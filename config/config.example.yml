@@ -27,8 +27,8 @@ paths:
 ngram:
   language: "chi_sim"
   n: 5
-  index_url: "https://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/chi_sim-5-ngrams_exports.html"
-  file_pattern: "googlebooks-chi-sim-all-5gram-*.gz"
+  # Data source: http://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/
+  # Downloads: totalcounts-5 + 5-00000-of-00105.gz through 5-00104-of-00105.gz
   min_year: 1940
   max_year: 2015
 
