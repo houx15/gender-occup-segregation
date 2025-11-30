@@ -1,0 +1,83 @@
+# Data files (too large for git)
+data/raw_ngrams/
+data/raw_ngrams_decompressed/
+data/corpora/
+data/models/
+data/results/
+
+# Logs
+logs/
+*.log
+
+# Configuration with sensitive paths (use config.example.yml instead)
+config/config.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebook
+.ipynb_checkpoints
+notebooks/.ipynb_checkpoints/
+*.ipynb
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+*.cache
+
+# Server-specific
+nohup.out
+*.pid
+
+# Exception: Keep directory structure and example config
+!data/.gitkeep
+!logs/.gitkeep
+!config/config.example.yml

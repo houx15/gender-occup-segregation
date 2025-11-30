@@ -1,0 +1,80 @@
+# Configuration file for Chinese Google 5-gram Occupation-Gender-Prestige Project
+#
+# IMPORTANT: Copy this file to config.yml and update the paths for your environment:
+#   cp config/config.example.yml config/config.yml
+#
+# Then edit config/config.yml with your actual server paths
+
+# Paths configuration
+# REPLACE ALL PATHS WITH YOUR SERVER PATHS
+paths:
+  # Base directory - replace with your server path
+  base_dir: "/path/to/your/project"
+
+  # Raw data directories
+  raw_ngram_dir: "/path/to/your/project/data/raw_ngrams"
+  decompressed_dir: "/path/to/your/project/data/raw_ngrams_decompressed"
+
+  # Processing directories
+  corpora_dir: "/path/to/your/project/data/corpora"
+  models_dir: "/path/to/your/project/data/models"
+  results_dir: "/path/to/your/project/data/results"
+
+  # Logs
+  log_dir: "/path/to/your/project/logs"
+
+# Google Ngram settings (Chinese simplified 5-grams)
+ngram:
+  language: "chi_sim"
+  n: 5
+  index_url: "https://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/chi_sim-5-ngrams_exports.html"
+  file_pattern: "googlebooks-chi-sim-all-5gram-*.gz"
+  min_year: 1940
+  max_year: 2015
+
+  # Format specification for parsing 5-gram files
+  # Expected format: token1 token2 token3 token4 token5<TAB>year<TAB>match_count<TAB>volume_count
+  delimiter: "\t"
+  year_column: 1  # 0-indexed position after splitting by delimiter
+  match_count_column: 2
+  volume_count_column: 3
+
+# Time slicing configuration
+time_slices:
+  window_size: 10  # years per corpus (inclusive)
+  step_size: 5     # years between the starts of two slices
+  start_year: 1940
+  end_year: 2015   # inclusive; last window may be truncated if needed
+
+# Word2Vec / embedding settings
+embedding:
+  vector_size: 300
+  window: 4        # context window size
+  min_count: 50    # discard tokens with total freq < 50 in that slice
+  sg: 1            # 1 = skip-gram, 0 = CBOW
+  negative: 15     # negative sampling size
+  workers: 16      # number of CPU cores to use (adjust based on your server)
+  epochs: 5        # passes over corpus
+  seed: 42         # reproducibility
+  implementation: "gensim"
+
+# Corpus construction settings
+corpus:
+  use_counts: false  # Whether to weight by match_count (false = each ngram appears once)
+  min_count_threshold: 1  # Minimum match_count to include an ngram
+
+# Word lists (relative paths from base_dir)
+wordlists:
+  occupations_file: "wordlists/occupations_zh.txt"
+  gender_words_file: "wordlists/gender_words_zh.json"
+  prestige_axes_file: "wordlists/prestige_axes_zh.json"
+
+# Analysis settings
+analysis:
+  # Strategy for handling multi-character occupation titles:
+  # "whole_token" - use occupation as single token if in vocab
+  # "average_chars" - average embeddings of constituent characters
+  # "hybrid" - try whole_token first, fall back to average_chars
+  occupation_strategy: "hybrid"
+  min_coverage: 0.5  # Minimum fraction of characters that must be in vocab
+  normalize_vectors: true  # Normalize vectors to unit length before computing similarities
