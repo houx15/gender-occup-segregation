@@ -15,6 +15,7 @@ from typing import List, Tuple
 from collections import defaultdict
 import yaml
 import fire
+import re
 
 
 def setup_logging(log_dir: Path) -> logging.Logger:
@@ -63,84 +64,99 @@ def generate_time_slices(start_year: int, end_year: int, window_size: int, step_
     return slices
 
 
-def parse_ngram_line(line: str, delimiter: str, year_col: int, count_col: int) -> Tuple[str, int, int]:
-    """Parse a single line from an n-gram file."""
-    try:
-        parts = line.strip().split(delimiter)
-        if len(parts) < max(year_col, count_col) + 1:
-            return None, None, None
+CHINESE_RE = re.compile(r"[\u4e00-\u9fff]")
 
-        ngram_part = parts[0]
-        year = int(parts[year_col])
-        match_count = int(parts[count_col])
+def clean_ngram(ngram: str):
+    tokens = ngram.split()
+    clean_tokens = []
+    for t in tokens:
+        t = "".join(CHINESE_RE.findall(t))
+        if t:
+            clean_tokens.append(t)
+    if len(clean_tokens) <= 1:
+        return None
+    return " ".join(clean_tokens) if len(clean_tokens) > 0 else None
 
-        return ngram_part, year, match_count
 
-    except (ValueError, IndexError):
-        return None, None, None
+def parse_ngram_line_v3(line: str):
+    """
+    Parse a v3 Chinese syntactic ngram line.
+
+    Return list of tuples: (ngram_string, year, match_count)
+    """
+    parts = line.strip().split('\t')
+    if len(parts) < 2:
+        return []
+    ngram = parts[0]                # e.g., "改革_VERB 开放_NOUN 促进_VERB"
+    ngram = clean_ngram(ngram)
+    if not ngram:
+        return []
+    year_triplets = parts[1:]       # e.g., ["1980,12,12", "1981,14,14"]
+    result = []
+    for yc in year_triplets:
+        try:
+            year, count1, count2 = yc.split(',')
+            result.append((ngram, int(year), int(count1)))
+        except:
+            continue
+    return result
 
 
 def process_ngram_file(
     file_path: Path,
-    time_slices: List[Tuple[int, int]],
-    output_files: dict,
-    config: dict,
-    logger: logging.Logger,
-    stats: dict
-) -> None:
-    """Process a single n-gram file and write to appropriate time slice corpora."""
-    delimiter = config['ngram']['delimiter']
-    year_col = config['ngram']['year_column']
-    count_col = config['ngram']['match_count_column']
-    use_counts = config['corpus']['use_counts']
+    time_slices,
+    config,
+    logger,
+):
     min_count = config['corpus']['min_count_threshold']
+    use_counts = config['corpus']['use_counts']
+    corpora_dir = Path(config['paths']['corpora_dir'])
 
     logger.info(f"Processing {file_path.name}...")
 
     lines_processed = 0
     lines_included = defaultdict(int)
+    file_index = file_path.name.split("-")[1]
 
-    try:
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-            for line in f:
-                lines_processed += 1
+    write_buffer = defaultdict(set)
+    largest_buffer = 10000
 
-                ngram_text, year, match_count = parse_ngram_line(line, delimiter, year_col, count_col)
-
-                if ngram_text is None or year is None:
-                    continue
-
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        for line in f:
+            lines_processed += 1
+            entries = parse_ngram_line_v3(line)  # NEW
+            if not entries:
+                continue
+            for ngram_text, year, match_count in entries:
                 if match_count < min_count:
                     continue
-
+                matched_slices = set()
                 for start_year, end_year in time_slices:
                     if start_year <= year <= end_year:
-                        slice_name = f"{start_year}_{end_year}"
-
-                        if use_counts:
-                            repetitions = min(match_count, 1000)
-                            for _ in range(repetitions):
-                                output_files[slice_name].write(ngram_text + '\n')
-                                stats[slice_name]['tokens'] += len(ngram_text.split())
-                        else:
-                            output_files[slice_name].write(ngram_text + '\n')
-                            stats[slice_name]['tokens'] += len(ngram_text.split())
-
-                        lines_included[slice_name] += 1
-
-                if lines_processed % 1000000 == 0:
-                    logger.info(f"  Processed {lines_processed:,} lines from {file_path.name}")
-
-    except Exception as e:
-        logger.error(f"Error processing {file_path.name}: {e}")
-        raise
+                        matched_slices.add(f"{start_year}_{end_year}")
+                
+                for slice_name in matched_slices:
+                    write_buffer[slice_name].add(ngram_text)
+                    if len(write_buffer[slice_name]) > largest_buffer:
+                        with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as f:
+                            f.write("\n".join(list(write_buffer[slice_name])) + "\n")
+                        write_buffer[slice_name] = set()
+                    lines_included[slice_name] += 1
+            
+            if lines_processed % 1000000 == 0:
+                logger.info(f"  Processed {lines_processed:,} lines from {file_path.name}")
+    
+    for slice_name, buffer in write_buffer.items():
+        if len(buffer) > 0:
+            with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as f:
+                f.write("\n".join(list(buffer)) + "\n")
 
     logger.info(f"Completed {file_path.name}: {lines_processed:,} lines processed")
     for slice_name, count in lines_included.items():
         logger.info(f"  {slice_name}: {count:,} n-grams included")
 
 
-def build_corpora(config_data: dict, logger: logging.Logger, specific_slice: str = None, overwrite: bool = False) -> None:
+def build_corpora(config_data: dict, logger: logging.Logger, specific_slice: str = None, overwrite: bool = False, file_name: str = None) -> None:
     """Build all time-sliced corpora."""
     time_slices_config = config_data['time_slices']
     time_slices = generate_time_slices(
@@ -159,60 +175,19 @@ def build_corpora(config_data: dict, logger: logging.Logger, specific_slice: str
         time_slices = [(start, end)]
         logger.info(f"\nBuilding only slice: {start}-{end}")
 
-    corpora_dir = Path(config_data['paths']['corpora_dir'])
+    
     decompressed_dir = Path(config_data['paths']['decompressed_dir'])
-
-    output_files = {}
-    stats = {}
-
-    for start_year, end_year in time_slices:
-        slice_name = f"{start_year}_{end_year}"
-        slice_dir = corpora_dir / slice_name
-        slice_dir.mkdir(parents=True, exist_ok=True)
-
-        corpus_file = slice_dir / "corpus.txt"
-
-        if corpus_file.exists() and not overwrite:
-            logger.warning(f"Corpus {slice_name} already exists, skipping (use --overwrite to regenerate)")
-            continue
-
-        output_files[slice_name] = open(corpus_file, 'w', encoding='utf-8')
-        stats[slice_name] = {'lines': 0, 'tokens': 0}
-
-    if not output_files:
-        logger.info("No corpora to build (all exist or no slices selected)")
-        return
-
-    ngram_files = sorted(decompressed_dir.glob("*.txt"))
-    if not ngram_files:
+    if file_name:
+        ngram_files = [decompressed_dir / file_name]
+    else:
         ngram_files = sorted(decompressed_dir.glob("googlebooks-chi-sim-all-5gram-*"))
-
-    if not ngram_files:
-        logger.error(f"No n-gram files found in {decompressed_dir}")
-        for f in output_files.values():
-            f.close()
-        return
 
     logger.info(f"\nFound {len(ngram_files)} n-gram files to process")
 
     for ngram_file in ngram_files:
-        process_ngram_file(ngram_file, time_slices, output_files, config_data, logger, stats)
+        process_ngram_file(ngram_file, time_slices, config_data, logger)
 
-    for slice_name, f in output_files.items():
-        f.close()
-        stats[slice_name]['lines'] = sum(1 for _ in open(f.name, 'r', encoding='utf-8'))
-
-    logger.info("\n" + "="*80)
-    logger.info("Corpus Building Summary:")
-    logger.info("="*80)
-
-    for slice_name in sorted(stats.keys()):
-        logger.info(f"\n{slice_name}:")
-        logger.info(f"  Lines: {stats[slice_name]['lines']:,}")
-        logger.info(f"  Approximate tokens: {stats[slice_name]['tokens']:,}")
-
-
-def main(config='config/config.yml', slice=None, overwrite=False):
+def main(file_name=None, config='config/config.yml', slice=None, overwrite=False):
     """
     Build time-sliced corpora from Chinese Google 5-gram data.
 
@@ -229,13 +204,14 @@ def main(config='config/config.yml', slice=None, overwrite=False):
     logger.info("Starting corpus building")
     logger.info("="*80)
 
-    build_corpora(config_data, logger, specific_slice=slice, overwrite=overwrite)
+    build_corpora(config_data, logger, specific_slice=slice, overwrite=overwrite, file_name=file_name)
 
     logger.info("\n" + "="*80)
     logger.info("Corpus building completed!")
     logger.info("="*80)
 
     return 0
+
 
 
 if __name__ == "__main__":
