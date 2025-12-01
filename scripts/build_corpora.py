@@ -8,6 +8,7 @@ Usage:
     python build_corpora.py --config=config/config.yml --overwrite
 """
 
+import os
 import logging
 import sys
 from pathlib import Path
@@ -16,7 +17,35 @@ from collections import defaultdict
 import yaml
 import fire
 import re
+import gzip
 
+def decompress_file(
+    gz_path: Path, output_path: Path, logger: logging.Logger
+) -> Tuple[bool, str]:
+    """Decompress a gzip file."""
+    filename = gz_path.name
+
+    # Check if already decompressed
+    if output_path.exists():
+        file_size = output_path.stat().st_size
+        if file_size > 0:
+            logger.info(f"Skipping decompression of {filename} (already exists)")
+            return True, f"Already decompressed: {filename}"
+
+    try:
+        logger.info(f"Decompressing {filename}...")
+
+        with gzip.open(gz_path, "rb") as f_in:
+            with open(output_path, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        output_size = output_path.stat().st_size
+        logger.info(f"Completed decompressing {filename} ({output_size:,} bytes)")
+        return True, f"Decompressed: {filename}"
+    except Exception as e:
+        logger.error(f"Failed to decompress {filename}: {e}")
+        if output_path.exists():
+            output_path.unlink()
+        return False, f"Failed to decompress: {filename} - {str(e)}"
 
 def setup_logging(log_dir: Path) -> logging.Logger:
     """Configure logging to both file and console."""
@@ -111,6 +140,7 @@ def process_ngram_file(
     min_count = config['corpus']['min_count_threshold']
     use_counts = config['corpus']['use_counts']
     corpora_dir = Path(config['paths']['corpora_dir'])
+    os.makedirs(corpora_dir, exist_ok=True)
 
     logger.info(f"Processing {file_path.name}...")
 
@@ -138,6 +168,7 @@ def process_ngram_file(
                 for slice_name in matched_slices:
                     write_buffer[slice_name].add(ngram_text)
                     if len(write_buffer[slice_name]) > largest_buffer:
+                        os.makedirs(corpora_dir / slice_name, exist_ok=True)
                         with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as f:
                             f.write("\n".join(list(write_buffer[slice_name])) + "\n")
                         write_buffer[slice_name] = set()
@@ -148,6 +179,7 @@ def process_ngram_file(
     
     for slice_name, buffer in write_buffer.items():
         if len(buffer) > 0:
+            os.makedirs(corpora_dir / slice_name, exist_ok=True)
             with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as f:
                 f.write("\n".join(list(buffer)) + "\n")
 
@@ -177,15 +209,27 @@ def build_corpora(config_data: dict, logger: logging.Logger, specific_slice: str
 
     
     decompressed_dir = Path(config_data['paths']['decompressed_dir'])
+    decompress = True
+    raw_ngram_dir = Path(config_data['paths']['raw_ngram_dir'])
     if file_name:
-        ngram_files = [decompressed_dir / file_name]
+        ngram_zips = [decompressed_dir / file_name]
+        decompress = False
     else:
-        ngram_files = sorted(decompressed_dir.glob("googlebooks-chi-sim-all-5gram-*"))
+        ngram_zips = sorted(raw_ngram_dir.glob("5-*-of-00105.gz"))
 
-    logger.info(f"\nFound {len(ngram_files)} n-gram files to process")
+    logger.info(f"\nFound {len(ngram_zips)} n-gram files to process")
 
-    for ngram_file in ngram_files:
+    for single_zip in ngram_zips:
+        if decompress:
+            ngram_file = decompressed_dir / single_zip.stem
+            decompress_file(single_zip, ngram_file, logger)
+        else:
+            ngram_file = single_zip
         process_ngram_file(ngram_file, time_slices, config_data, logger)
+
+        # delete the ngram file
+        if decompress:
+            os.remove(ngram_file)
 
 def main(file_name=None, config='config/config.yml', slice=None, overwrite=False):
     """

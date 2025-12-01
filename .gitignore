@@ -81,3 +81,6 @@ nohup.out
 !data/.gitkeep
 !logs/.gitkeep
 !config/config.example.yml
+
+*.out
+*.slurm

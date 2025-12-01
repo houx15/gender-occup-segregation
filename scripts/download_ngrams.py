@@ -149,7 +149,7 @@ def decompress_file(
         return False, f"Failed to decompress: {filename} - {str(e)}"
 
 
-def main(config="config/config.yml", skip_decompress=False, max_workers=4):
+def main(config="config/config.yml", skip_decompress=True, max_workers=4):
     """
     Download and decompress Chinese Google 5-gram data.
 
