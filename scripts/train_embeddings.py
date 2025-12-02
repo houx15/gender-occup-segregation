@@ -234,7 +234,7 @@ def train_all_models(
 
     # Filter to specific slice if requested
     if specific_slice:
-        slice_dirs = [d for d in slice_dirs if d.name == specific_slice]
+        slice_dirs = [d for d in slice_dirs if d.name.startswith(specific_slice)]
         if not slice_dirs:
             logger.error(f"Time slice {specific_slice} not found")
             return
@@ -264,13 +264,13 @@ def train_all_models(
         save_model_and_metadata(model, slice_name, start_year, end_year, config, logger)
 
 
-def main(config="config/config.yml", slice=None, retrain=False):
+def main(config="config/config.yml", time_slice=None, retrain=False):
     """
     Train word2vec embeddings for time-sliced Chinese corpora.
 
     Args:
         config: Path to configuration file
-        slice: Train only a specific slice (format: 1940_1949)
+        time_slice: Train only a specific slice (format: 1940)
         retrain: Retrain existing models
     """
     # Load configuration
@@ -285,7 +285,7 @@ def main(config="config/config.yml", slice=None, retrain=False):
     logger.info("=" * 80)
 
     # Train models
-    train_all_models(config_data, logger, specific_slice=slice, retrain=retrain)
+    train_all_models(config_data, logger, specific_slice=time_slice, retrain=retrain)
 
     logger.info("=" * 80)
     logger.info("Embedding training completed!")
