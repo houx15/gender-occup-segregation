@@ -234,7 +234,8 @@ def train_all_models(
 
     # Filter to specific slice if requested
     if specific_slice:
-        slice_dirs = [d for d in slice_dirs if d.name.startswith(specific_slice)]
+        # found dir with name started by specific_slice
+        slice_dirs = [d for d in slice_dirs if d.name.startswith(str(specific_slice))]
         if not slice_dirs:
             logger.error(f"Time slice {specific_slice} not found")
             return
