@@ -41,15 +41,15 @@ def setup_logging(log_dir: Path) -> logging.Logger:
     logger.setLevel(logging.INFO)
 
     # File handler
-    file_handler = logging.FileHandler(log_file, encoding='utf-8')
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
     file_handler.setLevel(logging.INFO)
-    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(file_formatter)
 
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
-    console_formatter = logging.Formatter('%(levelname)s - %(message)s')
+    console_formatter = logging.Formatter("%(levelname)s - %(message)s")
     console_handler.setFormatter(console_formatter)
 
     logger.addHandler(file_handler)
@@ -60,46 +60,44 @@ def setup_logging(log_dir: Path) -> logging.Logger:
 
 def load_config(config_path: str) -> dict:
     """Load configuration from YAML file."""
-    with open(config_path, 'r', encoding='utf-8') as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
 class CorpusIterator:
     """Iterator for reading corpus files line by line."""
 
-    def __init__(self, corpus_file: Path):
-        self.corpus_file = corpus_file
+    def __init__(self, corpora_dir: str, slice_name: str):
+        self.corpus_files = glob.glob(f"{corpora_dir}/{slice_name}/corpus_*.txt")
+        self.corpus_files.sort()
 
     def __iter__(self) -> Iterator[List[str]]:
         """Yield tokenized sentences from the corpus."""
-        with open(self.corpus_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                # Split on whitespace to get tokens
-                tokens = line.strip().split()
-                if tokens:  # Skip empty lines
-                    yield tokens
+        for corpus_file in self.corpus_files:
+            with open(
+                corpus_file, "r", encoding="utf-8", buffering=8 * 1024 * 1024
+            ) as f:
+                for line in f:
+                    # Split on whitespace to get tokens
+                    tokens = line.strip().split()
+                    if tokens:  # Skip empty lines
+                        yield tokens
 
 
 def count_corpus_lines(corpus_file: Path) -> int:
     """Count the number of lines in a corpus file."""
     count = 0
-    with open(corpus_file, 'r', encoding='utf-8') as f:
+    with open(corpus_file, "r", encoding="utf-8") as f:
         for _ in f:
             count += 1
     return count
 
 
-def train_model(
-    corpus_file: Path,
-    slice_name: str,
-    config: dict,
-    logger: logging.Logger
-) -> Word2Vec:
+def train_model(slice_name: str, config: dict, logger: logging.Logger) -> Word2Vec:
     """
     Train a word2vec model for a single time slice.
 
     Args:
-        corpus_file: Path to the corpus file
         slice_name: Name of the time slice (e.g., "1940_1949")
         config: Configuration dictionary
         logger: Logger instance
@@ -110,15 +108,11 @@ def train_model(
     logger.info(f"\nTraining model for {slice_name}...")
 
     # Get embedding configuration
-    emb_config = config['embedding']
-
-    # Count corpus size
-    logger.info(f"  Counting corpus lines...")
-    num_lines = count_corpus_lines(corpus_file)
-    logger.info(f"  Corpus has {num_lines:,} lines")
+    emb_config = config["embedding"]
 
     # Create corpus iterator
-    corpus = CorpusIterator(corpus_file)
+    corpora_dir = Path(config["paths"]["corpora_dir"])
+    corpus = CorpusIterator(corpora_dir, slice_name)
 
     # Initialize model
     logger.info(f"  Initializing Word2Vec model...")
@@ -130,34 +124,27 @@ def train_model(
     logger.info(f"    Workers: {emb_config['workers']}")
     logger.info(f"    Epochs: {emb_config['epochs']}")
 
-    model = Word2Vec(
-        sentences=None,  # Will build vocab first, then train
-        vector_size=emb_config['vector_size'],
-        window=emb_config['window'],
-        min_count=emb_config['min_count'],
-        sg=emb_config['sg'],
-        negative=emb_config['negative'],
-        workers=emb_config['workers'],
-        epochs=emb_config['epochs'],
-        seed=emb_config['seed'],
-        compute_loss=True
-    )
-
-    # Build vocabulary
-    logger.info(f"  Building vocabulary...")
-    model.build_vocab(corpus)
-    vocab_size = len(model.wv)
-    logger.info(f"  Vocabulary size: {vocab_size:,}")
-
     # Train model
     logger.info(f"  Training for {emb_config['epochs']} epochs...")
     epoch_logger = EpochLogger(logger, slice_name)
 
-    model.train(
-        corpus,
-        total_examples=num_lines,
-        epochs=emb_config['epochs'],
-        callbacks=[epoch_logger]
+    import multiprocessing
+
+    workers = multiprocessing.cpu_count() - 1
+    workers = min(workers, emb_config["workers"])
+
+    model = Word2Vec(
+        sentences=corpus,
+        vector_size=emb_config["vector_size"],
+        window=emb_config["window"],
+        min_count=emb_config["min_count"],
+        sg=emb_config["sg"],
+        negative=emb_config["negative"],
+        workers=workers,
+        epochs=emb_config["epochs"],
+        seed=emb_config["seed"],
+        compute_loss=True,
+        callbacks=[epoch_logger],
     )
 
     # Normalize vectors to unit length
@@ -174,9 +161,8 @@ def save_model_and_metadata(
     slice_name: str,
     start_year: int,
     end_year: int,
-    num_lines: int,
     config: dict,
-    logger: logging.Logger
+    logger: logging.Logger,
 ) -> None:
     """
     Save the trained model and its metadata.
@@ -186,37 +172,35 @@ def save_model_and_metadata(
         slice_name: Name of the time slice
         start_year: Start year of the slice
         end_year: End year of the slice
-        num_lines: Number of lines in the corpus
         config: Configuration dictionary
         logger: Logger instance
     """
-    models_dir = Path(config['paths']['models_dir'])
+    models_dir = Path(config["paths"]["models_dir"])
     models_dir.mkdir(parents=True, exist_ok=True)
 
     # Save model
     model_path = models_dir / f"chi_sim_5gram_{slice_name}.model"
     logger.info(f"  Saving model to {model_path}")
-    model.save(str(model_path))
+    model.wv.save(str(model_path))
 
     # Save metadata
     metadata = {
         "time_slice": slice_name,
         "start_year": start_year,
         "end_year": end_year,
-        "vector_size": config['embedding']['vector_size'],
-        "window": config['embedding']['window'],
-        "min_count": config['embedding']['min_count'],
-        "sg": config['embedding']['sg'],
-        "negative": config['embedding']['negative'],
-        "epochs": config['embedding']['epochs'],
-        "seed": config['embedding']['seed'],
-        "num_corpus_lines": num_lines,
-        "vocab_size": len(model.wv)
+        "vector_size": config["embedding"]["vector_size"],
+        "window": config["embedding"]["window"],
+        "min_count": config["embedding"]["min_count"],
+        "sg": config["embedding"]["sg"],
+        "negative": config["embedding"]["negative"],
+        "epochs": config["embedding"]["epochs"],
+        "seed": config["embedding"]["seed"],
+        "vocab_size": len(model.wv),
     }
 
     metadata_path = models_dir / f"chi_sim_5gram_{slice_name}.meta.json"
     logger.info(f"  Saving metadata to {metadata_path}")
-    with open(metadata_path, 'w', encoding='utf-8') as f:
+    with open(metadata_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
 
@@ -224,7 +208,7 @@ def train_all_models(
     config: dict,
     logger: logging.Logger,
     specific_slice: str = None,
-    retrain: bool = False
+    retrain: bool = False,
 ) -> None:
     """
     Train models for all time slices.
@@ -235,8 +219,8 @@ def train_all_models(
         specific_slice: If provided, only train this slice
         retrain: Whether to retrain existing models
     """
-    corpora_dir = Path(config['paths']['corpora_dir'])
-    models_dir = Path(config['paths']['models_dir'])
+    corpora_dir = Path(config["paths"]["corpora_dir"])
+    models_dir = Path(config["paths"]["models_dir"])
     models_dir.mkdir(parents=True, exist_ok=True)
 
     # Find all time slice directories
@@ -259,36 +243,28 @@ def train_all_models(
     # Train each model
     for slice_dir in slice_dirs:
         slice_name = slice_dir.name
-        corpus_file = slice_dir / "corpus.txt"
-
-        if not corpus_file.exists():
-            logger.warning(f"Corpus file not found for {slice_name}, skipping")
-            continue
-
         # Check if model already exists
         model_path = models_dir / f"chi_sim_5gram_{slice_name}.model"
         if model_path.exists() and not retrain:
-            logger.info(f"Model for {slice_name} already exists, skipping (use --retrain to overwrite)")
+            logger.info(
+                f"Model for {slice_name} already exists, skipping (use --retrain to overwrite)"
+            )
             continue
-
         # Parse start and end years from slice name
         try:
-            start_year, end_year = map(int, slice_name.split('_'))
+            start_year, end_year = map(int, slice_name.split("_"))
         except ValueError:
             logger.warning(f"Could not parse years from {slice_name}, skipping")
             continue
 
         # Train model
-        model = train_model(corpus_file, slice_name, config, logger)
-
-        # Count corpus lines for metadata
-        num_lines = count_corpus_lines(corpus_file)
+        model = train_model(slice_name, config, logger)
 
         # Save model and metadata
-        save_model_and_metadata(model, slice_name, start_year, end_year, num_lines, config, logger)
+        save_model_and_metadata(model, slice_name, start_year, end_year, config, logger)
 
 
-def main(config='config/config.yml', slice=None, retrain=False):
+def main(config="config/config.yml", slice=None, retrain=False):
     """
     Train word2vec embeddings for time-sliced Chinese corpora.
 
@@ -301,20 +277,19 @@ def main(config='config/config.yml', slice=None, retrain=False):
     config_data = load_config(config)
 
     # Setup logging
-    log_dir = Path(config_data['paths']['log_dir'])
+    log_dir = Path(config_data["paths"]["log_dir"])
     logger = setup_logging(log_dir)
 
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("Starting embedding training")
-    logger.info("="*80)
+    logger.info("=" * 80)
 
     # Train models
     train_all_models(config_data, logger, specific_slice=slice, retrain=retrain)
 
-    logger.info("
-" + "="*80)
+    logger.info("=" * 80)
     logger.info("Embedding training completed!")
-    logger.info("="*80)
+    logger.info("=" * 80)
 
     return 0
 
