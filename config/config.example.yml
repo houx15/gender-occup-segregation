@@ -57,6 +57,11 @@ embedding:
   epochs: 5        # passes over corpus
   seed: 42         # reproducibility
   implementation: "gensim"
+  # Model filename template. Use {slice_name} as placeholder for time slice name (e.g., "1940_1949")
+  # Examples:
+  #   "chi_sim_5gram_{slice_name}.model"  # for ngram data
+  #   "renminribao_{slice_name}.model"    # for renminribao data
+  model_name_template: "chi_sim_5gram_{slice_name}.model"
 
 # Corpus construction settings
 corpus:

@@ -65,6 +65,23 @@ def load_config(config_path: str) -> dict:
         return yaml.safe_load(f)
 
 
+def get_model_filename(slice_name: str, config: dict) -> str:
+    """
+    Get model filename from template in config.
+    
+    Args:
+        slice_name: Name of the time slice (e.g., "1940_1949")
+        config: Configuration dictionary
+    
+    Returns:
+        Model filename with {slice_name} replaced
+    """
+    template = config.get("embedding", {}).get(
+        "model_name_template", "chi_sim_5gram_{slice_name}.model"
+    )
+    return template.format(slice_name=slice_name)
+
+
 class CorpusIterator:
     """Iterator for reading corpus files line by line."""
 
@@ -180,7 +197,8 @@ def save_model_and_metadata(
     models_dir.mkdir(parents=True, exist_ok=True)
 
     # Save model
-    model_path = models_dir / f"chi_sim_5gram_{slice_name}.model"
+    model_filename = get_model_filename(slice_name, config)
+    model_path = models_dir / model_filename
     logger.info(f"  Saving model to {model_path}")
     model.wv.save(str(model_path))
 
@@ -199,7 +217,9 @@ def save_model_and_metadata(
         "vocab_size": len(model.wv),
     }
 
-    metadata_path = models_dir / f"chi_sim_5gram_{slice_name}.meta.json"
+    # Metadata filename: replace .model with .meta.json
+    metadata_filename = model_filename.replace(".model", ".meta.json")
+    metadata_path = models_dir / metadata_filename
     logger.info(f"  Saving metadata to {metadata_path}")
     with open(metadata_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
@@ -246,7 +266,8 @@ def train_all_models(
     for slice_dir in slice_dirs:
         slice_name = slice_dir.name
         # Check if model already exists
-        model_path = models_dir / f"chi_sim_5gram_{slice_name}.model"
+        model_filename = get_model_filename(slice_name, config)
+        model_path = models_dir / model_filename
         if model_path.exists() and not retrain:
             logger.info(
                 f"Model for {slice_name} already exists, skipping (use --retrain to overwrite)"

@@ -238,7 +238,7 @@ def process_file(
     
     try:
         lines_processed = 0
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(file_path, 'r', encoding='gb18030', errors='ignore') as f:
             for line_num, line in enumerate(f, 1):
                 lines_processed += 1
                 
