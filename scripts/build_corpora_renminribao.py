@@ -3,9 +3,9 @@
 Build time-sliced corpora from Chinese Google 5-gram data.
 
 Usage:
-    python build_corpora.py --config=config/config.yml
-    python build_corpora.py --config=config/config.yml --slice=1940_1949
-    python build_corpora.py --config=config/config.yml --overwrite
+    python build_corpora_renminribao.py --config=config/renminribao.yml
+    python build_corpora_renminribao.py --config=config/renminribao.yml --slice=1940_1949
+    python build_corpora_renminribao.py --config=config/renminribao.yml --overwrite
 """
 
 import os
@@ -17,36 +17,6 @@ from collections import defaultdict
 import yaml
 import fire
 import re
-import shutil
-import gzip
-
-def decompress_file(
-    gz_path: Path, output_path: Path, logger: logging.Logger
-) -> Tuple[bool, str]:
-    """Decompress a gzip file."""
-    filename = gz_path.name
-
-    # Check if already decompressed
-    if output_path.exists():
-        file_size = output_path.stat().st_size
-        if file_size > 0:
-            logger.info(f"Skipping decompression of {filename} (already exists)")
-            return True, f"Already decompressed: {filename}"
-
-    try:
-        logger.info(f"Decompressing {filename}...")
-
-        with gzip.open(gz_path, "rb") as f_in:
-            with open(output_path, "wb") as f_out:
-                shutil.copyfileobj(f_in, f_out)
-        output_size = output_path.stat().st_size
-        logger.info(f"Completed decompressing {filename} ({output_size:,} bytes)")
-        return True, f"Decompressed: {filename}"
-    except Exception as e:
-        logger.error(f"Failed to decompress {filename}: {e}")
-        if output_path.exists():
-            output_path.unlink()
-        return False, f"Failed to decompress: {filename} - {str(e)}"
 
 def setup_logging(log_dir: Path) -> logging.Logger:
     """Configure logging to both file and console."""
@@ -108,85 +78,6 @@ def clean_ngram(ngram: str):
     return " ".join(clean_tokens) if len(clean_tokens) > 0 else None
 
 
-def parse_ngram_line_v3(line: str):
-    """
-    Parse a v3 Chinese syntactic ngram line.
-
-    Return list of tuples: (ngram_string, year, match_count)
-    """
-    parts = line.strip().split('\t')
-    if len(parts) < 2:
-        return []
-    ngram = parts[0]                # e.g., "改革_VERB 开放_NOUN 促进_VERB"
-    ngram = clean_ngram(ngram)
-    if not ngram:
-        return []
-    year_triplets = parts[1:]       # e.g., ["1980,12,12", "1981,14,14"]
-    result = []
-    for yc in year_triplets:
-        try:
-            year, count1, count2 = yc.split(',')
-            result.append((ngram, int(year), int(count1)))
-        except:
-            continue
-    return result
-
-
-def process_ngram_file(
-    file_path: Path,
-    time_slices,
-    config,
-    logger,
-):
-    min_count = config['corpus']['min_count_threshold']
-    use_counts = config['corpus']['use_counts']
-    corpora_dir = Path(config['paths']['corpora_dir'])
-    os.makedirs(corpora_dir, exist_ok=True)
-
-    logger.info(f"Processing {file_path.name}...")
-
-    lines_processed = 0
-    lines_included = defaultdict(int)
-    file_index = file_path.name.split("-")[1]
-
-    write_buffer = defaultdict(set)
-    largest_buffer = 10000
-
-    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-        for line in f:
-            lines_processed += 1
-            entries = parse_ngram_line_v3(line)  # NEW
-            if not entries:
-                continue
-            for ngram_text, year, match_count in entries:
-                if match_count < min_count:
-                    continue
-                matched_slices = set()
-                for start_year, end_year in time_slices:
-                    if start_year <= year <= end_year:
-                        matched_slices.add(f"{start_year}_{end_year}")
-                
-                for slice_name in matched_slices:
-                    write_buffer[slice_name].add(ngram_text)
-                    if len(write_buffer[slice_name]) > largest_buffer:
-                        os.makedirs(corpora_dir / slice_name, exist_ok=True)
-                        with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as f:
-                            f.write("\n".join(list(write_buffer[slice_name])) + "\n")
-                        write_buffer[slice_name] = set()
-                    lines_included[slice_name] += 1
-            
-            if lines_processed % 1000000 == 0:
-                logger.info(f"  Processed {lines_processed:,} lines from {file_path.name}")
-    
-    for slice_name, buffer in write_buffer.items():
-        if len(buffer) > 0:
-            os.makedirs(corpora_dir / slice_name, exist_ok=True)
-            with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as f:
-                f.write("\n".join(list(buffer)) + "\n")
-
-    logger.info(f"Completed {file_path.name}: {lines_processed:,} lines processed")
-    for slice_name, count in lines_included.items():
-        logger.info(f"  {slice_name}: {count:,} n-grams included")
 
 
 def build_corpora(config_data: dict, logger: logging.Logger, specific_slice: str = None, overwrite: bool = False, file_name: str = None) -> None:

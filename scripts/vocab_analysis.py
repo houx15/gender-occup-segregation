@@ -23,17 +23,11 @@ import json
 from pathlib import Path
 from typing import Set, List, Dict
 import yaml
-from gensim.models import Word2Vec
+from gensim.models import KeyedVectors
 import fire
 import os
 
-# Try to import OpenAI for LLM analysis
-try:
-    import openai
-
-    HAS_OPENAI = True
-except ImportError:
-    HAS_OPENAI = False
+from openai import OpenAI
 
 
 def setup_logging(log_dir: Path) -> logging.Logger:
@@ -95,13 +89,11 @@ def load_all_vocabularies(models_dir: Path, logger: logging.Logger) -> Set[str]:
     for model_path in model_files:
         logger.info(f"  Loading vocabulary from {model_path.name}...")
         try:
-            model = Word2Vec.load(str(model_path))
+            model = KeyedVectors.load(str(model_path))
             # Get vocabulary from model
-            vocab = set(model.wv.key_to_index.keys())
+            vocab = set(model.index_to_key)
+            logger.info(f"    Loaded {len(vocab)} words (total unique: {len(all_vocab)})")
             all_vocab.update(vocab)
-            logger.info(
-                f"    Loaded {len(vocab)} words (total unique: {len(all_vocab)})"
-            )
         except Exception as e:
             logger.error(f"    Error loading {model_path.name}: {e}")
             continue
@@ -111,7 +103,7 @@ def load_all_vocabularies(models_dir: Path, logger: logging.Logger) -> Set[str]:
     return all_vocab
 
 
-def save_vocabulary(vocab: Set[str], output_path: Path, logger: logging.Logger) -> None:
+def save_vocabulary(vocab: Set[str], output_dir: Path, logger: logging.Logger) -> None:
     """
     Save vocabulary to a text file (one word per line).
 
@@ -120,169 +112,84 @@ def save_vocabulary(vocab: Set[str], output_path: Path, logger: logging.Logger) 
         output_path: Path to save the vocabulary file
         logger: Logger instance
     """
-    logger.info(f"Saving vocabulary to {output_path}...")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Saving vocabulary to {output_dir}...")
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # Sort vocabulary for consistent output
     sorted_vocab = sorted(vocab)
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        for word in sorted_vocab:
+    possible_occupations = []
+    others = []
+    for word in sorted_vocab:
+        if word.endswith("家") or word.endswith("师") or word.endswith("士") or word.endswith("员") or word.endswith("官") or word.endswith("长") or word.endswith("人") or word.endswith("工"):
+            possible_occupations.append(word)
+        else:
+            others.append(word)
+
+    with open(output_dir / "combined_vocabulary.txt", "w", encoding="utf-8") as f:
+        for word in others:
+            f.write(word + "\n")
+        
+    with open(output_dir / "possible_occupations.txt", "w", encoding="utf-8") as f:
+        for word in possible_occupations:
             f.write(word + "\n")
 
-    logger.info(f"  Saved {len(sorted_vocab)} words to {output_path}")
+    logger.info(f"  Saved {len(others)} words to {output_dir / 'combined_vocabulary.txt'}")
+    logger.info(f"  Saved {len(possible_occupations)} words to {output_dir / 'possible_occupations.txt'}")
+
 
 
 def analyze_vocab_with_llm(
     vocab: Set[str],
     logger: logging.Logger,
     api_key: str = None,
-    model: str = "gpt-4o-mini",
-    batch_size: int = 500,
+    model: str = "gpt-5-nano",
 ) -> Dict[str, List[str]]:
-    """
-    Use LLM to analyze vocabulary and categorize words.
 
-    Args:
-        vocab: Set of vocabulary words to analyze
-        logger: Logger instance
-        api_key: OpenAI API key (if None, tries to get from environment)
-        model: Model name to use
-        batch_size: Number of words to analyze per API call
-
-    Returns:
-        Dictionary with keys: 'occupations', 'prestige_adjectives',
-        'male_words', 'female_words'
-    """
-    if not HAS_OPENAI:
-        logger.error("OpenAI library not installed. Install with: pip install openai")
-        return {}
-
-    # Get API key
-    if api_key is None:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            logger.error(
-                "OpenAI API key not found. Set OPENAI_API_KEY environment variable or pass --api_key"
-            )
-            return {}
-
-    logger.info("Analyzing vocabulary with LLM...")
-    logger.info(f"  Using model: {model}")
-    logger.info(f"  Total words to analyze: {len(vocab)}")
-
-    # Initialize OpenAI client
-    from openai import OpenAI
-
+    # 初始化 OpenAI client
     client = OpenAI(api_key=api_key)
 
-    # Convert set to sorted list for consistent processing
-    vocab_list = sorted(list(vocab))
+    system_prompt = """
+你是一个严格的中文职业分类器。
+你的任务：判断给定词条是否是1940年以来中国语境中的“职业 / 工作岗位 / 职务”。
 
-    # Process in batches
-    results = {
-        "occupations": [],
-        "prestige_adjectives": [],
-        "male_words": [],
-        "female_words": [],
-    }
+你的输出必须是一个大写字母，不要解释：
+A = 一定是职业
+B = 一定不是职业
+C = 不确定（身份/头衔/角色/群体/机构/行为，而不是明确职业）
+"""
 
-    total_batches = (len(vocab_list) + batch_size - 1) // batch_size
+    results = {"A": [], "B": [], "C": []}
 
-    for i in range(0, len(vocab_list), batch_size):
-        batch = vocab_list[i : i + batch_size]
-        batch_num = i // batch_size + 1
-
-        logger.info(
-            f"  Processing batch {batch_num}/{total_batches} ({len(batch)} words)..."
-        )
-
+    for term in vocab:
         try:
-            # Create prompt
-            prompt = f"""请分析以下中文词汇列表，并将它们分类到以下四个类别中：
+            logger.info(f"Processing term: {term}")
 
-1. 职业相关词 (occupations): 与职业、工作、职位相关的词汇
-2. 声望形容词 (prestige_adjectives): 描述声望、地位、品质的形容词
-3. 男性相关词 (male_words): 与男性、男性特征相关的词汇
-4. 女性相关词 (female_words): 与女性、女性特征相关的词汇
+            user_prompt = f"{system_prompt}\n\n词条：{term}\n请回答 A, B, 或 C："
 
-词汇列表：
-{', '.join(batch)}
-
-请以JSON格式返回结果，格式如下：
-{{
-  "occupations": ["词1", "词2", ...],
-  "prestige_adjectives": ["词1", "词2", ...],
-  "male_words": ["词1", "词2", ...],
-  "female_words": ["词1", "词2", ...]
-}}
-
-只返回JSON，不要其他文字说明。如果一个词可能属于多个类别，请选择最合适的类别。如果某个类别没有匹配的词，返回空数组。"""
-
-            # Call OpenAI API
-            response = client.chat.completions.create(
+            response = client.responses.create(
                 model=model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "你是一个专业的中文词汇分析助手。请严格按照JSON格式返回结果。",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=0.3,
+                # system=system_prompt,
+                input=user_prompt,
+                reasoning={"effort": "minimal"},
+                # max_output_tokens=16,
             )
 
-            # Parse response
-            response_text = response.choices[0].message.content.strip()
+            reply = response.output_text.strip().upper()
+            if reply not in ["A", "B", "C"]:
+                logger.warning(f"Unexpected reply for '{term}': {reply}, fallback to C")
+                reply = "C"
 
-            # Try to extract JSON from response
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]
-            if response_text.startswith("```"):
-                response_text = response_text[3:]
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]
-            response_text = response_text.strip()
+            results[reply].append(term)
 
-            batch_results = json.loads(response_text)
-
-            # Merge results
-            for category in results:
-                if category in batch_results:
-                    results[category].extend(batch_results[category])
-
-            logger.info(
-                f"    Found: {len(batch_results.get('occupations', []))} occupations, "
-                f"{len(batch_results.get('prestige_adjectives', []))} prestige adjectives, "
-                f"{len(batch_results.get('male_words', []))} male words, "
-                f"{len(batch_results.get('female_words', []))} female words"
-            )
-
-        except json.JSONDecodeError as e:
-            logger.warning(f"    Failed to parse JSON response: {e}")
-            logger.warning(f"    Response: {response_text[:200]}...")
-            continue
         except Exception as e:
-            logger.error(f"    Error processing batch {batch_num}: {e}")
-            continue
-
-    # Deduplicate results
-    for category in results:
-        results[category] = sorted(list(set(results[category])))
-
-    logger.info("\nAnalysis complete!")
-    logger.info(f"  Total occupations found: {len(results['occupations'])}")
-    logger.info(
-        f"  Total prestige adjectives found: {len(results['prestige_adjectives'])}"
-    )
-    logger.info(f"  Total male words found: {len(results['male_words'])}")
-    logger.info(f"  Total female words found: {len(results['female_words'])}")
+            logger.error(f"Error processing {term}: {e}")
+            results["C"].append(term)
 
     return results
 
-
 def save_llm_analysis_results(
-    results: Dict[str, List[str]], output_path: Path, logger: logging.Logger
+    results: Dict[str, List[str]], output_dir: Path, logger: logging.Logger
 ) -> None:
     """
     Save LLM analysis results to JSON file.
@@ -305,7 +212,7 @@ def main(
     config="config/config.yml",
     analyze_with_llm=False,
     api_key=None,
-    llm_model="gpt-4o-mini",
+    llm_model="gpt-5-nano",
     batch_size=500,
 ):
     """
@@ -339,26 +246,7 @@ def main(
 
     # Save combined vocabulary
     results_dir = Path(config_data["paths"]["results_dir"])
-    vocab_output = results_dir / "combined_vocabulary.txt"
-    save_vocabulary(all_vocab, vocab_output, logger)
-
-    # Function 2: Analyze with LLM if requested
-    if analyze_with_llm:
-        logger.info("\n" + "=" * 80)
-        logger.info("Starting LLM-based vocabulary analysis")
-        logger.info("=" * 80)
-
-        llm_results = analyze_vocab_with_llm(
-            all_vocab, logger, api_key=api_key, model=llm_model, batch_size=batch_size
-        )
-
-        if llm_results:
-            llm_output = results_dir / "llm_vocab_analysis.json"
-            save_llm_analysis_results(llm_results, llm_output, logger)
-        else:
-            logger.warning("LLM analysis returned no results")
-    else:
-        logger.info("\nSkipping LLM analysis (use --analyze_with_llm to enable)")
+    save_vocabulary(all_vocab, results_dir, logger)
 
     logger.info("\n" + "=" * 80)
     logger.info("Vocabulary analysis completed!")
@@ -367,5 +255,30 @@ def main(
     return 0
 
 
+def llm(config="config/config.yml"):
+    config_data = load_config(config)
+    # Setup logging
+
+    api_key = config_data["api_key"]
+    log_dir = Path(config_data["paths"]["log_dir"])
+    logger = setup_logging(log_dir)
+
+    logger.info("=" * 80)
+    logger.info("Starting vocabulary analysis")
+    logger.info("=" * 80)
+
+    with open("combined_vocabulary.txt", "r", encoding="utf-8") as f:
+        combined_vocabulary = f.readlines()
+    
+    results = analyze_vocab_with_llm(combined_vocabulary, logger, api_key=api_key, model="gpt-5-nano")
+
+    with open("must_occupations.txt", "w", encoding="utf-8") as f:
+        for word in results["A"]:
+            f.write(word + "\n")
+    with open("may_occupations.txt", "w", encoding="utf-8") as f:
+        for word in results["C"]:
+            f.write(word + "\n")
+
+
 if __name__ == "__main__":
-    fire.Fire(main)
+    fire.Fire({"main": main, "llm": llm})

@@ -75,6 +75,4 @@ analysis:
   # "whole_token" - use occupation as single token if in vocab
   # "average_chars" - average embeddings of constituent characters
   # "hybrid" - try whole_token first, fall back to average_chars
-  occupation_strategy: "hybrid"
-  min_coverage: 0.5  # Minimum fraction of characters that must be in vocab
   normalize_vectors: true  # Normalize vectors to unit length before computing similarities

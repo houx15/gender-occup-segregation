@@ -76,6 +76,9 @@ Thumbs.db
 # Server-specific
 nohup.out
 *.pid
+config/*
+data/*
+figures/*
 
 # Exception: Keep directory structure and example config
 !data/.gitkeep
@@ -84,3 +87,4 @@ nohup.out
 
 *.out
 *.slurm
+
