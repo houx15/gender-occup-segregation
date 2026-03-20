@@ -296,31 +296,79 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
     plt.close()
     logger.info(f"  Saved: {path.name}")
 
-    # Plot 2: Separate subplot per dimension (with group means annotated)
-    n_dims = len(dimensions)
-    fig, axes = plt.subplots(1, n_dims, figsize=(6 * n_dims, 5))
-    if n_dims == 1:
-        axes = [axes]
+    # Plot 2: One standalone figure per dimension
+    dim_labels = {
+        "work_family": {
+            "title": "Work-Family Gender Norm Over Time",
+            "group1": "Family words", "group2": "Work words",
+            "interpret": "Positive = family more female-associated",
+        },
+        "leadership": {
+            "title": "Leadership Gender Norm Over Time",
+            "group1": "Non-leadership words", "group2": "Leadership words",
+            "interpret": "Positive = leadership more male-associated",
+        },
+        "stem": {
+            "title": "STEM Gender Norm Over Time",
+            "group1": "Non-STEM words", "group2": "STEM words",
+            "interpret": "Positive = STEM more male-associated",
+        },
+    }
 
-    for ax, dim in zip(axes, dimensions):
+    for dim in dimensions:
         dim_data = weat_df[weat_df["dimension"] == dim].sort_values("start_year")
-        ax.plot(dim_data["start_year"], dim_data["cohens_d"], "o-", linewidth=2)
-        ax.fill_between(dim_data["start_year"], 0, dim_data["cohens_d"], alpha=0.15)
-        ax.axhline(y=0, color="gray", linestyle="--", alpha=0.5)
-        # Reference lines for effect size interpretation
-        for threshold, label in [(0.2, "small"), (0.5, "medium"), (0.8, "large")]:
-            ax.axhline(y=threshold, color="lightcoral", linestyle=":", alpha=0.4)
-            ax.axhline(y=-threshold, color="lightblue", linestyle=":", alpha=0.4)
-        ax.set_xlabel("Start Year")
-        ax.set_ylabel("Cohen's d")
-        ax.set_title(f"{dim.replace('_', ' ').title()}")
-        ax.grid(True, alpha=0.3)
+        labels = dim_labels.get(dim, {})
 
-    plt.tight_layout()
-    path = get_figure_path("weat_longitudinal_by_dimension", figures_dir)
-    plt.savefig(path, format="pdf")
-    plt.close()
-    logger.info(f"  Saved: {path.name}")
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 9), height_ratios=[2, 1],
+                                        sharex=True, gridspec_kw={"hspace": 0.08})
+
+        # Top panel: Cohen's d timeline
+        ax1.plot(dim_data["start_year"], dim_data["cohens_d"], "o-",
+                 linewidth=2.5, color="#2c3e50", markersize=8, zorder=5)
+        ax1.fill_between(dim_data["start_year"], 0, dim_data["cohens_d"],
+                         alpha=0.12, color="#2c3e50")
+        ax1.axhline(y=0, color="gray", linestyle="--", alpha=0.5)
+        for threshold in [0.2, 0.5, 0.8]:
+            ax1.axhline(y=threshold, color="lightcoral", linestyle=":", alpha=0.3)
+            ax1.axhline(y=-threshold, color="lightblue", linestyle=":", alpha=0.3)
+        ax1.set_ylabel("Cohen's d", fontsize=12)
+        ax1.set_title(labels.get("title", f"{dim.replace('_', ' ').title()} Over Time"),
+                      fontsize=14, fontweight="bold")
+        ax1.grid(True, alpha=0.3)
+
+        # Annotate interpretation
+        interpret = labels.get("interpret", "")
+        if interpret:
+            ax1.text(0.02, 0.95, interpret, transform=ax1.transAxes,
+                     fontsize=9, verticalalignment="top", color="gray",
+                     fontstyle="italic")
+
+        # Bottom panel: Group mean projections (if available)
+        if "group1_mean" in dim_data.columns and "group2_mean" in dim_data.columns:
+            g1_label = labels.get("group1", "Group 1")
+            g2_label = labels.get("group2", "Group 2")
+            ax2.plot(dim_data["start_year"], dim_data["group1_mean"], "s--",
+                     linewidth=1.5, color="#e74c3c", markersize=6, label=g1_label, alpha=0.8)
+            ax2.plot(dim_data["start_year"], dim_data["group2_mean"], "^--",
+                     linewidth=1.5, color="#3498db", markersize=6, label=g2_label, alpha=0.8)
+            ax2.axhline(y=0, color="gray", linestyle="--", alpha=0.3)
+            ax2.set_ylabel("Mean projection\n(cosine sim)", fontsize=10)
+            ax2.legend(fontsize=9, loc="best")
+            ax2.grid(True, alpha=0.3)
+        else:
+            ax2.set_visible(False)
+
+        # X-axis: time slice labels
+        ax2.set_xlabel("Time Slice Start Year", fontsize=12)
+        x_ticks = dim_data["start_year"].values
+        ax2.set_xticks(x_ticks)
+        ax2.set_xticklabels([str(int(y)) for y in x_ticks], rotation=45, ha="right")
+
+        plt.tight_layout()
+        path = get_figure_path(f"weat_timeline_{dim}", figures_dir)
+        plt.savefig(path, format="pdf")
+        plt.close()
+        logger.info(f"  Saved: {path.name}")
 
 
 def plot_weat_projection_boxplots(proj_df, figures_dir, logger):

@@ -1,0 +1,39 @@
+data_source: "renminribao"
+analysis_mode: "weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/renminribao"
+  raw_data_dir: "/scratch/network/yh6580/chinese_corpus/xiandai_20250422/xiandai"
+  corpora_dir: "/scratch/network/yh6580/renminribao/corpora"
+  models_dir: "/scratch/network/yh6580/renminribao/models"
+  results_dir: "/scratch/network/yh6580/renminribao/results_weat"
+  log_dir: "/scratch/network/yh6580/renminribao/logs"
+  figures_dir: "/scratch/network/yh6580/renminribao/figures_weat"
+
+wordlists:
+  dir: "wordlists/weat_formal"
+  weat_gender_file: "gender_words.json"
+  weat_domestic_work_file: "domestic_work_words.json"
+  weat_leadership_file: "leadership_words.json"
+  weat_stem_file: "stem_words.json"
+
+time_slices:
+  window_size: 10
+  step_size: 5
+  start_year: 1940
+  end_year: 2020
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 50
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "renminribao_{slice_name}.model"
+
+corpus:
+  tokenizer: "jieba"
+  min_words: 5
