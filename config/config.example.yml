@@ -1,86 +1,141 @@
-# Configuration file for Chinese Google 5-gram Occupation-Gender-Prestige Project
+# Unified Configuration for Gender-Occupation Segregation Analysis
 #
-# IMPORTANT: Copy this file to config.yml and update the paths for your environment:
+# IMPORTANT: Copy this file to config.yml and update for your environment:
 #   cp config/config.example.yml config/config.yml
 #
-# Then edit config/config.yml with your actual server paths
+# Each server only needs settings relevant to its data source.
 
-# Paths configuration
-# REPLACE ALL PATHS WITH YOUR SERVER PATHS
+# Data source: "ngram", "renminribao", "weibo", "newspaper"
+data_source: "ngram"
+
+# Analysis mode: "prestige" or "weat"
+# - prestige: 4 prestige dimension projections + Pearson correlations
+# - weat: 3 WEAT dimensions (work-family, leadership, STEM) with Cohen's d
+analysis_mode: "prestige"
+
+# Analysis unit: "longitudinal" or "provincial"
+# Auto-inferred from data_source if omitted:
+#   ngram/renminribao -> longitudinal, weibo/newspaper -> provincial
+# analysis_unit: "longitudinal"
+
+# Paths configuration - REPLACE WITH YOUR SERVER PATHS
 paths:
-  # Base directory - replace with your server path
   base_dir: "/path/to/your/project"
-
-  # Raw data directories
   raw_ngram_dir: "/path/to/your/project/data/raw_ngrams"
   decompressed_dir: "/path/to/your/project/data/raw_ngrams_decompressed"
-
-  # Processing directories
+  raw_data_dir: "/path/to/your/raw/data"  # Source-specific raw data
   corpora_dir: "/path/to/your/project/data/corpora"
   models_dir: "/path/to/your/project/data/models"
   results_dir: "/path/to/your/project/data/results"
-
-  # Logs
   log_dir: "/path/to/your/project/logs"
-
-  # Figures
   figures_dir: "/path/to/your/project/figures"
 
-# Google Ngram settings (Chinese simplified 5-grams)
+# Wordlist directory (relative to base_dir, or absolute)
+wordlists:
+  dir: "wordlists/prestige"  # "wordlists/prestige", "wordlists/weat_informal", or "wordlists/weat_formal"
+  # Prestige mode word files (relative to wordlists.dir)
+  occupations_file: "occupations_zh.txt"
+  gender_words_file: "gender_words_zh.json"
+  prestige_axes_file: "prestige_axes_zh.json"
+  # WEAT mode word files (relative to wordlists.dir)
+  weat_gender_file: "gender_words.json"
+  weat_domestic_work_file: "domestic_work_words.json"
+  weat_leadership_file: "leadership_words.json"
+  weat_stem_file: "stem_words.json"
+
+# Google Ngram settings (only for data_source: ngram)
 ngram:
   language: "chi_sim"
   n: 5
-  # Data source: http://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/
-  # Downloads: totalcounts-5 + 5-00000-of-00105.gz through 5-00104-of-00105.gz
   min_year: 1940
   max_year: 2015
-
-  # Format specification for parsing 5-gram files
-  # Expected format: token1 token2 token3 token4 token5<TAB>year<TAB>match_count<TAB>volume_count
   delimiter: "\t"
-  year_column: 1  # 0-indexed position after splitting by delimiter
+  year_column: 1
   match_count_column: 2
   volume_count_column: 3
 
-# Time slicing configuration
+# Time slicing configuration (for longitudinal analysis)
 time_slices:
-  window_size: 10  # years per corpus (inclusive)
-  step_size: 5     # years between the starts of two slices
+  window_size: 10
+  step_size: 5
   start_year: 1940
-  end_year: 2015   # inclusive; last window may be truncated if needed
+  end_year: 2015
 
-# Word2Vec / embedding settings
+# Provincial configuration (for provincial analysis)
+provincial:
+  # Province groups for parallel execution on cluster
+  province_groups:
+    - ["北京", "天津", "河北", "山西"]
+    - ["内蒙古", "辽宁", "吉林", "黑龙江"]
+    - ["上海", "江苏"]
+    - ["福建", "江西", "山东"]
+    - ["河南", "湖北", "湖南"]
+    - ["广西", "海南"]
+    - ["重庆", "四川", "贵州", "云南"]
+    - ["西藏", "陕西", "甘肃", "青海", "宁夏", "新疆"]
+    - ["中国台湾", "中国香港", "中国澳门"]
+    - ["浙江", "安徽"]
+    - ["广东"]
+  min_documents: 1000  # Minimum docs to include a province
+
+# Word2Vec embedding settings
 embedding:
   vector_size: 300
-  window: 4        # context window size
-  min_count: 50    # discard tokens with total freq < 50 in that slice
-  sg: 1            # 1 = skip-gram, 0 = CBOW
-  negative: 15     # negative sampling size
-  workers: 16      # number of CPU cores to use (adjust based on your server)
-  epochs: 5        # passes over corpus
-  seed: 42         # reproducibility
-  implementation: "gensim"
-  # Model filename template. Use {slice_name} as placeholder for time slice name (e.g., "1940_1949")
-  # Examples:
-  #   "chi_sim_5gram_{slice_name}.model"  # for ngram data
-  #   "renminribao_{slice_name}.model"    # for renminribao data
-  model_name_template: "chi_sim_5gram_{slice_name}.model"
+  window: 4
+  min_count: 50
+  sg: 1            # 1 = skip-gram
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  # Model filename template. Use {unit_name} as placeholder.
+  # For longitudinal: {unit_name} = time slice name (e.g., "1940_1949")
+  # For provincial: {unit_name} = province name (e.g., "北京")
+  model_name_template: "chi_sim_5gram_{unit_name}.model"
 
 # Corpus construction settings
 corpus:
-  use_counts: false  # Whether to weight by match_count (false = each ngram appears once)
-  min_count_threshold: 1  # Minimum match_count to include an ngram
-
-# Word lists (relative paths from base_dir)
-wordlists:
-  occupations_file: "wordlists/occupations_zh.txt"
-  gender_words_file: "wordlists/gender_words_zh.json"
-  prestige_axes_file: "wordlists/prestige_axes_zh.json"
+  use_counts: false
+  min_count_threshold: 1
+  tokenizer: "whitespace"  # "whitespace" for ngram, "jieba" for weibo/newspaper/renminribao
+  min_words: 5             # Minimum words per line to include
 
 # Analysis settings
 analysis:
-  # Strategy for handling multi-character occupation titles:
-  # "whole_token" - use occupation as single token if in vocab
-  # "average_chars" - average embeddings of constituent characters
-  # "hybrid" - try whole_token first, fall back to average_chars
-  normalize_vectors: true  # Normalize vectors to unit length before computing similarities
+  normalize_vectors: true
+
+# Correlation analysis settings
+# Supports two modes (auto-detected from your CSV):
+#   - Provincial: CSV has a "province" column → merges on province
+#   - Longitudinal: CSV has a "year" or "start_year" column → merges on time slice
+#
+# correlation:
+#   # Path to your external data CSV
+#   external_data: "provincial/data/provincial_cleaned.csv"
+#
+#   # Provincial CSV format:
+#   #   province, gdp, income, education_years, ...
+#   #   北京, 43760, 85000, 13.2, ...
+#   #   (province names: 北京 or 北京市 both work)
+#
+#   # Longitudinal CSV format:
+#   #   year, female_labor_rate, gdp_per_capita, literacy_rate, ...
+#   #   1940, 0.45, 1200, 0.32, ...
+#   #   1945, 0.48, 1350, 0.38, ...
+#   #   (year values should match time slice start years)
+#
+#   # Optional: specify which columns to correlate (default: all numeric columns)
+#   # variables:
+#   #   - column: "gdp"
+#   #     label: "GDP"
+#   #   - "income"  # short form
+#
+#   # Optional: derived columns (computed before correlation)
+#   # transforms:
+#   #   - name: "log_gdp"
+#   #     op: "log"
+#   #     source: "gdp"
+#   #   - name: "edu_gap_mf"
+#   #     op: "diff"
+#   #     a: "edu_years_male"
+#   #     b: "edu_years_female"

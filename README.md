@@ -1,486 +1,413 @@
-# Chinese Google 5-gram Occupation-Gender-Prestige Project
+# Gender-Occupation Segregation Analysis
 
-This repository supports research on **gendered occupational prestige in Chinese culture** from 1940-2015, using Chinese Google Books 5-gram data and decade-specific word embeddings. The design parallels Wenhao Jiang (2025) for U.S. English, adapted to Chinese.
+Unified framework for analyzing **gender norms and occupational segregation in Chinese text** using word embeddings. Supports four data sources and two analysis modes across servers.
+
+## Overview
+
+This project measures how gender associations with occupations and social concepts evolve over time and vary across regions, using Word2Vec embeddings trained on large-scale Chinese text corpora.
+
+**Data sources:**
+- **Google N-grams** — Chinese simplified 5-grams (1940-2015), national longitudinal
+- **Renminribao (People's Daily)** — newspaper text (1940s-2010s), national longitudinal
+- **Weibo** — social media posts by province, provincial cross-sectional
+- **Newspaper** — regional newspapers mapped to provinces, provincial cross-sectional
+
+**Analysis modes:**
+- **Prestige** — Projects occupations onto gender + 4 prestige axes (evaluation, potency, activity, general prestige). Computes Pearson correlations between gender typing and prestige over time.
+- **WEAT** — Computes Cohen's d effect sizes for 3 gender norm dimensions: work-family, leadership, and STEM. Supports cross-provincial comparison and correlation with socioeconomic indicators.
 
 ## Quick Start
 
 ```bash
-# 1. Clone and setup
-git clone <your-repo>
+# 1. Clone and configure
+git clone <repo-url>
 cd gender-occup-segregation
-./setup_server.sh  # Interactive setup
+cp config/config.example.yml config/config.yml
+# Edit config/config.yml with your server paths and data source
 
-# 2. Run pipeline
-screen -S gender-analysis
-source venv/bin/activate
-./run_pipeline.sh 2>&1 | tee pipeline.log
-# Ctrl+A, D to detach
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Run (auto-skips stages with existing output)
+./run_pipeline.sh
+
+# Or use Slurm
+sbatch slurm/full_pipeline.slurm
 ```
-
-## Project Overview
-
-The project analyzes how gender associations and prestige perceptions of occupations have evolved in Chinese written culture using word embeddings trained on time-sliced corpora.
-
-**What it computes:**
-1. **Gender typing scores**: How occupations associate with male vs. female concepts
-2. **Prestige dimensions**: Evaluation (moral worth), potency (power), activity (liveliness), and general prestige
-
-**Pipeline stages:**
-1. Download & decompress Chinese Google 5-gram data
-2. Build time-sliced corpora (overlapping 10-year windows, 5-year steps)
-3. Train Word2Vec models (skip-gram) for each time slice
-4. Analyze occupation positions along gender and prestige axes
 
 ## Repository Structure
 
 ```
-.
+gender-occup-segregation/
 ├── config/
-│   ├── config.example.yml     # Template (copy to config.yml)
-│   └── config.yml             # Your config (NOT in git)
-├── scripts/                   # Four main pipeline scripts
-│   ├── download_ngrams.py
-│   ├── build_corpora.py
-│   ├── train_embeddings.py
-│   └── analyze_embeddings.py
-├── wordlists/                 # Input word lists
-│   ├── occupations_zh.txt
-│   ├── gender_words_zh.json
-│   └── prestige_axes_zh.json
-├── tests/                     # Unit tests
-├── data/                      # Generated data (NOT in git)
-│   ├── raw_ngrams/
-│   ├── corpora/
-│   ├── models/
-│   └── results/              # Your final outputs!
-└── logs/                      # Execution logs (NOT in git)
+│   ├── config.example.yml          # Full config template (all data sources)
+│   └── profiles/                   # Ready-to-use configs per server
+│       ├── ngram_server.yml
+│       ├── renminribao_server.yml
+│       ├── weibo_server.yml
+│       └── newspaper_server.yml
+├── scripts/
+│   ├── common/                     # Shared utilities
+│   │   ├── config_loader.py        # Unified config loading + validation
+│   │   ├── embedding_utils.py      # Axis construction, projection, Cohen's d
+│   │   └── logging_utils.py        # Logging setup
+│   ├── data_prep/                  # Data source-specific corpus building
+│   │   ├── download_ngrams.py      # Google n-gram download
+│   │   ├── build_corpora_ngram.py  # N-gram -> time-sliced corpora
+│   │   ├── build_corpora_rmrb.py   # Renminribao -> time-sliced corpora
+│   │   ├── build_corpora_weibo.py  # Weibo -> province-level corpora
+│   │   ├── build_corpora_newspaper.py  # Newspaper -> province-level corpora
+│   │   └── province_mapper.py      # Newspaper name -> province mapping pipeline
+│   ├── train_embeddings.py         # Unified Word2Vec trainer (time slices or provinces)
+│   ├── analyze_prestige.py         # Prestige mode: gender + prestige dimension scores
+│   ├── analyze_weat.py             # WEAT mode: 5-step Cohen's d pipeline
+│   ├── analyze_correlation.py      # Correlate indices with external socioeconomic data
+│   └── visualize.py                # Unified visualization (prestige + WEAT plots)
+├── wordlists/
+│   ├── prestige/                   # Prestige mode wordlists
+│   │   ├── occupations_zh.txt      # Occupation terms
+│   │   ├── gender_words_zh.json    # Male/female term pairs
+│   │   ├── prestige_axes_zh.json   # 4 prestige dimension definitions
+│   │   └── occup_category.json     # Occupation category groupings
+│   ├── weat_formal/                # WEAT wordlists for formal text (newspaper, ngram)
+│   │   ├── gender_words.json
+│   │   ├── domestic_work_words.json
+│   │   ├── leadership_words.json
+│   │   └── stem_words.json
+│   └── weat_informal/              # WEAT wordlists for informal text (Weibo)
+│       ├── gender_words.json       # Includes colloquial terms (帅哥, 闺蜜, etc.)
+│       ├── domestic_work_words.json
+│       ├── leadership_words.json
+│       └── stem_words.json
+├── provincial/                     # Provincial socioeconomic data processing
+│   ├── clean_provincial_data.py    # Clean survey/census data into standard format
+│   └── data/                       # CSV/Excel data files (not in git)
+├── slurm/                          # Slurm job templates
+│   ├── build_corpus.slurm
+│   ├── train.slurm
+│   ├── analyze.slurm
+│   └── full_pipeline.slurm
+├── tests/
+├── run_pipeline.sh                 # Full pipeline with auto-skip
+├── requirements.txt
+└── reference/                      # Original project code (archive, not in git)
 ```
-
-## Requirements
-
-### System
-- Python 3.8+
-- 100+ GB disk space
-- 16+ GB RAM (reduce workers if less)
-- Multiple CPU cores (recommended)
-
-### Python Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-Key packages: `gensim`, `numpy`, `pandas`, `matplotlib`, `seaborn`, `PyYAML`, `fire`, `requests`, `beautifulsoup4`
-
-## Installation
-
-### Local Setup
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-cp config/config.example.yml config/config.yml
-# Edit config/config.yml with your paths
-```
-
-### Server Setup
-
-```bash
-# On your server
-git clone <your-repo>
-cd gender-occup-segregation
-./setup_server.sh  # Automated interactive setup
-```
-
-The setup script will:
-- Create virtual environment
-- Install dependencies
-- Create `config/config.yml` from template
-- Ask for your server paths
-- Set CPU worker count
-- Create directory structure
-- Run tests
 
 ## Configuration
 
-Edit `config/config.yml` (copy from `config.example.yml`):
+Copy the example config and edit for your server:
+
+```bash
+cp config/config.example.yml config/config.yml
+```
+
+Or start from a profile:
+
+```bash
+cp config/profiles/weibo_server.yml config/config.yml
+```
+
+Key fields:
 
 ```yaml
+data_source: "ngram"          # "ngram", "renminribao", "weibo", "newspaper"
+analysis_mode: "prestige"     # "prestige" or "weat"
+
 paths:
   base_dir: "/path/to/project"
-  raw_ngram_dir: "/path/to/data/raw_ngrams"
-  # ... other paths
+  corpora_dir: "/path/to/corpora"
+  models_dir: "/path/to/models"
+  results_dir: "/path/to/results"
+  log_dir: "/path/to/logs"
+
+wordlists:
+  dir: "wordlists/prestige"  # or "wordlists/weat_formal", "wordlists/weat_informal"
 
 embedding:
-  vector_size: 300
-  window: 4
-  min_count: 50
-  workers: 16  # Match your CPU cores
-  epochs: 5
-
-time_slices:
-  window_size: 10   # years per corpus
-  step_size: 5      # overlap
-  start_year: 1940
-  end_year: 2015
+  model_name_template: "chi_sim_5gram_{unit_name}.model"  # must match your model filenames
 ```
+
+The `model_name_template` determines how scripts discover and name models. `{unit_name}` is replaced with the time slice (e.g., `1940_1949`) or province name (e.g., `北京`).
 
 ## Usage
 
-### All Scripts Use Fire CLI
-
-All scripts use [Python Fire](https://github.com/google/python-fire) for CLI:
+### Full Pipeline (Recommended)
 
 ```bash
-# General pattern
-python script.py --param=value --flag
-
-# Get help
-python script.py -- --help
+./run_pipeline.sh --config config/config.yml
 ```
 
-### Option 1: Full Pipeline
+Each stage **auto-skips** if its output already exists. Use `--force-*` to re-run:
 
 ```bash
-./run_pipeline.sh
-
-# With options
-./run_pipeline.sh --skip-download --export-plots
+./run_pipeline.sh --force-train     # Re-train even if models exist
+./run_pipeline.sh --force-all       # Re-run everything
 ```
 
-### Option 2: Step by Step
+### Step by Step
 
-**Step 1: Download Data**
-```bash
-python scripts/download_ngrams.py --config=config/config.yml
-
-# Options
-python scripts/download_ngrams.py --config=config/config.yml --skip_decompress
-python scripts/download_ngrams.py --max_workers=8
-```
-
-**Step 2: Build Corpora**
-```bash
-python scripts/build_corpora.py --config=config/config.yml
-
-# Options
-python scripts/build_corpora.py --slice=1940_1949  # Single slice
-python scripts/build_corpora.py --overwrite
-```
-
-**Step 3: Train Embeddings**
-```bash
-python scripts/train_embeddings.py --config=config/config.yml
-
-# Options
-python scripts/train_embeddings.py --slice=1940_1949
-python scripts/train_embeddings.py --retrain
-```
-
-**Step 4: Analyze**
-```bash
-python scripts/analyze_embeddings.py --config=config/config.yml
-
-# Options
-python scripts/analyze_embeddings.py --export_plots
-python scripts/analyze_embeddings.py --slice=1940_1949
-```
-
-## Running on Server
-
-### Using Screen (Recommended)
+**1. Build corpora** (data source-specific):
 
 ```bash
-# Start session
-screen -S gender-analysis
+# N-gram
+python -m scripts.data_prep.build_corpora_ngram --config=config/config.yml
 
-# Activate and run
-source venv/bin/activate
-./run_pipeline.sh 2>&1 | tee pipeline.log
+# Renminribao
+python -m scripts.data_prep.build_corpora_rmrb --config=config/config.yml
 
-# Detach: Ctrl+A, then D
-# Reattach: screen -r gender-analysis
+# Weibo (by province group for parallel execution)
+python -m scripts.data_prep.build_corpora_weibo --config=config/config.yml --year=2024 --group=0
+
+# Newspaper (requires province mapping first, see below)
+python -m scripts.data_prep.build_corpora_newspaper --config=config/config.yml
 ```
 
-### Using tmux
+**2. Train embeddings:**
 
 ```bash
-tmux new -s gender-analysis
-source venv/bin/activate
-./run_pipeline.sh 2>&1 | tee pipeline.log
-# Detach: Ctrl+B, then D
-# Reattach: tmux attach -t gender-analysis
+python -m scripts.train_embeddings --config=config/config.yml
+
+# Train specific unit
+python -m scripts.train_embeddings --config=config/config.yml --unit=1940_1949
+
+# Train specific province group (for parallel Slurm jobs)
+python -m scripts.train_embeddings --config=config/config.yml --group=0
 ```
 
-### Using nohup
+**3. Analyze:**
 
 ```bash
-nohup ./run_pipeline.sh > pipeline.log 2>&1 &
-echo $! > pipeline.pid
+# Prestige mode
+python -m scripts.analyze_prestige --config=config/config.yml
+
+# WEAT mode
+python -m scripts.analyze_weat --config=config/config.yml
 ```
 
-### Parallel Training (Speed Up)
-
-Train different time slices simultaneously:
+**4. Visualize:**
 
 ```bash
-# Manual approach
-screen -S train_1940
-source venv/bin/activate
-python scripts/train_embeddings.py --slice=1940_1949
-
-# Automated approach
-for slice in 1940_1949 1945_1954 1950_1959 1955_1964 1960_1969 1965_1974 1970_1979 1975_1984 1980_1989 1985_1994 1990_1999 1995_2004 2000_2009 2005_2014 2010_2015; do
-  screen -dmS train_${slice} bash -c "source venv/bin/activate && python scripts/train_embeddings.py --slice=${slice} 2>&1 | tee logs/train_${slice}.log"
-  sleep 5
-done
+python -m scripts.visualize --config=config/config.yml
 ```
 
-## Monitoring Progress
+**5. Correlate with external data** (optional):
 
 ```bash
-# Check logs
-tail -f logs/*.log
-
-# Reattach to screen
-screen -r gender-analysis
-
-# Check running processes
-ps aux | grep python
-
-# Disk usage
-df -h
-du -sh data/*
+python -m scripts.analyze_correlation --config=config/config.yml
 ```
+
+### Using Existing Models
+
+If you already have trained models and just want to analyze + visualize:
+
+```bash
+# Point config to your models directory, then:
+python -m scripts.analyze_weat --config=config/config.yml
+python -m scripts.visualize --config=config/config.yml
+```
+
+The pipeline auto-skips download, corpus building, and training when output files exist.
+
+### Cross-Mode Analysis
+
+Any data source can use either analysis mode. For example, to run WEAT on n-gram models:
+
+```yaml
+data_source: "ngram"
+analysis_mode: "weat"
+wordlists:
+  dir: "wordlists/weat_formal"
+embedding:
+  model_name_template: "chi_sim_5gram_{unit_name}.model"
+```
+
+## Newspaper Pipeline
+
+For newspaper data, an additional step maps newspaper names to provinces:
+
+```bash
+# 1. Extract newspaper names from raw JSONL files
+python -m scripts.data_prep.province_mapper extract --config=config/config.yml
+
+# 2. Auto-map newspapers to provinces
+python -m scripts.data_prep.province_mapper map --config=config/config.yml
+
+# 3. Review unknowns, add manual fixes to MANUAL_MAPPINGS in province_mapper.py, then:
+python -m scripts.data_prep.province_mapper add --config=config/config.yml
+
+# 4. Build corpora (uses the mapping)
+python -m scripts.data_prep.build_corpora_newspaper --config=config/config.yml
+```
+
+## Correlation Analysis
+
+Correlates WEAT Cohen's d indices with external socioeconomic data. Supports both provincial and longitudinal modes, auto-detected from your CSV.
+
+**Provincial CSV format** (for Weibo/newspaper analysis):
+
+```csv
+province,gdp,income,education_years,employment_rate
+北京,43760,85000,13.2,0.78
+广东,13500,55000,10.8,0.72
+```
+
+Province names can be short (`北京`) or full (`北京市`, `内蒙古自治区`).
+
+**Longitudinal CSV format** (for n-gram/Renminribao analysis):
+
+```csv
+year,female_labor_rate,gdp_per_capita,literacy_rate
+1940,0.45,1200,0.32
+1950,0.52,1500,0.45
+```
+
+The `year` column is matched to time slice start years.
+
+All numeric columns are auto-discovered for correlation. To select specific columns or add derived variables (log, diff), configure in `config.yml`:
+
+```yaml
+correlation:
+  external_data: "path/to/your_data.csv"
+  variables:
+    - column: "gdp"
+      label: "GDP"
+    - "employment_rate"
+  transforms:
+    - name: "log_gdp"
+      op: "log"
+      source: "gdp"
+```
+
+## Running on Slurm
+
+```bash
+# Single stage
+sbatch slurm/build_corpus.slurm
+sbatch slurm/train.slurm
+sbatch slurm/analyze.slurm
+
+# Full pipeline
+sbatch slurm/full_pipeline.slurm
+
+# Train specific province group (parallel jobs)
+sbatch slurm/train.slurm config/config.yml --group=0
+sbatch slurm/train.slurm config/config.yml --group=1
+# ...
+```
+
+Edit the `#SBATCH` headers in the slurm scripts to adjust resources and email.
 
 ## Output Files
 
-After analysis completes, find results in `data/results/`:
+### Prestige Mode
 
-- **`occupation_gender_typing_by_decade.csv`**: Gender scores over time
-  - Columns: occupation, time_slice, start_year, end_year, gender_score, coverage
-  - Negative score = male-typed, Positive = female-typed
+| File | Description |
+|------|-------------|
+| `occupation_scores_by_slice.parquet` | Gender + prestige scores per occupation per time slice |
+| `occupation_scores_by_province.parquet` | Same, for provincial analysis |
+| `summary_statistics.parquet` | Gender-prestige correlations per unit |
 
-- **`occupation_prestige_by_decade.csv`**: Prestige dimension scores over time
-  - Columns: occupation, time_slice, prestige_evaluation, prestige_potency, prestige_activity, prestige_general_prestige, coverage
+### WEAT Mode
 
-- **`occupation_gender_prestige_joint.csv`**: Combined dataset
+| File | Description |
+|------|-------------|
+| `weat_results.csv` | Cohen's d per unit per dimension (long format) |
+| `gender_norm_index.csv` | Cohen's d per unit (wide format, main result) |
+| `word_projections.csv` | All concept word projections onto gender axes |
+| `oov_unit_coverage.csv` | OOV diagnostics per unit |
+| `gender_axes.csv` | Gender axis metadata |
 
-- **`summary_statistics.csv`**: Time-series correlations and summary metrics
+### Visualizations
 
-- **`plots/`** (if `--export_plots` used): Diagnostic visualizations
-
-## Downloading Results from Server
-
-```bash
-# Compress on server
-cd data/results
-tar -czf results_$(date +%Y%m%d).tar.gz *.csv plots/
-
-# Download to local machine
-scp server:/path/to/results_*.tar.gz ./
-
-# Or use rsync (resumable)
-rsync -avzP server:/path/to/data/results/ ./local_results/
-```
-
-## Customization
-
-### Add Occupations
-
-Edit `wordlists/occupations_zh.txt`:
-```
-新职业1
-新职业2
-```
-
-Then re-run analysis step.
-
-### Modify Gender/Prestige Words
-
-Edit JSON files in `wordlists/`:
-- `gender_words_zh.json` - Gender-associated terms
-- `prestige_axes_zh.json` - Prestige dimension definitions
-
-### Change Time Windows
-
-Edit `config/config.yml`:
-```yaml
-time_slices:
-  window_size: 15  # Change from 10 to 15 years
-  step_size: 5
-```
-
-Then re-run corpus building, training, and analysis.
+| Plot | Mode | Description |
+|------|------|-------------|
+| `prestige_by_gender_over_time` | Prestige | Top 10% male vs female occupations' prestige scores |
+| `gender_prestige_correlation_over_time` | Prestige | Pearson r between gender and prestige per time slice |
+| `prestige_by_category_over_time` | Prestige | Prestige trends by occupation category |
+| `weat_cohens_d_heatmap` | WEAT | Heatmap of Cohen's d across units and dimensions |
+| `weat_rankings` | WEAT | Bar chart ranking units by Cohen's d |
+| `weat_longitudinal_trend` | WEAT | Line chart of Cohen's d over time (longitudinal) |
+| `weat_longitudinal_by_dimension` | WEAT | Per-dimension trend with effect size reference lines |
+| `weat_projection_boxplots` | WEAT | Projection distributions per unit (diagnostic) |
+| `weat_choropleth_*` | WEAT | Provincial maps (requires geopandas + shapefile) |
+| `*_correlation.pdf` | Correlation | Scatter plots with regression lines |
 
 ## Methodology
 
 ### Word Embeddings
-- **Algorithm**: Skip-gram with negative sampling (Word2Vec)
+
+- **Algorithm**: Word2Vec skip-gram with negative sampling (gensim)
 - **Vector size**: 300 dimensions
-- **Training**: One model per 10-year time slice
-- **Vocabulary**: ~50K-500K tokens per model
+- **Training**: One model per analysis unit (time slice or province)
+- **Tokenization**: Whitespace (n-grams), jieba (Chinese text)
 
-### Semantic Axes
+### Prestige Analysis
 
-Axes are constructed as normalized differences between centroids:
+Semantic axes are constructed as normalized centroid differences:
 
-```python
-# Gender axis
-male_centroid = mean([v_男, v_男人, v_他, ...])
-female_centroid = mean([v_女, v_女人, v_她, ...])
-gender_axis = normalize(male_centroid - female_centroid)
+```
+gender_axis = normalize(centroid(female_terms) - centroid(male_terms))
+prestige_axis = normalize(centroid(high_terms) - centroid(low_terms))
 
-# Occupation score
-gender_score = dot(occupation_vector, gender_axis)
+gender_score(occupation) = dot(occupation_vector, gender_axis)
+prestige_score(occupation) = dot(occupation_vector, prestige_axis)
 ```
 
-### Multi-Character Occupations
+### WEAT Analysis
 
-Chinese occupations are multi-character (e.g., 工程师). We use a hybrid strategy:
-1. Try whole-token embedding if available
-2. Fall back to averaging character embeddings
-3. Filter out occupations with low character coverage
+Follows the Word Embedding Association Test framework:
 
-### Prestige Dimensions
+1. **Gender axis**: `female_centroid - male_centroid` (normalized)
+2. **Projections**: Each concept word projected onto the gender axis (cosine similarity)
+3. **Cohen's d**: Effect size comparing two concept groups on the gender axis
+   - Work-Family: `d = (family_mean - work_mean) / pooled_std`
+   - Leadership: `d = (non_leadership_mean - leadership_mean) / pooled_std`
+   - STEM: `d = (non_stem_mean - stem_mean) / pooled_std`
+   - Positive d = traditional gender norm direction
 
-Following Osgood's semantic differential:
-1. **Evaluation**: Moral worth (高尚-卑鄙)
-2. **Potency**: Power/competence (强大-弱小)
-3. **Activity**: Liveliness (活跃-沉闷)
-4. **General Prestige**: Social status (高贵-低贱)
+### Wordlist Design
 
-## Performance & Resource Usage
+- **`prestige/`**: Occupation terms + prestige dimension poles from Osgood's semantic differential
+- **`weat_formal/`**: Gender/concept terms suited for formal text (newspaper, books)
+- **`weat_informal/`**: Adds colloquial terms (帅哥, 闺蜜, 带娃) for social media text
 
-### Disk Space
-- Raw data: ~50 GB compressed, ~200 GB decompressed
-- Corpora: ~100 GB
-- Models: ~10 GB
-- Results: <1 GB
-- **Total: ~360 GB**
+## Requirements
 
-### Time Estimates
-- Download: 2-6 hours (network dependent)
-- Corpus building: 1-2 hours
-- Training: 30-60 hours (sequential) or 3-6 hours (parallel)
-- Analysis: 30 minutes
-- **Total: 36-72 hours sequential, 6-12 hours optimized**
-
-### Memory
-- Reduce `workers` in config if < 16GB RAM
-- Each model training: 2-8 GB RAM
-
-## Troubleshooting
-
-### Out of Memory
-```yaml
-# In config/config.yml
-embedding:
-  workers: 4  # Reduce from 16
-```
-
-### Out of Disk Space
-```bash
-# After corpus building, can remove decompressed files
-rm -rf data/raw_ngrams_decompressed/*
-```
-
-### Download Failures
-Rerun the script - it automatically skips completed files:
-```bash
-python scripts/download_ngrams.py --config=config/config.yml
-```
-
-### Process Died
-Check logs and restart - scripts skip completed work:
-```bash
-tail -100 logs/*.log
-./run_pipeline.sh --skip-download  # Skip done steps
-```
-
-### Low Occupation Coverage
-Adjust in `config/config.yml`:
-```yaml
-analysis:
-  min_coverage: 0.3  # Lower from 0.5
-  occupation_strategy: "average_chars"  # Or "hybrid"
-```
-
-## Testing
+- Python 3.8+
+- `gensim`, `numpy`, `pandas`, `matplotlib`, `seaborn`, `PyYAML`, `fire`
+- `jieba` (for Chinese text tokenization; not needed for n-gram data)
+- `scipy` (for Pearson correlation p-values)
+- Optional: `geopandas` (for choropleth maps)
 
 ```bash
-# Run all tests
-python -m unittest discover tests/
-
-# Specific test
-python tests/test_build_corpora.py
+pip install -r requirements.txt
 ```
 
-## File Locations Summary
+## What's in Git vs Not
 
-**Tracked in Git:**
-- Scripts, word lists, tests
-- Documentation (*.md)
-- `config/config.example.yml` (template)
-- `requirements.txt`, `.gitignore`
+**Tracked:**
+- All scripts, wordlists, configs (except `config.yml`), slurm templates, tests
 
-**NOT in Git (Generated):**
-- `config/config.yml` (your server paths)
-- `data/` (360+ GB)
-- `logs/` (execution logs)
-- `venv/` (Python environment)
-
-## Technical Details
-
-### Code Statistics
-- 4 main scripts: ~1,500 lines Python
-- Word lists: 80+ occupations, 14+ gender terms, 40+ prestige terms
-- Tests: ~235 lines
-
-### Dependencies
-See `requirements.txt`. Core:
-- gensim (embeddings)
-- pandas (data manipulation)
-- numpy (linear algebra)
-- fire (CLI)
-
-### Reproducibility
-- Fixed random seeds (seed: 42)
-- Deterministic training (where possible)
-- Version-controlled configuration
-- Metadata saved with each model
+**Not tracked:**
+- `config/config.yml` (server-specific paths)
+- `data/` (corpora, models, results — too large)
+- `provincial/data/` (survey CSVs, `.dta` files)
+- `logs/`, `figures/`
+- `reference/` (archived original project code)
 
 ## Citation
-
-If you use this code, please cite:
 
 ```
 [Your paper citation here]
 ```
 
 This project adapts methods from:
-```
-Jiang, Wenhao. 2025. "Cultural Symbolic Biases and Wage Inequality."
-```
+- Jiang, Wenhao. 2025. "Cultural Symbolic Biases and Wage Inequality."
+- Caliskan, Aylin, Joanna J. Bryson, and Arvind Narayanan. 2017. "Semantics derived automatically from language corpora contain human-like biases." Science 356(6334): 183-186.
 
-## Data Source
+## Data Sources
 
-- Google Books Ngram (Chinese simplified, 5-grams, version 20200217)
-- Licensed under CC BY 3.0
-- URL: https://storage.googleapis.com/books/ngrams/books/datasetsv3.html
-
-## License
-
-[Specify your license]
-
-## Contact
-
-[Your contact information]
-
-## Acknowledgments
-
-- Google Books Ngram data
-- Gensim library for Word2Vec
-- Methods adapted from Jiang (2025)
+- Google Books Ngram (Chinese simplified, 5-grams, v20200217) — CC BY 3.0
+- Renminribao corpus
+- Weibo social media data
+- Chinese regional newspaper corpus

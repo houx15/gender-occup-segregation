@@ -1,155 +1,73 @@
 #!/usr/bin/env python3
 """
-Train word2vec embeddings for each time slice.
+Unified Word2Vec embedding trainer.
+
+Handles both modes:
+- Longitudinal (ngram, renminribao): one model per time slice
+- Provincial (weibo, newspaper): one model per province
 
 Usage:
-    python train_embeddings.py --config=config/config.yml
-    python train_embeddings.py --config=config/config.yml --slice=1940_1949
-    python train_embeddings.py --config=config/config.yml --retrain
+    python -m scripts.train_embeddings --config=config/config.yml
+    python -m scripts.train_embeddings --config=config/config.yml --unit=1940_1949
+    python -m scripts.train_embeddings --config=config/config.yml --group=0
+    python -m scripts.train_embeddings --config=config/config.yml --retrain
 """
 
-import logging
-import sys
-import json
+import gc
 import glob
+import json
+import multiprocessing
 from pathlib import Path
 from typing import Iterator, List
-import yaml
-from gensim.models import Word2Vec
+
 import fire
+from gensim.models import Word2Vec
 from gensim.models.callbacks import CallbackAny2Vec
+
+from scripts.common.config_loader import load_config, get_analysis_unit, get_model_name
+from scripts.common.logging_utils import setup_logging
 
 
 class EpochLogger(CallbackAny2Vec):
     """Callback to log training progress."""
-
-    def __init__(self, logger, slice_name):
+    def __init__(self, logger, unit_name):
         self.epoch = 0
         self.logger = logger
-        self.slice_name = slice_name
+        self.unit_name = unit_name
 
     def on_epoch_end(self, model):
         self.epoch += 1
-        self.logger.info(f"  {self.slice_name} - Completed epoch {self.epoch}")
-
-
-def setup_logging(log_dir: Path) -> logging.Logger:
-    """Configure logging to both file and console."""
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / "train_embeddings.log"
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
-    # File handler
-    file_handler = logging.FileHandler(log_file, encoding="utf-8")
-    file_handler.setLevel(logging.INFO)
-    file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    file_handler.setFormatter(file_formatter)
-
-    # Console handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.INFO)
-    console_formatter = logging.Formatter("%(levelname)s - %(message)s")
-    console_handler.setFormatter(console_formatter)
-
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-
-    return logger
-
-
-def load_config(config_path: str) -> dict:
-    """Load configuration from YAML file."""
-    with open(config_path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-
-def get_model_filename(slice_name: str, config: dict) -> str:
-    """
-    Get model filename from template in config.
-    
-    Args:
-        slice_name: Name of the time slice (e.g., "1940_1949")
-        config: Configuration dictionary
-    
-    Returns:
-        Model filename with {slice_name} replaced
-    """
-    template = config.get("embedding", {}).get(
-        "model_name_template", "chi_sim_5gram_{slice_name}.model"
-    )
-    return template.format(slice_name=slice_name)
+        self.logger.info(f"  {self.unit_name} - Completed epoch {self.epoch}")
 
 
 class CorpusIterator:
-    """Iterator for reading corpus files line by line."""
-
-    def __init__(self, corpora_dir: str, slice_name: str):
-        self.corpus_files = glob.glob(f"{corpora_dir}/{slice_name}/corpus_*.txt")
-        self.corpus_files.sort()
+    """Iterator for reading corpus files from a unit directory."""
+    def __init__(self, corpora_dir: str, unit_name: str):
+        unit_dir = Path(corpora_dir) / unit_name
+        self.corpus_files = sorted(glob.glob(str(unit_dir / "corpus_*")))
 
     def __iter__(self) -> Iterator[List[str]]:
-        """Yield tokenized sentences from the corpus."""
         for corpus_file in self.corpus_files:
-            with open(
-                corpus_file, "r", encoding="utf-8", buffering=8 * 1024 * 1024
-            ) as f:
+            with open(corpus_file, "r", encoding="utf-8", buffering=8 * 1024 * 1024) as f:
                 for line in f:
-                    # Split on whitespace to get tokens
                     tokens = line.strip().split()
-                    if tokens:  # Skip empty lines
+                    if tokens:
                         yield tokens
 
 
-def count_corpus_lines(corpus_file: Path) -> int:
-    """Count the number of lines in a corpus file."""
-    count = 0
-    with open(corpus_file, "r", encoding="utf-8") as f:
-        for _ in f:
-            count += 1
-    return count
-
-
-def train_model(slice_name: str, config: dict, logger: logging.Logger) -> Word2Vec:
-    """
-    Train a word2vec model for a single time slice.
-
-    Args:
-        slice_name: Name of the time slice (e.g., "1940_1949")
-        config: Configuration dictionary
-        logger: Logger instance
-
-    Returns:
-        Trained Word2Vec model
-    """
-    logger.info(f"\nTraining model for {slice_name}...")
-
-    # Get embedding configuration
+def train_model(unit_name: str, config: dict, logger) -> Word2Vec:
+    """Train a Word2Vec model for a single unit (time slice or province)."""
+    logger.info(f"\nTraining model for {unit_name}...")
     emb_config = config["embedding"]
 
-    # Create corpus iterator
-    corpora_dir = Path(config["paths"]["corpora_dir"])
-    corpus = CorpusIterator(corpora_dir, slice_name)
+    corpus = CorpusIterator(config["paths"]["corpora_dir"], unit_name)
 
-    # Initialize model
-    logger.info(f"  Initializing Word2Vec model...")
-    logger.info(f"    Vector size: {emb_config['vector_size']}")
-    logger.info(f"    Window: {emb_config['window']}")
-    logger.info(f"    Min count: {emb_config['min_count']}")
-    logger.info(f"    Skip-gram: {emb_config['sg']}")
-    logger.info(f"    Negative sampling: {emb_config['negative']}")
-    logger.info(f"    Workers: {emb_config['workers']}")
-    logger.info(f"    Epochs: {emb_config['epochs']}")
+    workers = min(multiprocessing.cpu_count() - 1, emb_config.get("workers", 16))
+    epoch_logger = EpochLogger(logger, unit_name)
 
-    # Train model
-    logger.info(f"  Training for {emb_config['epochs']} epochs...")
-    epoch_logger = EpochLogger(logger, slice_name)
-
-    import multiprocessing
-
-    workers = multiprocessing.cpu_count() - 1
-    workers = min(workers, emb_config["workers"])
+    logger.info(f"  vector_size={emb_config['vector_size']}, window={emb_config['window']}, "
+                f"min_count={emb_config['min_count']}, sg={emb_config['sg']}, "
+                f"epochs={emb_config['epochs']}, workers={workers}")
 
     model = Word2Vec(
         sentences=corpus,
@@ -157,164 +75,133 @@ def train_model(slice_name: str, config: dict, logger: logging.Logger) -> Word2V
         window=emb_config["window"],
         min_count=emb_config["min_count"],
         sg=emb_config["sg"],
-        negative=emb_config["negative"],
+        negative=emb_config.get("negative", 15),
         workers=workers,
         epochs=emb_config["epochs"],
-        seed=emb_config["seed"],
+        seed=emb_config.get("seed", 42),
         compute_loss=True,
         callbacks=[epoch_logger],
     )
-
-    # Normalize vectors to unit length
     model.wv.fill_norms()
 
-    logger.info(f"  Training completed for {slice_name}")
-    logger.info(f"    Final loss: {model.get_latest_training_loss():.2f}")
-
+    logger.info(f"  Completed {unit_name}: vocab={len(model.wv):,}, loss={model.get_latest_training_loss():.2f}")
     return model
 
 
-def save_model_and_metadata(
-    model: Word2Vec,
-    slice_name: str,
-    start_year: int,
-    end_year: int,
-    config: dict,
-    logger: logging.Logger,
-) -> None:
-    """
-    Save the trained model and its metadata.
-
-    Args:
-        model: Trained Word2Vec model
-        slice_name: Name of the time slice
-        start_year: Start year of the slice
-        end_year: End year of the slice
-        config: Configuration dictionary
-        logger: Logger instance
-    """
+def save_model(model: Word2Vec, unit_name: str, config: dict, logger, **extra_meta):
+    """Save trained model and metadata."""
     models_dir = Path(config["paths"]["models_dir"])
     models_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save model
-    model_filename = get_model_filename(slice_name, config)
+    model_filename = get_model_name(unit_name, config)
     model_path = models_dir / model_filename
     logger.info(f"  Saving model to {model_path}")
     model.wv.save(str(model_path))
 
-    # Save metadata
     metadata = {
-        "time_slice": slice_name,
-        "start_year": start_year,
-        "end_year": end_year,
+        "unit_name": unit_name,
         "vector_size": config["embedding"]["vector_size"],
         "window": config["embedding"]["window"],
         "min_count": config["embedding"]["min_count"],
         "sg": config["embedding"]["sg"],
-        "negative": config["embedding"]["negative"],
+        "negative": config["embedding"].get("negative", 15),
         "epochs": config["embedding"]["epochs"],
-        "seed": config["embedding"]["seed"],
+        "seed": config["embedding"].get("seed", 42),
         "vocab_size": len(model.wv),
+        **extra_meta,
     }
-
-    # Metadata filename: replace .model with .meta.json
-    metadata_filename = model_filename.replace(".model", ".meta.json")
-    metadata_path = models_dir / metadata_filename
-    logger.info(f"  Saving metadata to {metadata_path}")
-    with open(metadata_path, "w", encoding="utf-8") as f:
+    meta_filename = model_filename.replace(".model", ".meta.json")
+    meta_path = models_dir / meta_filename
+    with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
 
-def train_all_models(
-    config: dict,
-    logger: logging.Logger,
-    specific_slice: str = None,
-    retrain: bool = False,
-) -> None:
-    """
-    Train models for all time slices.
-
-    Args:
-        config: Configuration dictionary
-        logger: Logger instance
-        specific_slice: If provided, only train this slice
-        retrain: Whether to retrain existing models
-    """
+def discover_units(config: dict) -> List[str]:
+    """Discover available units (time slice dirs or province dirs) in corpora_dir."""
     corpora_dir = Path(config["paths"]["corpora_dir"])
+    if not corpora_dir.exists():
+        return []
+    return sorted([d.name for d in corpora_dir.iterdir() if d.is_dir()])
+
+
+def train_all(config: dict, logger, specific_unit=None, group=None, retrain=False):
+    """Train models for all units."""
     models_dir = Path(config["paths"]["models_dir"])
     models_dir.mkdir(parents=True, exist_ok=True)
 
-    # Find all time slice directories
-    slice_dirs = sorted([d for d in corpora_dir.iterdir() if d.is_dir()])
-
-    if not slice_dirs:
-        logger.error(f"No time slice directories found in {corpora_dir}")
+    units = discover_units(config)
+    if not units:
+        logger.error(f"No unit directories found in {config['paths']['corpora_dir']}")
         return
 
-    logger.info(f"Found {len(slice_dirs)} time slice directories")
-
-    # Filter to specific slice if requested
-    if specific_slice:
-        # found dir with name started by specific_slice
-        slice_dirs = [d for d in slice_dirs if d.name.startswith(str(specific_slice))]
-        if not slice_dirs:
-            logger.error(f"Time slice {specific_slice} not found")
+    # Filter by specific unit
+    if specific_unit:
+        units = [u for u in units if u.startswith(str(specific_unit))]
+        if not units:
+            logger.error(f"Unit {specific_unit} not found")
             return
-        logger.info(f"Training only slice: {specific_slice}")
 
-    # Train each model
-    for slice_dir in slice_dirs:
-        slice_name = slice_dir.name
-        # Check if model already exists
-        model_filename = get_model_filename(slice_name, config)
+    # Filter by group (provincial mode)
+    if group is not None:
+        prov_config = config.get("provincial", {})
+        groups = prov_config.get("province_groups", [])
+        if 0 <= group < len(groups):
+            target_provinces = set(groups[group])
+            units = [u for u in units if u in target_provinces]
+            logger.info(f"Training group {group}: {units}")
+        else:
+            logger.error(f"Invalid group index: {group}")
+            return
+
+    logger.info(f"Training {len(units)} models")
+
+    for unit_name in units:
+        model_filename = get_model_name(unit_name, config)
         model_path = models_dir / model_filename
         if model_path.exists() and not retrain:
-            logger.info(
-                f"Model for {slice_name} already exists, skipping (use --retrain to overwrite)"
-            )
-            continue
-        # Parse start and end years from slice name
-        try:
-            start_year, end_year = map(int, slice_name.split("_"))
-        except ValueError:
-            logger.warning(f"Could not parse years from {slice_name}, skipping")
+            logger.info(f"Skipping {unit_name} (model exists, use --retrain to overwrite)")
             continue
 
-        # Train model
-        model = train_model(slice_name, config, logger)
+        extra_meta = {}
+        # For longitudinal units, parse years
+        analysis_unit = get_analysis_unit(config)
+        if analysis_unit == "longitudinal":
+            try:
+                start_year, end_year = map(int, unit_name.split("_"))
+                extra_meta = {"start_year": start_year, "end_year": end_year}
+            except ValueError:
+                pass
 
-        # Save model and metadata
-        save_model_and_metadata(model, slice_name, start_year, end_year, config, logger)
+        model = train_model(unit_name, config, logger)
+        save_model(model, unit_name, config, logger, **extra_meta)
+
+        del model
+        gc.collect()
 
 
-def main(config="config/config.yml", time_slice=None, retrain=False):
+def main(config="config/config.yml", unit=None, group=None, retrain=False):
     """
-    Train word2vec embeddings for time-sliced Chinese corpora.
+    Train Word2Vec embeddings.
 
     Args:
         config: Path to configuration file
-        time_slice: Train only a specific slice (format: 1940)
+        unit: Train only a specific unit (time slice name or province name)
+        group: Train only a specific province group (index)
         retrain: Retrain existing models
     """
-    # Load configuration
     config_data = load_config(config)
-
-    # Setup logging
-    log_dir = Path(config_data["paths"]["log_dir"])
-    logger = setup_logging(log_dir)
+    logger = setup_logging(Path(config_data["paths"]["log_dir"]), "train_embeddings.log")
 
     logger.info("=" * 80)
-    logger.info("Starting embedding training")
+    logger.info(f"Starting embedding training (source={config_data['data_source']}, "
+                f"unit={get_analysis_unit(config_data)})")
     logger.info("=" * 80)
 
-    # Train models
-    train_all_models(config_data, logger, specific_slice=time_slice, retrain=retrain)
+    train_all(config_data, logger, specific_unit=unit, group=group, retrain=retrain)
 
     logger.info("=" * 80)
     logger.info("Embedding training completed!")
     logger.info("=" * 80)
-
-    return 0
 
 
 if __name__ == "__main__":

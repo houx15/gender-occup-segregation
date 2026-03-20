@@ -1,0 +1,38 @@
+data_source: "renminribao"
+analysis_mode: "prestige"
+
+paths:
+  base_dir: "/path/to/gender-occup-segregation"
+  raw_data_dir: "/scratch/network/yh6580/chinese_corpus/xiandai_20250422/xiandai"
+  corpora_dir: "/path/to/gender-occup-segregation/data/corpora"
+  models_dir: "/path/to/gender-occup-segregation/data/models"
+  results_dir: "/path/to/gender-occup-segregation/data/results"
+  log_dir: "/path/to/gender-occup-segregation/logs"
+  figures_dir: "/path/to/gender-occup-segregation/figures"
+
+wordlists:
+  dir: "wordlists/prestige"
+  occupations_file: "occupations_zh.txt"
+  gender_words_file: "gender_words_zh.json"
+  prestige_axes_file: "prestige_axes_zh.json"
+
+time_slices:
+  window_size: 10
+  step_size: 5
+  start_year: 1940
+  end_year: 2015
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 50
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "renminribao_{unit_name}.model"
+
+corpus:
+  tokenizer: "jieba"
+  min_words: 5

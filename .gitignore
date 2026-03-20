@@ -76,16 +76,21 @@ Thumbs.db
 # Server-specific
 nohup.out
 *.pid
-config/*
+reference/
+config/config.yml
 data/*
 figures/*
+provincial/data/*
 
-# Exception: Keep directory structure and example config
+# Exception: Keep directory structure, example config, and profile configs
 !data/.gitkeep
 !logs/.gitkeep
 !config/config.example.yml
+!config/profiles/
+!config/profiles/*.yml
+!provincial/data/.gitkeep
 
 *.out
-*.slurm
+!slurm/*.slurm
 
 *_figures/*

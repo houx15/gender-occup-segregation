@@ -1,0 +1,46 @@
+data_source: "ngram"
+analysis_mode: "prestige"
+
+paths:
+  base_dir: "/path/to/gender-occup-segregation"
+  raw_ngram_dir: "/path/to/gender-occup-segregation/data/raw_ngrams"
+  decompressed_dir: "/path/to/gender-occup-segregation/data/raw_ngrams_decompressed"
+  corpora_dir: "/path/to/gender-occup-segregation/data/corpora"
+  models_dir: "/path/to/gender-occup-segregation/data/models"
+  results_dir: "/path/to/gender-occup-segregation/data/results"
+  log_dir: "/path/to/gender-occup-segregation/logs"
+  figures_dir: "/path/to/gender-occup-segregation/figures"
+
+wordlists:
+  dir: "wordlists/prestige"
+  occupations_file: "occupations_zh.txt"
+  gender_words_file: "gender_words_zh.json"
+  prestige_axes_file: "prestige_axes_zh.json"
+
+ngram:
+  language: "chi_sim"
+  n: 5
+  min_year: 1940
+  max_year: 2015
+
+time_slices:
+  window_size: 10
+  step_size: 5
+  start_year: 1940
+  end_year: 2015
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 50
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "chi_sim_5gram_{unit_name}.model"
+
+corpus:
+  use_counts: false
+  min_count_threshold: 1
+  tokenizer: "whitespace"
