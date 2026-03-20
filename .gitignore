@@ -88,3 +88,4 @@ figures/*
 *.out
 *.slurm
 
+*_figures/*

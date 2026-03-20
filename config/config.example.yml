@@ -23,6 +23,9 @@ paths:
   # Logs
   log_dir: "/path/to/your/project/logs"
 
+  # Figures
+  figures_dir: "/path/to/your/project/figures"
+
 # Google Ngram settings (Chinese simplified 5-grams)
 ngram:
   language: "chi_sim"

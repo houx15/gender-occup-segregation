@@ -314,17 +314,18 @@ def compute_summary_statistics(
     return summary_df
 
 
-def get_figure_path(filename: str) -> Path:
+def get_figure_path(filename: str, config: dict) -> Path:
     """
     Get the full path for saving a figure with date prefix.
 
     Args:
         filename: Base filename (without extension, will be saved as PDF)
+        config: Configuration dictionary
 
     Returns:
         Path object for the figure file
     """
-    figures_dir = Path("figures")
+    figures_dir = Path(config["paths"]["figures_dir"])
     figures_dir.mkdir(parents=True, exist_ok=True)
     
     # Get current date in yyyymmdd format
@@ -341,6 +342,7 @@ def get_figure_path(filename: str) -> Path:
 def create_plots(
     df: pd.DataFrame,
     logger: logging.Logger,
+    config: dict,
 ) -> None:
     """
     Create diagnostic visualizations.
@@ -348,6 +350,7 @@ def create_plots(
     Args:
         df: Combined DataFrame with occupation scores
         logger: Logger instance
+        config: Configuration dictionary
     """
     logger.info("\nCreating diagnostic plots...")
 
@@ -432,7 +435,7 @@ def create_plots(
                 axes[idx].set_visible(False)
             
             plt.tight_layout()
-            fig_path = get_figure_path("prestige_by_gender_over_time")
+            fig_path = get_figure_path("prestige_by_gender_over_time", config)
             plt.savefig(fig_path, format="pdf")
             plt.close()
             logger.info(f"  Saved: {fig_path.name}")
@@ -479,7 +482,7 @@ def create_plots(
 
             plt.tight_layout()
             plot_name = f"gender_{target_dimension.replace('_score', '')}_scatter"
-            fig_path = get_figure_path(plot_name)
+            fig_path = get_figure_path(plot_name, config)
             plt.savefig(fig_path, format="pdf")
             plt.close()
             logger.info(f"  Saved: {fig_path.name}")
@@ -570,7 +573,7 @@ def create_plots(
                 axes[idx].set_visible(False)
             
             plt.tight_layout()
-            fig_path = get_figure_path("gender_prestige_correlation_over_time")
+            fig_path = get_figure_path("gender_prestige_correlation_over_time", config)
             plt.savefig(fig_path, format="pdf")
             plt.close()
             logger.info(f"  Saved: {fig_path.name}")
@@ -703,7 +706,7 @@ def create_plots(
                     axes[idx].set_visible(False)
                 
                 plt.tight_layout()
-                fig_path = get_figure_path("prestige_by_category_over_time")
+                fig_path = get_figure_path("prestige_by_category_over_time", config)
                 plt.savefig(fig_path, format="pdf")
                 plt.close()
                 logger.info(f"  Saved: {fig_path.name}")
@@ -712,6 +715,27 @@ def create_plots(
             logger.warning(f"Could not find occup_category.json at {occup_category_path}, skipping category plot")
         except Exception as e:
             logger.warning(f"Error creating category plot: {e}")
+
+
+def extract_prefix_from_template(template: str) -> str:
+    """
+    Extract prefix from model name template.
+    
+    Args:
+        template: Model name template, e.g., "chi_sim_5gram_{slice_name}.model"
+    
+    Returns:
+        Prefix string, e.g., "chi_sim_5gram_"
+    """
+    # Find {slice_name} placeholder
+    if "{slice_name}" in template:
+        prefix = template.split("{slice_name}")[0]
+        return prefix
+    else:
+        # Fallback: remove .model extension if present
+        if template.endswith(".model"):
+            return template[:-6]  # Remove ".model"
+        return template
 
 
 def analyze_all_models(
@@ -732,6 +756,13 @@ def analyze_all_models(
     occupations = load_occupations(config["wordlists"]["occupations_file"], logger)
     gender_words = load_word_lists(config["wordlists"]["gender_words_file"], logger)
     prestige_axes = load_word_lists(config["wordlists"]["prestige_axes_file"], logger)
+
+    # Get model name template from config
+    model_template = config.get("embedding", {}).get(
+        "model_name_template", "chi_sim_5gram_{slice_name}.model"
+    )
+    model_prefix = extract_prefix_from_template(model_template)
+    logger.info(f"Using model name prefix: '{model_prefix}' (from template: '{model_template}')")
 
     # Find all models
     models_dir = Path(config["paths"]["models_dir"])
@@ -754,9 +785,14 @@ def analyze_all_models(
     all_results = []
 
     for model_path in model_files:
-        # Parse slice name from filename
-        # Expected format: chi_sim_5gram_1940_1949.model
-        slice_name = model_path.stem.replace("chi_sim_5gram_", "")
+        # Parse slice name from filename using prefix from config
+        if not model_path.stem.startswith(model_prefix):
+            logger.warning(
+                f"Model filename '{model_path.name}' does not start with expected prefix "
+                f"'{model_prefix}', skipping"
+            )
+            continue
+        slice_name = model_path.stem[len(model_prefix):]
         try:
             start_year, end_year = map(int, slice_name.split("_"))
         except ValueError:
@@ -836,7 +872,7 @@ def main(config="config/config.yml", slice=None):
         config_data, logger, specific_slice=slice
     )
 
-    create_plots(combined_df, logger)
+    create_plots(combined_df, logger, config_data)
 
     logger.info("\n" + "=" * 80)
     logger.info("Analysis completed!")
