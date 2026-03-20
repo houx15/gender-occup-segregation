@@ -320,7 +320,8 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
         labels = dim_labels.get(dim, {})
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 9), height_ratios=[2, 1],
-                                        sharex=True, gridspec_kw={"hspace": 0.08})
+                                        sharex=True, gridspec_kw={"hspace": 0.08},
+                                        layout="constrained")
 
         # Top panel: Cohen's d timeline
         ax1.plot(dim_data["start_year"], dim_data["cohens_d"], "o-",
@@ -364,7 +365,6 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
         ax2.set_xticks(x_ticks)
         ax2.set_xticklabels([str(int(y)) for y in x_ticks], rotation=45, ha="right")
 
-        plt.tight_layout()
         path = get_figure_path(f"weat_timeline_{dim}", figures_dir)
         plt.savefig(path, format="pdf")
         plt.close()
@@ -391,7 +391,7 @@ def plot_weat_projection_boxplots(proj_df, figures_dir, logger):
         cat_data = proj_df[proj_df["category"] == cat]
         units = sorted(cat_data["unit"].unique())
         data_per_unit = [cat_data[cat_data["unit"] == u][value_col].values for u in units]
-        ax.boxplot(data_per_unit, labels=units, vert=True)
+        ax.boxplot(data_per_unit, tick_labels=units, vert=True)
         ax.set_xticklabels(units, rotation=45, ha="right", fontsize=8)
         ax.set_title(cat.replace("_", " ").title())
         ax.set_ylabel(value_col)
