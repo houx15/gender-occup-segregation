@@ -113,8 +113,9 @@ def discover_models(config: dict) -> List[tuple]:
     models_dir = Path(config["paths"]["models_dir"])
     prefix, suffix = _parse_model_template(config)
 
+    ext = suffix.lstrip(".")
     models = []
-    for model_file in sorted(models_dir.glob("*.model")):
+    for model_file in sorted(models_dir.glob(f"*.{ext}")):
         name = model_file.name
         if name.startswith(prefix) and name.endswith(suffix):
             unit_name = name[len(prefix):-len(suffix)] if suffix else name[len(prefix):]

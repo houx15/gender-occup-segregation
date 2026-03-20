@@ -122,7 +122,8 @@ fi
 echo ""
 
 # ── Step 3: Train embeddings ──────────────────────────────────────
-N_MODELS=$(count_files "$MODELS_DIR" "*.model")
+# Count both .model and .kv files
+N_MODELS=$(( $(count_files "$MODELS_DIR" "*.model") + $(count_files "$MODELS_DIR" "*.kv") ))
 
 if [ "$N_MODELS" -gt 0 ] && [ "$FORCE_TRAIN" = false ]; then
     echo "Step 3: SKIP training ($N_MODELS .model files found)"

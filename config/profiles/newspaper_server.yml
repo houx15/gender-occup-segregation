@@ -41,7 +41,7 @@ embedding:
   workers: 8
   epochs: 10
   seed: 42
-  model_name_template: "model_{unit_name}.model"
+  model_name_template: "model_{unit_name}.kv"
 
 corpus:
   tokenizer: "jieba"

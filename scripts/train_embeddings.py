@@ -110,7 +110,8 @@ def save_model(model: Word2Vec, unit_name: str, config: dict, logger, **extra_me
         "vocab_size": len(model.wv),
         **extra_meta,
     }
-    meta_filename = model_filename.replace(".model", ".meta.json")
+    # Strip extension and add .meta.json
+    meta_filename = str(Path(model_filename).stem) + ".meta.json"
     meta_path = models_dir / meta_filename
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
