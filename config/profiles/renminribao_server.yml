@@ -2,13 +2,13 @@ data_source: "renminribao"
 analysis_mode: "prestige"
 
 paths:
-  base_dir: "/path/to/gender-occup-segregation"
+  base_dir: "/scratch/network/yh6580/renminribao"
   raw_data_dir: "/scratch/network/yh6580/chinese_corpus/xiandai_20250422/xiandai"
-  corpora_dir: "/path/to/gender-occup-segregation/data/corpora"
-  models_dir: "/path/to/gender-occup-segregation/data/models"
-  results_dir: "/path/to/gender-occup-segregation/data/results"
-  log_dir: "/path/to/gender-occup-segregation/logs"
-  figures_dir: "/path/to/gender-occup-segregation/figures"
+  corpora_dir: "/scratch/network/yh6580/renminribao/corpora"
+  models_dir: "/scratch/network/yh6580/renminribao/models"
+  results_dir: "/scratch/network/yh6580/renminribao/results"
+  log_dir: "/scratch/network/yh6580/renminribao/logs"
+  figures_dir: "/scratch/network/yh6580/renminribao/figures"
 
 wordlists:
   dir: "wordlists/prestige"
@@ -20,7 +20,7 @@ time_slices:
   window_size: 10
   step_size: 5
   start_year: 1940
-  end_year: 2015
+  end_year: 2020
 
 embedding:
   vector_size: 300
@@ -31,7 +31,7 @@ embedding:
   workers: 16
   epochs: 5
   seed: 42
-  model_name_template: "renminribao_{unit_name}.model"
+  model_name_template: "renminribao_{slice_name}.model"
 
 corpus:
   tokenizer: "jieba"

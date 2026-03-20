@@ -2,14 +2,14 @@ data_source: "ngram"
 analysis_mode: "prestige"
 
 paths:
-  base_dir: "/path/to/gender-occup-segregation"
-  raw_ngram_dir: "/path/to/gender-occup-segregation/data/raw_ngrams"
-  decompressed_dir: "/path/to/gender-occup-segregation/data/raw_ngrams_decompressed"
-  corpora_dir: "/path/to/gender-occup-segregation/data/corpora"
-  models_dir: "/path/to/gender-occup-segregation/data/models"
-  results_dir: "/path/to/gender-occup-segregation/data/results"
-  log_dir: "/path/to/gender-occup-segregation/logs"
-  figures_dir: "/path/to/gender-occup-segregation/figures"
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_ngram_dir: "/scratch/network/yh6580/gender-occup/raw_ngrams"
+  decompressed_dir: "/scratch/network/yh6580/gender-occup/raw_ngrams_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/corpora"
+  models_dir: "/scratch/network/yh6580/gender-occup/models"
+  results_dir: "/scratch/network/yh6580/gender-occup/results"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures"
 
 wordlists:
   dir: "wordlists/prestige"
@@ -21,13 +21,13 @@ ngram:
   language: "chi_sim"
   n: 5
   min_year: 1940
-  max_year: 2015
+  max_year: 2020
 
 time_slices:
   window_size: 10
   step_size: 5
   start_year: 1940
-  end_year: 2015
+  end_year: 2020
 
 embedding:
   vector_size: 300
@@ -38,7 +38,7 @@ embedding:
   workers: 16
   epochs: 5
   seed: 42
-  model_name_template: "chi_sim_5gram_{unit_name}.model"
+  model_name_template: "chi_sim_5gram_{slice_name}.model"
 
 corpus:
   use_counts: false

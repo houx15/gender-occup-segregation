@@ -2,13 +2,13 @@ data_source: "newspaper"
 analysis_mode: "weat"
 
 paths:
-  base_dir: "/path/to/gender-occup-segregation"
-  raw_data_dir: "/lustre/home/2401111059/newspaper_data/pdf_txt"
-  corpora_dir: "/path/to/gender-occup-segregation/data/corpora"
-  models_dir: "/path/to/gender-occup-segregation/data/models"
-  results_dir: "/path/to/gender-occup-segregation/data/results"
-  log_dir: "/path/to/gender-occup-segregation/logs"
-  figures_dir: "/path/to/gender-occup-segregation/figures"
+  base_dir: "/lustre/home/2401111059/gender-occup-segregation"
+  raw_data_dir: "/lustre/home/2401111059/gender-occup-segregation/data/raw_newspaper"
+  corpora_dir: "/lustre/home/2401111059/gender-occup-segregation/data/corpora"
+  models_dir: "/lustre/home/2401111059/gender-occup-segregation/data/models"
+  results_dir: "/lustre/home/2401111059/gender-occup-segregation/data/results"
+  log_dir: "/lustre/home/2401111059/gender-occup-segregation/logs"
+  figures_dir: "/lustre/home/2401111059/gender-occup-segregation/figures"
 
 wordlists:
   dir: "wordlists/weat_formal"

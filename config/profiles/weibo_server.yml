@@ -2,13 +2,13 @@ data_source: "weibo"
 analysis_mode: "weat"
 
 paths:
-  base_dir: "/path/to/gender-occup-segregation"
-  raw_data_dir: "/path/to/cleaned_weibo_data"
-  corpora_dir: "/path/to/gender-occup-segregation/data/corpora"
-  models_dir: "/path/to/gender-occup-segregation/data/models"
-  results_dir: "/path/to/gender-occup-segregation/data/results"
-  log_dir: "/path/to/gender-occup-segregation/logs"
-  figures_dir: "/path/to/gender-occup-segregation/figures"
+  base_dir: "/gpfs/share/home/2401111059/gender-occup-segregation"
+  raw_data_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/raw_weibo"
+  corpora_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/corpora"
+  models_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/models"
+  results_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/results"
+  log_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/logs"
+  figures_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/figures"
 
 wordlists:
   dir: "wordlists/weat_informal"

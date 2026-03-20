@@ -28,7 +28,8 @@ import pandas as pd
 import fire
 
 from scripts.common.config_loader import (
-    load_config, get_analysis_unit, get_model_name, get_wordlist_dir
+    load_config, get_analysis_unit, get_model_name, get_wordlist_dir,
+    _parse_model_template,
 )
 from scripts.common.embedding_utils import (
     load_model, get_word_vector, compute_centroid, construct_semantic_axis,
@@ -109,10 +110,7 @@ def load_weat_wordlists(config: dict) -> Wordlists:
 def discover_units(config: dict) -> List[Tuple[str, Path]]:
     """Discover available model files and their unit names."""
     models_dir = Path(config["paths"]["models_dir"])
-    template = config.get("embedding", {}).get("model_name_template", "{unit_name}.model")
-    parts = template.split("{unit_name}")
-    prefix = parts[0] if len(parts) > 0 else ""
-    suffix = parts[1] if len(parts) > 1 else ".model"
+    prefix, suffix = _parse_model_template(config)
 
     units = []
     for model_file in sorted(models_dir.glob("*.model")):

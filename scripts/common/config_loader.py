@@ -116,6 +116,21 @@ def get_analysis_unit(config: dict) -> str:
     return config.get("analysis_unit", DATA_SOURCE_DEFAULTS[config["data_source"]])
 
 
+def _parse_model_template(config: dict):
+    """
+    Parse model_name_template into (prefix, suffix).
+
+    Handles all placeholder variants: {unit_name}, {slice_name}, {province}.
+    """
+    import re
+    template = config.get("embedding", {}).get("model_name_template", "{unit_name}.model")
+    # Split on any of the supported placeholders
+    parts = re.split(r"\{(?:unit_name|slice_name|province)\}", template)
+    prefix = parts[0] if len(parts) > 0 else ""
+    suffix = parts[1] if len(parts) > 1 else ".model"
+    return prefix, suffix
+
+
 def get_model_name(unit_name: str, config: dict) -> str:
     """
     Get model filename for a given unit (time slice or province).
