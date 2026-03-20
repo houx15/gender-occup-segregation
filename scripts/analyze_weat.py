@@ -164,7 +164,9 @@ def run_oov_check(units, wordlists, logger):
          "coverage": len(info["found_in"]) / len(units) if units else 0}
         for w, info in word_found.items()
     ]
-    word_df = pd.DataFrame(word_rows).sort_values(["category", "coverage"])
+    word_df = pd.DataFrame(word_rows)
+    if not word_df.empty:
+        word_df = word_df.sort_values(["category", "coverage"])
 
     return coverage_df, word_df
 

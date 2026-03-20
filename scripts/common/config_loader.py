@@ -78,13 +78,19 @@ def _resolve_paths(config: dict) -> None:
         if not path.is_absolute():
             paths[key] = str(base_dir / path)
 
-    # Resolve wordlist paths
+    # Resolve wordlist paths — relative to repo root (cwd), NOT base_dir,
+    # since wordlists are shipped with the repo, not stored in the data directory.
     wordlists = config.get("wordlists", {})
     wl_dir = wordlists.get("dir")
     if wl_dir:
         wl_path = Path(wl_dir)
         if not wl_path.is_absolute():
-            wordlists["dir"] = str(base_dir / wl_path)
+            # Try repo root (cwd) first, fall back to base_dir
+            if (Path.cwd() / wl_path).exists():
+                wordlists["dir"] = str(Path.cwd() / wl_path)
+            elif (base_dir / wl_path).exists():
+                wordlists["dir"] = str(base_dir / wl_path)
+            # else leave as-is (will error later with a clear message)
 
 
 def _set_defaults(config: dict) -> None:
@@ -151,16 +157,15 @@ def get_wordlist_dir(config: dict) -> Path:
     wl_dir = config.get("wordlists", {}).get("dir")
     if wl_dir:
         return Path(wl_dir)
-    # Fallback based on analysis_mode
-    base_dir = Path(config["paths"]["base_dir"])
+    # Fallback based on analysis_mode — look in repo root (cwd)
+    repo_root = Path.cwd()
     analysis_mode = config.get("analysis_mode", "prestige")
     if analysis_mode == "prestige":
-        return base_dir / "wordlists" / "prestige"
+        return repo_root / "wordlists" / "prestige"
     elif analysis_mode == "weat":
-        # Default to formal for newspaper/renminribao, informal for weibo
         data_source = config["data_source"]
         if data_source == "weibo":
-            return base_dir / "wordlists" / "weat_informal"
+            return repo_root / "wordlists" / "weat_informal"
         else:
-            return base_dir / "wordlists" / "weat_formal"
-    return base_dir / "wordlists"
+            return repo_root / "wordlists" / "weat_formal"
+    return repo_root / "wordlists"
