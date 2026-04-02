@@ -148,8 +148,11 @@ def train_all(config: dict, logger, specific_unit=None, group=None, retrain=Fals
         groups = prov_config.get("province_groups", [])
         if 0 <= group < len(groups):
             target_provinces = set(groups[group])
-            units = [u for u in units if u in target_provinces]
-            logger.info(f"Training group {group}: {units}")
+            # Support province-year units (e.g. 北京_2020 matches province 北京)
+            units = [u for u in units
+                     if u in target_provinces
+                     or any(u.startswith(p + "_") for p in target_provinces)]
+            logger.info(f"Training group {group}: provinces={target_provinces}, {len(units)} units")
         else:
             logger.error(f"Invalid group index: {group}")
             return

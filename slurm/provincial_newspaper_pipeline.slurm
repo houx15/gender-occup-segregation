@@ -9,7 +9,12 @@
 #SBATCH --mail-user=2401111059@stu.pku.edu.cn
 
 # Full pipeline for provincial newspaper gender norm analysis.
-# Runs: corpus building -> embedding training -> WEAT analysis -> visualization
+# Runs: corpus building -> embedding training (sequential) -> WEAT analysis -> visualization
+#
+# For PARALLEL training, run steps individually instead:
+#   sbatch slurm/build_corpus_provincial_newspaper.slurm
+#   sbatch slurm/train_provincial_newspaper.slurm   # <-- submits 8-group array job
+#   sbatch slurm/analyze.slurm
 #
 # Usage:
 #   sbatch slurm/provincial_newspaper_pipeline.slurm
@@ -32,7 +37,7 @@ echo "Step 1: Building corpora..."
 python -m scripts.data_prep.build_corpora_provincial_newspaper --config="$CONFIG"
 echo "Step 1 completed at: $(date)"
 
-# Step 2: Train embeddings
+# Step 2: Train embeddings (sequential in this script; use array job for parallel)
 echo ""
 echo "Step 2: Training embeddings..."
 python -m scripts.train_embeddings --config="$CONFIG"
