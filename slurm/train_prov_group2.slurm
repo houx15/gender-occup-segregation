@@ -2,7 +2,6 @@
 #SBATCH --job-name=train_g2
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem=32G
 #SBATCH --cpus-per-task=8
 #SBATCH --time=72:00:00
 #SBATCH --mail-type=end

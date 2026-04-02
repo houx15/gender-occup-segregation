@@ -2,7 +2,6 @@
 #SBATCH --job-name=train_embed
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem=32G
 #SBATCH --cpus-per-task=16
 #SBATCH --time=48:00:00
 #SBATCH --mail-type=end

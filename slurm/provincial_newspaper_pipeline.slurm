@@ -2,7 +2,6 @@
 #SBATCH --job-name=prov_news_pipeline
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem=32G
 #SBATCH --cpus-per-task=8
 #SBATCH --time=96:00:00
 #SBATCH --mail-type=end

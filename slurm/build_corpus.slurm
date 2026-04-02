@@ -2,7 +2,6 @@
 #SBATCH --job-name=build_corpus
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=end
