@@ -1,0 +1,61 @@
+# Provincial Newspaper WEAT Analysis
+# One model per province-year (e.g., 北京_2020, 广东_2023)
+#
+# Usage:
+#   cp config/profiles/provincial_newspaper_server.yml config/config.yml
+#   sbatch slurm/build_corpus_provincial_newspaper.slurm
+#   sbatch slurm/train_provincial_newspaper.slurm
+
+data_source: "newspaper"
+analysis_mode: "weat"
+
+paths:
+  base_dir: "/lustre/home/2401111059/gender-occup-segregation"
+  # Source: provincial newspaper text files (already organized by province)
+  raw_data_dir: "/lustre/home/2401111059/newspaper_data/provincial_newspaper"
+  corpora_dir: "/lustre/home/2401111059/gender-occup-segregation/data/provincial_newspaper/corpora"
+  models_dir: "/lustre/home/2401111059/gender-occup-segregation/data/provincial_newspaper/models"
+  results_dir: "/lustre/home/2401111059/gender-occup-segregation/data/provincial_newspaper/results"
+  log_dir: "/lustre/home/2401111059/gender-occup-segregation/logs/provincial_newspaper"
+  figures_dir: "/lustre/home/2401111059/gender-occup-segregation/figures/provincial_newspaper"
+  # China shapefile for choropleth maps (ADM1_ZH column for province names)
+  shapefile: "/lustre/home/2401111059/youth-analysis/configs/china_shp/chn_admbnda_adm1_ocha_2020.shp"
+
+wordlists:
+  dir: "wordlists/weat_formal"
+  weat_gender_file: "gender_words.json"
+  weat_domestic_work_file: "domestic_work_words.json"
+  weat_leadership_file: "leadership_words.json"
+  weat_stem_file: "stem_words.json"
+
+provincial:
+  # Province groups for parallel SLURM jobs
+  # Each group trains ~3-4 provinces in sequence
+  province_groups:
+    - ["北京", "天津", "河北", "山西"]
+    - ["内蒙古", "辽宁", "吉林", "黑龙江"]
+    - ["上海", "江苏"]
+    - ["福建", "江西", "山东"]
+    - ["河南", "湖北", "湖南"]
+    - ["广西", "海南"]
+    - ["重庆", "四川", "贵州", "云南"]
+    - ["西藏", "陕西", "甘肃", "青海", "宁夏", "新疆"]
+    - ["浙江", "安徽"]
+    - ["广东"]
+  min_documents: 500
+
+embedding:
+  vector_size: 300
+  window: 5
+  min_count: 20
+  sg: 1
+  negative: 10
+  workers: 8
+  epochs: 10
+  seed: 42
+  # Unit names will be like 北京_2020, 广东_2023
+  model_name_template: "model_{unit_name}.kv"
+
+corpus:
+  tokenizer: "jieba"
+  min_words: 5
