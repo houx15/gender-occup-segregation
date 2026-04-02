@@ -13,8 +13,8 @@
 #
 # For PARALLEL training, run steps individually instead:
 #   sbatch slurm/build_corpus_provincial_newspaper.slurm
-#   sbatch slurm/train_provincial_newspaper.slurm   # <-- submits 8-group array job
-#   sbatch slurm/analyze.slurm
+#   bash slurm/submit_all_train.sh              # <-- submits 8 groups in parallel
+#   sbatch slurm/analyze.slurm                  # <-- after all training jobs finish
 #
 # Usage:
 #   sbatch slurm/provincial_newspaper_pipeline.slurm

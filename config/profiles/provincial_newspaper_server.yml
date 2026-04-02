@@ -4,7 +4,8 @@
 # Usage:
 #   cp config/profiles/provincial_newspaper_server.yml config/config.yml
 #   sbatch slurm/build_corpus_provincial_newspaper.slurm
-#   sbatch slurm/train_provincial_newspaper.slurm
+#   bash slurm/submit_all_train.sh            # submits 8 groups in parallel
+#   sbatch slurm/analyze.slurm                # after all training jobs finish
 
 data_source: "newspaper"
 analysis_mode: "weat"

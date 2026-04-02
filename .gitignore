@@ -93,4 +93,4 @@ provincial/data/*
 *.out
 !slurm/*.slurm
 
-*_figures/*
+*_figures/*2020/
