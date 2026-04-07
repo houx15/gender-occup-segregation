@@ -840,14 +840,14 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
 
     source_label = DATA_SOURCE_LABELS.get(data_source, data_source or "")
 
-    # WEAT dimension styling: same solid linestyle, different colors, thick + translucent
+    # WEAT dimension styling: solid lines, markers, thick + translucent
     dim_styles = {
-        "work_family": {"color": "#e74c3c", "label": "WEAT: Work-Family"},
-        "leadership":  {"color": "#2c3e50", "label": "WEAT: Leadership"},
-        "stem":        {"color": "#27ae60", "label": "WEAT: STEM"},
+        "work_family": {"color": "#e74c3c", "marker": "o", "label": "WEAT: Work-Family"},
+        "leadership":  {"color": "#2c3e50", "marker": "s", "label": "WEAT: Leadership"},
+        "stem":        {"color": "#27ae60", "marker": "^", "label": "WEAT: STEM"},
     }
 
-    # Survey dataset styling: same dashed linestyle, different colors, thin + opaque
+    # Survey dataset styling: dashed lines, large markers, bold + opaque
     survey_styles = {
         "ACWF": {"color": "#8e44ad", "marker": "D", "label": "Survey: ACWF"},
         "CFPS": {"color": "#f39c12", "marker": "P", "label": "Survey: CFPS"},
@@ -855,14 +855,14 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
 
-    # Left axis: WEAT Cohen's d — solid lines, thick, semi-transparent
+    # Left axis: WEAT Cohen's d — dashed lines, thick, semi-transparent
     dimensions = weat_df["dimension"].unique()
     for dim in dimensions:
-        style = dim_styles.get(dim, {"color": "gray", "label": dim})
+        style = dim_styles.get(dim, {"color": "gray", "marker": "x", "label": dim})
         dim_data = weat_df[weat_df["dimension"] == dim].sort_values("mid_year")
         ax1.plot(dim_data["mid_year"], dim_data["cohens_d"],
-                 linestyle="-", color=style["color"],
-                 linewidth=4, label=style["label"], alpha=0.5)
+                 linestyle="--", color=style["color"], marker=style["marker"],
+                 linewidth=3, markersize=5, label=style["label"], alpha=0.45)
 
     ax1.axhline(y=0, color="gray", linestyle="--", alpha=0.4)
     ax1.set_xlabel("Year", fontsize=12)
@@ -870,21 +870,24 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
     ax1.tick_params(axis="y", labelcolor="#2c3e50")
     ax1.grid(True, alpha=0.2)
 
-    # Right axis: survey scores — dashed lines, thin, opaque
+    # Right axis: survey scores — dashed lines, large markers, bold
     ax2 = ax1.twinx()
     if survey_df is not None and not survey_df.empty:
         for dataset_name, grp in survey_df.groupby("dataset"):
             style = survey_styles.get(dataset_name,
                                       {"color": "gray", "marker": "o", "label": dataset_name})
             grp = grp.sort_values("year")
+            # Main line + markers — solid, opaque, prominent
             ax2.plot(grp["year"], grp["gender_ideation_mean"],
-                     linestyle="--", color=style["color"], marker=style["marker"],
-                     linewidth=1.5, markersize=8, label=style["label"], alpha=1.0, zorder=10)
+                     linestyle="-", color=style["color"], marker=style["marker"],
+                     linewidth=3, markersize=12, label=style["label"], alpha=1.0,
+                     zorder=10, markeredgecolor="white", markeredgewidth=1.5)
             # Error bars (1 SD)
             if "gender_ideation_sd" in grp.columns:
                 ax2.errorbar(grp["year"], grp["gender_ideation_mean"],
                              yerr=grp["gender_ideation_sd"],
-                             fmt="none", color=style["color"], alpha=0.3, capsize=4)
+                             fmt="none", color=style["color"], alpha=0.5, capsize=5,
+                             linewidth=2, zorder=9)
 
     ax2.set_ylabel("Survey gender ideation\n(0=progressive, 1=traditional)", fontsize=12, color="#8e44ad")
     ax2.tick_params(axis="y", labelcolor="#8e44ad")
