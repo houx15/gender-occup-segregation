@@ -1094,6 +1094,7 @@ def plot_choropleth_aggregated_grid(weat_df, figures_dir, logger):
     all_d = weat["cohens_d"]
     vmax = max(abs(all_d.min()), abs(all_d.max())) if len(all_d) > 0 else 1.0
     vmin = -vmax
+    norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
 
     fig, axes = plt.subplots(3, 4, figsize=(20, 16))
     fig.suptitle(
@@ -1173,10 +1174,12 @@ def plot_choropleth_aggregated_grid(weat_df, figures_dir, logger):
             fontsize=12, fontweight="bold",
         )
 
-    # Shared colorbar
+    # Shared colorbar — use a dedicated axis on the right to avoid stealing
+    # space from the map subplots (which pushes the colorbar into the middle)
+    cbar_ax = fig.add_axes([0.93, 0.15, 0.015, 0.70])  # [left, bottom, width, height]
     sm = plt.cm.ScalarMappable(cmap="RdBu_r", norm=norm)
     sm.set_array([])
-    cbar = fig.colorbar(sm, ax=axes, shrink=0.5, pad=0.02, aspect=30)
+    cbar = fig.colorbar(sm, cax=cbar_ax)
     cbar.set_label("Cohen's d", fontsize=10)
 
     plt.tight_layout(rect=[0, 0, 0.92, 0.96])
