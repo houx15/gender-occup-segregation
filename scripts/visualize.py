@@ -802,5 +802,215 @@ def main(config="config/config.yml", mode=None):
     logger.info("=" * 80)
 
 
+# =============================================================================
+# Composite: WEAT + Survey overlay
+# =============================================================================
+
+def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_source=None):
+    """Plot WEAT Cohen's d trends with survey gender ideation overlaid.
+
+    Creates one figure per data source with:
+      - Left y-axis: 3 WEAT dimension lines (work-family, leadership, STEM)
+      - Right y-axis: survey scores (ACWF + CFPS) as scatter points
+
+    Args:
+        weat_df: WEAT results with columns [unit, dimension, cohens_d]
+        survey_df: Survey data with columns [year, dataset, gender_ideation_mean]
+        figures_dir: Output directory
+        logger: Logger instance
+        data_source: e.g. "ngram", "renminribao"
+    """
+    if weat_df.empty:
+        return
+
+    # Parse time slices to midpoint years
+    def parse_midpoint(unit_name):
+        try:
+            parts = str(unit_name).split("_")
+            return (int(parts[0]) + int(parts[1])) / 2
+        except (ValueError, IndexError):
+            return None
+
+    weat_df = weat_df.copy()
+    weat_df["mid_year"] = weat_df["unit"].apply(parse_midpoint)
+    weat_df = weat_df.dropna(subset=["mid_year"]).sort_values("mid_year")
+
+    if len(weat_df) < 3:
+        return
+
+    source_label = DATA_SOURCE_LABELS.get(data_source, data_source or "")
+
+    # WEAT dimension styling
+    dim_styles = {
+        "work_family": {"color": "#e74c3c", "marker": "o", "ls": "-",  "label": "Work-Family"},
+        "leadership":  {"color": "#2c3e50", "marker": "s", "ls": "--", "label": "Leadership"},
+        "stem":        {"color": "#27ae60", "marker": "^", "ls": "-.", "label": "STEM"},
+    }
+
+    # Survey dataset styling
+    survey_styles = {
+        "ACWF": {"color": "#8e44ad", "marker": "D", "size": 100, "label": "ACWF Survey"},
+        "CFPS": {"color": "#f39c12", "marker": "P", "size": 100, "label": "CFPS Survey"},
+    }
+
+    fig, ax1 = plt.subplots(figsize=(14, 7))
+
+    # Left axis: WEAT Cohen's d
+    dimensions = weat_df["dimension"].unique()
+    for dim in dimensions:
+        style = dim_styles.get(dim, {"color": "gray", "marker": "x", "ls": "-", "label": dim})
+        dim_data = weat_df[weat_df["dimension"] == dim].sort_values("mid_year")
+        ax1.plot(dim_data["mid_year"], dim_data["cohens_d"],
+                 marker=style["marker"], linestyle=style["ls"], color=style["color"],
+                 linewidth=2, markersize=6, label=style["label"], alpha=0.9)
+
+    ax1.axhline(y=0, color="gray", linestyle="--", alpha=0.4)
+    ax1.set_xlabel("Year", fontsize=12)
+    ax1.set_ylabel("WEAT Cohen's d (text embedding)", fontsize=12, color="#2c3e50")
+    ax1.tick_params(axis="y", labelcolor="#2c3e50")
+    ax1.grid(True, alpha=0.2)
+
+    # Right axis: survey scores
+    ax2 = ax1.twinx()
+    if survey_df is not None and not survey_df.empty:
+        for dataset_name, grp in survey_df.groupby("dataset"):
+            style = survey_styles.get(dataset_name,
+                                      {"color": "gray", "marker": "o", "size": 80, "label": dataset_name})
+            ax2.scatter(grp["year"], grp["gender_ideation_mean"],
+                        color=style["color"], marker=style["marker"], s=style["size"],
+                        label=style["label"], zorder=10, edgecolors="white", linewidths=1.5)
+            # Error bars (1 SD)
+            if "gender_ideation_sd" in grp.columns:
+                ax2.errorbar(grp["year"], grp["gender_ideation_mean"],
+                             yerr=grp["gender_ideation_sd"],
+                             fmt="none", color=style["color"], alpha=0.4, capsize=4)
+
+    ax2.set_ylabel("Survey gender ideation\n(0=progressive, 1=traditional)", fontsize=12, color="#8e44ad")
+    ax2.tick_params(axis="y", labelcolor="#8e44ad")
+    ax2.set_ylim(0, 1)
+
+    # Combined legend
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper right", fontsize=9,
+               framealpha=0.9)
+
+    title = "Gender Norms: Text Embeddings vs. Survey Attitudes"
+    if source_label:
+        title += f"  [Text: {source_label}]"
+    ax1.set_title(title, fontsize=14, fontweight="bold")
+
+    path = get_figure_path("weat_survey_composite", figures_dir)
+    plt.savefig(path, format="pdf", bbox_inches="tight")
+    plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
+def main_composite(weat_results_csv, data_source=None, survey_csv="data/surveys/processed/gender_ideation_by_year.csv",
+                   figures_dir=None):
+    """Standalone entry point for composite WEAT + survey figure.
+
+    Usage:
+        python -m scripts.visualize main_composite \\
+            --weat_results_csv=results_weat/weat_results.csv \\
+            --data_source=ngram \\
+            --figures_dir=figures_weat
+    """
+    import logging
+    logger = logging.getLogger("composite")
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    weat_df = pd.read_csv(weat_results_csv)
+    survey_df = pd.read_csv(survey_csv) if Path(survey_csv).exists() else pd.DataFrame()
+
+    if figures_dir is None:
+        figures_dir = Path(weat_results_csv).parent / "figures"
+    figures_dir = Path(figures_dir)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    sns.set_style("whitegrid")
+    plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_source=data_source)
+
+
+def main(config="config/config.yml", mode=None):
+    """
+    Create visualizations for analysis results.
+
+    Args:
+        config: Path to configuration file
+        mode: "prestige", "weat", or None (auto-detect from config)
+    """
+    config_data = load_config(config)
+    logger = setup_logging(Path(config_data["paths"]["log_dir"]), "visualize.log")
+
+    logger.info("=" * 80)
+    logger.info("Starting visualization")
+    logger.info("=" * 80)
+
+    sns.set_style("whitegrid")
+    figures_dir = Path(config_data["paths"].get("figures_dir", config_data["paths"]["results_dir"] + "/figures"))
+    results_dir = Path(config_data["paths"]["results_dir"])
+    analysis_mode = mode or config_data.get("analysis_mode", "prestige")
+
+    if analysis_mode == "prestige":
+        # Load prestige results
+        for fname in ("occupation_scores_by_slice.parquet", "occupation_scores_by_province.parquet"):
+            fpath = results_dir / fname
+            if fpath.exists():
+                df = pd.read_parquet(fpath)
+                logger.info(f"Loaded {fpath}: {len(df)} rows")
+                if "time_slice" in df.columns:
+                    plot_prestige_by_gender_over_time(df, figures_dir, logger)
+                    plot_gender_prestige_correlation(df, figures_dir, logger)
+                    plot_prestige_by_category(df, config_data, figures_dir, logger)
+                break
+
+    elif analysis_mode == "weat":
+        weat_path = results_dir / "weat_results.csv"
+        if weat_path.exists():
+            weat_df = pd.read_csv(weat_path)
+            logger.info(f"Loaded {weat_path}: {len(weat_df)} rows")
+
+            # Check if data is in province-year format
+            if not weat_df.empty and "unit" in weat_df.columns:
+                sample_units = weat_df["unit"].unique()[:5]
+                parsed = [_parse_province_year(u) for u in sample_units]
+                is_province_year = sum(1 for p, y in parsed if p is not None) >= len(sample_units) // 2 + 1
+            else:
+                is_province_year = False
+
+            ds = config_data.get("data_source")
+            plot_weat_heatmap(weat_df, figures_dir, logger, data_source=ds)
+            plot_weat_rankings(weat_df, figures_dir, logger, data_source=ds)
+            plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=ds)
+
+            if is_province_year:
+                # For province-year data, use per-year choropleth and year comparison
+                plot_weat_choropleth_by_year(weat_df, figures_dir, logger)
+                plot_weat_year_comparison(weat_df, figures_dir, logger)
+            else:
+                # For other formats, use the general fallback
+                plot_weat_choropleth(weat_df, figures_dir, logger)
+
+            # Composite: WEAT + survey overlay (for longitudinal data)
+            if not is_province_year:
+                survey_path = Path("data/surveys/processed/gender_ideation_by_year.csv")
+                if survey_path.exists():
+                    survey_df = pd.read_csv(survey_path)
+                    logger.info(f"Loaded survey data: {len(survey_df)} rows")
+                    plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_source=ds)
+
+        # Projection boxplots (diagnostic)
+        proj_path = results_dir / "word_projections.csv"
+        if proj_path.exists():
+            proj_df = pd.read_csv(proj_path)
+            logger.info(f"Loaded {proj_path}: {len(proj_df)} rows")
+            plot_weat_projection_boxplots(proj_df, figures_dir, logger)
+
+    logger.info("=" * 80)
+    logger.info("Visualization completed!")
+    logger.info("=" * 80)
+
+
 if __name__ == "__main__":
-    fire.Fire(main)
+    fire.Fire({"main": main, "composite": main_composite})
