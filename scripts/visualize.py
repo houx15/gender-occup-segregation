@@ -851,7 +851,7 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
     survey_styles = {
         "ACWF": {"color": "#8e44ad", "marker": "D", "label": "Survey: ACWF"},
         "CFPS": {"color": "#f39c12", "marker": "P", "label": "Survey: CFPS"},
-        "CGSS": {"color": "#e67e22", "marker": "X", "label": "Survey: CGSS"},
+        "CGSS": {"color": "#16a085", "marker": "X", "label": "Survey: CGSS"},
     }
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
@@ -891,12 +891,6 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
                      linestyle="-", color=style["color"], marker=style["marker"],
                      linewidth=3, markersize=12, label=style["label"], alpha=1.0,
                      zorder=10, markeredgecolor="white", markeredgewidth=1.5)
-            # Error bars (1 SD)
-            if "gender_ideation_sd" in grp.columns:
-                ax2.errorbar(grp["year"], grp["gender_ideation_mean"],
-                             yerr=grp["gender_ideation_sd"],
-                             fmt="none", color=style["color"], alpha=0.5, capsize=5,
-                             linewidth=2, zorder=9)
 
     ax2.set_ylabel("Survey gender ideation", fontsize=12, color="#8e44ad")
     ax2.tick_params(axis="y", labelcolor="#8e44ad")
