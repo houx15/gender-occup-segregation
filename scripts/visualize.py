@@ -26,6 +26,14 @@ from scripts.common.logging_utils import setup_logging
 plt.rcParams["font.sans-serif"] = ["Noto Sans CJK SC", "SimHei", "DejaVu Sans", "Arial Unicode MS"]
 plt.rcParams["axes.unicode_minus"] = False
 
+# Human-readable data source labels for figure titles
+DATA_SOURCE_LABELS = {
+    "ngram": "Google Ngram",
+    "renminribao": "People's Daily",
+    "weibo": "Weibo",
+    "newspaper": "Provincial Newspapers",
+}
+
 
 def get_figure_path(filename: str, figures_dir: Path) -> Path:
     """Get dated figure path."""
@@ -201,7 +209,7 @@ def plot_prestige_by_category(df, config, figures_dir, logger):
 # WEAT mode plots
 # =============================================================================
 
-def plot_weat_heatmap(weat_df, figures_dir, logger):
+def plot_weat_heatmap(weat_df, figures_dir, logger, data_source=None):
     """Plot WEAT Cohen's d heatmap across units and dimensions."""
     if weat_df.empty:
         return
@@ -210,9 +218,12 @@ def plot_weat_heatmap(weat_df, figures_dir, logger):
     if pivot.empty:
         return
 
+    source_label = DATA_SOURCE_LABELS.get(data_source, "")
+    source_suffix = f"  [Data: {source_label}]" if source_label else ""
+
     fig, ax = plt.subplots(figsize=(10, max(6, len(pivot) * 0.4)))
     sns.heatmap(pivot, annot=True, fmt=".2f", cmap="RdBu_r", center=0, ax=ax)
-    ax.set_title("WEAT Cohen's d by Unit and Dimension")
+    ax.set_title(f"WEAT Cohen's d by Unit and Dimension{source_suffix}")
     plt.tight_layout()
     path = get_figure_path("weat_cohens_d_heatmap", figures_dir)
     plt.savefig(path, format="pdf")
@@ -220,10 +231,13 @@ def plot_weat_heatmap(weat_df, figures_dir, logger):
     logger.info(f"  Saved: {path.name}")
 
 
-def plot_weat_rankings(weat_df, figures_dir, logger):
+def plot_weat_rankings(weat_df, figures_dir, logger, data_source=None):
     """Plot Cohen's d rankings for each dimension."""
     if weat_df.empty:
         return
+
+    source_label = DATA_SOURCE_LABELS.get(data_source, "")
+    source_suffix = f"  [Data: {source_label}]" if source_label else ""
 
     dimensions = weat_df["dimension"].unique()
     fig, axes = plt.subplots(1, len(dimensions), figsize=(6 * len(dimensions), max(6, len(weat_df["unit"].unique()) * 0.3)))
@@ -235,7 +249,7 @@ def plot_weat_rankings(weat_df, figures_dir, logger):
         colors = ["red" if d > 0 else "blue" for d in dim_data["cohens_d"]]
         ax.barh(dim_data["unit"], dim_data["cohens_d"], color=colors, alpha=0.7)
         ax.axvline(x=0, color="black", linewidth=0.5)
-        ax.set_title(f"{dim} (Cohen's d)")
+        ax.set_title(f"{dim} (Cohen's d){source_suffix}")
         ax.set_xlabel("Cohen's d")
 
     plt.tight_layout()
@@ -245,7 +259,7 @@ def plot_weat_rankings(weat_df, figures_dir, logger):
     logger.info(f"  Saved: {path.name}")
 
 
-def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
+def plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=None):
     """Plot Cohen's d trend over time for longitudinal WEAT analysis.
 
     Units are expected to be time slices like '1940_1949'. If units don't
@@ -272,6 +286,10 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
     weat_df = weat_df.dropna(subset=["start_year"]).sort_values("start_year")
     dimensions = weat_df["dimension"].unique()
 
+    # Human-readable data source label for titles
+    source_label = DATA_SOURCE_LABELS.get(data_source, data_source or "")
+    source_suffix = f"  [Data: {source_label}]" if source_label else ""
+
     # Plot 1: All dimensions on one plot
     fig, ax = plt.subplots(figsize=(12, 6))
     markers = ["o", "s", "^", "D", "v"]
@@ -283,10 +301,9 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
     ax.axhline(y=0, color="gray", linestyle="--", alpha=0.5)
     ax.set_xlabel("Start Year of Time Slice")
     ax.set_ylabel("Cohen's d")
-    ax.set_title("WEAT Gender Norm Indices Over Time")
+    ax.set_title(f"WEAT Gender Norm Indices Over Time{source_suffix}")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    plt.tight_layout()
     path = get_figure_path("weat_longitudinal_trend", figures_dir)
     plt.savefig(path, format="pdf")
     plt.close()
@@ -297,17 +314,17 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
         "work_family": {
             "title": "Work-Family Gender Norm Over Time",
             "group1": "Family words", "group2": "Work words",
-            "interpret": "Positive = family more female-associated",
+            "interpret": "Positive d = family more female-associated",
         },
         "leadership": {
             "title": "Leadership Gender Norm Over Time",
             "group1": "Non-leadership words", "group2": "Leadership words",
-            "interpret": "Positive = leadership more male-associated",
+            "interpret": "Positive d = leadership more male-associated",
         },
         "stem": {
             "title": "STEM Gender Norm Over Time",
             "group1": "Non-STEM words", "group2": "STEM words",
-            "interpret": "Positive = STEM more male-associated",
+            "interpret": "Positive d = STEM more male-associated",
         },
     }
 
@@ -329,7 +346,8 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
             ax1.axhline(y=threshold, color="lightcoral", linestyle=":", alpha=0.3)
             ax1.axhline(y=-threshold, color="lightblue", linestyle=":", alpha=0.3)
         ax1.set_ylabel("Cohen's d", fontsize=12)
-        ax1.set_title(labels.get("title", f"{dim.replace('_', ' ').title()} Over Time"),
+        base_title = labels.get("title", f"{dim.replace('_', ' ').title()} Over Time")
+        ax1.set_title(f"{base_title}{source_suffix}",
                       fontsize=14, fontweight="bold")
         ax1.grid(True, alpha=0.3)
 
@@ -350,6 +368,12 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger):
                      linewidth=1.5, color="#3498db", markersize=6, label=g2_label, alpha=0.8)
             ax2.axhline(y=0, color="gray", linestyle="--", alpha=0.3)
             ax2.set_ylabel("Mean projection\n(cosine sim)", fontsize=10)
+            # Indicate axis direction: positive = female, negative = male
+            # (axis is constructed as female - male)
+            ax2.text(1.01, 0.95, "Female +", transform=ax2.transAxes,
+                     fontsize=8, color="#e74c3c", verticalalignment="top", fontstyle="italic")
+            ax2.text(1.01, 0.05, "Male +", transform=ax2.transAxes,
+                     fontsize=8, color="#3498db", verticalalignment="bottom", fontstyle="italic")
             ax2.legend(fontsize=9, loc="best")
             ax2.grid(True, alpha=0.3)
         else:
@@ -753,9 +777,10 @@ def main(config="config/config.yml", mode=None):
             else:
                 is_province_year = False
 
-            plot_weat_heatmap(weat_df, figures_dir, logger)
-            plot_weat_rankings(weat_df, figures_dir, logger)
-            plot_weat_longitudinal_trend(weat_df, figures_dir, logger)
+            ds = config_data.get("data_source")
+            plot_weat_heatmap(weat_df, figures_dir, logger, data_source=ds)
+            plot_weat_rankings(weat_df, figures_dir, logger, data_source=ds)
+            plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=ds)
 
             if is_province_year:
                 # For province-year data, use per-year choropleth and year comparison
