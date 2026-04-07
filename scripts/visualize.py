@@ -31,8 +31,15 @@ import matplotlib.font_manager as _fm
 _CJK_FONT_PATH = "/usr/share/fonts/google-droid/DroidSansFallback.ttf"
 _fm.fontManager.addfont(_CJK_FONT_PATH)
 _CJK_FAMILY = _fm.FontProperties(fname=_CJK_FONT_PATH).get_name()
-plt.rcParams["font.sans-serif"] = [_CJK_FAMILY] + plt.rcParams["font.sans-serif"]
-plt.rcParams["axes.unicode_minus"] = False
+
+
+def _apply_cjk_font():
+    """Apply CJK font to rcParams. Call after sns.set_style() which resets fonts."""
+    plt.rcParams["font.sans-serif"] = [_CJK_FAMILY] + plt.rcParams["font.sans-serif"]
+    plt.rcParams["axes.unicode_minus"] = False
+
+
+_apply_cjk_font()
 
 # Human-readable data source labels for figure titles
 DATA_SOURCE_LABELS = {
@@ -834,6 +841,7 @@ def main(config="config/config.yml", mode=None):
     logger.info("=" * 80)
 
     sns.set_style("whitegrid")
+    _apply_cjk_font()
     figures_dir = Path(config_data["paths"].get("figures_dir", config_data["paths"]["results_dir"] + "/figures"))
     results_dir = Path(config_data["paths"]["results_dir"])
     analysis_mode = mode or config_data.get("analysis_mode", "prestige")
@@ -1032,6 +1040,7 @@ def main_composite(weat_results_csv, data_source=None, survey_csv="data/surveys/
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     sns.set_style("whitegrid")
+    _apply_cjk_font()
     plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_source=data_source)
 
 
@@ -1498,6 +1507,7 @@ def main(config="config/config.yml", mode=None):
     logger.info("=" * 80)
 
     sns.set_style("whitegrid")
+    _apply_cjk_font()
     figures_dir = Path(config_data["paths"].get("figures_dir", config_data["paths"]["results_dir"] + "/figures"))
     results_dir = Path(config_data["paths"]["results_dir"])
     analysis_mode = mode or config_data.get("analysis_mode", "prestige")
