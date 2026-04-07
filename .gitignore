@@ -84,6 +84,10 @@ provincial/data/*
 
 # Exception: Keep directory structure, example config, and profile configs
 !data/.gitkeep
+!data/surveys/
+!data/surveys/processed/
+!data/surveys/processed/*
+!data/surveys/survey-config.md
 !logs/.gitkeep
 !config/config.example.yml
 !config/profiles/
