@@ -17,13 +17,21 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import fire
+import matplotlib.colors as mcolors
+from scipy.stats import pearsonr
 
 from scripts.common.config_loader import load_config, get_analysis_unit, get_wordlist_dir
 from scripts.common.logging_utils import setup_logging
 
 
-# Chinese font setup
-plt.rcParams["font.sans-serif"] = ["Noto Sans CJK SC", "SimHei", "DejaVu Sans", "Arial Unicode MS"]
+# Chinese font setup — DroidSansFallback.ttf is a single .ttf (not .ttc),
+# so matplotlib resolves it reliably.  Noto Sans CJK .ttc files fail to
+# register their sub-font names in the font cache, causing tofu/boxes.
+import matplotlib.font_manager as _fm
+_CJK_FONT_PATH = "/usr/share/fonts/google-droid/DroidSansFallback.ttf"
+_fm.fontManager.addfont(_CJK_FONT_PATH)
+_CJK_FAMILY = _fm.FontProperties(fname=_CJK_FONT_PATH).get_name()
+plt.rcParams["font.sans-serif"] = [_CJK_FAMILY] + plt.rcParams["font.sans-serif"]
 plt.rcParams["axes.unicode_minus"] = False
 
 # Human-readable data source labels for figure titles
@@ -436,6 +444,21 @@ SHORT_TO_FULL_PROVINCE = {
     "甘肃": "甘肃省", "青海": "青海省", "宁夏": "宁夏回族自治区",
     "新疆": "新疆维吾尔自治区",
 }
+# Reverse lookup: full shapefile name → short display name
+FULL_TO_SHORT_PROVINCE = {v: k for k, v in SHORT_TO_FULL_PROVINCE.items()}
+
+# English province name → Chinese short name (for merging with survey data)
+ENGLISH_TO_CHINESE_PROVINCE = {
+    "Beijing": "北京", "Tianjin": "天津", "Hebei": "河北", "Shanxi": "山西",
+    "Inner Mongolia": "内蒙古", "Liaoning": "辽宁", "Jilin": "吉林",
+    "Heilongjiang": "黑龙江", "Shanghai": "上海", "Jiangsu": "江苏",
+    "Zhejiang": "浙江", "Anhui": "安徽", "Fujian": "福建", "Jiangxi": "江西",
+    "Shandong": "山东", "Henan": "河南", "Hubei": "湖北", "Hunan": "湖南",
+    "Guangdong": "广东", "Guangxi": "广西", "Hainan": "海南", "Chongqing": "重庆",
+    "Sichuan": "四川", "Guizhou": "贵州", "Yunnan": "云南", "Tibet": "西藏",
+    "Shaanxi": "陕西", "Gansu": "甘肃", "Qinghai": "青海", "Ningxia": "宁夏",
+    "Xinjiang": "新疆",
+}
 
 
 def _match_province_in_shapefile(dim_data, china):
@@ -451,13 +474,44 @@ def _match_province_in_shapefile(dim_data, china):
 
 
 def _plot_single_choropleth(merged, title, filename, figures_dir, logger):
-    """Render and save a single choropleth map."""
+    """Render and save a single choropleth map with province name labels."""
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
     merged.plot(
         column="cohens_d", ax=ax, legend=True, cmap="RdBu_r",
         missing_kwds={"color": "lightgrey", "label": "No data"},
         edgecolor="black", linewidth=0.3,
     )
+
+    # Label each province with its short name at the polygon centroid
+    label_col = None
+    for col in ["ADM1_ZH", "NAME", "name", "省", "name_zh"]:
+        if col in merged.columns:
+            label_col = col
+            break
+
+    if label_col is not None:
+        for _, row in merged.iterrows():
+            geom = row.geometry
+            if geom is None or geom.is_empty:
+                continue
+            full_name = row[label_col]
+            short_name = FULL_TO_SHORT_PROVINCE.get(full_name, full_name)
+            # Use representative_point (guaranteed inside polygon)
+            try:
+                pt = geom.representative_point()
+            except Exception:
+                continue
+            # Provinces with data get dark label; no-data provinces get lighter
+            has_data = pd.notna(row.get("cohens_d"))
+            ax.annotate(
+                short_name,
+                xy=(pt.x, pt.y),
+                ha="center", va="center",
+                fontsize=5.5,
+                color="black" if has_data else "gray",
+                alpha=0.85 if has_data else 0.45,
+            )
+
     ax.set_title(title)
     ax.set_axis_off()
     plt.tight_layout()
@@ -481,6 +535,40 @@ def _parse_province_year(unit_name):
         except ValueError:
             pass
     return None, None
+
+
+def _merge_weat_survey(weat_df, survey_csv_path):
+    """Merge WEAT results with survey data on (province, year).
+
+    Parses WEAT units (e.g. '北京_2020'), maps survey English province names
+    to Chinese via ENGLISH_TO_CHINESE_PROVINCE, and performs an inner merge
+    so only rows with both WEAT and survey data remain.
+
+    Returns:
+        DataFrame with columns: province_short, year, dimension, cohens_d,
+        dataset, gender_ideation_mean, etc.
+    """
+    # Parse WEAT units into province_short and year
+    weat = weat_df.copy()
+    weat[["province_short", "year"]] = weat["unit"].apply(
+        lambda u: pd.Series(_parse_province_year(u))
+    )
+    weat = weat.dropna(subset=["province_short"])
+    weat["year"] = weat["year"].astype(int)
+
+    # Load and map survey province names to Chinese
+    survey = pd.read_csv(survey_csv_path)
+    survey["province_short"] = survey["province"].map(ENGLISH_TO_CHINESE_PROVINCE)
+    survey = survey.dropna(subset=["province_short"])
+
+    # Inner merge: keep only rows where BOTH data sources exist
+    merged = weat.merge(
+        survey,
+        on=["province_short", "year"],
+        how="inner",
+        suffixes=("_weat", "_survey"),
+    )
+    return merged
 
 
 def plot_weat_choropleth(weat_df, figures_dir, logger):
@@ -947,6 +1035,453 @@ def main_composite(weat_results_csv, data_source=None, survey_csv="data/surveys/
     plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_source=data_source)
 
 
+# =============================================================================
+# Provincial survey correlation visualizations
+# =============================================================================
+
+
+def plot_choropleth_aggregated_grid(weat_df, figures_dir, logger):
+    """Plot 3×4 grid of choropleth maps: 3 WEAT dimensions × 4 years.
+
+    Creates a single figure with 12 small maps showing provincial Cohen's d
+    values, with a shared diverging colorbar centered at 0.
+    """
+    try:
+        import geopandas as gpd
+    except ImportError:
+        logger.info("  Skipping choropleth grid (geopandas not installed)")
+        return
+
+    if weat_df.empty:
+        return
+
+    shapefile = Path(
+        "/lustre/home/2401111059/youth-analysis/configs/china_shp/"
+        "chn_admbnda_adm1_ocha_2020.shp"
+    )
+    if not shapefile.exists():
+        logger.info("  Skipping choropleth grid (shapefile not found)")
+        return
+
+    china = gpd.read_file(shapefile)
+
+    # Parse WEAT units into province_short and year
+    weat = weat_df.copy()
+    weat[["province_short", "year"]] = weat["unit"].apply(
+        lambda u: pd.Series(_parse_province_year(u))
+    )
+    weat = weat.dropna(subset=["province_short"])
+    weat["year"] = weat["year"].astype(int)
+
+    dimensions = ["work_family", "leadership", "stem"]
+    years = [2018, 2020, 2022, 2024]
+    dim_labels = {
+        "work_family": "Work-Family",
+        "leadership": "Leadership",
+        "stem": "STEM",
+    }
+
+    # Compute global symmetric color range
+    all_d = weat["cohens_d"]
+    vmax = max(abs(all_d.min()), abs(all_d.max())) if len(all_d) > 0 else 1.0
+    vmin = -vmax
+
+    fig, axes = plt.subplots(3, 4, figsize=(20, 16))
+    fig.suptitle(
+        "Gender Norm Index by Province (Provincial Newspapers)",
+        fontsize=16, fontweight="bold", y=0.98,
+    )
+
+    for row_idx, dim in enumerate(dimensions):
+        for col_idx, year in enumerate(years):
+            ax = axes[row_idx, col_idx]
+            dim_year = weat[(weat["dimension"] == dim) & (weat["year"] == year)]
+            if dim_year.empty:
+                ax.set_axis_off()
+                ax.set_title("n=0", fontsize=9)
+                continue
+
+            plot_data = dim_year[["province_short", "cohens_d"]].copy()
+            plot_data["province"] = plot_data["province_short"].map(
+                SHORT_TO_FULL_PROVINCE
+            )
+            plot_data = plot_data.dropna(subset=["province"])
+
+            merged = _match_province_in_shapefile(plot_data, china)
+            n_data = merged["cohens_d"].notna().sum()
+
+            norm = mcolors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+            merged.plot(
+                column="cohens_d", ax=ax, cmap="RdBu_r", norm=norm,
+                missing_kwds={"color": "lightgrey"},
+                edgecolor="black", linewidth=0.15,
+            )
+
+            # Province name labels (same logic as _plot_single_choropleth)
+            label_col = None
+            for col in ["ADM1_ZH", "NAME", "name", "省", "name_zh"]:
+                if col in merged.columns:
+                    label_col = col
+                    break
+            if label_col is not None:
+                for _, row in merged.iterrows():
+                    geom = row.geometry
+                    if geom is None or geom.is_empty:
+                        continue
+                    full_name = row[label_col]
+                    short_name = FULL_TO_SHORT_PROVINCE.get(full_name, full_name)
+                    try:
+                        pt = geom.representative_point()
+                    except Exception:
+                        continue
+                    has_data = pd.notna(row.get("cohens_d"))
+                    ax.annotate(
+                        short_name,
+                        xy=(pt.x, pt.y),
+                        ha="center", va="center",
+                        fontsize=4,
+                        color="black" if has_data else "gray",
+                        alpha=0.7 if has_data else 0.3,
+                    )
+
+            ax.set_axis_off()
+            ax.set_title(f"n={n_data}", fontsize=9)
+
+        # Row label on left edge
+        axes[row_idx, 0].text(
+            -0.05, 0.5, dim_labels[dim],
+            transform=axes[row_idx, 0].transAxes,
+            rotation=90, va="center", ha="right",
+            fontsize=12, fontweight="bold",
+        )
+
+    # Column labels on top
+    for col_idx, year in enumerate(years):
+        axes[0, col_idx].text(
+            0.5, 1.12, str(year),
+            transform=axes[0, col_idx].transAxes,
+            ha="center", va="bottom",
+            fontsize=12, fontweight="bold",
+        )
+
+    # Shared colorbar
+    sm = plt.cm.ScalarMappable(cmap="RdBu_r", norm=norm)
+    sm.set_array([])
+    cbar = fig.colorbar(sm, ax=axes, shrink=0.5, pad=0.02, aspect=30)
+    cbar.set_label("Cohen's d", fontsize=10)
+
+    plt.tight_layout(rect=[0, 0, 0.92, 0.96])
+    path = get_figure_path("choropleth_aggregated_grid", figures_dir)
+    plt.savefig(path, format="pdf")
+    plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
+def plot_survey_embedding_scatter(weat_df, survey_csv_path, figures_dir, logger):
+    """Plot correlation scatter plots between WEAT embeddings and survey data.
+
+    Creates three PDFs:
+      - CFPS-only scatter
+      - CGSS-only scatter
+      - Combined scatter (both datasets, different markers)
+    Each with 3 subplots (one per WEAT dimension).
+    """
+    merged = _merge_weat_survey(weat_df, survey_csv_path)
+    if merged.empty:
+        logger.info("  Skipping scatter plots: no merged data")
+        return
+
+    # Only use CGSS and CFPS
+    merged = merged[merged["dataset"].isin(["CGSS", "CFPS"])]
+    if merged.empty:
+        logger.info("  Skipping scatter plots: no CGSS/CFPS data after merge")
+        return
+
+    dim_labels = {
+        "work_family": "Work-Family",
+        "leadership": "Leadership",
+        "stem": "STEM",
+    }
+    dimensions = ["work_family", "leadership", "stem"]
+
+    # Time period bins and colors
+    period_bins = [(2007, 2009), (2010, 2014), (2015, 2019), (2020, 2024)]
+    period_colors = ["#1b9e77", "#d95f02", "#7570b3", "#e7298a"]
+    period_labels = ["2007–2009", "2010–2014", "2015–2019", "2020–2024"]
+
+    def _assign_period(year):
+        for i, (lo, hi) in enumerate(period_bins):
+            if lo <= year <= hi:
+                return i
+        return None
+
+    merged["period"] = merged["year"].apply(_assign_period)
+
+    survey_markers = {"CFPS": "P", "CGSS": "X"}
+
+    def _make_scatter(data, filename_suffix):
+        """Generate one scatter figure with 1×3 subplots."""
+        fig, axes = plt.subplots(1, 3, figsize=(18, 5.5), sharey=False)
+
+        for idx, dim in enumerate(dimensions):
+            ax = axes[idx]
+            dim_data = data[
+                data["dimension"] == dim
+            ].dropna(subset=["gender_ideation_mean", "cohens_d"])
+
+            if dim_data.empty:
+                ax.set_title(dim_labels[dim], fontsize=12)
+                ax.set_xlabel("Survey gender ideation")
+                ax.set_ylabel("WEAT Cohen's d")
+                continue
+
+            # Plot points colored by time period
+            for p_idx, (lo, hi) in enumerate(period_bins):
+                mask = dim_data["period"] == p_idx
+                subset = dim_data[mask]
+                if subset.empty:
+                    continue
+
+                if filename_suffix == "combined":
+                    # Different markers per dataset
+                    for ds, marker in survey_markers.items():
+                        ds_sub = subset[subset["dataset"] == ds]
+                        if ds_sub.empty:
+                            continue
+                        ax.scatter(
+                            ds_sub["gender_ideation_mean"],
+                            ds_sub["cohens_d"],
+                            c=period_colors[p_idx],
+                            marker=marker,
+                            s=80, alpha=0.8,
+                            edgecolors="white", linewidths=0.5,
+                            zorder=5,
+                        )
+                else:
+                    ax.scatter(
+                        subset["gender_ideation_mean"],
+                        subset["cohens_d"],
+                        c=period_colors[p_idx],
+                        marker="o",
+                        s=80, alpha=0.8,
+                        edgecolors="white", linewidths=0.5,
+                        label=period_labels[p_idx],
+                        zorder=5,
+                    )
+
+            # OLS regression line across all points
+            x = dim_data["gender_ideation_mean"].values
+            y = dim_data["cohens_d"].values
+            mask_valid = ~(np.isnan(x) | np.isnan(y))
+            if mask_valid.sum() >= 3:
+                x_valid, y_valid = x[mask_valid], y[mask_valid]
+                slope, intercept = np.polyfit(x_valid, y_valid, 1)
+                x_line = np.linspace(x_valid.min(), x_valid.max(), 100)
+                ax.plot(
+                    x_line, slope * x_line + intercept,
+                    "--", color="gray", linewidth=1.5, zorder=3,
+                )
+                r, p = pearsonr(x_valid, y_valid)
+                eq = f"y = {slope:.2f}x + {intercept:.2f}"
+                p_str = f"p = {p:.3f}" if p >= 0.001 else "p < 0.001"
+                ax.text(
+                    0.05, 0.95,
+                    f"r = {r:.3f}\n{p_str}\n{eq}",
+                    transform=ax.transAxes, fontsize=9,
+                    verticalalignment="top",
+                    bbox=dict(
+                        boxstyle="round,pad=0.3",
+                        facecolor="white", alpha=0.8,
+                    ),
+                )
+
+            ax.set_title(dim_labels[dim], fontsize=12, fontweight="bold")
+            ax.set_xlabel("Survey gender ideation", fontsize=10)
+            if idx == 0:
+                ax.set_ylabel("WEAT Cohen's d", fontsize=10)
+            ax.grid(True, alpha=0.3)
+
+        # Build legend: period colors + dataset markers
+        # Period color legend
+        from matplotlib.lines import Line2D
+        period_handles = [
+            Line2D([0], [0], marker="o", color="w",
+                   markerfacecolor=period_colors[i], markersize=8,
+                   label=period_labels[i])
+            for i in range(len(period_bins))
+        ]
+
+        if filename_suffix == "combined":
+            ds_handles = [
+                Line2D([0], [0], marker=survey_markers[ds], color="w",
+                       markerfacecolor="gray", markersize=8,
+                       label=f"Survey: {ds}")
+                for ds in ["CFPS", "CGSS"]
+            ]
+            all_handles = period_handles + ds_handles
+        else:
+            all_handles = period_handles
+
+        axes[0].legend(
+            handles=all_handles, fontsize=7,
+            loc="lower right", framealpha=0.9,
+        )
+
+        plt.tight_layout()
+        path = get_figure_path(f"scatter_{filename_suffix}", figures_dir)
+        plt.savefig(path, format="pdf")
+        plt.close()
+        logger.info(f"  Saved: {path.name}")
+
+    # CFPS only
+    cfps_data = merged[merged["dataset"] == "CFPS"]
+    if not cfps_data.empty:
+        _make_scatter(cfps_data, "cfps")
+    else:
+        logger.info("  Skipping CFPS scatter: no data")
+
+    # CGSS only
+    cgss_data = merged[merged["dataset"] == "CGSS"]
+    if not cgss_data.empty:
+        _make_scatter(cgss_data, "cgss")
+    else:
+        logger.info("  Skipping CGSS scatter: no data")
+
+    # Combined
+    _make_scatter(merged, "combined")
+
+
+def plot_province_longitudinal_trends(weat_df, survey_csv_path, figures_dir, logger):
+    """Plot longitudinal trends for 4 provinces with dual WEAT/survey axes.
+
+    Creates a 3×4 grid (3 dimensions × 4 provinces) with dual y-axes
+    showing WEAT Cohen's d (left) and survey gender ideation (right).
+    """
+    merged = _merge_weat_survey(weat_df, survey_csv_path)
+
+    # Parse all WEAT data for province-year lines (not just merged with survey)
+    weat = weat_df.copy()
+    weat[["province_short", "year"]] = weat["unit"].apply(
+        lambda u: pd.Series(_parse_province_year(u))
+    )
+    weat = weat.dropna(subset=["province_short"])
+    weat["year"] = weat["year"].astype(int)
+
+    target_provinces = {
+        "河南": "Henan",
+        "浙江": "Zhejiang",
+        "内蒙古": "Inner Mongolia",
+        "辽宁": "Liaoning",
+    }
+
+    dimensions = ["work_family", "leadership", "stem"]
+    dim_labels = {
+        "work_family": "Work-Family",
+        "leadership": "Leadership",
+        "stem": "STEM",
+    }
+    survey_styles = {
+        "CFPS": {"color": "#f39c12", "marker": "P", "label": "CFPS Survey"},
+        "CGSS": {"color": "#16a085", "marker": "X", "label": "CGSS Survey"},
+    }
+
+    fig, axes = plt.subplots(3, 4, figsize=(20, 12))
+    fig.suptitle(
+        "Province Longitudinal Trends: WEAT vs. Survey",
+        fontsize=14, fontweight="bold", y=0.98,
+    )
+
+    for row_idx, dim in enumerate(dimensions):
+        weat_dim = weat[weat["dimension"] == dim]
+        merged_dim = (
+            merged[merged["dimension"] == dim] if not merged.empty
+            else pd.DataFrame()
+        )
+
+        for col_idx, (prov_cn, _prov_en) in enumerate(
+            target_provinces.items()
+        ):
+            ax1 = axes[row_idx, col_idx]
+
+            # WEAT embedding line (left axis)
+            prov_weat = weat_dim[
+                weat_dim["province_short"] == prov_cn
+            ].sort_values("year")
+            if not prov_weat.empty:
+                ax1.plot(
+                    prov_weat["year"], prov_weat["cohens_d"], "o-",
+                    color="#2c3e50", markersize=5, linewidth=1.5,
+                    label="WEAT Cohen's d", zorder=5,
+                )
+                ax1.fill_between(
+                    prov_weat["year"], 0, prov_weat["cohens_d"],
+                    alpha=0.1, color="#2c3e50",
+                )
+
+            ax1.axhline(y=0, color="gray", linestyle="--", alpha=0.3)
+            ax1.set_ylabel("Cohen's d", fontsize=9, color="#2c3e50")
+            ax1.tick_params(axis="y", labelcolor="#2c3e50", labelsize=8)
+            ax1.tick_params(axis="x", labelsize=8)
+            ax1.grid(True, alpha=0.2)
+
+            # Survey data (right axis)
+            ax2 = ax1.twinx()
+            prov_survey = (
+                merged_dim[merged_dim["province_short"] == prov_cn]
+                if not merged_dim.empty
+                else pd.DataFrame()
+            )
+            if not prov_survey.empty:
+                for ds_name, grp in prov_survey.groupby("dataset"):
+                    if ds_name not in survey_styles:
+                        continue
+                    style = survey_styles[ds_name]
+                    grp = grp.sort_values("year")
+                    ax2.plot(
+                        grp["year"], grp["gender_ideation_mean"],
+                        linestyle="--", color=style["color"],
+                        marker=style["marker"], markersize=7,
+                        linewidth=1.5, label=style["label"],
+                        alpha=0.9, zorder=4,
+                    )
+
+            ax2.set_ylim(0, 1)
+            ax2.set_ylabel("Survey ideation", fontsize=9, color="#8e44ad")
+            ax2.tick_params(axis="y", labelcolor="#8e44ad", labelsize=8)
+
+            # Province title on top row only
+            if row_idx == 0:
+                ax1.set_title(prov_cn, fontsize=12, fontweight="bold")
+
+            # Legend on first subplot only
+            if row_idx == 0 and col_idx == 0:
+                lines1, labels1 = ax1.get_legend_handles_labels()
+                lines2, labels2 = ax2.get_legend_handles_labels()
+                ax1.legend(
+                    lines1 + lines2, labels1 + labels2,
+                    fontsize=7, loc="upper right", framealpha=0.8,
+                )
+
+            # Row labels on left edge
+            if col_idx == 0:
+                ax1.text(
+                    -0.15, 0.5, dim_labels[dim],
+                    transform=ax1.transAxes,
+                    rotation=90, va="center", ha="right",
+                    fontsize=10, fontweight="bold",
+                )
+
+            # X label on bottom row only
+            if row_idx == 2:
+                ax1.set_xlabel("Year", fontsize=9)
+
+    plt.tight_layout(rect=[0.03, 0, 1, 0.96])
+    path = get_figure_path("province_longitudinal_trends", figures_dir)
+    plt.savefig(path, format="pdf")
+    plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
 def main(config="config/config.yml", mode=None):
     """
     Create visualizations for analysis results.
@@ -1014,6 +1549,16 @@ def main(config="config/config.yml", mode=None):
                     survey_df = pd.read_csv(survey_path)
                     logger.info(f"Loaded survey data: {len(survey_df)} rows")
                     plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_source=ds)
+
+            # Provincial survey correlation analysis
+            if is_province_year:
+                survey_csv = Path("data/surveys/processed/gender_ideation_by_province_year.csv")
+                if survey_csv.exists():
+                    survey_df = pd.read_csv(survey_csv)
+                    logger.info(f"Loaded provincial survey data: {len(survey_df)} rows")
+                    plot_choropleth_aggregated_grid(weat_df, figures_dir, logger)
+                    plot_survey_embedding_scatter(weat_df, str(survey_csv), figures_dir, logger)
+                    plot_province_longitudinal_trends(weat_df, str(survey_csv), figures_dir, logger)
 
         # Projection boxplots (diagnostic)
         proj_path = results_dir / "word_projections.csv"

@@ -29,13 +29,13 @@ except ImportError:
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
 
-# Chinese font setup
-plt.rcParams["font.sans-serif"] = ["SimHei", "DejaVu Sans"]
+# Chinese font setup — same fix as visualize.py
+import matplotlib.font_manager as _fm
+_CJK_FONT_PATH = "/usr/share/fonts/google-droid/DroidSansFallback.ttf"
+_fm.fontManager.addfont(_CJK_FONT_PATH)
+_CJK_FAMILY = _fm.FontProperties(fname=_CJK_FONT_PATH).get_name()
+plt.rcParams["font.sans-serif"] = [_CJK_FAMILY] + plt.rcParams["font.sans-serif"]
 plt.rcParams["axes.unicode_minus"] = False
-try:
-    plt.rcParams["font.sans-serif"] = ["Arial Unicode MS", "SimHei", "STHeiti", "Microsoft YaHei"]
-except Exception:
-    pass
 
 PROVINCE_NAME_MAPPING = {
     "北京": "北京市", "天津": "天津市", "上海": "上海市", "重庆": "重庆市",
