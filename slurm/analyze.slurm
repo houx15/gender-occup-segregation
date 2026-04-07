@@ -29,7 +29,7 @@ case $ANALYSIS_MODE in
 esac
 
 # Visualization
-python -m scripts.visualize --config="$CONFIG"
+python -m scripts.visualize main --config="$CONFIG"
 
 # Correlation (provincial + weat only)
 if [ "$ANALYSIS_MODE" = "weat" ]; then

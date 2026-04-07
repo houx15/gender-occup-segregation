@@ -162,7 +162,7 @@ echo ""
 
 # ── Step 5: Visualization ─────────────────────────────────────────
 echo "Step 5: Creating visualizations..."
-python -m scripts.visualize --config="$CONFIG"
+python -m scripts.visualize main --config="$CONFIG"
 echo ""
 
 # ── Step 6: Correlation (provincial + weat only) ──────────────────

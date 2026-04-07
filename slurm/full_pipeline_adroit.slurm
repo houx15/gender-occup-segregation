@@ -19,5 +19,5 @@ CONFIG="${1:-config/config.yml}"
 
 echo "Running full pipeline with config=$CONFIG"
 
-python -m scripts.analyze_weat --config=config/config.yml
-python -m scripts.visualize --config=config/config.yml
+python -m scripts.analyze_weat --config="$CONFIG"
+python -m scripts.visualize main --config="$CONFIG"

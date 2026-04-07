@@ -51,7 +51,7 @@ echo "Step 3 completed at: $(date)"
 # Step 4: Visualization
 echo ""
 echo "Step 4: Creating visualizations..."
-python -m scripts.visualize --config="$CONFIG"
+python -m scripts.visualize main --config="$CONFIG"
 echo "Step 4 completed at: $(date)"
 
 echo ""

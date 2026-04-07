@@ -17,4 +17,4 @@ conda activate opinion
 CONFIG="${1:-config/config.yml}"
 
 echo "Visualizing with config=$CONFIG"
-python -m scripts.visualize --config="$CONFIG"
+python -m scripts.visualize main --config="$CONFIG"
