@@ -871,6 +871,14 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
     ax1.tick_params(axis="y", labelcolor="#2c3e50")
     ax1.grid(True, alpha=0.2)
 
+    # Direction annotations for left y-axis
+    ax1.text(-0.01, 0.97, "More gender-\nstereotyped", transform=ax1.transAxes,
+             fontsize=8, color="#2c3e50", alpha=0.7, verticalalignment="top",
+             horizontalalignment="right", fontstyle="italic")
+    ax1.text(-0.01, 0.03, "Less gender-\nstereotyped", transform=ax1.transAxes,
+             fontsize=8, color="#2c3e50", alpha=0.7, verticalalignment="bottom",
+             horizontalalignment="right", fontstyle="italic")
+
     # Right axis: survey scores — dashed lines, large markers, bold
     ax2 = ax1.twinx()
     if survey_df is not None and not survey_df.empty:
@@ -890,9 +898,17 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
                              fmt="none", color=style["color"], alpha=0.5, capsize=5,
                              linewidth=2, zorder=9)
 
-    ax2.set_ylabel("Survey gender ideation\n(0=progressive, 1=traditional)", fontsize=12, color="#8e44ad")
+    ax2.set_ylabel("Survey gender ideation", fontsize=12, color="#8e44ad")
     ax2.tick_params(axis="y", labelcolor="#8e44ad")
     ax2.set_ylim(0, 1)
+
+    # Direction annotations for right y-axis
+    ax2.text(1.01, 0.97, "More\ntraditional", transform=ax2.transAxes,
+             fontsize=8, color="#8e44ad", alpha=0.7, verticalalignment="top",
+             horizontalalignment="left", fontstyle="italic")
+    ax2.text(1.01, 0.03, "More\nprogressive", transform=ax2.transAxes,
+             fontsize=8, color="#8e44ad", alpha=0.7, verticalalignment="bottom",
+             horizontalalignment="left", fontstyle="italic")
 
     # Combined legend
     lines1, labels1 = ax1.get_legend_handles_labels()
