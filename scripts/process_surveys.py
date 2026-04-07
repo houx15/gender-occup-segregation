@@ -36,6 +36,21 @@ PROVINCE_CODES = {
 }
 
 
+# Chinese province name -> code mapping (for CGSS 2018 which uses names)
+PROVINCE_NAME_TO_CODE = {
+    "北京市": 11, "天津市": 12, "河北省": 13, "山西省": 14, "内蒙古自治区": 15,
+    "辽宁省": 21, "吉林省": 22, "黑龙江省": 23,
+    "上海市": 31, "江苏省": 32, "浙江省": 33, "安徽省": 34, "福建省": 35,
+    "江西省": 36, "山东省": 37,
+    "河南省": 41, "湖北省": 42, "湖南省": 43, "广东省": 44, "广西壮族自治区": 45,
+    "海南省": 46,
+    "重庆市": 50, "四川省": 51, "贵州省": 52, "云南省": 53, "西藏自治区": 54,
+    "陕西省": 61, "甘肃省": 62, "青海省": 63, "宁夏回族自治区": 64, "新疆维吾尔自治区": 65,
+    # Aliases
+    "深圳市": 44,  # Shenzhen → Guangdong
+}
+
+
 def _normalize(series, orig_min, orig_max):
     """Normalize score to [0, 1] range."""
     return (series - orig_min) / (orig_max - orig_min)
@@ -257,6 +272,78 @@ def process_cfps_2020():
     )
 
 
+# ─── CGSS ─────────────────────────────────────────────────────────────────────
+
+def process_cgss():
+    """Process all CGSS waves (2010-2023).
+
+    Items a421-a425 (or A42_1-A42_5 in 2021):
+        1=strongly disagree, 5=strongly agree.
+
+    Traditional items: a421-a424 (agree=traditional)
+    Progressive item:  a425 (agree=progressive, reverse code)
+
+    Missing codes: -8, -3, -2, -1, 98, 99 → NaN
+    Province: s41 (numeric code) in most years, 'provinces' (Chinese name) in 2018.
+    """
+    # Column name mapping per year
+    year_configs = {
+        2010: {"items_trad": ["a421", "a422", "a423", "a424"], "items_prog": ["a425"], "prov": "s41"},
+        2012: {"items_trad": ["a421", "a422", "a423", "a424"], "items_prog": ["a425"], "prov": "s41"},
+        2013: {"items_trad": ["a421", "a422", "a423", "a424"], "items_prog": ["a425"], "prov": "s41"},
+        2015: {"items_trad": ["a421", "a422", "a423", "a424"], "items_prog": ["a425"], "prov": "s41"},
+        2017: {"items_trad": ["a421", "a422", "a423", "a424"], "items_prog": ["a425"], "prov": "s41"},
+        2018: {"items_trad": ["a421", "a422", "a423", "a424"], "items_prog": ["a425"], "prov": "provinces"},
+        2021: {"items_trad": ["A42_1", "A42_2", "A42_3", "A42_4"], "items_prog": ["A42_5"], "prov": "s41"},
+        2023: {"items_trad": ["a421", "a422", "a423", "a424"], "items_prog": ["a425"], "prov": "s41"},
+    }
+
+    all_dfs = []
+    for year, cfg in year_configs.items():
+        path = Path(f"data/surveys/CGSS/{year}/CGSS{year}.dta")
+        if not path.exists():
+            continue
+
+        items = cfg["items_trad"] + cfg["items_prog"]
+        prov_col = cfg["prov"]
+        df = pd.read_stata(path, convert_categoricals=False, columns=[prov_col] + items)
+
+        # Clean missing values: valid range is 1-5
+        for col in items:
+            df.loc[~df[col].between(1, 5), col] = np.nan
+
+        # Traditional items: 5=agree=traditional → keep: (x-1)/4
+        for col in cfg["items_trad"]:
+            df[col] = _normalize(df[col], 1, 5)
+
+        # Progressive item: 5=agree=progressive → reverse: (6-x-1)/4
+        for col in cfg["items_prog"]:
+            df[col] = _normalize(6 - df[col], 1, 5)
+
+        df["gender_ideation"] = df[items].mean(axis=1, skipna=True)
+        df["n_valid_items"] = df[items].notna().sum(axis=1)
+        df["year"] = year
+        df["dataset"] = "CGSS"
+
+        # Province code
+        if prov_col == "provinces":
+            # 2018 uses Chinese province names
+            df["province_code"] = df[prov_col].map(PROVINCE_NAME_TO_CODE)
+        else:
+            df["province_code"] = df[prov_col]
+
+        # Drop invalid/missing province codes
+        df = df[df["province_code"].notna() & (df["province_code"] > 0)]
+        df["province_code"] = df["province_code"].astype(int)
+
+        df = df[["province_code", "year", "dataset", "gender_ideation", "n_valid_items"]].dropna(
+            subset=["gender_ideation"]
+        )
+        all_dfs.append(df)
+
+    return pd.concat(all_dfs, ignore_index=True) if all_dfs else pd.DataFrame()
+
+
 # ─── Aggregation ──────────────────────────────────────────────────────────────
 
 def aggregate(individual_df):
@@ -304,6 +391,7 @@ def main(output_dir="data/surveys/processed"):
         ("ACWF 2010", process_acwf_2010),
         ("CFPS 2014", process_cfps_2014),
         ("CFPS 2020", process_cfps_2020),
+        ("CGSS 2010-2023", process_cgss),
     ]
 
     all_individual = []

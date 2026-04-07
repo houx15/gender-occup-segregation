@@ -847,10 +847,11 @@ def plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_sou
         "stem":        {"color": "#27ae60", "marker": "^", "label": "WEAT: STEM"},
     }
 
-    # Survey dataset styling: dashed lines, large markers, bold + opaque
+    # Survey dataset styling: solid lines, large markers, bold + opaque
     survey_styles = {
         "ACWF": {"color": "#8e44ad", "marker": "D", "label": "Survey: ACWF"},
         "CFPS": {"color": "#f39c12", "marker": "P", "label": "Survey: CFPS"},
+        "CGSS": {"color": "#e67e22", "marker": "X", "label": "Survey: CGSS"},
     }
 
     fig, ax1 = plt.subplots(figsize=(14, 7))
