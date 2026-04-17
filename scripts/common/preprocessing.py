@@ -169,3 +169,43 @@ def clean_text(
         return " ".join(tokens)
 
     raise ValueError(f"Unsupported language for clean_text: {language!r}")
+
+
+# ---------------------------------------------------------------------------
+# One-shot preprocess pipeline
+# ---------------------------------------------------------------------------
+
+def preprocess(
+    text: str,
+    *,
+    language: str,
+    tokenizer: str,
+    stopwords_key: str | None,
+    lowercase: bool,
+    min_words: int,
+    cleaner_opts: dict | None = None,
+) -> list[str] | None:
+    """
+    Clean → tokenize → filter stopwords → length-check.
+
+    Returns the filtered token list, or None when the document should be
+    dropped (too short, or empty after cleaning).
+    """
+    opts = dict(cleaner_opts or {})
+    opts["lowercase"] = lowercase
+    cleaned = clean_text(text, language, **opts)
+    if not cleaned:
+        return None
+
+    tokens = tokenize(cleaned, tokenizer)
+    if not tokens:
+        return None
+
+    if stopwords_key:
+        sw = get_stopwords(stopwords_key)
+        tokens = [t for t in tokens if t and t.strip() and t not in sw]
+
+    if len(tokens) < min_words:
+        return None
+
+    return tokens

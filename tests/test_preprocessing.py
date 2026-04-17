@@ -7,6 +7,7 @@ from scripts.common.preprocessing import (
     TOKENIZERS,
     clean_text,
     get_stopwords,
+    preprocess,
     tokenize,
 )
 
@@ -123,3 +124,74 @@ def test_clean_text_en_mentions_and_parens():
 def test_clean_text_unsupported_language_raises():
     with pytest.raises(ValueError, match="Unsupported language"):
         clean_text("hello", "fr")
+
+
+def test_preprocess_zh_rmrb_sample():
+    pytest.importorskip("jieba")
+    text = "本报讯 新华社北京电 我爱北京天安门 http://x.com"
+    out = preprocess(
+        text,
+        language="zh",
+        tokenizer="jieba",
+        stopwords_key="zh_newspaper",
+        lowercase=False,
+        min_words=2,
+    )
+    assert out is not None
+    assert "本报" not in out  # stopword
+    assert "北京" in out
+    assert all(len(w) > 0 for w in out)
+
+
+def test_preprocess_min_words_filters_short_docs():
+    pytest.importorskip("jieba")
+    out = preprocess(
+        "你",
+        language="zh",
+        tokenizer="jieba",
+        stopwords_key="zh_default",
+        lowercase=False,
+        min_words=5,
+    )
+    assert out is None
+
+
+def test_preprocess_en_cleans_and_lowercases():
+    tokens = preprocess(
+        "Hello WORLD http://x.com",
+        language="en",
+        tokenizer="whitespace",
+        stopwords_key="en_default",
+        lowercase=True,
+        min_words=1,
+    )
+    assert tokens is not None
+    assert "hello" in tokens
+    assert "world" in tokens
+    assert not any(t.startswith("http") for t in tokens)
+
+
+def test_preprocess_no_stopword_filter_when_key_none():
+    tokens = preprocess(
+        "hello world",
+        language="en",
+        tokenizer="whitespace",
+        stopwords_key=None,
+        lowercase=True,
+        min_words=1,
+    )
+    assert tokens == ["hello", "world"]
+
+
+def test_preprocess_passes_cleaner_opts():
+    tokens = preprocess(
+        "hi (aside) end",
+        language="en",
+        tokenizer="whitespace",
+        stopwords_key=None,
+        lowercase=True,
+        min_words=1,
+        cleaner_opts={"strip_parens": True},
+    )
+    assert tokens is not None
+    assert "aside" not in tokens
