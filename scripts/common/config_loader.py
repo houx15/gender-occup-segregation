@@ -142,11 +142,8 @@ def _set_defaults(config: dict) -> None:
         config["analysis_unit"] = DATA_SOURCE_DEFAULTS[data_source]
 
     if "analysis_mode" not in config:
-        if data_source in ("ngram", "renminribao", "coha"):
-            if data_source == "coha":
-                config["analysis_mode"] = "weat"
-            elif data_source in ("ngram", "renminribao"):
-                config["analysis_mode"] = "prestige"
+        if data_source in ("ngram", "renminribao"):
+            config["analysis_mode"] = "prestige"
         else:
             config["analysis_mode"] = "weat"
 
