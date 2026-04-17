@@ -28,11 +28,12 @@ cp config/config.example.yml config/config.yml
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Run (auto-skips stages with existing output)
-./run_pipeline.sh
+# 3. Download raw data on the login node (Slurm compute nodes have no internet)
+python -m scripts.data_prep.download_ngrams --config config/config.yml
 
-# Or use Slurm
+# 4. Submit corpus building + training + analysis to Slurm
 sbatch slurm/full_pipeline.slurm
+# (run_pipeline.sh auto-skips the download step when raw files already exist)
 ```
 
 ## Repository Structure
@@ -280,19 +281,29 @@ correlation:
 
 ## Running on Slurm
 
+Slurm compute nodes have no internet access. Always download raw data on a login node first:
+
 ```bash
-# Single stage
+# Login node — download raw n-gram or COHA files
+python -m scripts.data_prep.download_ngrams --config config/config.yml   # Chinese/English ngram
+python -m scripts.data_prep.download_coha   --config config/profiles/coha_server.yml  # COHA
+```
+
+Then submit the rest to Slurm (`run_pipeline.sh` auto-skips the download step when files exist):
+
+```bash
+# Full pipeline (corpus → train → analyze → visualize)
+sbatch slurm/full_pipeline.slurm
+sbatch slurm/full_pipeline_en.slurm config/profiles/ngram_en_server.yml  # English
+
+# Individual stages
 sbatch slurm/build_corpus.slurm
 sbatch slurm/train.slurm
 sbatch slurm/analyze.slurm
 
-# Full pipeline
-sbatch slurm/full_pipeline.slurm
-
 # Train specific province group (parallel jobs)
 sbatch slurm/train.slurm config/config.yml --group=0
 sbatch slurm/train.slurm config/config.yml --group=1
-# ...
 ```
 
 Edit the `#SBATCH` headers in the slurm scripts to adjust resources and email.
@@ -346,14 +357,21 @@ English wordlists live under `wordlists/en/` (subdirectories `prestige/` and `we
 python -c "import nltk; nltk.download('punkt_tab'); nltk.download('stopwords')"
 ```
 
-**Quick start (English Ngram on a server):**
+**Quick start (English Ngram on Princeton Slurm):**
+
+Slurm compute nodes have no internet access. Download on a login node first, then submit the rest as a batch job.
 
 ```bash
-# Copy the ready-made server profile
-cp config/profiles/ngram_en_server.yml config/config.yml
-# Edit paths.base_dir and related paths for your server, then:
-./run_pipeline.sh --config config/profiles/ngram_en_server.yml
+# Step 1 — login node: download raw n-gram files (~300 GB)
+python -m scripts.data_prep.download_ngrams --config config/profiles/ngram_en_server.yml
+
+# Step 2 — submit corpus building + training + analysis to Slurm
+sbatch slurm/full_pipeline_en.slurm config/profiles/ngram_en_server.yml
 ```
+
+`run_pipeline.sh` auto-skips the download step when the raw files already exist, so the Slurm job picks up cleanly from corpus building.
+
+For COHA, replace step 1 with `download_coha.py` (URLs from your corpusdata.org signup email) and use `config/profiles/coha_server.yml`.
 
 The English builder lowercases all tokens, strips punctuation (apostrophes are preserved), and writes one `corpus_{index}.txt` per ngram file into the standard `corpora_dir/{start}_{end}/` slice directories — the same layout consumed by `train_embeddings.py`.
 
