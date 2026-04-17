@@ -191,8 +191,8 @@ def preprocess(
     Returns the filtered token list, or None when the document should be
     dropped (too short, or empty after cleaning).
     """
-    opts = dict(cleaner_opts or {})
-    opts["lowercase"] = lowercase
+    opts = {k: v for k, v in (cleaner_opts or {}).items() if k != "language"}
+    opts["lowercase"] = lowercase  # explicit param always wins over cleaner_opts
     cleaned = clean_text(text, language, **opts)
     if not cleaned:
         return None
@@ -203,6 +203,7 @@ def preprocess(
 
     if stopwords_key:
         sw = get_stopwords(stopwords_key)
+        # `t and t.strip()` guards against jieba emitting whitespace tokens on raw input
         tokens = [t for t in tokens if t and t.strip() and t not in sw]
 
     if len(tokens) < min_words:
