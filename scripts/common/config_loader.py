@@ -122,28 +122,40 @@ def _resolve_paths(config: dict) -> None:
             # else leave as-is (will error later with a clear message)
 
 
+# Defaults by (language, data_source) — order: (tokenizer, stopwords, lowercase)
+_CORPUS_DEFAULTS = {
+    ("zh", "ngram"):       ("whitespace", None,             False),
+    ("zh", "renminribao"): ("jieba",      "zh_default",     False),
+    ("zh", "weibo"):       ("jieba",      "zh_weibo",       False),
+    ("zh", "newspaper"):   ("jieba",      "zh_newspaper",   False),
+    ("en", "ngram"):       ("whitespace", None,             True),
+    ("en", "coha"):        ("whitespace", None,             True),
+}
+
+
 def _set_defaults(config: dict) -> None:
-    """Set default values based on data_source."""
+    """Set default values based on (language, data_source)."""
+    language = config["language"]
     data_source = config["data_source"]
 
-    # Default analysis unit
     if "analysis_unit" not in config:
         config["analysis_unit"] = DATA_SOURCE_DEFAULTS[data_source]
 
-    # Default analysis mode
     if "analysis_mode" not in config:
-        if data_source in ("ngram", "renminribao"):
-            config["analysis_mode"] = "prestige"
+        if data_source in ("ngram", "renminribao", "coha"):
+            if data_source == "coha":
+                config["analysis_mode"] = "weat"
+            elif data_source in ("ngram", "renminribao"):
+                config["analysis_mode"] = "prestige"
         else:
             config["analysis_mode"] = "weat"
 
-    # Default tokenizer
     corpus = config.setdefault("corpus", {})
-    if "tokenizer" not in corpus:
-        if data_source == "ngram":
-            corpus["tokenizer"] = "whitespace"
-        else:
-            corpus["tokenizer"] = "jieba"
+    tok_default, sw_default, lc_default = _CORPUS_DEFAULTS[(language, data_source)]
+    corpus.setdefault("tokenizer", tok_default)
+    if sw_default is not None:
+        corpus.setdefault("stopwords", sw_default)
+    corpus.setdefault("lowercase", lc_default)
 
 
 def get_analysis_unit(config: dict) -> str:
@@ -182,19 +194,21 @@ def get_model_name(unit_name: str, config: dict) -> str:
 
 
 def get_wordlist_dir(config: dict) -> Path:
-    """Get the resolved wordlist directory path."""
+    """Get the resolved wordlist directory path (language-aware)."""
     wl_dir = config.get("wordlists", {}).get("dir")
     if wl_dir:
         return Path(wl_dir)
-    # Fallback based on analysis_mode — look in repo root (cwd)
+
+    # Fallback based on (language, analysis_mode, data_source)
     repo_root = Path.cwd()
+    language = config["language"]
     analysis_mode = config.get("analysis_mode", "prestige")
+
     if analysis_mode == "prestige":
-        return repo_root / "wordlists" / "prestige"
-    elif analysis_mode == "weat":
-        data_source = config["data_source"]
-        if data_source == "weibo":
-            return repo_root / "wordlists" / "weat_informal"
-        else:
-            return repo_root / "wordlists" / "weat_formal"
-    return repo_root / "wordlists"
+        return repo_root / "wordlists" / language / "prestige"
+
+    # WEAT
+    data_source = config["data_source"]
+    if data_source == "weibo":
+        return repo_root / "wordlists" / language / "weat_informal"
+    return repo_root / "wordlists" / language / "weat_formal"

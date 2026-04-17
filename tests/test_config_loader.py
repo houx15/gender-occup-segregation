@@ -87,3 +87,60 @@ def test_en_coha_accepted(tmp_path):
     config = load_config(str(path))
     assert config["data_source"] == "coha"
     assert config["language"] == "en"
+
+
+def test_zh_ngram_defaults(tmp_path):
+    path = _write_config(tmp_path, {"language": "zh"})
+    config = load_config(str(path))
+    assert config["corpus"]["tokenizer"] == "whitespace"
+    assert config["corpus"]["lowercase"] is False
+    assert config["corpus"].get("stopwords") in (None, "")
+
+
+def test_zh_renminribao_defaults(tmp_path):
+    path = _write_config(tmp_path, {"language": "zh", "data_source": "renminribao"})
+    config = load_config(str(path))
+    assert config["corpus"]["tokenizer"] == "jieba"
+    assert config["corpus"]["stopwords"] == "zh_default"
+    assert config["corpus"]["lowercase"] is False
+
+
+def test_en_ngram_defaults(tmp_path):
+    path = _write_config(tmp_path, {"language": "en"})
+    config = load_config(str(path))
+    assert config["corpus"]["tokenizer"] == "whitespace"
+    assert config["corpus"]["lowercase"] is True
+
+
+def test_explicit_stopwords_override_default(tmp_path):
+    path = _write_config(
+        tmp_path,
+        {"language": "zh", "data_source": "weibo", "corpus": {"stopwords": "zh_default"}},
+    )
+    config = load_config(str(path))
+    assert config["corpus"]["stopwords"] == "zh_default"  # override, not zh_weibo
+
+
+def test_wordlist_dir_under_language_subdir(tmp_path):
+    from scripts.common.config_loader import get_wordlist_dir
+
+    path = _write_config(tmp_path, {"language": "zh"})
+    config = load_config(str(path))
+    wl = get_wordlist_dir(config)
+    # For ngram + prestige default mode, expect wordlists/zh/prestige
+    assert str(wl).endswith("wordlists/zh/prestige")
+
+
+def test_wordlist_dir_explicit_wins(tmp_path, monkeypatch):
+    from scripts.common.config_loader import get_wordlist_dir
+
+    path = _write_config(
+        tmp_path,
+        {"language": "en", "wordlists": {"dir": "wordlists/en/weat_formal"}},
+    )
+    # Create dir so loader resolves it
+    (tmp_path / "wordlists" / "en" / "weat_formal").mkdir(parents=True)
+    monkeypatch.chdir(tmp_path)
+    config = load_config(str(path))
+    wl = get_wordlist_dir(config)
+    assert str(wl).endswith("wordlists/en/weat_formal")
