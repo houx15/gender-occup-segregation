@@ -13,10 +13,8 @@ Usage:
     python -m scripts.data_prep.build_corpora_rmrb --config=config/config.yml --slice=1940_1949
 """
 
-import os
 import re
 from pathlib import Path
-from typing import List, Tuple
 from collections import defaultdict
 
 import fire
