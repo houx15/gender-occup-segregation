@@ -11,27 +11,14 @@ Usage:
 
 import json
 import os
-import re
 from pathlib import Path
-from collections import defaultdict
 from typing import Dict
 
 import fire
-import jieba
 
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
-
-
-STOPWORDS = {
-    "的", "是", "了", "在", "有", "和", "就", "不", "人", "都",
-    "一", "一个", "上", "也", "很", "到", "说", "要", "去", "你",
-    "会", "着", "没有", "看", "好", "自己", "这", "那", "我", "他",
-    "她", "我们", "你们", "他们", "她们", "什么", "怎么", "这个", "那个",
-    "可以", "因为", "所以", "但是", "而且", "或者", "如果", "虽然",
-    "已经", "可能", "应该", "需要", "通过", "进行", "提出", "以及",
-    "本报", "记者", "报道", "日前", "近日", "今天", "昨天", "今年",
-}
+from scripts.common.preprocessing import preprocess
 
 
 def load_mapping(mapping_file: str) -> Dict[str, str]:
@@ -45,31 +32,6 @@ def load_mapping(mapping_file: str) -> Dict[str, str]:
         if province not in ('全国', '行业', '未知'):
             mapping[newspaper] = province
     return mapping
-
-
-def clean_text(text: str) -> str:
-    if not text:
-        return ""
-    text = str(text)
-    text = re.sub(r'[　\s]+', ' ', text)
-    text = re.sub(r'http[s]?://\S+', '', text)
-    text = re.sub(r'www\.\S+', '', text)
-    text = re.sub(r'\[.*?\]', '', text)
-    text = re.sub(r'（[^）]*）', '', text)
-    text = re.sub(r'[^\u4e00-\u9fa5a-zA-Z0-9\s]', '', text)
-    return text.strip()
-
-
-def segment_text(text: str) -> list:
-    if not text or len(text) < 20:
-        return []
-    words = jieba.lcut(text, HMM=True)
-    filtered = [
-        w.strip() for w in words
-        if w.strip() and w.strip() not in STOPWORDS
-        and len(w.strip()) > 1 and not w.strip().isdigit()
-    ]
-    return filtered
 
 
 class ProvinceCorpusWriter:
@@ -172,17 +134,21 @@ def build_corpus(config, logger, max_files=None, min_article_length=50,
                             stats['skipped'] += 1
                             continue
                         province = mapping[source]
-                        cleaned = clean_text(text)
-                        if len(cleaned) < min_article_length:
-                            stats['skipped'] += 1
-                            continue
-                        words = segment_text(cleaned)
-                        if len(words) < 5:
+                        tokens = preprocess(
+                            text,
+                            language=config["language"],
+                            tokenizer=config["corpus"]["tokenizer"],
+                            stopwords_key=config["corpus"].get("stopwords"),
+                            lowercase=config["corpus"].get("lowercase", False),
+                            min_words=config.get("corpus", {}).get("min_words", 5),
+                            cleaner_opts={"strip_parens": True},
+                        )
+                        if tokens is None:
                             stats['skipped'] += 1
                             continue
                         if province not in province_writers:
                             province_writers[province] = ProvinceCorpusWriter(province, corpora_dir)
-                        province_writers[province].write(words)
+                        province_writers[province].write(tokens)
                         stats['total_articles'] += 1
                     except Exception:
                         stats['errors'] += 1
