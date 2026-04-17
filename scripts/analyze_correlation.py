@@ -28,14 +28,7 @@ except ImportError:
 
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
-
-# Chinese font setup — same fix as visualize.py
-import matplotlib.font_manager as _fm
-_CJK_FONT_PATH = "/usr/share/fonts/google-droid/DroidSansFallback.ttf"
-_fm.fontManager.addfont(_CJK_FONT_PATH)
-_CJK_FAMILY = _fm.FontProperties(fname=_CJK_FONT_PATH).get_name()
-plt.rcParams["font.sans-serif"] = [_CJK_FAMILY] + plt.rcParams["font.sans-serif"]
-plt.rcParams["axes.unicode_minus"] = False
+from scripts.visualize import _configure_fonts, L
 
 PROVINCE_NAME_MAPPING = {
     "北京": "北京市", "天津": "天津市", "上海": "上海市", "重庆": "重庆市",
@@ -152,18 +145,26 @@ def merge_longitudinal(norms, external_df, logger):
     return merged
 
 
-def merge_provincial(norms, external_df, logger):
+def merge_provincial(norms, external_df, logger, config=None):
     """
     Merge WEAT results with external provincial data.
 
-    The external CSV must have a "province" column with Chinese province names.
+    For Chinese configs the external CSV must have a "province" column with
+    Chinese province names; normalization is applied automatically.
+    For English configs province names are expected to already be clean
+    (e.g. US state names) and no normalization is applied.
     """
     norms = norms.copy()
     external_df = external_df.copy()
 
     unit_col = "unit" if "unit" in norms.columns else "province"
-    norms["province"] = norms[unit_col].map(normalize_province)
-    external_df["province"] = external_df["province"].map(normalize_province)
+    language = (config or {}).get("language", "zh")
+    if language == "zh":
+        norms["province"] = norms[unit_col].map(normalize_province)
+        external_df["province"] = external_df["province"].map(normalize_province)
+    else:
+        # English configs ship clean state names; just alias the unit column
+        norms["province"] = norms[unit_col]
 
     merged = norms.merge(external_df, on="province", how="inner")
     logger.info(f"  Merged: {len(merged)} provinces")
@@ -277,6 +278,7 @@ def main(config="config/config.yml", norms_file=None, external_data=None):
         external_data: Override path to external CSV file
     """
     config_data = load_config(config)
+    _configure_fonts(config_data)
     logger = setup_logging(Path(config_data["paths"]["log_dir"]), "analyze_correlation.log")
 
     logger.info("=" * 80)
@@ -303,7 +305,7 @@ def main(config="config/config.yml", norms_file=None, external_data=None):
     # Auto-detect mode: provincial if "province" column exists, longitudinal if "year"/"start_year"
     if "province" in ext_df.columns:
         logger.info("  Mode: provincial (detected 'province' column)")
-        merged = merge_provincial(norms, ext_df, logger)
+        merged = merge_provincial(norms, ext_df, logger, config=config_data)
     elif "year" in ext_df.columns or "start_year" in ext_df.columns:
         logger.info("  Mode: longitudinal (detected 'year'/'start_year' column)")
         merged = merge_longitudinal(norms, ext_df, logger)

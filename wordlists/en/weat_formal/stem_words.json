@@ -1,0 +1,4 @@
+{
+  "stem": ["science", "technology", "physics", "chemistry", "engineering", "mathematics", "computation", "algorithm", "biology", "astronomy", "geology", "statistics"],
+  "non_stem": ["arts", "literature", "poetry", "dance", "symphony", "drama", "sculpture", "painting", "novel", "philosophy", "history", "linguistics"]
+}

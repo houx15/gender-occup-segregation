@@ -18,28 +18,85 @@ import pandas as pd
 import seaborn as sns
 import fire
 import matplotlib.colors as mcolors
+import matplotlib.font_manager as _fm
 from scipy.stats import pearsonr
 
 from scripts.common.config_loader import load_config, get_analysis_unit, get_wordlist_dir
 from scripts.common.logging_utils import setup_logging
 
 
-# Chinese font setup — DroidSansFallback.ttf is a single .ttf (not .ttc),
-# so matplotlib resolves it reliably.  Noto Sans CJK .ttc files fail to
-# register their sub-font names in the font cache, causing tofu/boxes.
-import matplotlib.font_manager as _fm
-_CJK_FONT_PATH = "/usr/share/fonts/google-droid/DroidSansFallback.ttf"
-_fm.fontManager.addfont(_CJK_FONT_PATH)
-_CJK_FAMILY = _fm.FontProperties(fname=_CJK_FONT_PATH).get_name()
+_DEFAULT_CJK_FONT_PATH = "/usr/share/fonts/google-droid/DroidSansFallback.ttf"
 
 
-def _apply_cjk_font():
-    """Apply CJK font to rcParams. Call after sns.set_style() which resets fonts."""
-    plt.rcParams["font.sans-serif"] = [_CJK_FAMILY] + plt.rcParams["font.sans-serif"]
-    plt.rcParams["axes.unicode_minus"] = False
+def _configure_fonts(config: dict) -> None:
+    """Register language-appropriate fonts with matplotlib."""
+    language = config["language"]
+    if language != "zh":
+        return  # matplotlib defaults are fine for English
+
+    cjk_path = config.get("fonts", {}).get("cjk_path", _DEFAULT_CJK_FONT_PATH)
+    try:
+        _fm.fontManager.addfont(cjk_path)
+        family = _fm.FontProperties(fname=cjk_path).get_name()
+        plt.rcParams["font.sans-serif"] = [family] + plt.rcParams["font.sans-serif"]
+        plt.rcParams["axes.unicode_minus"] = False
+    except FileNotFoundError:
+        pass
 
 
-_apply_cjk_font()
+LABELS = {
+    "zh": {
+        "year": "年份",
+        "start_year": "起始年份",
+        "province": "省份",
+        "state": "州",
+        "gender_norm": "性别规范指数",
+        "cohens_d": "Cohen's d 效应量",
+        "cohens_d_abs": "|Cohen's d|",
+        "prestige": "声望",
+        "evaluation": "评价",
+        "potency": "力量",
+        "activity": "活动",
+        "gender_axis": "性别轴投影",
+        "work_family": "工作-家庭",
+        "leadership": "领导力",
+        "stem": "STEM",
+        "male": "男性",
+        "female": "女性",
+        "occupation": "职业",
+        "correlation": "皮尔逊相关系数",
+        "slice": "时间窗",
+        "value": "值",
+    },
+    "en": {
+        "year": "Year",
+        "start_year": "Start year",
+        "province": "State",
+        "state": "State",
+        "gender_norm": "Gender norm index",
+        "cohens_d": "Cohen's d",
+        "cohens_d_abs": "|Cohen's d|",
+        "prestige": "Prestige",
+        "evaluation": "Evaluation",
+        "potency": "Potency",
+        "activity": "Activity",
+        "gender_axis": "Gender-axis projection",
+        "work_family": "Work–Family",
+        "leadership": "Leadership",
+        "stem": "STEM",
+        "male": "Male",
+        "female": "Female",
+        "occupation": "Occupation",
+        "correlation": "Pearson r",
+        "slice": "Time window",
+        "value": "Value",
+    },
+}
+
+
+def L(config: dict, key: str) -> str:
+    """Look up a user-facing label in the current language. Unknown keys fall back to the key itself."""
+    return LABELS.get(config["language"], {}).get(key, key)
 
 # Human-readable data source labels for figure titles
 DATA_SOURCE_LABELS = {
@@ -822,83 +879,6 @@ def plot_weat_year_comparison(weat_df, figures_dir, logger):
 
 
 # =============================================================================
-# Main
-# =============================================================================
-
-def main(config="config/config.yml", mode=None):
-    """
-    Create visualizations for analysis results.
-
-    Args:
-        config: Path to configuration file
-        mode: "prestige", "weat", or None (auto-detect from config)
-    """
-    config_data = load_config(config)
-    logger = setup_logging(Path(config_data["paths"]["log_dir"]), "visualize.log")
-
-    logger.info("=" * 80)
-    logger.info("Starting visualization")
-    logger.info("=" * 80)
-
-    sns.set_style("whitegrid")
-    _apply_cjk_font()
-    figures_dir = Path(config_data["paths"].get("figures_dir", config_data["paths"]["results_dir"] + "/figures"))
-    results_dir = Path(config_data["paths"]["results_dir"])
-    analysis_mode = mode or config_data.get("analysis_mode", "prestige")
-
-    if analysis_mode == "prestige":
-        # Load prestige results
-        for fname in ("occupation_scores_by_slice.parquet", "occupation_scores_by_province.parquet"):
-            fpath = results_dir / fname
-            if fpath.exists():
-                df = pd.read_parquet(fpath)
-                logger.info(f"Loaded {fpath}: {len(df)} rows")
-                if "time_slice" in df.columns:
-                    plot_prestige_by_gender_over_time(df, figures_dir, logger)
-                    plot_gender_prestige_correlation(df, figures_dir, logger)
-                    plot_prestige_by_category(df, config_data, figures_dir, logger)
-                break
-
-    elif analysis_mode == "weat":
-        weat_path = results_dir / "weat_results.csv"
-        if weat_path.exists():
-            weat_df = pd.read_csv(weat_path)
-            logger.info(f"Loaded {weat_path}: {len(weat_df)} rows")
-
-            # Check if data is in province-year format
-            if not weat_df.empty and "unit" in weat_df.columns:
-                sample_units = weat_df["unit"].unique()[:5]
-                parsed = [_parse_province_year(u) for u in sample_units]
-                is_province_year = sum(1 for p, y in parsed if p is not None) >= len(sample_units) // 2 + 1
-            else:
-                is_province_year = False
-
-            ds = config_data.get("data_source")
-            plot_weat_heatmap(weat_df, figures_dir, logger, data_source=ds)
-            plot_weat_rankings(weat_df, figures_dir, logger, data_source=ds)
-            plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=ds)
-
-            if is_province_year:
-                # For province-year data, use per-year choropleth and year comparison
-                plot_weat_choropleth_by_year(weat_df, figures_dir, logger)
-                plot_weat_year_comparison(weat_df, figures_dir, logger)
-            else:
-                # For other formats, use the general fallback
-                plot_weat_choropleth(weat_df, figures_dir, logger)
-
-        # Projection boxplots (diagnostic)
-        proj_path = results_dir / "word_projections.csv"
-        if proj_path.exists():
-            proj_df = pd.read_csv(proj_path)
-            logger.info(f"Loaded {proj_path}: {len(proj_df)} rows")
-            plot_weat_projection_boxplots(proj_df, figures_dir, logger)
-
-    logger.info("=" * 80)
-    logger.info("Visualization completed!")
-    logger.info("=" * 80)
-
-
-# =============================================================================
 # Composite: WEAT + Survey overlay
 # =============================================================================
 
@@ -1040,7 +1020,6 @@ def main_composite(weat_results_csv, data_source=None, survey_csv="data/surveys/
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     sns.set_style("whitegrid")
-    _apply_cjk_font()
     plot_weat_survey_composite(weat_df, survey_df, figures_dir, logger, data_source=data_source)
 
 
@@ -1049,12 +1028,16 @@ def main_composite(weat_results_csv, data_source=None, survey_csv="data/surveys/
 # =============================================================================
 
 
-def plot_choropleth_aggregated_grid(weat_df, figures_dir, logger):
+def plot_choropleth_aggregated_grid(weat_df, figures_dir, logger, config=None):
     """Plot 3×4 grid of choropleth maps: 3 WEAT dimensions × 4 years.
 
     Creates a single figure with 12 small maps showing provincial Cohen's d
     values, with a shared diverging colorbar centered at 0.
     """
+    if config is not None and config.get("language", "zh") != "zh":
+        logger.info("Skipping survey comparison: zh-only")
+        return
+
     try:
         import geopandas as gpd
     except ImportError:
@@ -1189,7 +1172,7 @@ def plot_choropleth_aggregated_grid(weat_df, figures_dir, logger):
     logger.info(f"  Saved: {path.name}")
 
 
-def plot_survey_embedding_scatter(weat_df, survey_csv_path, figures_dir, logger):
+def plot_survey_embedding_scatter(weat_df, survey_csv_path, figures_dir, logger, config=None):
     """Plot correlation scatter plots between WEAT embeddings and survey data.
 
     Creates three PDFs:
@@ -1198,6 +1181,10 @@ def plot_survey_embedding_scatter(weat_df, survey_csv_path, figures_dir, logger)
       - Combined scatter (both datasets, different markers)
     Each with 3 subplots (one per WEAT dimension).
     """
+    if config is not None and config.get("language", "zh") != "zh":
+        logger.info("Skipping survey comparison: zh-only")
+        return
+
     merged = _merge_weat_survey(weat_df, survey_csv_path)
     if merged.empty:
         logger.info("  Skipping scatter plots: no merged data")
@@ -1363,12 +1350,16 @@ def plot_survey_embedding_scatter(weat_df, survey_csv_path, figures_dir, logger)
     _make_scatter(merged, "combined")
 
 
-def plot_province_longitudinal_trends(weat_df, survey_csv_path, figures_dir, logger):
+def plot_province_longitudinal_trends(weat_df, survey_csv_path, figures_dir, logger, config=None):
     """Plot longitudinal trends for 4 provinces with dual WEAT/survey axes.
 
     Creates a 3×4 grid (3 dimensions × 4 provinces) with dual y-axes
     showing WEAT Cohen's d (left) and survey gender ideation (right).
     """
+    if config is not None and config.get("language", "zh") != "zh":
+        logger.info("Skipping survey comparison: zh-only")
+        return
+
     merged = _merge_weat_survey(weat_df, survey_csv_path)
 
     # Parse all WEAT data for province-year lines (not just merged with survey)
@@ -1510,7 +1501,7 @@ def main(config="config/config.yml", mode=None):
     logger.info("=" * 80)
 
     sns.set_style("whitegrid")
-    _apply_cjk_font()
+    _configure_fonts(config_data)  # must run after sns.set_style resets rcParams
     figures_dir = Path(config_data["paths"].get("figures_dir", config_data["paths"]["results_dir"] + "/figures"))
     results_dir = Path(config_data["paths"]["results_dir"])
     analysis_mode = mode or config_data.get("analysis_mode", "prestige")
@@ -1569,9 +1560,9 @@ def main(config="config/config.yml", mode=None):
                 if survey_csv.exists():
                     survey_df = pd.read_csv(survey_csv)
                     logger.info(f"Loaded provincial survey data: {len(survey_df)} rows")
-                    plot_choropleth_aggregated_grid(weat_df, figures_dir, logger)
-                    plot_survey_embedding_scatter(weat_df, str(survey_csv), figures_dir, logger)
-                    plot_province_longitudinal_trends(weat_df, str(survey_csv), figures_dir, logger)
+                    plot_choropleth_aggregated_grid(weat_df, figures_dir, logger, config=config_data)
+                    plot_survey_embedding_scatter(weat_df, str(survey_csv), figures_dir, logger, config=config_data)
+                    plot_province_longitudinal_trends(weat_df, str(survey_csv), figures_dir, logger, config=config_data)
 
         # Projection boxplots (diagnostic)
         proj_path = results_dir / "word_projections.csv"

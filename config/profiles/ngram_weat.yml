@@ -1,3 +1,4 @@
+language: "zh"
 data_source: "ngram"
 analysis_mode: "weat"
 
@@ -12,7 +13,7 @@ paths:
   figures_dir: "/scratch/network/yh6580/gender-occup/figures_weat"
 
 wordlists:
-  dir: "wordlists/weat_formal"
+  dir: "wordlists/zh/weat_formal"
   weat_gender_file: "gender_words.json"
   weat_domestic_work_file: "domestic_work_words.json"
   weat_leadership_file: "leadership_words.json"

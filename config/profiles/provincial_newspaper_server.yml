@@ -7,6 +7,7 @@
 #   bash slurm/submit_all_train.sh            # submits 8 groups in parallel
 #   sbatch slurm/analyze.slurm                # after all training jobs finish
 
+language: "zh"
 data_source: "newspaper"
 analysis_mode: "weat"
 
@@ -23,7 +24,7 @@ paths:
   shapefile: "/lustre/home/2401111059/youth-analysis/configs/china_shp/chn_admbnda_adm1_ocha_2020.shp"
 
 wordlists:
-  dir: "wordlists/weat_formal"
+  dir: "wordlists/zh/weat_formal"
   weat_gender_file: "gender_words.json"
   weat_domestic_work_file: "domestic_work_words.json"
   weat_leadership_file: "leadership_words.json"

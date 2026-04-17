@@ -332,6 +332,31 @@ Edit the `#SBATCH` headers in the slurm scripts to adjust resources and email.
 | `weat_choropleth_*` | WEAT | Provincial maps (requires geopandas + shapefile) |
 | `*_correlation.pdf` | Correlation | Scatter plots with regression lines |
 
+## English Pipeline
+
+The framework supports English-language corpora alongside the Chinese pipeline.
+
+**Supported English sources:**
+- **Google Books Ngram (English)** — 5-gram files from the Google Ngram v3 corpus (1800–2019), producing time-sliced corpora identical in structure to the Chinese n-gram pipeline.
+- **COHA (Corpus of Historical American English)** — decade-level 4-gram files for 1810s–2010s (support is implemented; large-scale runs deferred).
+
+English wordlists live under `wordlists/en/` (subdirectories `prestige/` and `weat_formal/`) and follow the same JSON/TXT conventions as the Chinese wordlists. NLTK punkt\_tab and stopwords data are required before the first run:
+
+```bash
+python -c "import nltk; nltk.download('punkt_tab'); nltk.download('stopwords')"
+```
+
+**Quick start (English Ngram on a server):**
+
+```bash
+# Copy the ready-made server profile
+cp config/profiles/ngram_en_server.yml config/config.yml
+# Edit paths.base_dir and related paths for your server, then:
+./run_pipeline.sh --config config/profiles/ngram_en_server.yml
+```
+
+The English builder lowercases all tokens, strips punctuation (apostrophes are preserved), and writes one `corpus_{index}.txt` per ngram file into the standard `corpora_dir/{start}_{end}/` slice directories — the same layout consumed by `train_embeddings.py`.
+
 ## Methodology
 
 ### Word Embeddings

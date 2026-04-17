@@ -1,0 +1,18 @@
+{
+  "evaluation": {
+    "positive": ["good", "pleasant", "beautiful", "wonderful", "nice", "kind", "happy", "honest", "friendly", "warm"],
+    "negative": ["bad", "unpleasant", "ugly", "terrible", "awful", "mean", "sad", "dishonest", "hostile", "cold"]
+  },
+  "potency": {
+    "positive": ["strong", "powerful", "large", "heavy", "hard", "solid", "dominant", "tough", "robust", "firm"],
+    "negative": ["weak", "powerless", "small", "light", "soft", "fragile", "submissive", "tender", "delicate", "loose"]
+  },
+  "activity": {
+    "positive": ["active", "fast", "noisy", "young", "lively", "energetic", "dynamic", "vigorous", "alert", "busy"],
+    "negative": ["passive", "slow", "quiet", "old", "sluggish", "lethargic", "static", "weary", "drowsy", "idle"]
+  },
+  "general_prestige": {
+    "positive": ["prestigious", "respected", "esteemed", "admired", "distinguished", "eminent", "renowned", "elite", "honored", "influential"],
+    "negative": ["lowly", "scorned", "despised", "disrespected", "common", "ordinary", "menial", "unskilled", "humble", "marginal"]
+  }
+}

@@ -12,6 +12,6 @@ module purge
 module load anaconda3/2023.3
 conda activate llm
 
-python scripts/train_embeddings.py --config config/renminribao.yml
+python -m scripts.train_embeddings --config config/profiles/renminribao_server.yml
 
 

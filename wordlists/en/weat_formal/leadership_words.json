@@ -1,0 +1,4 @@
+{
+  "leadership": ["leader", "manager", "executive", "director", "supervisor", "chief", "president", "commander", "boss", "head"],
+  "non_leadership": ["assistant", "clerk", "helper", "follower", "subordinate", "trainee", "intern", "apprentice", "aide", "attendant"]
+}
