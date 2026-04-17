@@ -1,3 +1,4 @@
+language: "zh"
 data_source: "ngram"
 analysis_mode: "prestige"
 
@@ -12,10 +13,10 @@ paths:
   figures_dir: "/scratch/network/yh6580/gender-occup/figures"
 
 wordlists:
-  dir: "wordlists/prestige"
-  occupations_file: "occupations_zh.txt"
-  gender_words_file: "gender_words_zh.json"
-  prestige_axes_file: "prestige_axes_zh.json"
+  dir: "wordlists/zh/prestige"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+  prestige_axes_file: "prestige_axes.json"
 
 ngram:
   language: "chi_sim"

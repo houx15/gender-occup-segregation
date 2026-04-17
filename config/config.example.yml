@@ -5,6 +5,9 @@
 #
 # Each server only needs settings relevant to its data source.
 
+# Language: "zh" or "en" (REQUIRED)
+language: "zh"
+
 # Data source: "ngram", "renminribao", "weibo", "newspaper"
 data_source: "ngram"
 
@@ -32,11 +35,11 @@ paths:
 
 # Wordlist directory (relative to base_dir, or absolute)
 wordlists:
-  dir: "wordlists/prestige"  # "wordlists/prestige", "wordlists/weat_informal", or "wordlists/weat_formal"
+  dir: "wordlists/zh/prestige"  # e.g., wordlists/{zh,en}/{prestige,weat_formal,weat_informal}
   # Prestige mode word files (relative to wordlists.dir)
-  occupations_file: "occupations_zh.txt"
-  gender_words_file: "gender_words_zh.json"
-  prestige_axes_file: "prestige_axes_zh.json"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+  prestige_axes_file: "prestige_axes.json"
   # WEAT mode word files (relative to wordlists.dir)
   weat_gender_file: "gender_words.json"
   weat_domestic_work_file: "domestic_work_words.json"
