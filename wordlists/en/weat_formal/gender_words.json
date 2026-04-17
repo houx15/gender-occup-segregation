@@ -1,0 +1,4 @@
+{
+  "male": ["male", "man", "boy", "brother", "he", "him", "his", "son", "father", "uncle", "grandfather", "husband", "nephew", "gentleman", "king", "prince", "sir"],
+  "female": ["female", "woman", "girl", "sister", "she", "her", "hers", "daughter", "mother", "aunt", "grandmother", "wife", "niece", "lady", "queen", "princess", "madam"]
+}
