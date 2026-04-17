@@ -226,3 +226,27 @@ class TestRmrbBuilder:
             for cf in corpus_files
         )
         assert total_lines > 0, "Expected non-empty corpus output"
+
+
+def test_build_corpora_ngram_en_parses_english_5gram_line(tmp_path):
+    from scripts.data_prep.build_corpora_ngram_en import parse_ngram_line, clean_ngram
+
+    line = "the quick brown fox jumps\t2000,42,3\t2001,50,4\n"
+    entries = parse_ngram_line(line)
+    assert len(entries) == 2
+    ngram_text, year, count = entries[0]
+    assert year == 2000
+    assert count == 42
+    assert "the" in ngram_text or "quick" in ngram_text
+
+
+def test_build_corpora_ngram_en_clean_drops_short_cleaned(tmp_path):
+    from scripts.data_prep.build_corpora_ngram_en import clean_ngram
+    assert clean_ngram("!@#$ ^&*(  ") is None
+
+
+def test_build_corpora_ngram_en_lowercases(tmp_path):
+    from scripts.data_prep.build_corpora_ngram_en import clean_ngram
+    out = clean_ngram("Hello WORLD FROM Mars")
+    assert out is not None
+    assert out.islower()
