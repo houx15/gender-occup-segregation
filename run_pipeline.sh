@@ -50,8 +50,13 @@ read_config() {
 }
 
 DATA_SOURCE=$(read_config "c['data_source']")
+LANGUAGE=$(read_config "c.get('language', 'zh')")
 ANALYSIS_MODE=$(read_config "c.get('analysis_mode', 'prestige')")
-RAW_DIR=$(read_config "c['paths'].get('raw_ngram_dir', '')")
+if [ "$DATA_SOURCE" = "coha" ]; then
+    RAW_DIR=$(read_config "c['paths'].get('raw_coha_dir', '')")
+else
+    RAW_DIR=$(read_config "c['paths'].get('raw_ngram_dir', '')")
+fi
 CORPORA_DIR=$(read_config "c['paths']['corpora_dir']")
 MODELS_DIR=$(read_config "c['paths']['models_dir']")
 RESULTS_DIR=$(read_config "c['paths']['results_dir']")
@@ -81,13 +86,14 @@ has_subdirs_with_content() {
 
 echo "=========================================="
 echo "Gender-Occupation Segregation Pipeline"
+echo "  Language:       $LANGUAGE"
 echo "  Data source:    $DATA_SOURCE"
 echo "  Analysis mode:  $ANALYSIS_MODE"
 echo "  Auto-skip:      stages with existing output"
 echo "=========================================="
 echo ""
 
-# ── Step 1: Download (ngram only) ──────────────────────────────────
+# ── Step 1: Download (ngram + coha only) ───────────────────────────
 if [ "$DATA_SOURCE" = "ngram" ]; then
     N_RAW=$(count_files "$RAW_DIR" "*.gz")
     if [ "$N_RAW" -gt 0 ] && [ "$FORCE_DOWNLOAD" = false ]; then
@@ -95,6 +101,14 @@ if [ "$DATA_SOURCE" = "ngram" ]; then
     else
         echo "Step 1: Downloading Google 5-gram data..."
         python -m scripts.data_prep.download_ngrams --config="$CONFIG"
+    fi
+elif [ "$DATA_SOURCE" = "coha" ]; then
+    N_RAW=$(count_files "$RAW_DIR" "*.zip")
+    if [ "$N_RAW" -gt 0 ] && [ "$FORCE_DOWNLOAD" = false ]; then
+        echo "Step 1: SKIP download ($N_RAW .zip files found in raw_coha_dir)"
+    else
+        echo "Step 1: Downloading COHA archives..."
+        python -m scripts.data_prep.download_coha --config="$CONFIG"
     fi
 else
     echo "Step 1: SKIP download (not applicable for $DATA_SOURCE)"
@@ -112,11 +126,18 @@ if [ "$N_CORPORA" -gt 0 ] && [ "$FORCE_CORPUS" = false ]; then
 else
     echo "Step 2: Building corpora ($DATA_SOURCE)..."
     case $DATA_SOURCE in
-        ngram)      python -m scripts.data_prep.build_corpora_ngram --config="$CONFIG" ;;
+        ngram)
+            if [ "$LANGUAGE" = "en" ]; then
+                python -m scripts.data_prep.build_corpora_ngram_en --config="$CONFIG"
+            else
+                python -m scripts.data_prep.build_corpora_ngram --config="$CONFIG"
+            fi
+            ;;
         renminribao) python -m scripts.data_prep.build_corpora_rmrb --config="$CONFIG" ;;
-        weibo)      python -m scripts.data_prep.build_corpora_weibo --config="$CONFIG" ;;
-        newspaper)  python -m scripts.data_prep.build_corpora_newspaper --config="$CONFIG" ;;
-        *)          echo "Unknown data_source: $DATA_SOURCE"; exit 1 ;;
+        weibo)       python -m scripts.data_prep.build_corpora_weibo --config="$CONFIG" ;;
+        newspaper)   python -m scripts.data_prep.build_corpora_newspaper --config="$CONFIG" ;;
+        coha)        python -m scripts.data_prep.build_corpora_coha --config="$CONFIG" ;;
+        *)           echo "Unknown data_source: $DATA_SOURCE"; exit 1 ;;
     esac
 fi
 echo ""

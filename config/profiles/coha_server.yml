@@ -1,0 +1,44 @@
+# English COHA n-grams + prestige (longitudinal)
+language: "en"
+data_source: "coha"
+analysis_mode: "prestige"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_coha_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha"
+  coha_decompressed_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/corpora_en_coha"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/models_en_coha"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_en_coha"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures"
+
+coha:
+  n: 5
+  source_archive_urls: []  # paste URLs from corpusdata.org signup email
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 20
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "coha_{unit_name}.model"
+
+corpus:
+  min_words: 2
+  tokenizer: "whitespace"
+  lowercase: true
+
+wordlists:
+  dir: "wordlists/en/prestige"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+  prestige_axes_file: "prestige_axes.json"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5

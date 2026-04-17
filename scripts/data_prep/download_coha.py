@@ -63,6 +63,10 @@ def download_one(url: str, out_path: Path, logger: logging.Logger) -> Tuple[bool
 
 
 def decompress_one(zip_path: Path, out_dir: Path, logger: logging.Logger) -> Tuple[bool, str]:
+    stem_dir = out_dir / zip_path.stem
+    if stem_dir.exists() and any(stem_dir.iterdir()):
+        logger.info(f"Skipping {zip_path.name} (already decompressed)")
+        return True, "skipped"
     try:
         logger.info(f"Decompressing {zip_path.name} -> {out_dir}")
         out_dir.mkdir(parents=True, exist_ok=True)
