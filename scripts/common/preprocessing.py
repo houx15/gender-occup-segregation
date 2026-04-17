@@ -123,7 +123,7 @@ _BRACKETED_RE = re.compile(r"\[.*?\]")
 
 KEEP_PATTERNS: dict[str, re.Pattern] = {
     "zh": re.compile(r"[\u4e00-\u9fff]+"),
-    "en": re.compile(r"[a-z']+"),
+    "en": re.compile(r"[a-zA-Z']+"),
 }
 
 

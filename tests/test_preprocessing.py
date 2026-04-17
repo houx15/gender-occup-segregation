@@ -2,7 +2,13 @@
 
 import pytest
 
-from scripts.common.preprocessing import TOKENIZERS, tokenize
+from scripts.common.preprocessing import (
+    STOPWORDS,
+    TOKENIZERS,
+    clean_text,
+    get_stopwords,
+    tokenize,
+)
 
 
 def test_whitespace_tokenizer():
@@ -34,13 +40,6 @@ def test_unknown_tokenizer_raises():
 
 def test_registry_contains_expected_keys():
     assert set(TOKENIZERS.keys()) >= {"whitespace", "jieba", "nltk_en"}
-
-
-from scripts.common.preprocessing import (
-    STOPWORDS,
-    clean_text,
-    get_stopwords,
-)
 
 
 def test_stopwords_zh_default_contains_common_particles():
@@ -82,7 +81,6 @@ def test_clean_text_zh_removes_urls():
 
 def test_clean_text_zh_keeps_chinese_only():
     out = clean_text("Hello世界 abc123 你好", "zh")
-    # Only Chinese chars survive
     assert "Hello" not in out
     assert "abc" not in out
     assert "世界" in out
@@ -92,6 +90,11 @@ def test_clean_text_zh_keeps_chinese_only():
 def test_clean_text_en_lowercases_when_asked():
     out = clean_text("Hello WORLD", "en", lowercase=True)
     assert out == "hello world"
+
+
+def test_clean_text_en_preserves_case_without_lowercase():
+    out = clean_text("Hello WORLD", "en")
+    assert out == "Hello WORLD"
 
 
 def test_clean_text_en_strips_urls():
@@ -115,3 +118,8 @@ def test_clean_text_en_mentions_and_parens():
     assert "aside" not in out
     assert "hi" in out
     assert "end" in out
+
+
+def test_clean_text_unsupported_language_raises():
+    with pytest.raises(ValueError, match="Unsupported language"):
+        clean_text("hello", "fr")
