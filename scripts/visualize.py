@@ -879,84 +879,6 @@ def plot_weat_year_comparison(weat_df, figures_dir, logger):
 
 
 # =============================================================================
-# Main
-# =============================================================================
-
-def main(config="config/config.yml", mode=None):
-    """
-    Create visualizations for analysis results.
-
-    Args:
-        config: Path to configuration file
-        mode: "prestige", "weat", or None (auto-detect from config)
-    """
-    config_data = load_config(config)
-    _configure_fonts(config_data)
-    logger = setup_logging(Path(config_data["paths"]["log_dir"]), "visualize.log")
-
-    logger.info("=" * 80)
-    logger.info("Starting visualization")
-    logger.info("=" * 80)
-
-    sns.set_style("whitegrid")
-    _configure_fonts(config_data)
-    figures_dir = Path(config_data["paths"].get("figures_dir", config_data["paths"]["results_dir"] + "/figures"))
-    results_dir = Path(config_data["paths"]["results_dir"])
-    analysis_mode = mode or config_data.get("analysis_mode", "prestige")
-
-    if analysis_mode == "prestige":
-        # Load prestige results
-        for fname in ("occupation_scores_by_slice.parquet", "occupation_scores_by_province.parquet"):
-            fpath = results_dir / fname
-            if fpath.exists():
-                df = pd.read_parquet(fpath)
-                logger.info(f"Loaded {fpath}: {len(df)} rows")
-                if "time_slice" in df.columns:
-                    plot_prestige_by_gender_over_time(df, figures_dir, logger)
-                    plot_gender_prestige_correlation(df, figures_dir, logger)
-                    plot_prestige_by_category(df, config_data, figures_dir, logger)
-                break
-
-    elif analysis_mode == "weat":
-        weat_path = results_dir / "weat_results.csv"
-        if weat_path.exists():
-            weat_df = pd.read_csv(weat_path)
-            logger.info(f"Loaded {weat_path}: {len(weat_df)} rows")
-
-            # Check if data is in province-year format
-            if not weat_df.empty and "unit" in weat_df.columns:
-                sample_units = weat_df["unit"].unique()[:5]
-                parsed = [_parse_province_year(u) for u in sample_units]
-                is_province_year = sum(1 for p, y in parsed if p is not None) >= len(sample_units) // 2 + 1
-            else:
-                is_province_year = False
-
-            ds = config_data.get("data_source")
-            plot_weat_heatmap(weat_df, figures_dir, logger, data_source=ds)
-            plot_weat_rankings(weat_df, figures_dir, logger, data_source=ds)
-            plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=ds)
-
-            if is_province_year:
-                # For province-year data, use per-year choropleth and year comparison
-                plot_weat_choropleth_by_year(weat_df, figures_dir, logger)
-                plot_weat_year_comparison(weat_df, figures_dir, logger)
-            else:
-                # For other formats, use the general fallback
-                plot_weat_choropleth(weat_df, figures_dir, logger)
-
-        # Projection boxplots (diagnostic)
-        proj_path = results_dir / "word_projections.csv"
-        if proj_path.exists():
-            proj_df = pd.read_csv(proj_path)
-            logger.info(f"Loaded {proj_path}: {len(proj_df)} rows")
-            plot_weat_projection_boxplots(proj_df, figures_dir, logger)
-
-    logger.info("=" * 80)
-    logger.info("Visualization completed!")
-    logger.info("=" * 80)
-
-
-# =============================================================================
 # Composite: WEAT + Survey overlay
 # =============================================================================
 
@@ -1572,7 +1494,6 @@ def main(config="config/config.yml", mode=None):
         mode: "prestige", "weat", or None (auto-detect from config)
     """
     config_data = load_config(config)
-    _configure_fonts(config_data)
     logger = setup_logging(Path(config_data["paths"]["log_dir"]), "visualize.log")
 
     logger.info("=" * 80)
@@ -1580,7 +1501,7 @@ def main(config="config/config.yml", mode=None):
     logger.info("=" * 80)
 
     sns.set_style("whitegrid")
-    _configure_fonts(config_data)
+    _configure_fonts(config_data)  # must run after sns.set_style resets rcParams
     figures_dir = Path(config_data["paths"].get("figures_dir", config_data["paths"]["results_dir"] + "/figures"))
     results_dir = Path(config_data["paths"]["results_dir"])
     analysis_mode = mode or config_data.get("analysis_mode", "prestige")
