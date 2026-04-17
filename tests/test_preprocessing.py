@@ -195,3 +195,68 @@ def test_preprocess_passes_cleaner_opts():
     )
     assert tokens is not None
     assert "aside" not in tokens
+
+
+# ---------------------------------------------------------------------------
+# clean_text edge cases
+# ---------------------------------------------------------------------------
+
+def test_clean_text_none_input_returns_empty():
+    assert clean_text(None, "en") == ""
+
+
+def test_clean_text_non_string_input_returns_empty():
+    assert clean_text(42, "en") == ""
+
+
+def test_clean_text_zh_strips_bracketed_content():
+    out = clean_text("你好[注释内容]世界", "zh")
+    assert "注释" not in out
+    assert "你好" in out
+    assert "世界" in out
+
+
+def test_clean_text_en_strips_bracketed_content():
+    out = clean_text("hello [editorial note] world", "en")
+    assert "editorial" not in out
+    assert "hello" in out
+    assert "world" in out
+
+
+def test_clean_text_zh_strips_ellipsis():
+    out = clean_text("你好…世界", "zh")
+    # ellipsis removed; Chinese characters kept
+    assert "…" not in out
+    assert "你好" in out
+    assert "世界" in out
+
+
+# ---------------------------------------------------------------------------
+# preprocess edge cases
+# ---------------------------------------------------------------------------
+
+def test_preprocess_empty_after_cleaning_returns_none():
+    """URL-only zh text cleans to empty → preprocess returns None."""
+    result = preprocess(
+        "http://example.com/foo",
+        language="zh",
+        tokenizer="jieba",
+        stopwords_key=None,
+        lowercase=False,
+        min_words=1,
+    )
+    assert result is None
+
+
+def test_preprocess_stopwords_removed():
+    """All tokens are stopwords → below min_words → returns None."""
+    result = preprocess(
+        "the and",
+        language="en",
+        tokenizer="whitespace",
+        stopwords_key="en_default",
+        lowercase=True,
+        min_words=1,
+    )
+    # "the" and "and" are English stopwords; after removal doc is empty
+    assert result is None or len(result) == 0

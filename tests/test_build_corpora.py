@@ -268,3 +268,119 @@ def test_build_corpora_coha_decade_from_filename():
     from pathlib import Path
     assert decade_from_filename(Path("w4_1940.txt")) == "1940s"
     assert decade_from_filename(Path("coha_4grams_1950s.txt")) == "1950s"
+
+
+def test_build_corpora_coha_decade_from_filename_no_match():
+    from scripts.data_prep.build_corpora_coha import decade_from_filename
+    from pathlib import Path
+    assert decade_from_filename(Path("readme.txt")) is None
+    assert decade_from_filename(Path("no_year_here.tsv")) is None
+
+
+def test_build_corpora_coha_parse_line_empty_returns_none():
+    from scripts.data_prep.build_corpora_coha import parse_coha_line
+    assert parse_coha_line("", n=4) is None
+
+
+def test_build_corpora_coha_parse_line_no_tab_returns_none():
+    from scripts.data_prep.build_corpora_coha import parse_coha_line
+    assert parse_coha_line("the quick brown fox 42", n=4) is None
+
+
+def test_build_corpora_coha_parse_line_single_token_returns_none():
+    """After cleaning, only one English token: should return None."""
+    from scripts.data_prep.build_corpora_coha import parse_coha_line
+    assert parse_coha_line("singleword\t5", n=4) is None
+
+
+def test_build_corpora_coha_parse_line_non_int_freq_returns_none():
+    from scripts.data_prep.build_corpora_coha import parse_coha_line
+    assert parse_coha_line("the quick brown fox\tNaN", n=4) is None
+
+
+class TestBuildCorporaCohaIntegration:
+    """Integration tests for build_corpora in build_corpora_coha.py."""
+
+    def _run(self, tmp_path, min_freq=1):
+        import logging
+        from scripts.data_prep.build_corpora_coha import build_corpora
+
+        decomp_dir = tmp_path / "decomp"
+        decomp_dir.mkdir()
+
+        (decomp_dir / "w4_1940.txt").write_text(
+            "the quick brown fox\t50\nhello world nice day\t3\n",
+            encoding="utf-8",
+        )
+        (decomp_dir / "w4_1950.txt").write_text(
+            "work and family balance\t20\n",
+            encoding="utf-8",
+        )
+
+        config = {
+            "coha": {"ngram_order": 4, "min_freq": min_freq},
+            "paths": {
+                "coha_decompressed_dir": str(decomp_dir),
+                "corpora_dir": str(tmp_path / "corpora"),
+            },
+        }
+        logger = logging.getLogger("test_build_corpora_coha")
+        build_corpora(config, logger)
+        return tmp_path / "corpora"
+
+    def test_decade_dirs_created(self, tmp_path):
+        corpora_dir = self._run(tmp_path)
+        assert (corpora_dir / "1940s").exists()
+        assert (corpora_dir / "1950s").exists()
+
+    def test_corpus_files_written(self, tmp_path):
+        corpora_dir = self._run(tmp_path)
+        assert len(list((corpora_dir / "1940s").glob("corpus_*.txt"))) > 0
+        assert len(list((corpora_dir / "1950s").glob("corpus_*.txt"))) > 0
+
+    def test_corpus_contains_expected_ngrams(self, tmp_path):
+        corpora_dir = self._run(tmp_path)
+        content_1940 = "".join(
+            f.read_text(encoding="utf-8")
+            for f in (corpora_dir / "1940s").glob("corpus_*.txt")
+        )
+        assert "the quick brown fox" in content_1940
+        content_1950 = "".join(
+            f.read_text(encoding="utf-8")
+            for f in (corpora_dir / "1950s").glob("corpus_*.txt")
+        )
+        assert "work and family balance" in content_1950
+
+    def test_min_freq_filters_out_low_frequency(self, tmp_path):
+        """Lines below min_freq should not appear in output."""
+        corpora_dir = self._run(tmp_path, min_freq=10)
+        content_1940 = "".join(
+            f.read_text(encoding="utf-8")
+            for f in (corpora_dir / "1940s").glob("corpus_*.txt")
+        )
+        # freq=50 passes; freq=3 is filtered
+        assert "the quick brown fox" in content_1940
+        assert "hello world nice day" not in content_1940
+
+    def test_file_without_decade_is_skipped(self, tmp_path):
+        import logging
+        from scripts.data_prep.build_corpora_coha import build_corpora
+
+        decomp_dir = tmp_path / "decomp"
+        decomp_dir.mkdir()
+        (decomp_dir / "nodecade.txt").write_text(
+            "the quick brown fox\t50\n", encoding="utf-8"
+        )
+        config = {
+            "coha": {"ngram_order": 4, "min_freq": 1},
+            "paths": {
+                "coha_decompressed_dir": str(decomp_dir),
+                "corpora_dir": str(tmp_path / "corpora"),
+            },
+        }
+        logger = logging.getLogger("test_skip")
+        build_corpora(config, logger)
+        # No output at all since filename has no parseable decade
+        assert not (tmp_path / "corpora").exists() or not any(
+            (tmp_path / "corpora").rglob("*.txt")
+        )
