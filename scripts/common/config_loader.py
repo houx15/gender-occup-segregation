@@ -88,6 +88,8 @@ def _validate_config(config: dict) -> None:
     if data_source == "coha":
         if "raw_coha_dir" not in paths:
             raise ValueError("coha data_source requires paths.raw_coha_dir")
+        if "coha_decompressed_dir" not in paths:
+            raise ValueError("coha data_source requires paths.coha_decompressed_dir")
         if "coha" not in config:
             raise ValueError("coha data_source requires a top-level 'coha' config block")
     if data_source in ("ngram", "renminribao"):

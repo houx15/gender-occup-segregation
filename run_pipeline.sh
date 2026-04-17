@@ -50,7 +50,7 @@ read_config() {
 }
 
 DATA_SOURCE=$(read_config "c['data_source']")
-LANGUAGE=$(read_config "c.get('language', 'zh')")
+LANGUAGE=$(read_config "c['language']")
 ANALYSIS_MODE=$(read_config "c.get('analysis_mode', 'prestige')")
 if [ "$DATA_SOURCE" = "coha" ]; then
     RAW_DIR=$(read_config "c['paths'].get('raw_coha_dir', '')")
