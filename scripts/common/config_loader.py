@@ -11,12 +11,23 @@ from typing import Optional
 import yaml
 
 
+VALID_LANGUAGES = {"zh", "en"}
+
+DATA_SOURCE_LANGUAGE_COMPAT = {
+    "ngram":       {"zh", "en"},
+    "renminribao": {"zh"},
+    "weibo":       {"zh"},
+    "newspaper":   {"zh"},
+    "coha":        {"en"},
+}
+
 # Valid data sources and their default analysis units
 DATA_SOURCE_DEFAULTS = {
     "ngram": "longitudinal",
     "renminribao": "longitudinal",
     "weibo": "provincial",
     "newspaper": "provincial",
+    "coha": "longitudinal",
 }
 
 VALID_ANALYSIS_MODES = {"prestige", "weat"}
@@ -36,11 +47,26 @@ def load_config(config_path: str) -> dict:
 
 def _validate_config(config: dict) -> None:
     """Validate required fields based on data_source type."""
+    language = config.get("language")
+    if not language:
+        raise ValueError("Missing required top-level key: language ('zh' or 'en')")
+    if language not in VALID_LANGUAGES:
+        raise ValueError(
+            f"Invalid language: {language!r}. Must be one of: {sorted(VALID_LANGUAGES)}"
+        )
+
     data_source = config.get("data_source")
     if data_source not in DATA_SOURCE_DEFAULTS:
         raise ValueError(
-            f"Invalid data_source: {data_source}. "
+            f"Invalid data_source: {data_source!r}. "
             f"Must be one of: {list(DATA_SOURCE_DEFAULTS.keys())}"
+        )
+
+    compat = DATA_SOURCE_LANGUAGE_COMPAT.get(data_source, set())
+    if language not in compat:
+        raise ValueError(
+            f"data_source={data_source!r} is not compatible with language={language!r}. "
+            f"Allowed languages for {data_source!r}: {sorted(compat)}"
         )
 
     analysis_mode = config.get("analysis_mode")
@@ -50,17 +76,20 @@ def _validate_config(config: dict) -> None:
             f"Must be one of: {list(VALID_ANALYSIS_MODES)}"
         )
 
-    # Validate required paths
     paths = config.get("paths", {})
     required_paths = ["base_dir", "corpora_dir", "models_dir", "results_dir", "log_dir"]
     for key in required_paths:
         if key not in paths:
             raise ValueError(f"Missing required path: paths.{key}")
 
-    # Source-specific validation
     if data_source == "ngram":
         if "raw_ngram_dir" not in paths:
             raise ValueError("ngram data_source requires paths.raw_ngram_dir")
+    if data_source == "coha":
+        if "raw_coha_dir" not in paths:
+            raise ValueError("coha data_source requires paths.raw_coha_dir")
+        if "coha" not in config:
+            raise ValueError("coha data_source requires a top-level 'coha' config block")
     if data_source in ("ngram", "renminribao"):
         if "time_slices" not in config:
             raise ValueError(f"{data_source} data_source requires time_slices config")
