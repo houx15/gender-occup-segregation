@@ -250,3 +250,21 @@ def test_build_corpora_ngram_en_lowercases(tmp_path):
     out = clean_ngram("Hello WORLD FROM Mars")
     assert out is not None
     assert out.islower()
+
+
+def test_build_corpora_coha_parses_4gram_line(tmp_path):
+    from scripts.data_prep.build_corpora_coha import parse_coha_line
+    from pathlib import Path
+
+    entries = parse_coha_line("the quick brown fox\t42", n=4)
+    assert entries is not None
+    text, freq = entries
+    assert freq == 42
+    assert text == "the quick brown fox"
+
+
+def test_build_corpora_coha_decade_from_filename():
+    from scripts.data_prep.build_corpora_coha import decade_from_filename
+    from pathlib import Path
+    assert decade_from_filename(Path("w4_1940.txt")) == "1940s"
+    assert decade_from_filename(Path("coha_4grams_1950s.txt")) == "1950s"
