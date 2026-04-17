@@ -10,7 +10,6 @@ module does not pull them in unless their tokenizer is actually called.
 
 from __future__ import annotations
 
-import re
 from typing import Callable
 
 
