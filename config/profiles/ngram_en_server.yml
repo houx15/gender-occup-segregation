@@ -1,0 +1,58 @@
+# English Google 5-gram + prestige (longitudinal)
+language: "en"
+data_source: "ngram"
+analysis_mode: "prestige"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_ngram_dir: "/scratch/network/yh6580/gender-occup/data/raw_ngrams_en"
+  decompressed_dir: "/scratch/network/yh6580/gender-occup/data/raw_ngrams_en_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/corpora_en_ngram"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/models_en_ngram"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_en_ngram"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures"
+
+ngram:
+  language: "eng"
+  n: 5
+  min_year: 1800
+  max_year: 2019
+  delimiter: "\t"
+  year_column: 1
+  match_count_column: 2
+  volume_count_column: 3
+
+time_slices:
+  window_size: 10
+  step_size: 5
+  start_year: 1900
+  end_year: 2015
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 50
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "eng_5gram_{unit_name}.model"
+
+corpus:
+  use_counts: false
+  min_count_threshold: 1
+  tokenizer: "whitespace"
+  lowercase: true
+  min_words: 2
+
+wordlists:
+  dir: "wordlists/en/prestige"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+  prestige_axes_file: "prestige_axes.json"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
