@@ -13,7 +13,6 @@ Usage:
 """
 
 import os
-import re
 import gc
 import glob
 from pathlib import Path
@@ -23,13 +22,9 @@ from datetime import datetime, timedelta
 import pandas as pd
 import fire
 
-try:
-    import jieba_fast as jieba
-except ImportError:
-    import jieba
-
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
+from scripts.common.preprocessing import preprocess
 
 
 # Province code mapping (GB/T 2260)
@@ -45,15 +40,6 @@ PROVINCE_CODE_TO_NAME = {
     "71": "中国台湾", "81": "中国香港", "82": "中国澳门",
 }
 PROVINCE_NAME_TO_CODE = {v: k for k, v in PROVINCE_CODE_TO_NAME.items()}
-
-STOPWORDS = {
-    "的", "是", "了", "在", "有", "和", "就", "不", "人", "都", "一", "一个",
-    "上", "也", "很", "到", "说", "要", "去", "你", "会", "着", "没有", "看",
-    "好", "自己", "这", "那", "我", "他", "她", "我们", "你们", "他们", "她们",
-    "什么", "怎么", "这个", "那个",
-}
-
-CHINESE_RE = re.compile(r"[\u4e00-\u9fff]+")
 
 # Default province groups for parallel execution
 PROVINCE_GROUPS = [
@@ -71,19 +57,6 @@ PROVINCE_GROUPS = [
 ]
 
 
-def clean_weibo_content(text):
-    if pd.isna(text) or text == "":
-        return ""
-    text = str(text).split("//")[0]
-    text = text.replace("\u200b", "").replace(""", "").replace(""", "").replace("…", "")
-    text = re.sub(r"\[.*?\]", "", text)
-    text = re.sub(r"http[s]?://\S+", "", text)
-    text = re.sub(r"www\.\S+", "", text)
-    text = re.sub(r"t\.cn/\S+", "", text)
-    text = re.sub(r"@\S+", "", text)
-    return text.strip()
-
-
 def clean_region_name(region):
     if pd.isna(region) or region == "":
         return None
@@ -98,20 +71,6 @@ def convert_province_code(code):
         return None
     code_str = str(int(code)) if isinstance(code, (int, float)) else str(code).strip()
     return PROVINCE_CODE_TO_NAME.get(code_str)
-
-
-def preprocess_batch(ser):
-    """Tokenize and filter a Series of text."""
-    ser = ser.dropna()
-    ser = ser[ser.astype(str).str.strip().ne("")]
-    chinese = ser.str.findall(CHINESE_RE).str.join("")
-    cuts = [jieba.lcut(t, HMM=True) for t in chinese.tolist()]
-    out = []
-    for words in cuts:
-        tmp = [w.strip() for w in words if w.strip() not in STOPWORDS]
-        if len(tmp) >= 5:
-            out.append(" ".join(tmp))
-    return out
 
 
 class RollingFile:
@@ -175,7 +134,8 @@ def prepare_2024(config, logger, year, start_month, end_month):
                 if "weibo_content" not in df.columns or "region_name" not in df.columns:
                     continue
                 df = df.dropna(subset=["weibo_id", "weibo_content", "region_name"])
-                df["weibo_content"] = df["weibo_content"].apply(clean_weibo_content)
+                # Strip retweet prefix (text after "//" is the quoted original)
+                df["weibo_content"] = df["weibo_content"].astype(str).str.split("//").str[0].str.strip()
                 df = df[df["weibo_content"].str.len() > 5]
                 df["province"] = df["region_name"].apply(clean_region_name)
                 df = df.dropna(subset=["province"])
@@ -201,6 +161,7 @@ def prepare_2024(config, logger, year, start_month, end_month):
 def clean_for_word2vec(config, logger, provinces):
     """Convert prepared parquet data to tokenized corpus files."""
     corpora_dir = Path(config['paths']['corpora_dir'])
+    corpus_cfg = config.get("corpus", {})
     for province in provinces:
         province_dir = corpora_dir / province
         if not province_dir.exists():
@@ -213,7 +174,20 @@ def clean_for_word2vec(config, logger, provinces):
         for pq_path in parquet_files:
             try:
                 df = pd.read_parquet(pq_path, columns=["weibo_content"])
-                lines = preprocess_batch(df["weibo_content"])
+                lines = []
+                for raw_text in df["weibo_content"].dropna():
+                    tokens = preprocess(
+                        str(raw_text),
+                        language=config.get("language", "zh"),
+                        tokenizer=corpus_cfg.get("tokenizer", "jieba"),
+                        stopwords_key=corpus_cfg.get("stopwords", "zh_weibo"),
+                        lowercase=corpus_cfg.get("lowercase", False),
+                        min_words=corpus_cfg.get("min_words", 5),
+                        cleaner_opts={"strip_mentions": True, "strip_parens": True},
+                    )
+                    if tokens is None:
+                        continue
+                    lines.append(" ".join(tokens))
                 if lines:
                     roller.write("\n".join(lines))
                     total += len(lines)
@@ -237,6 +211,7 @@ def build_2020(config, logger, year, province_filter=None):
     parquet_files = sorted(glob.glob(os.path.join(year_dir, "*.parquet")))
     logger.info(f"Found {len(parquet_files)} parquet files for {year}")
 
+    corpus_cfg = config.get("corpus", {})
     province_writers = {}
     for file_path in parquet_files:
         try:
@@ -250,7 +225,20 @@ def build_2020(config, logger, year, province_filter=None):
 
             for province in df["province"].unique():
                 prov_data = df[df["province"] == province]
-                lines = preprocess_batch(prov_data["weibo_content"])
+                lines = []
+                for raw_text in prov_data["weibo_content"].dropna():
+                    tokens = preprocess(
+                        str(raw_text),
+                        language=config.get("language", "zh"),
+                        tokenizer=corpus_cfg.get("tokenizer", "jieba"),
+                        stopwords_key=corpus_cfg.get("stopwords", "zh_weibo"),
+                        lowercase=corpus_cfg.get("lowercase", False),
+                        min_words=corpus_cfg.get("min_words", 5),
+                        cleaner_opts={"strip_mentions": True, "strip_parens": True},
+                    )
+                    if tokens is None:
+                        continue
+                    lines.append(" ".join(tokens))
                 if not lines:
                     continue
                 if province not in province_writers:

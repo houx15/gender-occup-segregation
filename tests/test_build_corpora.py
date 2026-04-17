@@ -12,6 +12,67 @@ from scripts.data_prep.build_corpora_ngram import (
 )
 
 
+class TestWeiboBuilder:
+    """Tests for the Weibo corpus builder."""
+
+    def test_weibo_builder_produces_corpus(self, tmp_path):
+        pytest.importorskip("jieba")
+        pytest.importorskip("pandas")
+        import pandas as pd
+        import logging
+        from scripts.data_prep.build_corpora_weibo import build_2020
+
+        # Create fixture directory: raw_data_dir/2020/*.parquet
+        year_dir = tmp_path / "raw" / "2020"
+        year_dir.mkdir(parents=True)
+
+        # Province code "11" = 北京; create rows with enough Chinese text
+        sample_texts = [
+            "工人阶级是社会主义建设的主力军，劳动人民共同奋斗",
+            "教育是民族振兴的基石，科技是第一生产力推动发展",
+            "医疗卫生事业关系到广大人民群众的健康和生命安全",
+            "农业农村发展是国家经济建设的重要组成部分",
+            "文化艺术繁荣是社会主义精神文明建设的重要内容",
+        ] * 4  # 20 rows total
+
+        df = pd.DataFrame({
+            "province": ["11"] * len(sample_texts),
+            "weibo_content": sample_texts,
+        })
+        df.to_parquet(year_dir / "sample.parquet", index=False)
+
+        corpora_dir = tmp_path / "data" / "corpora"
+        config = {
+            "language": "zh",
+            "corpus": {
+                "tokenizer": "jieba",
+                "stopwords": "zh_weibo",
+                "lowercase": False,
+                "min_words": 2,
+            },
+            "paths": {
+                "raw_data_dir": str(tmp_path / "raw"),
+                "corpora_dir": str(corpora_dir),
+                "log_dir": str(tmp_path / "logs"),
+            },
+        }
+
+        logger = logging.getLogger("test_weibo")
+        build_2020(config, logger, year=2020)
+
+        # Expect a corpus file under corpora_dir/北京/
+        province_dir = corpora_dir / "北京"
+        assert province_dir.exists(), f"Expected province dir {province_dir}"
+        corpus_files = list(province_dir.glob("corpus_*"))
+        assert len(corpus_files) > 0, "Expected at least one corpus file"
+
+        total_lines = sum(
+            len(cf.read_text(encoding="utf-8").strip().splitlines())
+            for cf in corpus_files
+        )
+        assert total_lines > 0, "Expected non-empty corpus output"
+
+
 class TestGenerateTimeSlices:
     """Test cases for generate_time_slices."""
 
