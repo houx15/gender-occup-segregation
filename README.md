@@ -371,9 +371,27 @@ sbatch slurm/full_pipeline_en.slurm config/profiles/ngram_en_server.yml
 
 `run_pipeline.sh` auto-skips the download step when the raw files already exist, so the Slurm job picks up cleanly from corpus building.
 
-For COHA, replace step 1 with `download_coha.py` (URLs from your corpusdata.org signup email) and use `config/profiles/coha_server.yml`.
-
 The English builder lowercases all tokens, strips punctuation (apostrophes are preserved), and writes one `corpus_{index}.txt` per ngram file into the standard `corpora_dir/{start}_{end}/` slice directories — the same layout consumed by `train_embeddings.py`.
+
+**Quick start (COHA on Princeton Slurm):**
+
+COHA archives are email-gated. You must sign up at [corpusdata.org](https://www.corpusdata.org/) first — they email you a page with download URLs for the free n-gram archives (1-gram through 5-gram, 1810s–2010s).
+
+```bash
+# Step 1 — paste the URLs into config/profiles/coha_server.yml under coha.source_archive_urls
+#          and set coha.n to match the n-gram size you downloaded (e.g. n: 5 for 5-grams)
+
+# Step 2 — login node: download + decompress
+python -m scripts.data_prep.download_coha --config config/profiles/coha_server.yml
+
+# Step 3 — submit corpus building + training + analysis to Slurm
+sbatch slurm/full_pipeline_en.slurm config/profiles/coha_server.yml
+```
+
+Notes on COHA data layout:
+- Free archives are bundled by n-gram size (`coha-5-grams.zip`, etc.), **not** by decade. After decompression, each archive expands into per-decade TSV files that the builder auto-buckets into decade slice dirs (`1940s/`, `1950s/`, …).
+- The builder reads decade from filenames via regex — verify one decompressed filename contains a decade marker (e.g. `..._1940s_...`) before running the pipeline. If not, adjust `decade_from_filename` in `scripts/data_prep/build_corpora_coha.py`.
+- Do not mix n-gram sizes in one run. Set `coha.n` to the size you downloaded and keep one archive set per config.
 
 ## Methodology
 
