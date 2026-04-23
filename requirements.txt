@@ -25,6 +25,9 @@ requests>=2.31.0
 # Chinese text segmentation (for renminribao/weibo/newspaper)
 jieba>=0.42.1
 
+# English tokenization and stopwords (for ngram_en/coha pipelines)
+nltk>=3.8.0
+
 # Statistics
 scipy>=1.10.0
 

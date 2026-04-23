@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Download and decompress Chinese Google 5-gram data.
+Download and decompress Google 5-gram data (Chinese or English).
 
 Usage:
     python download_ngrams.py --config=config/config.yml
@@ -9,6 +9,7 @@ Usage:
 """
 
 import logging
+import re
 import sys
 import gzip
 import shutil
@@ -16,8 +17,21 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Tuple
 import requests
-import yaml
 import fire
+
+from scripts.common.config_loader import load_config
+
+
+NGRAM_BASE_TEMPLATE = "http://storage.googleapis.com/books/ngrams/books/20200217/{lang}"
+NGRAM_LANGUAGE_CODES = {"zh": "chi_sim", "en": "eng"}
+
+
+def _resolve_ngram_language(config: dict) -> str:
+    """Return the Google ngram language code for the current config."""
+    ngram_cfg = config.get("ngram", {})
+    if "language" in ngram_cfg:
+        return ngram_cfg["language"]
+    return NGRAM_LANGUAGE_CODES[config["language"]]
 
 
 def setup_logging(log_dir: Path) -> logging.Logger:
@@ -46,40 +60,25 @@ def setup_logging(log_dir: Path) -> logging.Logger:
     return logger
 
 
-def load_config(config_path: str) -> dict:
-    """Load configuration from YAML file."""
-    with open(config_path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-
 def generate_download_urls(base_url: str, logger: logging.Logger) -> List[str]:
     """
-    Generate download URLs for Chinese 5-gram files.
+    Fetch the base_url index page and extract shard filenames.
 
-    Pattern:
-    - totalcounts-5 (metadata file)
-    - 5-00000-of-00105.gz through 5-00104-of-00105.gz (105 data files)
+    Pattern: 5-00000-of-NNNNN.gz (shard count differs per language)
     """
-    download_urls = []
+    logger.info(f"Fetching index page: {base_url}/")
+    response = requests.get(f"{base_url}/", timeout=30)
+    response.raise_for_status()
+    html = response.text
 
-    # Add totalcounts file (metadata)
-    totalcounts_url = f"{base_url}/totalcounts-5"
-    download_urls.append(totalcounts_url)
+    shard_names = sorted(set(re.findall(r"5-\d{5}-of-\d{5}\.gz", html)))
+    if not shard_names:
+        raise RuntimeError(f"No 5-gram shard files found at {base_url}/")
 
-    # Add all 5-gram data files (00000 to 00104 = 105 files)
-    for i in range(105):
-        file_url = f"{base_url}/5-{i:05d}-of-00105.gz"
-        download_urls.append(file_url)
+    download_urls = [f"{base_url}/totalcounts-5"]
+    download_urls.extend(f"{base_url}/{name}" for name in shard_names)
 
-    logger.info(f"Generated {len(download_urls)} download URLs")
-    logger.info(f"  - 1 totalcounts file")
-    logger.info(f"  - 105 5-gram data files")
-    logger.info(f"  Sample URLs:")
-    for i, url in enumerate(download_urls[:3]):
-        logger.info(f"    {i+1}. {url}")
-    logger.info(f"    ...")
-    logger.info(f"    {len(download_urls)}. {download_urls[-1]}")
-
+    logger.info(f"Discovered {len(shard_names)} shard files at {base_url}")
     return download_urls
 
 
@@ -151,13 +150,13 @@ def decompress_file(
 
 def main(config="config/config.yml", skip_decompress=True, max_workers=4):
     """
-    Download and decompress Chinese Google 5-gram data.
+    Download and decompress Google 5-gram data (Chinese or English).
 
-    http://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/totalcounts-5
-    http://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/5-00000-of-00105.gz
-    http://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/5-00001-of-00105.gz
-    ...
-    http://storage.googleapis.com/books/ngrams/books/20200217/chi_sim/5-00104-of-00105.gz
+    Base URL is resolved from the config's language field:
+      zh -> chi_sim: .../20200217/chi_sim/
+      en -> eng:     .../20200217/eng/
+
+    Override with ngram.language in config to use a different language code.
 
     Args:
         config: Path to configuration file
@@ -180,11 +179,12 @@ def main(config="config/config.yml", skip_decompress=True, max_workers=4):
     logger = setup_logging(log_dir)
 
     logger.info("=" * 80)
-    logger.info("Starting Chinese Google 5-gram download")
+    logger.info("Starting Google 5-gram download")
     logger.info("=" * 80)
 
     # Generate download URLs
-    base_url = "http://storage.googleapis.com/books/ngrams/books/20200217/chi_sim"
+    lang_code = _resolve_ngram_language(config_data)
+    base_url = NGRAM_BASE_TEMPLATE.format(lang=lang_code)
     download_urls = generate_download_urls(base_url, logger)
 
     # Download files

@@ -65,6 +65,12 @@ pip install --upgrade pip
 pip install -r requirements.txt
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 
+# Download NLTK data needed for English pipeline
+echo ""
+echo "Step 3b: Downloading NLTK data (punkt_tab, stopwords)..."
+python3 -c "import nltk; nltk.download('punkt_tab', quiet=True); nltk.download('stopwords', quiet=True)"
+echo -e "${GREEN}✓ NLTK data downloaded${NC}"
+
 # Step 4: Create config file
 echo ""
 echo "Step 4: Creating configuration file..."

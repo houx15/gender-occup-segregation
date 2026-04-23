@@ -11,12 +11,23 @@ from typing import Optional
 import yaml
 
 
+VALID_LANGUAGES = {"zh", "en"}
+
+DATA_SOURCE_LANGUAGE_COMPAT = {
+    "ngram":       {"zh", "en"},
+    "renminribao": {"zh"},
+    "weibo":       {"zh"},
+    "newspaper":   {"zh"},
+    "coha":        {"en"},
+}
+
 # Valid data sources and their default analysis units
 DATA_SOURCE_DEFAULTS = {
     "ngram": "longitudinal",
     "renminribao": "longitudinal",
     "weibo": "provincial",
     "newspaper": "provincial",
+    "coha": "longitudinal",
 }
 
 VALID_ANALYSIS_MODES = {"prestige", "weat"}
@@ -36,11 +47,26 @@ def load_config(config_path: str) -> dict:
 
 def _validate_config(config: dict) -> None:
     """Validate required fields based on data_source type."""
+    language = config.get("language")
+    if not language:
+        raise ValueError("Missing required top-level key: language ('zh' or 'en')")
+    if language not in VALID_LANGUAGES:
+        raise ValueError(
+            f"Invalid language: {language!r}. Must be one of: {sorted(VALID_LANGUAGES)}"
+        )
+
     data_source = config.get("data_source")
     if data_source not in DATA_SOURCE_DEFAULTS:
         raise ValueError(
-            f"Invalid data_source: {data_source}. "
+            f"Invalid data_source: {data_source!r}. "
             f"Must be one of: {list(DATA_SOURCE_DEFAULTS.keys())}"
+        )
+
+    compat = DATA_SOURCE_LANGUAGE_COMPAT.get(data_source, set())
+    if language not in compat:
+        raise ValueError(
+            f"data_source={data_source!r} is not compatible with language={language!r}. "
+            f"Allowed languages for {data_source!r}: {sorted(compat)}"
         )
 
     analysis_mode = config.get("analysis_mode")
@@ -50,17 +76,22 @@ def _validate_config(config: dict) -> None:
             f"Must be one of: {list(VALID_ANALYSIS_MODES)}"
         )
 
-    # Validate required paths
     paths = config.get("paths", {})
     required_paths = ["base_dir", "corpora_dir", "models_dir", "results_dir", "log_dir"]
     for key in required_paths:
         if key not in paths:
             raise ValueError(f"Missing required path: paths.{key}")
 
-    # Source-specific validation
     if data_source == "ngram":
         if "raw_ngram_dir" not in paths:
             raise ValueError("ngram data_source requires paths.raw_ngram_dir")
+    if data_source == "coha":
+        if "raw_coha_dir" not in paths:
+            raise ValueError("coha data_source requires paths.raw_coha_dir")
+        if "coha_decompressed_dir" not in paths:
+            raise ValueError("coha data_source requires paths.coha_decompressed_dir")
+        if "coha" not in config:
+            raise ValueError("coha data_source requires a top-level 'coha' config block")
     if data_source in ("ngram", "renminribao"):
         if "time_slices" not in config:
             raise ValueError(f"{data_source} data_source requires time_slices config")
@@ -93,28 +124,37 @@ def _resolve_paths(config: dict) -> None:
             # else leave as-is (will error later with a clear message)
 
 
+# Defaults by (language, data_source) — order: (tokenizer, stopwords, lowercase)
+_CORPUS_DEFAULTS = {
+    ("zh", "ngram"):       ("whitespace", None,             False),
+    ("zh", "renminribao"): ("jieba",      "zh_default",     False),
+    ("zh", "weibo"):       ("jieba",      "zh_weibo",       False),
+    ("zh", "newspaper"):   ("jieba",      "zh_newspaper",   False),
+    ("en", "ngram"):       ("whitespace", None,             True),
+    ("en", "coha"):        ("whitespace", None,             True),
+}
+
+
 def _set_defaults(config: dict) -> None:
-    """Set default values based on data_source."""
+    """Set default values based on (language, data_source)."""
+    language = config["language"]
     data_source = config["data_source"]
 
-    # Default analysis unit
     if "analysis_unit" not in config:
         config["analysis_unit"] = DATA_SOURCE_DEFAULTS[data_source]
 
-    # Default analysis mode
     if "analysis_mode" not in config:
         if data_source in ("ngram", "renminribao"):
             config["analysis_mode"] = "prestige"
         else:
             config["analysis_mode"] = "weat"
 
-    # Default tokenizer
     corpus = config.setdefault("corpus", {})
-    if "tokenizer" not in corpus:
-        if data_source == "ngram":
-            corpus["tokenizer"] = "whitespace"
-        else:
-            corpus["tokenizer"] = "jieba"
+    tok_default, sw_default, lc_default = _CORPUS_DEFAULTS[(language, data_source)]
+    corpus.setdefault("tokenizer", tok_default)
+    if sw_default is not None:
+        corpus.setdefault("stopwords", sw_default)
+    corpus.setdefault("lowercase", lc_default)
 
 
 def get_analysis_unit(config: dict) -> str:
@@ -153,19 +193,21 @@ def get_model_name(unit_name: str, config: dict) -> str:
 
 
 def get_wordlist_dir(config: dict) -> Path:
-    """Get the resolved wordlist directory path."""
+    """Get the resolved wordlist directory path (language-aware)."""
     wl_dir = config.get("wordlists", {}).get("dir")
     if wl_dir:
         return Path(wl_dir)
-    # Fallback based on analysis_mode — look in repo root (cwd)
+
+    # Fallback based on (language, analysis_mode, data_source)
     repo_root = Path.cwd()
+    language = config["language"]
     analysis_mode = config.get("analysis_mode", "prestige")
+
     if analysis_mode == "prestige":
-        return repo_root / "wordlists" / "prestige"
-    elif analysis_mode == "weat":
-        data_source = config["data_source"]
-        if data_source == "weibo":
-            return repo_root / "wordlists" / "weat_informal"
-        else:
-            return repo_root / "wordlists" / "weat_formal"
-    return repo_root / "wordlists"
+        return repo_root / "wordlists" / language / "prestige"
+
+    # WEAT
+    data_source = config["data_source"]
+    if data_source == "weibo":
+        return repo_root / "wordlists" / language / "weat_informal"
+    return repo_root / "wordlists" / language / "weat_formal"

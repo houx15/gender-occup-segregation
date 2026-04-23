@@ -28,11 +28,12 @@ cp config/config.example.yml config/config.yml
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Run (auto-skips stages with existing output)
-./run_pipeline.sh
+# 3. Download raw data on the login node (Slurm compute nodes have no internet)
+python -m scripts.data_prep.download_ngrams --config config/config.yml
 
-# Or use Slurm
+# 4. Submit corpus building + training + analysis to Slurm
 sbatch slurm/full_pipeline.slurm
+# (run_pipeline.sh auto-skips the download step when raw files already exist)
 ```
 
 ## Repository Structure
@@ -280,19 +281,29 @@ correlation:
 
 ## Running on Slurm
 
+Slurm compute nodes have no internet access. Always download raw data on a login node first:
+
 ```bash
-# Single stage
+# Login node — download raw n-gram or COHA files
+python -m scripts.data_prep.download_ngrams --config config/config.yml   # Chinese/English ngram
+python -m scripts.data_prep.download_coha   --config config/profiles/coha_server.yml  # COHA
+```
+
+Then submit the rest to Slurm (`run_pipeline.sh` auto-skips the download step when files exist):
+
+```bash
+# Full pipeline (corpus → train → analyze → visualize)
+sbatch slurm/full_pipeline.slurm
+sbatch slurm/full_pipeline_en.slurm config/profiles/ngram_en_server.yml  # English
+
+# Individual stages
 sbatch slurm/build_corpus.slurm
 sbatch slurm/train.slurm
 sbatch slurm/analyze.slurm
 
-# Full pipeline
-sbatch slurm/full_pipeline.slurm
-
 # Train specific province group (parallel jobs)
 sbatch slurm/train.slurm config/config.yml --group=0
 sbatch slurm/train.slurm config/config.yml --group=1
-# ...
 ```
 
 Edit the `#SBATCH` headers in the slurm scripts to adjust resources and email.
@@ -331,6 +342,56 @@ Edit the `#SBATCH` headers in the slurm scripts to adjust resources and email.
 | `weat_projection_boxplots` | WEAT | Projection distributions per unit (diagnostic) |
 | `weat_choropleth_*` | WEAT | Provincial maps (requires geopandas + shapefile) |
 | `*_correlation.pdf` | Correlation | Scatter plots with regression lines |
+
+## English Pipeline
+
+The framework supports English-language corpora alongside the Chinese pipeline.
+
+**Supported English sources:**
+- **Google Books Ngram (English)** — 5-gram files from the Google Ngram v3 corpus (1800–2019), producing time-sliced corpora identical in structure to the Chinese n-gram pipeline.
+- **COHA (Corpus of Historical American English)** — decade-level 4-gram files for 1810s–2010s (support is implemented; large-scale runs deferred).
+
+English wordlists live under `wordlists/en/` (subdirectories `prestige/` and `weat_formal/`) and follow the same JSON/TXT conventions as the Chinese wordlists. NLTK punkt\_tab and stopwords data are required before the first run:
+
+```bash
+python -c "import nltk; nltk.download('punkt_tab'); nltk.download('stopwords')"
+```
+
+**Quick start (English Ngram on Princeton Slurm):**
+
+Slurm compute nodes have no internet access. Download on a login node first, then submit the rest as a batch job.
+
+```bash
+# Step 1 — login node: download raw n-gram files (~300 GB)
+python -m scripts.data_prep.download_ngrams --config config/profiles/ngram_en_server.yml
+
+# Step 2 — submit corpus building + training + analysis to Slurm
+sbatch slurm/full_pipeline_en.slurm config/profiles/ngram_en_server.yml
+```
+
+`run_pipeline.sh` auto-skips the download step when the raw files already exist, so the Slurm job picks up cleanly from corpus building.
+
+The English builder lowercases all tokens, strips punctuation (apostrophes are preserved), and writes one `corpus_{index}.txt` per ngram file into the standard `corpora_dir/{start}_{end}/` slice directories — the same layout consumed by `train_embeddings.py`.
+
+**Quick start (COHA on Princeton Slurm):**
+
+COHA archives are email-gated. You must sign up at [corpusdata.org](https://www.corpusdata.org/) first — they email you a page with download URLs for the free n-gram archives (1-gram through 5-gram, 1810s–2010s).
+
+```bash
+# Step 1 — paste the URLs into config/profiles/coha_server.yml under coha.source_archive_urls
+#          and set coha.n to match the n-gram size you downloaded (e.g. n: 5 for 5-grams)
+
+# Step 2 — login node: download + decompress
+python -m scripts.data_prep.download_coha --config config/profiles/coha_server.yml
+
+# Step 3 — submit corpus building + training + analysis to Slurm
+sbatch slurm/full_pipeline_en.slurm config/profiles/coha_server.yml
+```
+
+Notes on COHA data layout:
+- Free archives are bundled by n-gram size (`coha-5-grams.zip`, etc.), **not** by decade. After decompression, each archive expands into per-decade TSV files that the builder auto-buckets into decade slice dirs (`1940s/`, `1950s/`, …).
+- The builder reads decade from filenames via regex — verify one decompressed filename contains a decade marker (e.g. `..._1940s_...`) before running the pipeline. If not, adjust `decade_from_filename` in `scripts/data_prep/build_corpora_coha.py`.
+- Do not mix n-gram sizes in one run. Set `coha.n` to the size you downloaded and keep one archive set per config.
 
 ## Methodology
 

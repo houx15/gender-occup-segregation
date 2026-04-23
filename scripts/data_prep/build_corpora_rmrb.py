@@ -13,27 +13,15 @@ Usage:
     python -m scripts.data_prep.build_corpora_rmrb --config=config/config.yml --slice=1940_1949
 """
 
-import os
 import re
 from pathlib import Path
-from typing import List, Tuple
 from collections import defaultdict
 
 import fire
-import jieba
 
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
-
-
-STOPWORDS = {
-    '的', '了', '在', '是', '我', '有', '和', '就', '不', '人', '都', '一', '一个',
-    '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好',
-    '自己', '这', '那', '他', '她', '它', '们', '为', '而', '以', '与', '及', '或',
-    ' ', '\t', '\n', '\r',
-}
-
-CHINESE_RE = re.compile(r"[\u4e00-\u9fff]+")
+from scripts.common.preprocessing import preprocess
 
 
 def generate_time_slices(start_year, end_year, window_size, step_size):
@@ -46,26 +34,6 @@ def generate_time_slices(start_year, end_year, window_size, step_size):
         if current_start > end_year:
             break
     return slices
-
-
-def clean_text(text):
-    if not text or not isinstance(text, str):
-        return ""
-    text = re.sub(r"http[s]?://\S+", "", text)
-    text = re.sub(r"www\.\S+", "", text)
-    text = re.sub(r"\[.*?\]", "", text)
-    text = text.replace("\u200b", "").replace("…", "")
-    return "".join(CHINESE_RE.findall(text)).strip()
-
-
-def segment_text(text, min_words=5):
-    if not text:
-        return ""
-    words = jieba.lcut(text, HMM=True)
-    filtered = [w.strip() for w in words if w.strip() and w.strip() not in STOPWORDS]
-    if len(filtered) < min_words:
-        return ""
-    return " ".join(filtered)
 
 
 def extract_year_from_filename(filename):
@@ -91,7 +59,7 @@ def find_renminribao_files(data_dir):
     return files
 
 
-def process_file(file_path, year, time_slices, corpora_dir, logger, min_words=5, buffer_size=10000):
+def process_file(file_path, year, time_slices, corpora_dir, logger, config, buffer_size=10000):
     stats = defaultdict(int)
     matched_slices = [
         f"{s}_{e}" for s, e in time_slices if s <= year <= e
@@ -108,16 +76,22 @@ def process_file(file_path, year, time_slices, corpora_dir, logger, min_words=5,
         corpus_files[s] = slice_dir / f"corpus_{file_index}.txt"
 
     try:
+        min_words = config.get("corpus", {}).get("min_words", 5)
         lines_processed = 0
         with open(file_path, 'r', encoding='gb18030', errors='ignore') as f:
             for line in f:
                 lines_processed += 1
-                cleaned = clean_text(line)
-                if not cleaned:
+                tokens = preprocess(
+                    line,
+                    language=config["language"],
+                    tokenizer=config["corpus"]["tokenizer"],
+                    stopwords_key=config["corpus"].get("stopwords"),
+                    lowercase=config["corpus"].get("lowercase", False),
+                    min_words=min_words,
+                )
+                if tokens is None:
                     continue
-                segmented = segment_text(cleaned, min_words=min_words)
-                if not segmented:
-                    continue
+                segmented = " ".join(tokens)
                 for s in matched_slices:
                     buffers[s].append(segmented)
                     stats[f"{s}_lines"] += 1
@@ -178,7 +152,7 @@ def build_corpora(config, logger, specific_slice=None, data_dir=None):
     total_stats = defaultdict(int)
     for idx, (file_path, year) in enumerate(files, 1):
         logger.info(f"Processing [{idx}/{len(files)}]: {file_path.name} (year: {year})")
-        stats = process_file(file_path, year, time_slices, corpora_dir, logger)
+        stats = process_file(file_path, year, time_slices, corpora_dir, logger, config)
         for key, value in stats.items():
             total_stats[key] += value
 

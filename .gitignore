@@ -98,3 +98,6 @@ provincial/data/*
 !slurm/*.slurm
 
 *_figures/*2020/
+
+# Worktrees
+.worktrees/
