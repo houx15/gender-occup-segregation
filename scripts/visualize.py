@@ -664,11 +664,16 @@ def plot_weat_choropleth(weat_df, figures_dir, logger):
                 filename = f"weat_choropleth_{dim}_overall"
                 _plot_single_choropleth(merged, title, filename, figures_dir, logger)
         else:
-            # Simple province matching (non province-year units)
-            dim_data = dim_raw.rename(columns={"unit": "province"})
+            # Simple province matching (non province-year units, e.g. "北京")
+            dim_data = dim_raw.copy()
+            dim_data["province"] = dim_data["unit"].map(SHORT_TO_FULL_PROVINCE)
+            dim_data = dim_data.dropna(subset=["province"])
+            if dim_data.empty:
+                logger.info(f"  Skipping choropleth for {dim}: no province name matches")
+                continue
             merged = _match_province_in_shapefile(dim_data, china)
             if merged["cohens_d"].notna().sum() == 0:
-                logger.info(f"  Skipping choropleth for {dim}: no matches")
+                logger.info(f"  Skipping choropleth for {dim}: no shapefile matches")
                 continue
             title = f"{dim.replace('_', ' ').title()} - Cohen's d by Province"
             _plot_single_choropleth(merged, title, f"weat_choropleth_{dim}",
