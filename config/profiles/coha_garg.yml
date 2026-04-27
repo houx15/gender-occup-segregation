@@ -1,0 +1,54 @@
+# Garg et al. 2018 Fig 2 replication — COHA decade embeddings
+# See docs/replication/garg_2018.md for the full methodology and run instructions.
+language: "en"
+data_source: "coha"
+analysis_mode: "garg"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_coha_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha"
+  coha_decompressed_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/corpora_en_coha"
+  # Garg run uses separate model/results/figures dirs so it does not collide
+  # with the prestige run (config/profiles/coha_server.yml).
+  models_dir: "/scratch/network/yh6580/gender-occup/data/models_en_coha_garg"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_en_coha_garg"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg"
+
+coha:
+  # NOTE: build_corpora_coha.py reads `ngram_order`, not `n`. The latter is
+  # silently ignored (latent bug in older profiles). Use `ngram_order` here.
+  ngram_order: 5
+  # Paste mentor-shared Dropbox archive URLs here.
+  # For Dropbox shared links, append ?dl=1 to force a direct download
+  # (download_coha.py uses requests.get + follows redirects).
+  source_archive_urls: []
+
+# Training params pinned to HistWords (Hamilton et al. 2016) SGNS COHA settings,
+# which are the vectors Garg et al. 2018 actually consumed for Fig 2.
+# Do not change without updating docs/replication/garg_2018.md.
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 100
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "coha_{unit_name}.model"
+
+corpus:
+  min_words: 2
+  tokenizer: "whitespace"
+  lowercase: true
+
+wordlists:
+  dir: "wordlists/en/garg"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
