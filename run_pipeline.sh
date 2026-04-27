@@ -167,6 +167,10 @@ elif [ "$ANALYSIS_MODE" = "weat" ]; then
     if [ -f "$RESULTS_DIR/weat_results.csv" ]; then
         HAS_RESULTS=true
     fi
+elif [ "$ANALYSIS_MODE" = "garg" ]; then
+    if [ -f "$RESULTS_DIR/garg_average_bias_by_decade.parquet" ]; then
+        HAS_RESULTS=true
+    fi
 fi
 
 if [ "$HAS_RESULTS" = true ] && [ "$FORCE_ANALYZE" = false ]; then
@@ -176,6 +180,7 @@ else
     case $ANALYSIS_MODE in
         prestige) python -m scripts.analyze_prestige --config="$CONFIG" ;;
         weat)     python -m scripts.analyze_weat --config="$CONFIG" ;;
+        garg)     python -m scripts.analyze_garg --config="$CONFIG" ;;
         *)        echo "Unknown analysis_mode: $ANALYSIS_MODE"; exit 1 ;;
     esac
 fi

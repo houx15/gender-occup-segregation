@@ -278,6 +278,59 @@ def plot_prestige_by_category(df, config, figures_dir, logger):
 
 
 # =============================================================================
+# Garg (2018) replication mode plots
+# =============================================================================
+
+def plot_garg_trend(df, figures_dir, logger):
+    """Plot Garg (2018) Fig 2 replication: mean relative norm distance by decade.
+
+    Empty-DataFrame behavior: logs a WARNING and returns early without writing
+    a figure. This avoids producing misleading empty plots when the upstream
+    analyzer wrote a zero-row summary (e.g. all decades skipped).
+    """
+    figures_dir = Path(figures_dir)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    out_path = figures_dir / "fig2_garg_replication.png"
+
+    if df is None or df.empty:
+        logger.warning(
+            "plot_garg_trend called with empty DataFrame; skipping write of "
+            f"{out_path}"
+        )
+        return
+
+    df_sorted = df.sort_values("unit_name").reset_index(drop=True)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(
+        df_sorted["unit_name"],
+        df_sorted["mean_rnd"],
+        marker="o",
+        color="#2c3e50",
+        linewidth=1.8,
+        label="Mean RND",
+    )
+    plt.fill_between(
+        df_sorted["unit_name"],
+        df_sorted["ci_low"],
+        df_sorted["ci_high"],
+        color="#2c3e50",
+        alpha=0.2,
+        label="95% CI",
+    )
+    plt.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
+    plt.title("Garg (2018) Fig 2 replication: relative norm distance by decade")
+    plt.xlabel("Decade")
+    plt.ylabel("Relative norm distance (positive → male-leaning)")
+    plt.xticks(rotation=45, ha="right")
+    plt.legend(loc="best", framealpha=0.8)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    logger.info(f"Saved Garg trend figure: {out_path}")
+
+
+# =============================================================================
 # WEAT mode plots
 # =============================================================================
 
@@ -1491,7 +1544,7 @@ def main(config="config/config.yml", mode=None):
 
     Args:
         config: Path to configuration file
-        mode: "prestige", "weat", or None (auto-detect from config)
+        mode: "prestige", "weat", "garg", or None (auto-detect from config)
     """
     config_data = load_config(config)
     logger = setup_logging(Path(config_data["paths"]["log_dir"]), "visualize.log")
@@ -1570,6 +1623,15 @@ def main(config="config/config.yml", mode=None):
             proj_df = pd.read_csv(proj_path)
             logger.info(f"Loaded {proj_path}: {len(proj_df)} rows")
             plot_weat_projection_boxplots(proj_df, figures_dir, logger)
+
+    elif analysis_mode == "garg":
+        summary_path = results_dir / "garg_average_bias_by_decade.parquet"
+        if summary_path.exists():
+            df = pd.read_parquet(summary_path)
+            logger.info(f"Loaded {summary_path}: {len(df)} rows")
+            plot_garg_trend(df, figures_dir, logger)
+        else:
+            logger.error(f"Garg summary not found at {summary_path}")
 
     logger.info("=" * 80)
     logger.info("Visualization completed!")

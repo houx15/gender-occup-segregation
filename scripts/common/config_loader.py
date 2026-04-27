@@ -30,7 +30,7 @@ DATA_SOURCE_DEFAULTS = {
     "coha": "longitudinal",
 }
 
-VALID_ANALYSIS_MODES = {"prestige", "weat"}
+VALID_ANALYSIS_MODES = {"prestige", "weat", "garg"}
 
 
 def load_config(config_path: str) -> dict:
@@ -205,6 +205,9 @@ def get_wordlist_dir(config: dict) -> Path:
 
     if analysis_mode == "prestige":
         return repo_root / "wordlists" / language / "prestige"
+
+    if analysis_mode == "garg":
+        return repo_root / "wordlists" / language / "garg"
 
     # WEAT
     data_source = config["data_source"]

@@ -321,6 +321,84 @@ def test_wordlist_dir_weat_informal_for_weibo(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# analysis_mode: garg (Garg et al. 2018 replication)
+# ---------------------------------------------------------------------------
+
+def test_garg_analysis_mode_accepted(tmp_path):
+    path = _write_config(
+        tmp_path,
+        {
+            "language": "en",
+            "data_source": "coha",
+            "analysis_mode": "garg",
+            "coha": {
+                "ngram_order": 4,
+                "source_archive_urls": ["http://example.com/coha.zip"],
+                "decade_min": 1810,
+                "decade_max": 2000,
+            },
+            "paths": {
+                "raw_coha_dir": "data/raw_coha",
+                "coha_decompressed_dir": "data/raw_coha_decompressed",
+            },
+        },
+    )
+    config = load_config(str(path))
+    assert config["analysis_mode"] == "garg"
+
+
+def test_wordlist_dir_garg_routes_to_garg_subdir(tmp_path):
+    from scripts.common.config_loader import get_wordlist_dir
+
+    path = _write_config(
+        tmp_path,
+        {
+            "language": "en",
+            "data_source": "coha",
+            "analysis_mode": "garg",
+            "coha": {
+                "ngram_order": 4,
+                "source_archive_urls": ["http://example.com/coha.zip"],
+                "decade_min": 1810,
+                "decade_max": 2000,
+            },
+            "paths": {
+                "raw_coha_dir": "data/raw_coha",
+                "coha_decompressed_dir": "data/raw_coha_decompressed",
+            },
+        },
+    )
+    config = load_config(str(path))
+    wl = get_wordlist_dir(config)
+    assert str(wl).endswith("wordlists/en/garg")
+
+
+def test_invalid_garg_like_mode_still_rejected(tmp_path):
+    """Regression: only the literal 'garg' string is accepted, not e.g. 'garg2018'."""
+    path = _write_config(tmp_path, {"language": "zh", "analysis_mode": "garg2018"})
+    with pytest.raises(ValueError, match="analysis_mode"):
+        load_config(str(path))
+
+
+def test_coha_garg_profile_loads_cleanly():
+    """Smoke test: the real Garg replication profile validates and pins HistWords params."""
+    repo_root = Path(__file__).resolve().parents[1]
+    profile = repo_root / "config" / "profiles" / "coha_garg.yml"
+    assert profile.exists(), f"Profile missing: {profile}"
+    config = load_config(str(profile))
+    assert config["analysis_mode"] == "garg"
+    assert config["language"] == "en"
+    assert config["data_source"] == "coha"
+    # Pinned to HistWords/Garg
+    embedding = config["embedding"]
+    assert embedding["vector_size"] == 300
+    assert embedding["window"] == 4
+    assert embedding["min_count"] == 100
+    assert embedding["sg"] == 1
+    assert embedding["negative"] == 15
+
+
+# ---------------------------------------------------------------------------
 # get_model_name
 # ---------------------------------------------------------------------------
 

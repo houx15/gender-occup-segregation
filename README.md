@@ -393,6 +393,17 @@ Notes on COHA data layout:
 - The builder reads decade from filenames via regex — verify one decompressed filename contains a decade marker (e.g. `..._1940s_...`) before running the pipeline. If not, adjust `decade_from_filename` in `scripts/data_prep/build_corpora_coha.py`.
 - Do not mix n-gram sizes in one run. Set `coha.n` to the size you downloaded and keep one archive set per config.
 
+### Garg (2018) replication
+
+A third analysis mode, `garg`, replicates Fig 2 of Garg et al. 2018 (gender-occupation bias trend across COHA decades) using the relative norm distance metric. The full methodology, training-parameter rationale, end-to-end run instructions (including Dropbox-shared COHA archives), and acceptance criteria live in [`docs/replication/garg_2018.md`](docs/replication/garg_2018.md).
+
+```bash
+# Same flow as COHA above, but with the Garg-pinned profile
+python -m scripts.data_prep.download_coha --config config/profiles/coha_garg.yml
+sbatch slurm/full_pipeline_en.slurm config/profiles/coha_garg.yml
+# → figures_garg/fig2_garg_replication.png
+```
+
 ## Methodology
 
 ### Word Embeddings
