@@ -17,12 +17,19 @@ paths:
   figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg"
 
 coha:
-  # NOTE: build_corpora_coha.py reads `ngram_order`, not `n`. The latter is
-  # silently ignored (latent bug in older profiles). Use `ngram_order` here.
-  ngram_order: 5
-  # Paste mentor-shared Dropbox archive URLs here.
-  # For Dropbox shared links, append ?dl=1 to force a direct download
-  # (download_coha.py uses requests.get + follows redirects).
+  # COHA paid full-text release (one document per file, prose with @@<id>
+  # header and `@ @ @ @ @ @ @ @ @ @` redaction markers). This is the format
+  # HistWords / Garg actually trained on. To use the free n-gram release
+  # instead, set format: ngram and add `ngram_order: 5`.
+  format: fulltext
+  # Drop chunks (inter-redaction segments) shorter than this many tokens —
+  # avoids polluting SGNS with 1-2 word fragments left over after splitting
+  # on the redaction marker.
+  min_chunk_tokens: 5
+  # If left empty AND coha_decompressed_dir already has *.txt files, the
+  # download step is auto-skipped. Paste mentor-shared Dropbox URLs here
+  # only if you actually need a download (append ?dl=1 to force direct
+  # download from Dropbox shared links).
   source_archive_urls: []
 
 # Training params pinned to HistWords (Hamilton et al. 2016) SGNS COHA settings,

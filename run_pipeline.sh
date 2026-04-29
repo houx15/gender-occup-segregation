@@ -54,6 +54,7 @@ LANGUAGE=$(read_config "c['language']")
 ANALYSIS_MODE=$(read_config "c.get('analysis_mode', 'prestige')")
 if [ "$DATA_SOURCE" = "coha" ]; then
     RAW_DIR=$(read_config "c['paths'].get('raw_coha_dir', '')")
+    DECOMP_DIR=$(read_config "c['paths'].get('coha_decompressed_dir', '')")
 else
     RAW_DIR=$(read_config "c['paths'].get('raw_ngram_dir', '')")
 fi
@@ -104,7 +105,10 @@ if [ "$DATA_SOURCE" = "ngram" ]; then
     fi
 elif [ "$DATA_SOURCE" = "coha" ]; then
     N_RAW=$(count_files "$RAW_DIR" "*.zip")
-    if [ "$N_RAW" -gt 0 ] && [ "$FORCE_DOWNLOAD" = false ]; then
+    N_DECOMP=$(count_files "$DECOMP_DIR" "*.txt")
+    if [ "$N_DECOMP" -gt 0 ] && [ "$FORCE_DOWNLOAD" = false ]; then
+        echo "Step 1: SKIP download ($N_DECOMP .txt files already in coha_decompressed_dir)"
+    elif [ "$N_RAW" -gt 0 ] && [ "$FORCE_DOWNLOAD" = false ]; then
         echo "Step 1: SKIP download ($N_RAW .zip files found in raw_coha_dir)"
     else
         echo "Step 1: Downloading COHA archives..."
