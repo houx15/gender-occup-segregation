@@ -281,8 +281,21 @@ def plot_prestige_by_category(df, config, figures_dir, logger):
 # Garg (2018) replication mode plots
 # =============================================================================
 
-def plot_garg_trend(df, figures_dir, logger):
+def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
     """Plot Garg (2018) Fig 2 replication: mean relative norm distance by decade.
+
+    Args:
+        df: summary DataFrame from analyze_garg.build_summary, with at least
+            columns unit_name / mean_rnd / ci_low / ci_high. If a non-null
+            mean_pct_diff column is present, an "Avg. Women Occupation %
+            Difference" overlay is rendered on a twin y-axis (matching Garg's
+            plot_creation.plot_averagebias_over_time_consistentoccupations).
+        figures_dir: directory to write the figure into.
+        logger: logger for status messages.
+        embedding_source: optional short label like "trained_coha" or
+            "histwords_sgns". Flows into the figure filename suffix
+            (fig2_garg_replication__{source}.png) and title so runs against
+            different embedding sources do not overwrite each other.
 
     Empty-DataFrame behavior: logs a WARNING and returns early without writing
     a figure. This avoids producing misleading empty plots when the upstream
@@ -290,7 +303,9 @@ def plot_garg_trend(df, figures_dir, logger):
     """
     figures_dir = Path(figures_dir)
     figures_dir.mkdir(parents=True, exist_ok=True)
-    out_path = figures_dir / "fig2_garg_replication.png"
+
+    suffix = f"__{embedding_source}" if embedding_source else ""
+    out_path = figures_dir / f"fig2_garg_replication{suffix}.png"
 
     if df is None or df.empty:
         logger.warning(
@@ -301,29 +316,68 @@ def plot_garg_trend(df, figures_dir, logger):
 
     df_sorted = df.sort_values("unit_name").reset_index(drop=True)
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(
+    has_pct_overlay = (
+        "mean_pct_diff" in df_sorted.columns
+        and df_sorted["mean_pct_diff"].notna().any()
+    )
+
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+
+    bias_color = "#1f4e79"  # blue, matches Garg's ax1
+    pct_color = "#2e7d32"   # green, matches Garg's ax2
+
+    ax1.plot(
         df_sorted["unit_name"],
         df_sorted["mean_rnd"],
         marker="o",
-        color="#2c3e50",
+        color=bias_color,
         linewidth=1.8,
-        label="Mean RND",
+        label="Avg. women bias (embedding)",
     )
-    plt.fill_between(
+    ax1.fill_between(
         df_sorted["unit_name"],
         df_sorted["ci_low"],
         df_sorted["ci_high"],
-        color="#2c3e50",
-        alpha=0.2,
+        color=bias_color,
+        alpha=0.18,
         label="95% CI",
     )
-    plt.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
-    plt.title("Garg (2018) Fig 2 replication: average gender bias of occupations")
-    plt.xlabel("Decade")
-    plt.ylabel("Avg. women bias  (||v − c_male|| − ||v − c_female||)")
-    plt.xticks(rotation=45, ha="right")
-    plt.legend(loc="best", framealpha=0.8)
+    ax1.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
+    ax1.set_xlabel("Decade")
+    ax1.set_ylabel(
+        "Avg. women bias  (||v − c_male|| − ||v − c_female||)",
+        color=bias_color,
+    )
+    ax1.tick_params(axis="y", labelcolor=bias_color)
+    ax1.tick_params(axis="x", rotation=45)
+
+    if has_pct_overlay:
+        ax2 = ax1.twinx()
+        ax2.plot(
+            df_sorted["unit_name"],
+            df_sorted["mean_pct_diff"],
+            marker="s",
+            color=pct_color,
+            linewidth=1.8,
+            label="Avg. women occupation % difference (census)",
+        )
+        ax2.set_ylabel(
+            "Avg. women occupation % difference  (2·female_share − 1)·100",
+            color=pct_color,
+        )
+        ax2.tick_params(axis="y", labelcolor=pct_color)
+
+        h1, l1 = ax1.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        ax1.legend(h1 + h2, l1 + l2, loc="best", framealpha=0.85)
+    else:
+        ax1.legend(loc="best", framealpha=0.85)
+
+    title_src = f" — {embedding_source}" if embedding_source else ""
+    ax1.set_title(
+        f"Garg (2018) Fig 2 replication: average gender bias of occupations{title_src}"
+    )
+
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
@@ -1629,7 +1683,8 @@ def main(config="config/config.yml", mode=None):
         if summary_path.exists():
             df = pd.read_parquet(summary_path)
             logger.info(f"Loaded {summary_path}: {len(df)} rows")
-            plot_garg_trend(df, figures_dir, logger)
+            embedding_source = config_data.get("embedding_source")
+            plot_garg_trend(df, figures_dir, logger, embedding_source=embedding_source)
         else:
             logger.error(f"Garg summary not found at {summary_path}")
 

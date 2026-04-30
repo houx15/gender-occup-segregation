@@ -179,6 +179,40 @@ def test_main_dispatcher_does_not_call_prestige_or_weat_plotters_in_garg_mode(tm
     )
 
 
+def test_plot_garg_trend_with_pct_overlay_renders(tmp_path):
+    """A summary DF with a non-null mean_pct_diff should render the twin axis
+    without raising. Smoke test only — assert PNG is non-empty."""
+    from scripts.visualize import plot_garg_trend
+
+    df = _make_summary_df().assign(
+        mean_pct_diff=[-60.0 + 5 * i for i in range(9)],
+        n_consistent=50,
+    )
+    logger = logging.getLogger("test_plot_garg_trend_with_pct")
+    plot_garg_trend(df, tmp_path, logger)
+
+    out = tmp_path / "fig2_garg_replication.png"
+    assert out.exists() and out.stat().st_size > 0
+
+
+def test_plot_garg_trend_appends_source_suffix_to_filename(tmp_path):
+    """When embedding_source is provided, the figure filename includes it."""
+    from scripts.visualize import plot_garg_trend
+
+    df = _make_summary_df()
+    logger = logging.getLogger("test_plot_garg_trend_source_suffix")
+    plot_garg_trend(df, tmp_path, logger, embedding_source="histwords_sgns")
+
+    expected = tmp_path / "fig2_garg_replication__histwords_sgns.png"
+    plain = tmp_path / "fig2_garg_replication.png"
+    assert expected.exists() and expected.stat().st_size > 0, (
+        f"Expected source-suffixed file at {expected}"
+    )
+    assert not plain.exists(), (
+        "Plain (no-suffix) file should NOT be written when source is set"
+    )
+
+
 def test_main_dispatcher_logs_error_when_garg_summary_missing(tmp_path, caplog):
     """If the parquet is missing, main() should log an ERROR mentioning the
     Garg summary, not crash."""

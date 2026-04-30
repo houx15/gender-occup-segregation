@@ -17,7 +17,7 @@ import logging
 import sys
 import types
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -81,8 +81,14 @@ def _write_config_and_wordlists(
     occupations: List[str],
     gender_words: Dict[str, List[str]],
     model_template: str = "coha_{unit_name}.kv",
+    occupation_percentages: Optional[Dict[str, Dict[int, float]]] = None,
+    consistent_occupations: bool = False,
 ) -> Path:
-    """Write a minimal valid config plus wordlists. Returns the config path."""
+    """Write a minimal valid config plus wordlists. Returns the config path.
+
+    If ``occupation_percentages`` is given (occupation -> {census_year:
+    female_share_0to1}), writes a Garg-format CSV and points the config at it.
+    """
     base_dir = tmp_path / "proj"
     (base_dir / "data" / "models").mkdir(parents=True)
     (base_dir / "data" / "results").mkdir(parents=True)
@@ -96,6 +102,21 @@ def _write_config_and_wordlists(
     (wl_dir / "gender_words.json").write_text(
         json.dumps(gender_words), encoding="utf-8"
     )
+
+    wordlists_block = {
+        "dir": str(wl_dir),
+        "occupations_file": "occupations.txt",
+        "gender_words_file": "gender_words.json",
+    }
+
+    if occupation_percentages is not None:
+        pct_path = wl_dir / "occupation_percentages_gender.csv"
+        with open(pct_path, "w", encoding="utf-8") as f:
+            f.write("Census year,Occupation,Total Weight,Female,Male\n")
+            for occ, year_to_share in occupation_percentages.items():
+                for year, share in year_to_share.items():
+                    f.write(f"{year},{occ},1,{share},{1.0 - share}\n")
+        wordlists_block["occupation_percentages_file"] = "occupation_percentages_gender.csv"
 
     config = {
         "language": "en",
@@ -112,12 +133,11 @@ def _write_config_and_wordlists(
         },
         "coha": {"n": 5, "source_archive_urls": []},
         "embedding": {"model_name_template": model_template},
-        "wordlists": {
-            "dir": str(wl_dir),
-            "occupations_file": "occupations.txt",
-            "gender_words_file": "gender_words.json",
-        },
+        "wordlists": wordlists_block,
     }
+    if consistent_occupations:
+        config["analysis"] = {"consistent_occupations": True}
+
     config_path = tmp_path / "config.yml"
     config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
     return config_path
@@ -229,10 +249,13 @@ def test_summary_table_schema_and_rowcount(tmp_path, monkeypatch):
         / "garg_average_bias_by_decade.parquet"
     )
     assert set(summary_df.columns) == {
-        "unit_name", "mean_rnd", "ci_low", "ci_high", "n_occupations"
+        "unit_name", "mean_rnd", "ci_low", "ci_high",
+        "n_occupations", "mean_pct_diff", "n_consistent",
     }
     assert len(summary_df) == 2
     assert (summary_df["n_occupations"] == 3).all()
+    # No occupation_percentages_file configured → mean_pct_diff is NaN.
+    assert summary_df["mean_pct_diff"].isna().all()
 
 
 def test_known_value_rnd_for_doctor(tmp_path, monkeypatch):
@@ -405,3 +428,119 @@ def test_unit_cli_filter(tmp_path, monkeypatch):
     assert set(long_df["unit_name"].unique()) == {"1990s"}
     assert set(summary_df["unit_name"].unique()) == {"1990s"}
     assert len(summary_df) == 1
+
+
+# =============================================================================
+# Phase A: occupation-percent overlay + consistent-occupation filter
+# =============================================================================
+
+def test_decade_to_census_year_parses_decade_label():
+    import scripts.analyze_garg as ag
+    assert ag.decade_to_census_year("1900s") == 1900
+    assert ag.decade_to_census_year("1990s") == 1990
+    assert ag.decade_to_census_year("2000s") == 2000
+    assert ag.decade_to_census_year("not-a-decade") is None
+
+
+def test_load_occupation_percent_data_computes_2p_minus_1_times_100(tmp_path):
+    """CSV value Female=0.7 → pct_diff = (2*0.7 - 1)*100 = 40.0."""
+    csv_path = tmp_path / "pct.csv"
+    csv_path.write_text(
+        "Census year,Occupation,Total Weight,Female,Male\n"
+        "1990,nurse,1,0.7,0.3\n"
+        "1990,doctor,1,0.2,0.8\n"
+        "2000,nurse,1,0.6,0.4\n",
+        encoding="utf-8",
+    )
+    import scripts.analyze_garg as ag
+    out = ag.load_occupation_percent_data(csv_path)
+    assert out["nurse"][1990] == pytest.approx(40.0)
+    assert out["doctor"][1990] == pytest.approx(-60.0)
+    assert out["nurse"][2000] == pytest.approx(20.0)
+    assert "doctor" not in out or 2000 not in out["doctor"]  # not in CSV
+
+
+def test_summary_includes_pct_overlay_when_csv_configured(tmp_path, monkeypatch):
+    """End-to-end: with percent CSV configured + consistent_occupations=True,
+    summary parquet has populated mean_pct_diff per decade."""
+    occupations = ["doctor", "nurse", "teacher"]
+    gender_words = {"male": list(_MALE_VECS), "female": list(_FEMALE_VECS)}
+
+    # 1990s nurse=0.9 (very female), doctor=0.1, teacher=0.7
+    # 2000s nurse=0.8, doctor=0.2, teacher=0.6
+    pct_data = {
+        "doctor":  {1990: 0.1, 2000: 0.2},
+        "nurse":   {1990: 0.9, 2000: 0.8},
+        "teacher": {1990: 0.7, 2000: 0.6},
+    }
+    cfg = _write_config_and_wordlists(
+        tmp_path, occupations, gender_words,
+        occupation_percentages=pct_data,
+        consistent_occupations=True,
+    )
+
+    kvs = _two_unit_kvs()
+    _touch_models(Path(yaml.safe_load(cfg.read_text())["paths"]["models_dir"]),
+                  list(kvs))
+
+    import scripts.analyze_garg as ag
+    monkeypatch.setattr(ag, "load_model", _make_loader(kvs))
+
+    ag.main(config=str(cfg))
+
+    summary_df = pd.read_parquet(
+        Path(yaml.safe_load(cfg.read_text())["paths"]["results_dir"])
+        / "garg_average_bias_by_decade.parquet"
+    )
+
+    assert {"mean_pct_diff", "n_consistent"}.issubset(set(summary_df.columns))
+    assert summary_df["mean_pct_diff"].notna().all()
+    # 1990s: mean of (2*0.1-1, 2*0.9-1, 2*0.7-1)*100 = (-80 + 80 + 40)/3 = 40/3
+    expected_1990 = ((2*0.1-1) + (2*0.9-1) + (2*0.7-1)) * 100 / 3
+    row_1990 = summary_df[summary_df["unit_name"] == "1990s"].iloc[0]
+    assert row_1990["mean_pct_diff"] == pytest.approx(expected_1990)
+    # All three occupations are in vocab in both decades → consistent set = 3
+    assert (summary_df["n_consistent"] == 3).all()
+
+
+def test_consistent_filter_drops_occupation_oov_in_one_decade(tmp_path, monkeypatch):
+    """Occupation present in one unit but not another should be excluded from
+    every decade's mean when consistent_occupations is enabled."""
+    occupations = ["doctor", "nurse", "rare"]
+    gender_words = {"male": list(_MALE_VECS), "female": list(_FEMALE_VECS)}
+    cfg = _write_config_and_wordlists(
+        tmp_path, occupations, gender_words,
+        consistent_occupations=True,
+    )
+
+    # "rare" exists in 1990s only.
+    kv_1990 = StubKV({
+        **_MALE_VECS, **_FEMALE_VECS,
+        "doctor": [0.5, 0.0],
+        "nurse":  [-0.5, 0.0],
+        "rare":   [0.4, 0.4],
+    })
+    kv_2000 = StubKV({
+        **_MALE_VECS, **_FEMALE_VECS,
+        "doctor": [0.5, 0.0],
+        "nurse":  [-0.5, 0.0],
+        # "rare" intentionally missing
+    })
+    kvs = {"1990s": kv_1990, "2000s": kv_2000}
+    _touch_models(Path(yaml.safe_load(cfg.read_text())["paths"]["models_dir"]),
+                  list(kvs))
+
+    import scripts.analyze_garg as ag
+    monkeypatch.setattr(ag, "load_model", _make_loader(kvs))
+    ag.main(config=str(cfg))
+
+    summary_df = pd.read_parquet(
+        Path(yaml.safe_load(cfg.read_text())["paths"]["results_dir"])
+        / "garg_average_bias_by_decade.parquet"
+    )
+    # Consistent set = {doctor, nurse} → n_consistent==2 in both decades.
+    assert (summary_df["n_consistent"] == 2).all()
+    # 1990s mean over doctor/nurse only: (-2 + 2)/2 = 0  (NOT including "rare").
+    row_1990 = summary_df[summary_df["unit_name"] == "1990s"].iloc[0]
+    assert row_1990["mean_rnd"] == pytest.approx(0.0)
+    assert row_1990["n_occupations"] == 2

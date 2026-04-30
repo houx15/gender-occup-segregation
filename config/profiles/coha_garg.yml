@@ -55,7 +55,20 @@ wordlists:
   dir: "wordlists/en/garg"
   occupations_file: "occupations.txt"
   gender_words_file: "gender_words.json"
+  # IPUMS census female-share-of-occupation by year, vendored from Garg's
+  # repo. Used by analyze_garg to overlay "Avg. Women Occupation %
+  # Difference" on Fig 2 (Garg 2018, plot_creation.py:115).
+  occupation_percentages_file: "occupation_percentages_gender.csv"
+
+# Plot/title label identifying the embedding source — flows into figure
+# filename suffix and title so Fig 2 from different vector sources do not
+# overwrite each other.
+embedding_source: "trained_coha"
 
 analysis:
   occupation_strategy: "whole_token"
   min_coverage: 0.5
+  # When true, restrict every decade's mean to the SAME set of occupations
+  # (those in vocab AND with valid census data in every decade). Matches
+  # Garg's plot_averagebias_over_time_consistentoccupations behaviour.
+  consistent_occupations: true
