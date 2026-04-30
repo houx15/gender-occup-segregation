@@ -1,0 +1,47 @@
+# Garg (2018) Fig 2 replication on the published HistWords COHA SGNS vectors.
+#
+# These are the exact embeddings Garg consumed (Hamilton et al. 2016,
+# https://nlp.stanford.edu/projects/histwords/). We bypass our own
+# download/corpus/train pipeline entirely and load the pre-trained
+# {decade}-w.npy + {decade}-vocab.pkl pairs directly.
+#
+# Download:
+#   python -m scripts.data_prep.download_pretrained_embeddings \
+#       --source=histwords_coha_sgns \
+#       --target_dir=/scratch/network/yh6580/gender-occup/data/pretrained_embeddings
+#
+# Run analyze + visualize (no train/corpus steps needed):
+#   python -m scripts.analyze_garg --config=config/profiles/coha_histwords_sgns.yml
+#   python -m scripts.visualize main --config=config/profiles/coha_histwords_sgns.yml
+language: "en"
+data_source: "coha"
+analysis_mode: "garg"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  # models_dir points at the directory containing the unzipped histwords
+  # files (e.g. .../histwords_coha_sgns/sgns_word/1990-w.npy + 1990-vocab.pkl).
+  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/histwords_coha_sgns/sgns"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_histwords_sgns"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_histwords_sgns"
+
+# Tells analyze_garg to use scripts.common.embedding_loaders.load_histwords_decade
+# instead of gensim KeyedVectors.load. discover_models then scans for
+# {YYYY}-w.npy pairs.
+embedding:
+  format: histwords
+
+# Identifies the source on the figure filename suffix and title.
+embedding_source: "histwords_sgns"
+
+wordlists:
+  dir: "wordlists/en/garg"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+  occupation_percentages_file: "occupation_percentages_gender.csv"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  consistent_occupations: true

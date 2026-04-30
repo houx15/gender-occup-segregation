@@ -52,16 +52,25 @@ read_config() {
 DATA_SOURCE=$(read_config "c['data_source']")
 LANGUAGE=$(read_config "c['language']")
 ANALYSIS_MODE=$(read_config "c.get('analysis_mode', 'prestige')")
+EMBEDDING_FORMAT=$(read_config "c.get('embedding', {}).get('format', 'gensim_kv')")
 if [ "$DATA_SOURCE" = "coha" ]; then
     RAW_DIR=$(read_config "c['paths'].get('raw_coha_dir', '')")
     DECOMP_DIR=$(read_config "c['paths'].get('coha_decompressed_dir', '')")
 else
     RAW_DIR=$(read_config "c['paths'].get('raw_ngram_dir', '')")
 fi
-CORPORA_DIR=$(read_config "c['paths']['corpora_dir']")
+CORPORA_DIR=$(read_config "c['paths'].get('corpora_dir', '')")
 MODELS_DIR=$(read_config "c['paths']['models_dir']")
 RESULTS_DIR=$(read_config "c['paths']['results_dir']")
 FIGURES_DIR=$(read_config "c['paths'].get('figures_dir', c['paths']['results_dir'] + '/figures')")
+
+# Pretrained embedding formats (histwords, word2vec_bin, glove_text) bypass
+# steps 1-3 entirely — there is nothing to download, build, or train. The
+# vectors are loaded straight from models_dir by analyze_garg.
+case "$EMBEDDING_FORMAT" in
+    histwords|word2vec_bin|glove_text) IS_PRETRAINED=true ;;
+    *)                                  IS_PRETRAINED=false ;;
+esac
 
 # Helper: count files matching a pattern in a directory
 count_files() {
@@ -90,12 +99,15 @@ echo "Gender-Occupation Segregation Pipeline"
 echo "  Language:       $LANGUAGE"
 echo "  Data source:    $DATA_SOURCE"
 echo "  Analysis mode:  $ANALYSIS_MODE"
+echo "  Embedding fmt:  $EMBEDDING_FORMAT  (pretrained=$IS_PRETRAINED)"
 echo "  Auto-skip:      stages with existing output"
 echo "=========================================="
 echo ""
 
 # ── Step 1: Download (ngram + coha only) ───────────────────────────
-if [ "$DATA_SOURCE" = "ngram" ]; then
+if [ "$IS_PRETRAINED" = true ]; then
+    echo "Step 1: SKIP download (pretrained embedding format=$EMBEDDING_FORMAT)"
+elif [ "$DATA_SOURCE" = "ngram" ]; then
     N_RAW=$(count_files "$RAW_DIR" "*.gz")
     if [ "$N_RAW" -gt 0 ] && [ "$FORCE_DOWNLOAD" = false ]; then
         echo "Step 1: SKIP download ($N_RAW .gz files found in raw_ngram_dir)"
@@ -125,7 +137,9 @@ if has_subdirs_with_content "$CORPORA_DIR"; then
     N_CORPORA=$(count_files "$CORPORA_DIR" "corpus_*")
 fi
 
-if [ "$N_CORPORA" -gt 0 ] && [ "$FORCE_CORPUS" = false ]; then
+if [ "$IS_PRETRAINED" = true ]; then
+    echo "Step 2: SKIP corpus building (pretrained embedding format=$EMBEDDING_FORMAT)"
+elif [ "$N_CORPORA" -gt 0 ] && [ "$FORCE_CORPUS" = false ]; then
     echo "Step 2: SKIP corpus building ($N_CORPORA corpus files found)"
 else
     echo "Step 2: Building corpora ($DATA_SOURCE)..."
@@ -150,7 +164,9 @@ echo ""
 # Count both .model and .kv files
 N_MODELS=$(( $(count_files "$MODELS_DIR" "*.model") + $(count_files "$MODELS_DIR" "*.kv") ))
 
-if [ "$N_MODELS" -gt 0 ] && [ "$FORCE_TRAIN" = false ]; then
+if [ "$IS_PRETRAINED" = true ]; then
+    echo "Step 3: SKIP training (pretrained embedding format=$EMBEDDING_FORMAT)"
+elif [ "$N_MODELS" -gt 0 ] && [ "$FORCE_TRAIN" = false ]; then
     echo "Step 3: SKIP training ($N_MODELS .model files found)"
 else
     echo "Step 3: Training embeddings..."

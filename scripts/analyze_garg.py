@@ -47,8 +47,14 @@ from scripts.common.config_loader import (
     load_config, get_wordlist_dir, _parse_model_template,
 )
 from scripts.common.embedding_utils import (
-    load_model, check_oov,
+    load_model as _load_gensim_kv, check_oov,
 )
+
+# Module-level alias preserved so existing tests can monkeypatch
+# ``analyze_garg.load_model`` to inject a stub KeyedVectors. The format-aware
+# dispatch (``load_model_for_unit``) reads embedding.format and only falls back
+# here for the default gensim_kv path.
+load_model = _load_gensim_kv
 from scripts.common.logging_utils import setup_logging
 from scripts.common.metrics import (
     relative_norm_distance, bootstrap_ci, l2_normalize,
@@ -58,13 +64,33 @@ from scripts.common.metrics import (
 _DECADE_RE = re.compile(r"^(\d{4})s$")
 
 
+def _embedding_format(config: dict) -> str:
+    """Return the embedding format key. Defaults to 'gensim_kv' (our trained
+    models). 'histwords' selects the Hamilton et al. 2016 .npy + vocab.pkl
+    layout used by the published HistWords COHA SGNS / SVD vectors.
+    """
+    return config.get("embedding", {}).get("format", "gensim_kv")
+
+
 def discover_models(config: dict) -> List[Tuple[Path, str]]:
     """
     Discover all model files and their unit names.
 
-    Mirrors `scripts.analyze_prestige.discover_models` to keep blast radius
-    small (per WI-3 plan: do not hoist a shared helper).
+    Dispatches on ``embedding.format``:
+      - "gensim_kv" (default): scans models_dir for files matching the
+        ``model_name_template`` (legacy behavior, used by our trained COHA).
+      - "histwords": scans models_dir for ``{YYYY}-w.npy`` pairs (matched
+        with ``{YYYY}-vocab.pkl``) and yields ``(npy_path, "YYYYs")``.
     """
+    fmt = _embedding_format(config)
+
+    if fmt == "histwords":
+        # Local import to avoid a hard gensim dependency at module-load time
+        # for non-histwords paths (esp. in test envs with stubbed gensim).
+        from scripts.common.embedding_loaders import discover_histwords_decades
+        models_dir = Path(config["paths"]["models_dir"])
+        return list(discover_histwords_decades(models_dir))
+
     models_dir = Path(config["paths"]["models_dir"])
     prefix, suffix = _parse_model_template(config)
 
@@ -76,6 +102,22 @@ def discover_models(config: dict) -> List[Tuple[Path, str]]:
             unit_name = name[len(prefix):-len(suffix)] if suffix else name[len(prefix):]
             models.append((model_file, unit_name))
     return models
+
+
+def load_model_for_unit(model_path: Path, config: dict):
+    """Format-aware loader for a single unit's model file.
+
+    Wraps the legacy ``embedding_utils.load_model`` for trained gensim models
+    and adds a HistWords path for pre-trained .npy + vocab.pkl pairs.
+
+    The default (gensim_kv) path goes through this module's ``load_model``
+    alias so tests can still monkeypatch ``analyze_garg.load_model``.
+    """
+    fmt = _embedding_format(config)
+    if fmt == "histwords":
+        from scripts.common.embedding_loaders import load_histwords_decade
+        return load_histwords_decade(Path(model_path))
+    return load_model(str(model_path))
 
 
 def load_occupations(file_path: Path, logger) -> List[str]:
@@ -143,9 +185,15 @@ def analyze_unit(
     occupations: List[str],
     gender_words: dict,
     logger,
+    config: Optional[dict] = None,
 ) -> Optional[Tuple[pd.DataFrame, dict]]:
     """
     Compute RND for every occupation in a single unit.
+
+    Args:
+        config: Full config dict. Used to dispatch on embedding.format
+                (gensim_kv default vs histwords). Optional for backwards
+                compatibility with tests that monkeypatch ``load_model``.
 
     Returns:
         (long_df, summary_row) where
@@ -153,7 +201,12 @@ def analyze_unit(
           summary_row has keys: unit_name, mean_rnd, ci_low, ci_high, n_occupations
         or None if both gender centroids are unobtainable (unit is skipped).
     """
-    model = load_model(str(model_path))
+    if config is None:
+        # Legacy entry-point: tests monkeypatch ``load_model`` to return a
+        # StubKV. Preserve that contract by routing through it.
+        model = load_model(str(model_path))  # noqa: F821 (resolved via module global below)
+    else:
+        model = load_model_for_unit(model_path, config)
 
     # L2-normalize every fetched vector before centroid + distance, matching
     # Garg et al. 2018's dataset_utilities/normalize_vectors.py. Without this,
@@ -397,7 +450,8 @@ def main(config: str = "config/config.yml", unit: Optional[str] = None) -> None:
     units: List[str] = []
     for model_path, unit_name in models:
         result = analyze_unit(
-            model_path, unit_name, occupations, gender_words, logger
+            model_path, unit_name, occupations, gender_words, logger,
+            config=config_data,
         )
         if result is None:
             continue

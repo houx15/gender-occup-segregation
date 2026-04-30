@@ -503,6 +503,55 @@ def test_summary_includes_pct_overlay_when_csv_configured(tmp_path, monkeypatch)
     assert (summary_df["n_consistent"] == 3).all()
 
 
+def test_histwords_format_discovers_w_npy_pairs_and_loads(tmp_path, monkeypatch):
+    """When embedding.format == 'histwords', discover_models picks up
+    {YYYY}-w.npy pairs from models_dir and load_model_for_unit dispatches
+    to load_histwords_decade."""
+    occupations = ["doctor", "nurse", "teacher"]
+    gender_words = {"male": list(_MALE_VECS), "female": list(_FEMALE_VECS)}
+    cfg = _write_config_and_wordlists(
+        tmp_path, occupations, gender_words,
+        consistent_occupations=True,
+    )
+
+    # Inject embedding.format == "histwords" into the config
+    cfg_data = yaml.safe_load(cfg.read_text())
+    cfg_data["embedding"] = {"format": "histwords"}
+    cfg.write_text(yaml.safe_dump(cfg_data), encoding="utf-8")
+
+    # Lay out fake -w.npy + -vocab.pkl pairs in models_dir.
+    models_dir = Path(cfg_data["paths"]["models_dir"])
+    import numpy as np
+    import pickle
+    for year in (1990, 2000):
+        # Each pair file just needs to exist for discover() to find them;
+        # we monkeypatch load_histwords_decade to return our StubKVs anyway.
+        np.save(models_dir / f"{year}-w.npy", np.zeros((1, 1), dtype=np.float32))
+        with open(models_dir / f"{year}-vocab.pkl", "wb") as f:
+            pickle.dump(["dummy"], f)
+
+    kvs = _two_unit_kvs()
+
+    def fake_load_histwords(npy_path, vocab_path=None):
+        # Map "1990-w.npy" -> "1990s" -> StubKV
+        stem = Path(npy_path).name[: -len("-w.npy")]
+        return kvs[f"{stem}s"]
+
+    import scripts.analyze_garg as ag
+    import scripts.common.embedding_loaders as el
+    monkeypatch.setattr(el, "load_histwords_decade", fake_load_histwords)
+
+    ag.main(config=str(cfg))
+
+    summary_df = pd.read_parquet(
+        Path(cfg_data["paths"]["results_dir"])
+        / "garg_average_bias_by_decade.parquet"
+    )
+    # Both decades should have produced results.
+    assert set(summary_df["unit_name"]) == {"1990s", "2000s"}
+    assert (summary_df["n_consistent"] == 3).all()
+
+
 def test_consistent_filter_drops_occupation_oov_in_one_decade(tmp_path, monkeypatch):
     """Occupation present in one unit but not another should be excluded from
     every decade's mean when consistent_occupations is enabled."""
