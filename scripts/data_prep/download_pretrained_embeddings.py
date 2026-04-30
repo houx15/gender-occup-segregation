@@ -70,8 +70,12 @@ class Source:
     name: str
     url: Optional[str]
     archive_filename: str
-    decompress: str  # "zip", "gz", or "manual"
+    decompress: str  # "zip", "gz", "none", or "manual"
     note: str = ""
+    # Additional companion files to fetch alongside the main archive (used for
+    # multi-file save formats like gensim's KeyedVectors split into
+    # .model + .model.vectors.npy). Each entry is (url, dest_filename).
+    extra_files: tuple = ()
 
 
 SOURCES: Dict[str, Source] = {
@@ -111,15 +115,25 @@ SOURCES: Dict[str, Source] = {
     ),
     "google_news_word2vec": Source(
         name="google_news_word2vec",
-        url=None,
-        archive_filename="GoogleNews-vectors-negative300.bin.gz",
-        decompress="manual",
+        url=(
+            "https://huggingface.co/fse/word2vec-google-news-300/resolve/main/"
+            "word2vec-google-news-300.model"
+        ),
+        archive_filename="word2vec-google-news-300.model",
+        decompress="none",
+        extra_files=(
+            (
+                "https://huggingface.co/fse/word2vec-google-news-300/resolve/main/"
+                "word2vec-google-news-300.model.vectors.npy",
+                "word2vec-google-news-300.model.vectors.npy",
+            ),
+        ),
         note=(
-            "Google News word2vec is on Google Drive and not directly "
-            "downloadable via plain HTTP. Get the file from "
-            "https://code.google.com/archive/p/word2vec/ "
-            "(or any well-known mirror), drop it in the source folder, "
-            "and re-run; the script will handle decompression."
+            "Google News word2vec, 300d, via the fse/word2vec-google-news-300 "
+            "Hugging Face mirror (gensim KeyedVectors split-save format: a "
+            "small .model file + a ~3.35 GB sidecar .vectors.npy). Load with "
+            "gensim.models.KeyedVectors.load(<.model path>); the sidecar is "
+            "auto-discovered. Total download is ~3.5 GB."
         ),
     ),
 }
@@ -132,8 +146,8 @@ _DETECT_PATTERNS: Dict[str, List[tuple[str, str]]] = {
     "histwords_coha_all":  [("*-w.npy", "HistWords {YYYY}-w.npy files")],
     "glove_wiki_gigaword": [("glove.*.txt", "GloVe text-format vectors")],
     "glove_commoncrawl":   [("glove.*.txt", "GloVe text-format vectors")],
-    "google_news_word2vec": [("*.bin", "word2vec binary"),
-                             ("*-vectors-*.bin", "word2vec binary")],
+    "google_news_word2vec": [("*.model", "gensim KeyedVectors split-save"),
+                             ("*.bin", "word2vec binary")],
 }
 
 
@@ -316,10 +330,16 @@ def _process_source(src: Source, target_dir: Path, logger: logging.Logger) -> di
         else:
             try:
                 _stream_download(src.url, archive, logger)
+                # Pull any companion files (e.g. gensim split-save sidecars).
+                for extra_url, extra_fname in src.extra_files:
+                    extra_dest = src_dir / extra_fname
+                    _stream_download(extra_url, extra_dest, logger)
                 if src.decompress == "zip":
                     _decompress_zip(archive, src_dir, logger)
                 elif src.decompress == "gz":
                     _decompress_gz(archive, src_dir, logger)
+                # decompress == "none": no further work; main + sidecars are
+                # the final files (e.g. gensim .model + .model.vectors.npy).
                 entry["status"] = "ok"
             except requests.RequestException as e:
                 logger.error(f"  download failed for {src.name}: {e}")

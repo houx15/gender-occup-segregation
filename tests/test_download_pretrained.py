@@ -34,10 +34,41 @@ def test_histwords_sgns_url_matches_stanford_snap():
     assert src.decompress == "zip"
 
 
-def test_google_news_is_manual():
+def test_google_news_uses_huggingface_mirror_with_sidecar():
+    """The Google Drive original isn't downloadable headlessly. We use the
+    fse/word2vec-google-news-300 HF mirror, which ships in gensim
+    split-save format: a small .model file + a ~3.35 GB .vectors.npy sidecar.
+    Both files must land in the source dir for KeyedVectors.load to work.
+    """
     src = dpe.SOURCES["google_news_word2vec"]
-    assert src.url is None
-    assert src.decompress == "manual"
+    assert src.url is not None
+    assert "huggingface.co" in src.url
+    assert src.decompress == "none"
+    extra_filenames = {fname for _u, fname in src.extra_files}
+    assert "word2vec-google-news-300.model.vectors.npy" in extra_filenames
+
+
+def test_process_source_pulls_extra_files(tmp_path, monkeypatch):
+    """For sources with extra_files, _process_source must download every
+    one — not just the primary archive."""
+    src = dpe.SOURCES["google_news_word2vec"]
+    downloaded: list[str] = []
+
+    def fake_download(url, dest, logger):
+        downloaded.append(url)
+        # Touch a fake file so detect_models_dir has something to look at.
+        Path(dest).parent.mkdir(parents=True, exist_ok=True)
+        Path(dest).write_bytes(b"\x00")
+
+    monkeypatch.setattr(dpe, "_stream_download", fake_download)
+
+    logger = logging.getLogger("test_dpe_extra_files")
+    entry = dpe._process_source(src, tmp_path, logger)
+
+    assert entry["status"] == "ok"
+    # Main URL + every extra URL should be hit exactly once.
+    expected = [src.url] + [u for u, _f in src.extra_files]
+    assert downloaded == expected
 
 
 def test_main_unknown_source_raises():
@@ -64,8 +95,17 @@ def test_process_source_returns_manifest_entry(tmp_path, monkeypatch):
     assert entry["archive"].endswith(src.archive_filename)
 
 
-def test_process_source_manual_pending_when_archive_missing(tmp_path, caplog):
-    src = dpe.SOURCES["google_news_word2vec"]
+def test_manual_source_status_when_archive_missing(tmp_path, caplog, monkeypatch):
+    """Construct a synthetic manual-mode source so we test the manual-pending
+    branch independently of the registry (which now points google_news at
+    the HF mirror)."""
+    src = dpe.Source(
+        name="manual_test",
+        url=None,
+        archive_filename="manual_test.bin.gz",
+        decompress="manual",
+        note="synthetic",
+    )
     logger = logging.getLogger("test_dpe_manual")
     logger.setLevel(logging.WARNING)
     with caplog.at_level(logging.WARNING, logger=logger.name):
