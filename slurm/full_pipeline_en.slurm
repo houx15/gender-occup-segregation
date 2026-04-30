@@ -15,9 +15,11 @@ conda activate llm
 #   sbatch slurm/full_pipeline_en.slurm
 #   sbatch slurm/full_pipeline_en.slurm config/profiles/coha_server.yml
 #   sbatch slurm/full_pipeline_en.slurm config/profiles/ngram_en_server.yml
+#   sbatch slurm/full_pipeline_en.slurm config/profiles/coha_garg.yml --force-analyze
 
 CONFIG="${1:-config/profiles/ngram_en_server.yml}"
+shift || true   # remaining args (e.g., --force-analyze) flow through
 
-echo "Running English full pipeline with config=$CONFIG"
+echo "Running English full pipeline with config=$CONFIG  extra_args=$*"
 
-bash run_pipeline.sh --config "$CONFIG"
+bash run_pipeline.sh --config "$CONFIG" "$@"
