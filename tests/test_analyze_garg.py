@@ -148,15 +148,17 @@ def _touch_models(models_dir: Path, unit_names: List[str], template: str = "coha
 # Reusable vector fixtures
 # -----------------------------------------------------------------------------
 
-# Two male, two female anchor words placed symmetrically in 2-D so centroids
-# land at (+1, 0) and (-1, 0). Easy hand-computation for RND.
+# Two male, two female anchor words. After analyze_garg's L2-normalize step
+# every fetched vector is rescaled to unit length, so we pick already-unit
+# vectors to make the post-normalize centroids hand-computable:
+#   centroid_male = (1, 0)   centroid_female = (-1, 0)
 _MALE_VECS = {
-    "he":  [1.0, 0.5],
-    "man": [1.0, -0.5],
+    "he":  [1.0, 0.0],
+    "man": [1.0, 0.0],
 }
 _FEMALE_VECS = {
-    "she":   [-1.0, 0.5],
-    "woman": [-1.0, -0.5],
+    "she":   [-1.0, 0.0],
+    "woman": [-1.0, 0.0],
 }
 # centroids -> male=(1,0), female=(-1,0)
 
@@ -234,13 +236,14 @@ def test_summary_table_schema_and_rowcount(tmp_path, monkeypatch):
 
 
 def test_known_value_rnd_for_doctor(tmp_path, monkeypatch):
-    """WI-3 case 3: hand-computable RND for one occupation.
+    """WI-3 case 3: hand-computable RND for one occupation (Garg sign convention).
 
-    centroid_male = (1, 0), centroid_female = (-1, 0)
-    For doctor at (0.5, 0):
-      ||v - c_female|| = ||(1.5, 0)|| = 1.5
-      ||v - c_male||   = ||(-0.5, 0)|| = 0.5
-      RND = 1.5 - 0.5 = 1.0  (positive => closer to male)
+    Post-L2-normalize:
+      centroid_male = (1, 0), centroid_female = (-1, 0)
+      doctor (0.5, 0) -> (1, 0)
+        ||v - c_male|| = 0,  ||v - c_female|| = 2  -> RND = 0 - 2 = -2  (male-leaning)
+      nurse (-0.5, 0) -> (-1, 0)
+        ||v - c_male|| = 2,  ||v - c_female|| = 0  -> RND = 2 - 0 = +2  (female-leaning)
     """
     occupations = ["doctor", "nurse", "teacher"]
     gender_words = {"male": list(_MALE_VECS), "female": list(_FEMALE_VECS)}
@@ -261,10 +264,10 @@ def test_known_value_rnd_for_doctor(tmp_path, monkeypatch):
     )
     row = long_df[(long_df["unit_name"] == "1990s") & (long_df["occupation"] == "doctor")]
     assert len(row) == 1
-    assert row.iloc[0]["rnd"] == pytest.approx(1.0)
-    # Sanity: nurse should be negative (closer to female) of equal magnitude.
+    assert row.iloc[0]["rnd"] == pytest.approx(-2.0)
+    # Symmetric: nurse should be +2 (female-leaning).
     nurse_row = long_df[(long_df["unit_name"] == "1990s") & (long_df["occupation"] == "nurse")]
-    assert nurse_row.iloc[0]["rnd"] == pytest.approx(-1.0)
+    assert nurse_row.iloc[0]["rnd"] == pytest.approx(2.0)
 
 
 def test_oov_occupation_excluded_from_mean_present_in_long(tmp_path, monkeypatch):
@@ -304,9 +307,9 @@ def test_oov_occupation_excluded_from_mean_present_in_long(tmp_path, monkeypatch
 
     assert len(summary_df) == 1
     assert summary_df.iloc[0]["n_occupations"] == 3
-    # mean of (1.0, -1.0, 0.0) for (doctor, nurse, teacher) — teacher RND:
-    # ||(-1, 0.5)|| - ||(1, 0.5)|| = sqrt(1.25) - sqrt(1.25) = 0
-    expected_mean = (1.0 + -1.0 + 0.0) / 3.0
+    # Post-L2-normalize: doctor=-2, nurse=+2, teacher=0 (teacher unit (0,1):
+    # ||(-1,1)|| - ||(1,1)|| = sqrt(2) - sqrt(2) = 0). Mean = 0.
+    expected_mean = (-2.0 + 2.0 + 0.0) / 3.0
     assert summary_df.iloc[0]["mean_rnd"] == pytest.approx(expected_mean)
 
 

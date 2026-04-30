@@ -33,10 +33,12 @@ from scripts.common.config_loader import (
     load_config, get_wordlist_dir, _parse_model_template,
 )
 from scripts.common.embedding_utils import (
-    load_model, compute_centroid, check_oov,
+    load_model, check_oov,
 )
 from scripts.common.logging_utils import setup_logging
-from scripts.common.metrics import relative_norm_distance, bootstrap_ci
+from scripts.common.metrics import (
+    relative_norm_distance, bootstrap_ci, l2_normalize,
+)
 
 
 def discover_models(config: dict) -> List[Tuple[Path, str]]:
@@ -105,15 +107,24 @@ def analyze_unit(
     """
     model = load_model(str(model_path))
 
-    c_male, male_found = compute_centroid(model, gender_words["male"])
-    c_female, female_found = compute_centroid(model, gender_words["female"])
+    # L2-normalize every fetched vector before centroid + distance, matching
+    # Garg et al. 2018's dataset_utilities/normalize_vectors.py. Without this,
+    # decade-to-decade vector-norm drift inflates RND magnitudes and breaks
+    # direct comparison to Garg's Fig 2 numbers.
+    male_unit = [l2_normalize(model[w]) for w in gender_words["male"] if w in model.key_to_index]
+    female_unit = [l2_normalize(model[w]) for w in gender_words["female"] if w in model.key_to_index]
+    male_found = [w for w in gender_words["male"] if w in model.key_to_index]
+    female_found = [w for w in gender_words["female"] if w in model.key_to_index]
 
-    if c_male is None or c_female is None:
+    if not male_unit or not female_unit:
         logger.warning(
             f"  {unit_name}: skipping — could not compute gender centroids "
             f"(male_found={len(male_found)}, female_found={len(female_found)})"
         )
         return None
+
+    c_male = np.mean(np.asarray(male_unit), axis=0)
+    c_female = np.mean(np.asarray(female_unit), axis=0)
 
     long_rows = []
     in_vocab_rnds: List[float] = []
@@ -121,7 +132,8 @@ def analyze_unit(
     for occ in occupations:
         found, _oov = check_oov(model, [occ])
         if found:
-            rnd = relative_norm_distance(model[occ], c_male, c_female)
+            occ_vec = l2_normalize(model[occ])
+            rnd = relative_norm_distance(occ_vec, c_male, c_female)
             long_rows.append({
                 "unit_name": unit_name,
                 "occupation": occ,

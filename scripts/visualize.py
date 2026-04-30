@@ -319,9 +319,9 @@ def plot_garg_trend(df, figures_dir, logger):
         label="95% CI",
     )
     plt.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
-    plt.title("Garg (2018) Fig 2 replication: relative norm distance by decade")
+    plt.title("Garg (2018) Fig 2 replication: average gender bias of occupations")
     plt.xlabel("Decade")
-    plt.ylabel("Relative norm distance (positive → male-leaning)")
+    plt.ylabel("Avg. women bias  (||v − c_male|| − ||v − c_female||)")
     plt.xticks(rotation=45, ha="right")
     plt.legend(loc="best", framealpha=0.8)
     plt.tight_layout()

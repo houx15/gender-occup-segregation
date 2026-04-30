@@ -5,32 +5,35 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scripts.common.metrics import bootstrap_ci, relative_norm_distance
+from scripts.common.metrics import (
+    bootstrap_ci, l2_normalize, relative_norm_distance,
+)
 
 
 class TestRelativeNormDistance:
     def test_hand_computed(self):
+        # Garg sign convention: ||v_w - c_male|| - ||v_w - c_female||
         v_w = np.array([1.0, 0.0, 0.0])
         c_male = np.array([2.0, 0.0, 0.0])
         c_female = np.array([0.0, 1.0, 0.0])
-        # ||v_w - c_female|| - ||v_w - c_male|| = sqrt(2) - 1
+        # ||v_w - c_male|| - ||v_w - c_female|| = 1 - sqrt(2)
         assert relative_norm_distance(v_w, c_male, c_female) == pytest.approx(
-            np.sqrt(2) - 1.0
+            1.0 - np.sqrt(2)
         )
 
     def test_sign_male_leaning(self):
-        # v_w sits right on c_male; positive (closer to male)
+        # v_w sits right on c_male; Garg convention → negative (male-leaning)
         v_w = np.array([1.0, 0.0])
         c_male = np.array([1.0, 0.0])
         c_female = np.array([-1.0, 0.0])
-        assert relative_norm_distance(v_w, c_male, c_female) > 0
+        assert relative_norm_distance(v_w, c_male, c_female) < 0
 
     def test_sign_female_leaning(self):
-        # v_w sits right on c_female; negative (closer to female)
+        # v_w sits right on c_female; Garg convention → positive (female-leaning)
         v_w = np.array([-1.0, 0.0])
         c_male = np.array([1.0, 0.0])
         c_female = np.array([-1.0, 0.0])
-        assert relative_norm_distance(v_w, c_male, c_female) < 0
+        assert relative_norm_distance(v_w, c_male, c_female) > 0
 
     def test_symmetry_swap_flips_sign(self):
         rng = np.random.default_rng(0)
@@ -51,6 +54,25 @@ class TestRelativeNormDistance:
         c_female = np.array([0.0, 1.0, 0.0])  # 3-D
         with pytest.raises(ValueError):
             relative_norm_distance(v_w, c_male, c_female)
+
+
+class TestL2Normalize:
+    def test_unit_length_after_normalize(self):
+        v = np.array([3.0, 4.0])  # norm = 5
+        u = l2_normalize(v)
+        assert np.linalg.norm(u) == pytest.approx(1.0)
+        assert u == pytest.approx(np.array([0.6, 0.8]))
+
+    def test_zero_vector_passes_through(self):
+        v = np.zeros(5)
+        u = l2_normalize(v)
+        # Zero vectors return unchanged (no division by zero)
+        assert np.array_equal(u, v)
+
+    def test_already_unit_unchanged(self):
+        v = np.array([1.0, 0.0, 0.0])
+        u = l2_normalize(v)
+        assert u == pytest.approx(v)
 
 
 class TestBootstrapCI:
