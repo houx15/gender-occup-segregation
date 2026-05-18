@@ -294,7 +294,7 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
         logger: logger for status messages.
         embedding_source: optional short label like "trained_coha" or
             "histwords_sgns". Flows into the figure filename suffix
-            (fig2_garg_replication__{source}.png) and title so runs against
+            (fig2_garg_replication__{source}.pdf) and title so runs against
             different embedding sources do not overwrite each other.
 
     Empty-DataFrame behavior: logs a WARNING and returns early without writing
@@ -305,7 +305,7 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     suffix = f"__{embedding_source}" if embedding_source else ""
-    out_path = figures_dir / f"fig2_garg_replication{suffix}.png"
+    out_path = figures_dir / f"fig2_garg_replication{suffix}.pdf"
 
     if df is None or df.empty:
         logger.warning(
@@ -379,7 +379,7 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
     )
 
     plt.tight_layout()
-    plt.savefig(out_path, dpi=150, bbox_inches="tight")
+    plt.savefig(out_path, format="pdf", bbox_inches="tight")
     plt.close()
     logger.info(f"Saved Garg trend figure: {out_path}")
 

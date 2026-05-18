@@ -1,7 +1,7 @@
 """Tests for the Garg (2018) replication visualization branch.
 
 Covers:
-  - ``plot_garg_trend`` writes a non-empty PNG for a normal summary DataFrame.
+  - ``plot_garg_trend`` writes a non-empty PDF for a normal summary DataFrame.
   - ``plot_garg_trend`` handles empty DataFrame by logging a warning and
     returning early without writing the file.
   - ``main`` dispatcher routes ``analysis_mode=="garg"`` to ``plot_garg_trend``.
@@ -97,9 +97,9 @@ def test_plot_garg_trend_writes_nonempty_png(tmp_path):
     logger = logging.getLogger("test_plot_garg_trend_writes_nonempty_png")
     plot_garg_trend(df, tmp_path, logger)
 
-    out = tmp_path / "fig2_garg_replication.png"
+    out = tmp_path / "fig2_garg_replication.pdf"
     assert out.exists(), f"Expected {out} to be created"
-    assert out.stat().st_size > 0, "PNG file is empty"
+    assert out.stat().st_size > 0, "PDF file is empty"
 
 
 def test_plot_garg_trend_empty_df_logs_warning_and_skips_write(tmp_path, caplog):
@@ -115,7 +115,7 @@ def test_plot_garg_trend_empty_df_logs_warning_and_skips_write(tmp_path, caplog)
     with caplog.at_level(logging.WARNING, logger=logger.name):
         plot_garg_trend(df, tmp_path, logger)
 
-    out = tmp_path / "fig2_garg_replication.png"
+    out = tmp_path / "fig2_garg_replication.pdf"
     assert not out.exists(), (
         "Empty DataFrame should not produce a figure; got "
         f"{out} with size {out.stat().st_size if out.exists() else 'N/A'}"
@@ -181,7 +181,7 @@ def test_main_dispatcher_does_not_call_prestige_or_weat_plotters_in_garg_mode(tm
 
 def test_plot_garg_trend_with_pct_overlay_renders(tmp_path):
     """A summary DF with a non-null mean_pct_diff should render the twin axis
-    without raising. Smoke test only — assert PNG is non-empty."""
+    without raising. Smoke test only — assert PDF is non-empty."""
     from scripts.visualize import plot_garg_trend
 
     df = _make_summary_df().assign(
@@ -191,7 +191,7 @@ def test_plot_garg_trend_with_pct_overlay_renders(tmp_path):
     logger = logging.getLogger("test_plot_garg_trend_with_pct")
     plot_garg_trend(df, tmp_path, logger)
 
-    out = tmp_path / "fig2_garg_replication.png"
+    out = tmp_path / "fig2_garg_replication.pdf"
     assert out.exists() and out.stat().st_size > 0
 
 
@@ -203,8 +203,8 @@ def test_plot_garg_trend_appends_source_suffix_to_filename(tmp_path):
     logger = logging.getLogger("test_plot_garg_trend_source_suffix")
     plot_garg_trend(df, tmp_path, logger, embedding_source="histwords_sgns")
 
-    expected = tmp_path / "fig2_garg_replication__histwords_sgns.png"
-    plain = tmp_path / "fig2_garg_replication.png"
+    expected = tmp_path / "fig2_garg_replication__histwords_sgns.pdf"
+    plain = tmp_path / "fig2_garg_replication.pdf"
     assert expected.exists() and expected.stat().st_size > 0, (
         f"Expected source-suffixed file at {expected}"
     )

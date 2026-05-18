@@ -401,7 +401,7 @@ A third analysis mode, `garg`, replicates Fig 2 of Garg et al. 2018 (gender-occu
 # Same flow as COHA above, but with the Garg-pinned profile
 python -m scripts.data_prep.download_coha --config config/profiles/coha_garg.yml
 sbatch slurm/full_pipeline_en.slurm config/profiles/coha_garg.yml
-# → figures_garg/fig2_garg_replication.png
+# → figures_garg/fig2_garg_replication.pdf
 ```
 
 ## Methodology

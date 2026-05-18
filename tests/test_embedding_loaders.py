@@ -90,6 +90,24 @@ def test_load_histwords_decade_raises_on_length_mismatch(tmp_path):
         load_histwords_decade(tmp_path / "1990-w.npy")
 
 
+@requires_gensim
+def test_load_histwords_decade_decodes_py2_bytes_vocab(tmp_path):
+    """HistWords (Hamilton 2016) released its vocab.pkl files as Python 2
+    pickles. Under Py3 those unpickle as `bytes` (e.g. b'doctor') unless
+    encoding='latin1' is passed — which silently OOVs every lookup. Guard
+    against regression by writing a pickle whose entries are bytes and
+    asserting we get back proper str keys."""
+    np.save(tmp_path / "1990-w.npy", np.eye(3, dtype=np.float32))
+    with open(tmp_path / "1990-vocab.pkl", "wb") as f:
+        pickle.dump([b"he", b"she", b"doctor"], f)
+
+    kv = load_histwords_decade(tmp_path / "1990-w.npy")
+    assert "doctor" in kv.key_to_index
+    # The bytes form must NOT leak through as a key:
+    assert "b'doctor'" not in kv.key_to_index
+    assert b"doctor" not in kv.key_to_index
+
+
 def test_histwords_unit_name_parses_yyyy_w_npy():
     assert histwords_unit_name_from_npy(Path("1990-w.npy")) == "1990s"
     assert histwords_unit_name_from_npy(Path("1810-w.npy")) == "1810s"

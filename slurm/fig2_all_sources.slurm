@@ -11,8 +11,8 @@
 #SBATCH --error=logs/fig2_all_sources_%j.err
 
 # Run analyze_garg + visualize for every embedding source we have on disk,
-# producing one Fig 2 PNG per source. Each profile sets embedding_source so
-# the figures land at fig2_garg_replication__<source>.png and don't
+# producing one Fig 2 PDF per source. Each profile sets embedding_source so
+# the figures land at fig2_garg_replication__<source>.pdf and don't
 # overwrite each other.
 #
 # Usage:
@@ -122,7 +122,7 @@ for CONFIG in "${CONFIGS[@]}"; do
         continue
     fi
 
-    FIG_PATH="$FIG_DIR/fig2_garg_replication__${SRC}.png"
+    FIG_PATH="$FIG_DIR/fig2_garg_replication__${SRC}.pdf"
     STATUSES+=("ok")
     FIGURES+=("$FIG_PATH")
     echo "  ok: $FIG_PATH"

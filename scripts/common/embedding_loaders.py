@@ -23,16 +23,35 @@ import numpy as np
 
 def _load_vocab_pkl(vocab_path: Path) -> List[str]:
     """Load a HistWords vocab pickle. The file is a Python pickle of a list
-    of word strings (one entry per row of the parallel -w.npy matrix)."""
+    of word strings (one entry per row of the parallel -w.npy matrix).
+
+    HistWords (Hamilton et al. 2016) was released as Python 2 code, so the
+    vocab pickles contain Py2 ``str`` objects. Under Py3 those unpickle as
+    ``bytes`` by default — making every key look like ``b'doctor'`` and
+    every downstream lookup OOV. We pass ``encoding="latin1"`` so the legacy
+    pickles deserialize as proper str, and decode any straggler bytes for
+    safety. Modern Py3 pickles (used by our tests) are unaffected.
+    """
     with open(vocab_path, "rb") as f:
-        words = pickle.load(f)
+        try:
+            words = pickle.load(f, encoding="latin1")
+        except TypeError:
+            # encoding= was added in Py3; if we're somehow on Py2, fall back.
+            f.seek(0)
+            words = pickle.load(f)
     if isinstance(words, np.ndarray):
         words = words.tolist()
     if not isinstance(words, (list, tuple)):
         raise ValueError(
             f"Expected list/tuple in {vocab_path}, got {type(words).__name__}"
         )
-    return [str(w) for w in words]
+    out: List[str] = []
+    for w in words:
+        if isinstance(w, bytes):
+            out.append(w.decode("utf-8", errors="replace"))
+        else:
+            out.append(str(w))
+    return out
 
 
 def load_histwords_decade(npy_path: Path, vocab_path: "Path | None" = None):
