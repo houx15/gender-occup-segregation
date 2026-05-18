@@ -22,7 +22,6 @@ naturalist
 botanist
 zoologist
 geographer
-draftsman
 electrician
 machinist
 surveyor
