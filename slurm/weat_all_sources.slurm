@@ -57,6 +57,7 @@ read_config_value() {
 declare -a STATUSES
 declare -a SOURCES
 declare -a RESULT_PATHS
+declare -a FIG_PATHS
 
 echo "=========================================="
 echo "WEAT multi-source run"
@@ -85,12 +86,14 @@ for CONFIG in "${CONFIGS[@]}"; do
     SRC=$(read_config_value "$CONFIG" "c.get('embedding_source', '?')")
     MODELS_DIR=$(read_config_value "$CONFIG" "c['paths']['models_dir']")
     RESULTS_DIR=$(read_config_value "$CONFIG" "c['paths']['results_dir']")
+    FIG_DIR=$(read_config_value "$CONFIG" "c['paths'].get('figures_dir', c['paths']['results_dir'] + '/figures')")
     SOURCES+=("$SRC")
 
     if [ ! -d "$MODELS_DIR" ]; then
         echo "  SKIP: models_dir does not exist: $MODELS_DIR"
         STATUSES+=("no_models_dir")
         RESULT_PATHS+=("?")
+        FIG_PATHS+=("?")
         continue
     fi
     NHIT=$(find "$MODELS_DIR" -maxdepth 2 \( -name '*.model' -o -name '*.kv' -o -name '*-w.npy' \) 2>/dev/null | head -1 | wc -l | tr -d ' ')
@@ -98,6 +101,7 @@ for CONFIG in "${CONFIGS[@]}"; do
         echo "  SKIP: no .model / .kv / *-w.npy files under $MODELS_DIR"
         STATUSES+=("empty_models_dir")
         RESULT_PATHS+=("?")
+        FIG_PATHS+=("?")
         continue
     fi
 
@@ -107,6 +111,7 @@ for CONFIG in "${CONFIGS[@]}"; do
         echo "  ERROR: analyze_weat failed"
         STATUSES+=("analyze_failed")
         RESULT_PATHS+=("?")
+        FIG_PATHS+=("?")
         continue
     fi
 
@@ -119,11 +124,35 @@ for CONFIG in "${CONFIGS[@]}"; do
         echo "          OOV / gender-axis diagnostics)"
         STATUSES+=("no_results_written")
         RESULT_PATHS+=("$RESULT_PATH")
+        FIG_PATHS+=("?")
+        continue
+    fi
+
+    # Run visualize: produces heatmap, rankings, longitudinal trend PDFs
+    # (filenames are date-prefixed, e.g. 20260518_weat_longitudinal_trend.pdf).
+    if ! python -m scripts.visualize main --config="$CONFIG"; then
+        echo "  ERROR: visualize failed (CSVs written but no figures)"
+        STATUSES+=("visualize_failed")
+        RESULT_PATHS+=("$RESULT_PATH")
+        FIG_PATHS+=("?")
+        continue
+    fi
+
+    # Confirm at least the longitudinal trend PDF landed. Date-prefix makes
+    # an exact path impossible; glob for the most recent one.
+    LATEST_FIG=$(ls -1t "$FIG_DIR"/*weat_longitudinal_trend.pdf 2>/dev/null | head -1)
+    if [ -z "$LATEST_FIG" ]; then
+        echo "  ERROR: no weat_longitudinal_trend.pdf under $FIG_DIR"
+        STATUSES+=("no_figure_written")
+        RESULT_PATHS+=("$RESULT_PATH")
+        FIG_PATHS+=("?")
         continue
     fi
     STATUSES+=("ok")
     RESULT_PATHS+=("$RESULT_PATH")
+    FIG_PATHS+=("$LATEST_FIG")
     echo "  ok: $RESULT_PATH"
+    echo "  fig: $LATEST_FIG"
 done
 
 echo ""
@@ -131,6 +160,8 @@ echo "=========================================="
 echo "SUMMARY"
 echo "=========================================="
 for j in "${!CONFIGS[@]}"; do
-    printf "  %-55s  %-22s  %s\n" "${CONFIGS[$j]}" "${STATUSES[$j]}" "${RESULT_PATHS[$j]}"
+    printf "  %-55s  %-22s\n" "${CONFIGS[$j]}" "${STATUSES[$j]}"
+    printf "      csv: %s\n" "${RESULT_PATHS[$j]}"
+    printf "      fig: %s\n" "${FIG_PATHS[$j]}"
 done
 echo "=========================================="
