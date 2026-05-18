@@ -32,10 +32,13 @@
 # After download_pretrained_embeddings.py finishes, look at MANIFEST.json
 # and edit the matching profile's paths.models_dir to the resolved path.
 
-set -u  # fail on unset vars; do NOT set -e (we want to continue past per-source failures)
-
+# NOTE: conda's activate script references $PS1, which is unset in
+# non-interactive Slurm shells. Load + activate FIRST, then turn on `set -u`.
+# We deliberately do NOT `set -e` — we want to continue past per-source failures.
 module load anaconda3/2023.3
 conda activate llm
+
+set -u
 
 # Default config list — override by passing configs as positional args.
 DEFAULT_CONFIGS=(
