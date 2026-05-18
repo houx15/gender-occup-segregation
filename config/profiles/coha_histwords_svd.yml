@@ -11,8 +11,9 @@ analysis_mode: "garg"
 
 paths:
   base_dir: "/scratch/network/yh6580/gender-occup"
-  # The histwords coha-word.zip bundle places SVD files under svd_word/.
-  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/histwords_coha_all/svd"
+  # coha-word.zip extracts to histwords_coha_all/coha-word/{sgns,svd,ppmi}/;
+  # the SVD per-decade .npy + .pkl files live in coha-word/svd/.
+  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/histwords_coha_all/coha-word/svd"
   results_dir: "/scratch/network/yh6580/gender-occup/data/results_histwords_svd"
   log_dir: "/scratch/network/yh6580/gender-occup/logs"
   figures_dir: "/scratch/network/yh6580/gender-occup/figures_histwords_svd"
