@@ -10,7 +10,9 @@ Implements the 5-step pipeline:
   Step 4: Compute WEAT Cohen's d
   Step 5: Save results
 
-Works for both provincial and longitudinal units.
+Works for both provincial and longitudinal units. Embedding format is
+dispatched via ``embedding.format`` (default ``gensim_kv`` = our trained
+models; ``histwords`` = Hamilton et al. 2016 .npy + vocab.pkl pairs).
 
 Usage:
     python -m scripts.analyze_weat --config=config/config.yml
@@ -19,6 +21,7 @@ Usage:
 
 import json
 import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -32,10 +35,51 @@ from scripts.common.config_loader import (
     _parse_model_template,
 )
 from scripts.common.embedding_utils import (
-    load_model, get_word_vector, compute_centroid, construct_semantic_axis,
-    compute_projection, compute_cohens_d, check_oov,
+    load_model as _load_gensim_kv, get_word_vector, compute_centroid,
+    construct_semantic_axis, compute_projection, compute_cohens_d, check_oov,
 )
+
+# Module-level alias preserved so callers / tests can monkeypatch
+# ``analyze_weat.load_model`` to inject a stub KeyedVectors. The
+# format-aware dispatch (``load_model_for_unit``) only falls back here for
+# the default gensim_kv path.
+load_model = _load_gensim_kv
 from scripts.common.logging_utils import setup_logging
+
+
+_DECADE_RE = re.compile(r"^(\d{4})s$")
+
+
+def _embedding_format(config: dict) -> str:
+    """Return the embedding format key. Defaults to 'gensim_kv' (our trained
+    models). 'histwords' selects the Hamilton et al. 2016 .npy + vocab.pkl
+    layout used by the published HistWords COHA SGNS / SVD vectors.
+    """
+    return config.get("embedding", {}).get("format", "gensim_kv")
+
+
+def _decade_to_year(unit_name: str) -> Optional[int]:
+    """'1990s' -> 1990. Returns None if the unit name doesn't match."""
+    m = _DECADE_RE.match(unit_name)
+    if not m:
+        return None
+    return int(m.group(1))
+
+
+def load_model_for_unit(model_path: Path, config: dict):
+    """Format-aware loader for a single unit's model file.
+
+    Wraps the legacy ``embedding_utils.load_model`` for trained gensim
+    models and adds a HistWords path for pre-trained .npy + vocab.pkl
+    pairs. The default (gensim_kv) path goes through this module's
+    ``load_model`` alias so tests can still monkeypatch
+    ``analyze_weat.load_model``.
+    """
+    fmt = _embedding_format(config)
+    if fmt == "histwords":
+        from scripts.common.embedding_loaders import load_histwords_decade
+        return load_histwords_decade(Path(model_path))
+    return load_model(str(model_path))
 
 
 # =============================================================================
@@ -108,8 +152,26 @@ def load_weat_wordlists(config: dict) -> Wordlists:
 # =============================================================================
 
 def discover_units(config: dict) -> List[Tuple[str, Path]]:
-    """Discover available model files and their unit names."""
+    """Discover available model files and their unit names.
+
+    Dispatches on ``embedding.format``:
+      - "gensim_kv" (default): scans ``models_dir`` for files matching the
+        ``model_name_template`` (legacy behavior).
+      - "histwords": scans ``models_dir`` for ``{YYYY}-w.npy`` pairs and
+        yields ``(unit_name="YYYYs", npy_path)``.
+    """
+    fmt = _embedding_format(config)
     models_dir = Path(config["paths"]["models_dir"])
+
+    if fmt == "histwords":
+        # Local import to avoid a hard gensim dependency at module-load time
+        # for non-histwords paths (esp. in test envs with stubbed gensim).
+        from scripts.common.embedding_loaders import discover_histwords_decades
+        # discover_histwords_decades yields (npy_path, unit_name); flip to
+        # match this module's historical (unit_name, path) order so
+        # downstream callers don't need to care which format ran.
+        return [(unit_name, path) for path, unit_name in discover_histwords_decades(models_dir)]
+
     prefix, suffix = _parse_model_template(config)
 
     # Glob for the correct extension from the template suffix
@@ -127,8 +189,13 @@ def discover_units(config: dict) -> List[Tuple[str, Path]]:
 # Step 0: OOV check
 # =============================================================================
 
-def run_oov_check(units, wordlists, logger):
-    """Check OOV across all units."""
+def run_oov_check(units, wordlists, logger, config=None):
+    """Check OOV across all units.
+
+    ``config`` is used to dispatch on ``embedding.format`` (gensim_kv default
+    vs histwords). Optional for backwards compatibility with callers that
+    monkeypatch ``load_model`` directly.
+    """
     logger.info("\n" + "=" * 70)
     logger.info("Step 0: OOV Check")
     logger.info("=" * 70)
@@ -139,7 +206,8 @@ def run_oov_check(units, wordlists, logger):
                   for cat, words in categories.items() for w in words}
 
     for unit_name, model_path in units:
-        model = load_model(str(model_path))
+        model = (load_model_for_unit(model_path, config)
+                 if config is not None else load_model(str(model_path)))
         for cat, words in categories.items():
             found, oov = check_oov(model, words)
             coverage_rows.append({
@@ -175,9 +243,17 @@ def run_oov_check(units, wordlists, logger):
 # Steps 1-4: Gender axes, projections, comparability, WEAT
 # =============================================================================
 
-def run_analysis(units, wordlists, logger, standardize=None):
-    """Run steps 1-4 of the WEAT pipeline."""
+def run_analysis(units, wordlists, logger, standardize=None, config=None):
+    """Run steps 1-4 of the WEAT pipeline.
+
+    ``config`` is used to dispatch on ``embedding.format`` (gensim_kv
+    default vs histwords). Optional for backwards compatibility.
+    """
     concept_words = wordlists.get_all_concept_words()
+
+    def _load(path):
+        return (load_model_for_unit(path, config)
+                if config is not None else load_model(str(path)))
 
     # Step 1: Build gender axes
     logger.info("\n" + "=" * 70)
@@ -186,7 +262,7 @@ def run_analysis(units, wordlists, logger, standardize=None):
 
     gender_axes = {}
     for unit_name, model_path in units:
-        model = load_model(str(model_path))
+        model = _load(model_path)
         axis, n_pos, n_neg = construct_semantic_axis(
             wordlists.female, wordlists.male, model
         )
@@ -205,7 +281,7 @@ def run_analysis(units, wordlists, logger, standardize=None):
 
     projection_rows = []
     for unit_name, info in gender_axes.items():
-        model = load_model(str(info["model_path"]))
+        model = _load(info["model_path"])
         for category, words in concept_words.items():
             for word in words:
                 vec = get_word_vector(model, word)
@@ -362,6 +438,35 @@ def main(config="config/config.yml", standardize=None, skip_oov=False):
     wordlists = load_weat_wordlists(config_data)
     units = discover_units(config_data)
 
+    # Optional [start, end] decade clip — matches the Garg pipeline so
+    # WEAT runs on HistWords (1810s-2000s) and on our trained_coha
+    # (1910s-1990s) operate on the same comparable decade window.
+    decade_range = config_data.get("analysis", {}).get("decade_range")
+    if decade_range:
+        try:
+            start, end = int(decade_range[0]), int(decade_range[1])
+        except (TypeError, ValueError, IndexError):
+            raise ValueError(
+                f"analysis.decade_range must be [start, end] integers, "
+                f"got {decade_range!r}"
+            )
+        before = len(units)
+        filtered: List[Tuple[str, Path]] = []
+        for unit_name, path in units:
+            year = _decade_to_year(unit_name)
+            if year is None:
+                logger.warning(
+                    f"  decade_range filter: cannot parse decade from "
+                    f"unit_name {unit_name!r}; keeping it"
+                )
+                filtered.append((unit_name, path))
+            elif start <= year <= end:
+                filtered.append((unit_name, path))
+        units = filtered
+        logger.info(
+            f"decade_range filter [{start}, {end}]: {before} -> {len(units)} units"
+        )
+
     if not units:
         logger.error("No models found")
         return
@@ -371,11 +476,11 @@ def main(config="config/config.yml", standardize=None, skip_oov=False):
     # Step 0
     coverage_df = word_df = None
     if not skip_oov:
-        coverage_df, word_df = run_oov_check(units, wordlists, logger)
+        coverage_df, word_df = run_oov_check(units, wordlists, logger, config=config_data)
 
     # Steps 1-4
     gender_axes, proj_df, stats_df, weat_df, use_zscore = run_analysis(
-        units, wordlists, logger, standardize=standardize
+        units, wordlists, logger, standardize=standardize, config=config_data,
     )
 
     # Step 5

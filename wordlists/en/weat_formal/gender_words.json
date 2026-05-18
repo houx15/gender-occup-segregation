@@ -1,4 +1,14 @@
 {
-  "male": ["male", "man", "boy", "brother", "he", "him", "his", "son", "father", "uncle", "grandfather", "husband", "nephew", "gentleman", "king", "prince", "sir"],
-  "female": ["female", "woman", "girl", "sister", "she", "her", "hers", "daughter", "mother", "aunt", "grandmother", "wife", "niece", "lady", "queen", "princess", "madam"]
+  "male": [
+    "male", "man", "boy", "brother", "he", "him", "his", "son", "father",
+    "uncle", "grandfather", "husband", "nephew", "gentleman", "king",
+    "prince", "sir", "himself", "men", "boys", "males", "brothers", "sons",
+    "fathers", "uncles", "nephews"
+  ],
+  "female": [
+    "female", "woman", "girl", "sister", "she", "her", "hers", "daughter",
+    "mother", "aunt", "grandmother", "wife", "niece", "lady", "queen",
+    "princess", "madam", "herself", "women", "girls", "females", "sisters",
+    "daughters", "mothers", "aunts", "nieces"
+  ]
 }

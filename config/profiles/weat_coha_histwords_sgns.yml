@@ -1,0 +1,41 @@
+# WEAT analysis on the published HistWords COHA SGNS vectors
+# (Hamilton et al. 2016 — the exact embeddings Garg consumed).
+# Companion to coha_histwords_sgns.yml — same models_dir, different metric.
+#
+# NOTE: analyze_weat.py currently only supports the legacy gensim
+# .model loader. To run this profile, the script needs the same
+# format-aware dispatch we added to analyze_garg.py (read
+# `embedding.format: histwords`, use scripts.common.embedding_loaders).
+# `decade_range` is also not yet honored by analyze_weat.py — without
+# it, pre-1850 decades will run but won't have comparable census data
+# (not used by WEAT, so less critical than for the Garg metric).
+language: "en"
+data_source: "coha"
+analysis_mode: "weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/histwords_coha_sgns/sgns"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_weat_histwords_sgns"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_weat_histwords_sgns"
+
+embedding:
+  format: histwords
+
+embedding_source: "histwords_sgns"
+
+wordlists:
+  dir: "wordlists/en/weat_formal"
+  weat_gender_file: "gender_words.json"
+  weat_domestic_work_file: "domestic_work_words.json"
+  weat_leadership_file: "leadership_words.json"
+  weat_stem_file: "stem_words.json"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  # Clip to Garg's Fig 2 scope. WEAT itself doesn't need census coverage,
+  # but staying inside the same decade window keeps trained_coha and the
+  # two HistWords runs directly comparable.
+  decade_range: [1910, 1990]
