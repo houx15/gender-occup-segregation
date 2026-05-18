@@ -451,16 +451,22 @@ def plot_weat_rankings(weat_df, figures_dir, logger, data_source=None):
 def plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=None):
     """Plot Cohen's d trend over time for longitudinal WEAT analysis.
 
-    Units are expected to be time slices like '1940_1949'. If units don't
-    parse as year ranges, this plot is skipped.
+    Recognised unit formats:
+      - '1940_1949' (rolling-window slices used by the ngram pipeline)
+      - '1990s'      (decade labels used by the COHA + HistWords pipelines)
+    If units don't parse as either, this plot is skipped.
     """
     if weat_df.empty:
         return
 
-    # Try to parse units as time slices (start_year_end_year)
     def parse_year(unit_name):
+        s = str(unit_name)
+        # Decade label: '1990s' -> 1990
+        if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
+            return int(s[:4])
+        # Window slice: '1940_1949' -> 1940
         try:
-            parts = str(unit_name).split("_")
+            parts = s.split("_")
             return int(parts[0])
         except (ValueError, IndexError):
             return None
@@ -469,7 +475,15 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=None)
     weat_df["start_year"] = weat_df["unit"].apply(parse_year)
 
     # Only proceed if most units parse as years
-    if weat_df["start_year"].notna().sum() < 3:
+    n_parsed = int(weat_df["start_year"].notna().sum())
+    if n_parsed < 3:
+        logger.warning(
+            f"plot_weat_longitudinal_trend: only {n_parsed} of "
+            f"{len(weat_df)} units parsed as years (sample units: "
+            f"{list(weat_df['unit'].unique()[:5])}); skipping. Add the "
+            "format to parse_year() above if this is a new unit naming "
+            "convention."
+        )
         return
 
     weat_df = weat_df.dropna(subset=["start_year"]).sort_values("start_year")
