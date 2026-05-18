@@ -102,6 +102,35 @@ def test_plot_garg_trend_writes_nonempty_png(tmp_path):
     assert out.stat().st_size > 0, "PDF file is empty"
 
 
+def test_plot_garg_trend_all_nan_logs_error_and_skips_write(tmp_path, caplog):
+    """A non-empty DF whose mean_rnd column is entirely NaN must NOT produce
+    a blank figure — log ERROR and return instead. This is the silent
+    failure mode that produced the first empty HistWords PDF."""
+    from scripts.visualize import plot_garg_trend
+
+    df = pd.DataFrame({
+        "unit_name": ["1810s", "1820s", "1830s"],
+        "mean_rnd": [float("nan")] * 3,
+        "ci_low": [float("nan")] * 3,
+        "ci_high": [float("nan")] * 3,
+        "n_occupations": [0, 0, 0],
+    })
+    logger = logging.getLogger("test_plot_garg_trend_all_nan")
+    logger.setLevel(logging.ERROR)
+    with caplog.at_level(logging.ERROR, logger=logger.name):
+        plot_garg_trend(df, tmp_path, logger)
+
+    assert not (tmp_path / "fig2_garg_replication.pdf").exists(), (
+        "All-NaN mean_rnd should not produce a figure"
+    )
+    errors = [r for r in caplog.records if r.levelno == logging.ERROR]
+    assert errors, "Expected at least one ERROR log record"
+    assert any("nan" in r.getMessage().lower() for r in errors), (
+        "Expected error to mention NaN; got: "
+        + "; ".join(r.getMessage() for r in errors)
+    )
+
+
 def test_plot_garg_trend_empty_df_logs_warning_and_skips_write(tmp_path, caplog):
     """Empty-DataFrame contract: warn and return; do NOT write a file."""
     from scripts.visualize import plot_garg_trend

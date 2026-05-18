@@ -208,6 +208,22 @@ def analyze_unit(
     else:
         model = load_model_for_unit(model_path, config)
 
+    # Vocab sanity log — first/last keys plus a few mid keys catch broken
+    # decoding (e.g. b'doctor' from a Py2 pickle), unexpected casing, or
+    # surprise BPE-style tokenization. Cheap and very high signal when
+    # something's wrong.
+    try:
+        vocab_size = len(model.key_to_index)
+        all_keys = list(model.key_to_index.keys())
+        sample_first = all_keys[:5]
+        sample_last = all_keys[-5:] if vocab_size > 10 else []
+        logger.info(
+            f"  {unit_name}: vocab_size={vocab_size}; "
+            f"first5={sample_first}; last5={sample_last}"
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"  {unit_name}: could not introspect vocab ({e!r})")
+
     # L2-normalize every fetched vector before centroid + distance, matching
     # Garg et al. 2018's dataset_utilities/normalize_vectors.py. Without this,
     # decade-to-decade vector-norm drift inflates RND magnitudes and breaks
@@ -216,6 +232,18 @@ def analyze_unit(
     female_unit = [l2_normalize(model[w]) for w in gender_words["female"] if w in model.key_to_index]
     male_found = [w for w in gender_words["male"] if w in model.key_to_index]
     female_found = [w for w in gender_words["female"] if w in model.key_to_index]
+    male_oov = [w for w in gender_words["male"] if w not in model.key_to_index]
+    female_oov = [w for w in gender_words["female"] if w not in model.key_to_index]
+
+    # Always log gender-word coverage; surfacing per-word OOV makes it
+    # obvious when, say, the wordlist is uppercase but the vocab is lower.
+    logger.info(
+        f"  {unit_name}: gender words — "
+        f"male {len(male_found)}/{len(gender_words['male'])} found "
+        f"(OOV: {male_oov if male_oov else '∅'}); "
+        f"female {len(female_found)}/{len(gender_words['female'])} found "
+        f"(OOV: {female_oov if female_oov else '∅'})"
+    )
 
     if not male_unit or not female_unit:
         logger.warning(
@@ -255,6 +283,17 @@ def analyze_unit(
     n_in_vocab = len(in_vocab_rnds)
     n_total = len(occupations)
     pct = (n_in_vocab / n_total) if n_total else 0.0
+
+    # Show which occupations were dropped — invaluable when coverage looks
+    # off. Truncate to 15 to keep logs readable for the 76-occupation list.
+    oov_occs = [r["occupation"] for r in long_rows if not r["in_vocab"]]
+    if oov_occs:
+        preview = oov_occs[:15]
+        more = f" (+{len(oov_occs) - 15} more)" if len(oov_occs) > 15 else ""
+        logger.info(
+            f"  {unit_name}: OOV occupations ({len(oov_occs)}/{n_total}): "
+            f"{preview}{more}"
+        )
 
     if n_in_vocab == 0:
         logger.warning(
@@ -302,9 +341,14 @@ def compute_consistent_set(
     "consistentoccupations" filter.
     """
     in_all_units = set(long_df.loc[long_df["in_vocab"], "occupation"].unique())
+    # Per-unit in-vocab counts — surface which decade is the bottleneck
+    # when the consistent set ends up tiny.
     for u in units:
         unit_in_vocab = set(
             long_df.loc[(long_df["unit_name"] == u) & long_df["in_vocab"], "occupation"]
+        )
+        logger.info(
+            f"  consistent-set: {u} contributes {len(unit_in_vocab)} in-vocab occupations"
         )
         in_all_units &= unit_in_vocab
 
@@ -382,13 +426,35 @@ def build_summary(
             "n_consistent": n_consistent,
         })
 
-    return pd.DataFrame(
+    summary_df = pd.DataFrame(
         rows,
         columns=[
             "unit_name", "mean_rnd", "ci_low", "ci_high",
             "n_occupations", "mean_pct_diff", "n_consistent",
         ],
     )
+
+    # Loud failure mode: if EVERY unit's mean_rnd is NaN we've produced a
+    # summary that will plot to an empty figure. This is the silent failure
+    # mode that hit the first HistWords run; surface it at ERROR.
+    n_rows = len(summary_df)
+    n_valid = int(summary_df["mean_rnd"].notna().sum())
+    if n_rows > 0 and n_valid == 0:
+        logger.error(
+            f"build_summary: ALL {n_rows} units have mean_rnd=NaN — "
+            "downstream plot will be empty. Likely causes: (a) every unit "
+            "has 0 in-vocab occupations, (b) consistent-set filter dropped "
+            "every occupation, (c) gender centroids couldn't be built. "
+            "Scroll up for per-unit coverage + OOV logs."
+        )
+    elif n_rows > 0 and n_valid < n_rows:
+        nan_units = summary_df.loc[summary_df["mean_rnd"].isna(), "unit_name"].tolist()
+        logger.warning(
+            f"build_summary: {n_rows - n_valid}/{n_rows} units have mean_rnd=NaN "
+            f"({nan_units}) — they will show as gaps in the plot."
+        )
+
+    return summary_df
 
 
 def main(config: str = "config/config.yml", unit: Optional[str] = None) -> None:

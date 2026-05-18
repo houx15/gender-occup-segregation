@@ -314,6 +314,16 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
         )
         return
 
+    # Same shape as empty for the eye, but technically different — catch it
+    # explicitly so the user gets a loud error instead of an empty PDF.
+    if "mean_rnd" in df.columns and df["mean_rnd"].isna().all():
+        logger.error(
+            "plot_garg_trend: every mean_rnd is NaN — refusing to write a "
+            "blank figure. Check the analyze_garg log for vocab/OOV "
+            f"diagnostics. (Would have written {out_path}.)"
+        )
+        return
+
     df_sorted = df.sort_values("unit_name").reset_index(drop=True)
 
     has_pct_overlay = (
