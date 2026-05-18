@@ -503,10 +503,40 @@ def main(config: str = "config/config.yml", unit: Optional[str] = None) -> None:
     if unit:
         models = [(p, n) for p, n in models if n.startswith(str(unit))]
 
+    # Optional [start, end] decade clip — matches Garg's Fig 2 scope (1910–1990).
+    # HistWords COHA bundles ship 1810s–2000s, which breaks the consistent-set
+    # filter when census data only starts in 1850. Without a clip, the cross-
+    # decade intersection drops to zero and the plot is empty.
+    decade_range = config_data.get("analysis", {}).get("decade_range")
+    if decade_range:
+        try:
+            start, end = int(decade_range[0]), int(decade_range[1])
+        except (TypeError, ValueError, IndexError):
+            raise ValueError(
+                f"analysis.decade_range must be [start, end] integers, got {decade_range!r}"
+            )
+        before = len(models)
+        filtered: List[Tuple[Path, str]] = []
+        for path, unit_name in models:
+            year = decade_to_census_year(unit_name)
+            if year is None:
+                logger.warning(
+                    f"  decade_range filter: cannot parse decade from "
+                    f"unit_name {unit_name!r}; keeping it"
+                )
+                filtered.append((path, unit_name))
+            elif start <= year <= end:
+                filtered.append((path, unit_name))
+        models = filtered
+        logger.info(
+            f"decade_range filter [{start}, {end}]: {before} -> {len(models)} models"
+        )
+
     if not models:
         logger.error(
             f"No models found in {config_data['paths']['models_dir']}"
             + (f" matching unit prefix '{unit}'" if unit else "")
+            + (f" within decade_range {decade_range}" if decade_range else "")
         )
         return
 

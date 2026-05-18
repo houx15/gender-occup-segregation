@@ -83,6 +83,7 @@ def _write_config_and_wordlists(
     model_template: str = "coha_{unit_name}.kv",
     occupation_percentages: Optional[Dict[str, Dict[int, float]]] = None,
     consistent_occupations: bool = False,
+    decade_range: Optional[List[int]] = None,
 ) -> Path:
     """Write a minimal valid config plus wordlists. Returns the config path.
 
@@ -135,8 +136,13 @@ def _write_config_and_wordlists(
         "embedding": {"model_name_template": model_template},
         "wordlists": wordlists_block,
     }
-    if consistent_occupations:
-        config["analysis"] = {"consistent_occupations": True}
+    if consistent_occupations or decade_range is not None:
+        analysis_block: Dict = {}
+        if consistent_occupations:
+            analysis_block["consistent_occupations"] = True
+        if decade_range is not None:
+            analysis_block["decade_range"] = list(decade_range)
+        config["analysis"] = analysis_block
 
     config_path = tmp_path / "config.yml"
     config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
@@ -593,3 +599,32 @@ def test_consistent_filter_drops_occupation_oov_in_one_decade(tmp_path, monkeypa
     row_1990 = summary_df[summary_df["unit_name"] == "1990s"].iloc[0]
     assert row_1990["mean_rnd"] == pytest.approx(0.0)
     assert row_1990["n_occupations"] == 2
+
+
+def test_decade_range_filter_restricts_units(tmp_path, monkeypatch):
+    """decade_range=[1990, 1990] keeps only the 1990s model and drops 2000s.
+    Guards the HistWords bugfix where 1810s–2000s decades broke the
+    consistent-occupations filter (no census data pre-1850).
+    """
+    occupations = ["doctor", "nurse"]
+    gender_words = {"male": list(_MALE_VECS), "female": list(_FEMALE_VECS)}
+    cfg = _write_config_and_wordlists(
+        tmp_path, occupations, gender_words,
+        decade_range=[1990, 1990],
+    )
+
+    kvs = _two_unit_kvs()
+    _touch_models(Path(yaml.safe_load(cfg.read_text())["paths"]["models_dir"]),
+                  list(kvs))
+
+    import scripts.analyze_garg as ag
+    monkeypatch.setattr(ag, "load_model", _make_loader(kvs))
+    ag.main(config=str(cfg))
+
+    summary_df = pd.read_parquet(
+        Path(yaml.safe_load(cfg.read_text())["paths"]["results_dir"])
+        / "garg_average_bias_by_decade.parquet"
+    )
+    assert set(summary_df["unit_name"]) == {"1990s"}, (
+        f"decade_range=[1990,1990] should drop 2000s; got {set(summary_df['unit_name'])}"
+    )

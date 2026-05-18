@@ -122,7 +122,17 @@ for CONFIG in "${CONFIGS[@]}"; do
         continue
     fi
 
+    # visualize's plot_garg_trend can ERROR-and-return (all-NaN summary, etc.)
+    # while still exiting 0. Trust the file system: did it actually write?
     FIG_PATH="$FIG_DIR/fig2_garg_replication__${SRC}.pdf"
+    if [ ! -f "$FIG_PATH" ]; then
+        echo "  ERROR: expected figure not written: $FIG_PATH"
+        echo "         (visualize exited 0 — check the analyze_garg log above"
+        echo "          for vocab/OOV/consistent-set diagnostics)"
+        STATUSES+=("no_figure_written")
+        FIGURES+=("$FIG_PATH")
+        continue
+    fi
     STATUSES+=("ok")
     FIGURES+=("$FIG_PATH")
     echo "  ok: $FIG_PATH"

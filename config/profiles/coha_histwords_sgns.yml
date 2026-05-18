@@ -45,3 +45,8 @@ analysis:
   occupation_strategy: "whole_token"
   min_coverage: 0.5
   consistent_occupations: true
+  # Clip to Garg's Fig 2 scope. The HistWords COHA bundle ships 1810s–2000s,
+  # but census data only goes back to 1850 — without this clip, the
+  # consistent-occupations filter drops every occupation (no occupation has
+  # census data for 1810/1820/1830/1840) and the plot is empty.
+  decade_range: [1910, 1990]
