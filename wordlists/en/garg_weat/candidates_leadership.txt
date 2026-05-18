@@ -4,7 +4,6 @@ director
 executive
 president
 administrator
-supervisor
 governor
 minister
 commander
@@ -17,14 +16,5 @@ mayor
 commissioner
 ambassador
 chancellor
-executive
 officer
-strategist
-coordinator
-organizer
-negotiator
 representative
-diplomat
-consultant
-moderator
-policymaker
