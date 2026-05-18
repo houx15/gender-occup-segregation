@@ -23,6 +23,14 @@ paths:
   log_dir: "/scratch/network/yh6580/gender-occup/logs"
   figures_dir: "/scratch/network/yh6580/gender-occup/figures_weat_trained_coha"
 
+# Top-level coha block is required by config_loader's validator whenever
+# data_source=coha AND embedding.format is not a pretrained shortcut.
+# WEAT itself never reads this; we're reusing models already on disk.
+coha:
+  format: fulltext
+  min_chunk_tokens: 5
+  source_archive_urls: []
+
 embedding:
   vector_size: 300
   window: 4
