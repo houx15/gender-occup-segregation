@@ -9,11 +9,9 @@ biologist
 geologist
 astronomer
 botanist
-zoologist
 geographer
 anatomist
 naturalist
-ecologist
 surgeon
 physician
 doctor
@@ -29,7 +27,6 @@ electrician
 engraver
 designer
 inventor
-cartographer
 surveyor
 professor
 lecturer
@@ -38,7 +35,6 @@ philosopher
 historian
 economist
 accountant
-actuary
 lawyer
 banker
 broker

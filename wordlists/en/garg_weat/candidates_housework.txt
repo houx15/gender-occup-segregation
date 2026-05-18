@@ -16,7 +16,6 @@ scrubbing
 mopping
 sweeping
 dusting
-vacuuming
 polishing
 tidying
 wiping
@@ -33,7 +32,6 @@ darning
 folding
 caring
 tending
-babysitting
 raising
 feeding
 bathing
@@ -42,17 +40,14 @@ weeding
 planting
 watering
 housekeeping
-homemaking
 parenting
-caregiving
-caretaking
 shopping
-dishwashing
 organizing
 decorating
 upbringing
-childrearing
-childcare
+babysitter
+caregiver
+homemaker
 laundry
 household
 housework
