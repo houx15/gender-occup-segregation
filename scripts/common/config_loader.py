@@ -30,7 +30,7 @@ DATA_SOURCE_DEFAULTS = {
     "coha": "longitudinal",
 }
 
-VALID_ANALYSIS_MODES = {"prestige", "weat", "garg"}
+VALID_ANALYSIS_MODES = {"prestige", "weat", "garg", "garg_weat"}
 
 # Embedding formats that bypass our download/corpus/train pipeline. Profiles
 # using these formats only need models_dir/results_dir/log_dir; the corpus

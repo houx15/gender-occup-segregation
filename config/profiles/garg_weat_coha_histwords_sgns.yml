@@ -1,0 +1,30 @@
+# Garg-WEAT per-category RND analysis on the published HistWords COHA SGNS
+# vectors (Hamilton et al. 2016). Companion to coha_histwords_sgns.yml.
+language: "en"
+data_source: "coha"
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/histwords_coha_sgns/sgns"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_garg_weat_histwords_sgns"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_histwords_sgns"
+
+embedding:
+  format: histwords
+
+embedding_source: "histwords_sgns"
+
+wordlists:
+  dir: "wordlists/en/garg_weat"
+  gender_words_file: "gender_words.json"
+  categories:
+    leadership: "candidates_leadership.txt"
+    housework: "candidates_housework.txt"
+    stem: "candidates_stem.txt"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  decade_range: [1910, 1990]

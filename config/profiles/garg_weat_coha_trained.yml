@@ -1,0 +1,53 @@
+# Garg-WEAT per-category RND analysis on our from-scratch trained COHA SGNS
+# embeddings. Companion to coha_garg.yml (same models_dir, different metric:
+# RND partitioned into leadership / housework / stem buckets).
+language: "en"
+data_source: "coha"
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_coha_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha"
+  coha_decompressed_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/corpora_en_coha"
+  # Reuses the models trained for the Garg replication.
+  models_dir: "/scratch/network/yh6580/gender-occup/data/models_en_coha_garg"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_garg_weat_trained_coha"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_trained_coha"
+
+# Required by config_loader's validator when data_source=coha + gensim_kv format.
+coha:
+  format: fulltext
+  min_chunk_tokens: 5
+  source_archive_urls: []
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 100
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "coha_{unit_name}.model"
+
+corpus:
+  min_words: 2
+  tokenizer: "whitespace"
+  lowercase: true
+
+wordlists:
+  dir: "wordlists/en/garg_weat"
+  gender_words_file: "gender_words.json"
+  categories:
+    leadership: "candidates_leadership.txt"
+    housework: "candidates_housework.txt"
+    stem: "candidates_stem.txt"
+
+embedding_source: "trained_coha"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5

@@ -395,6 +395,117 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
 
 
 # =============================================================================
+# Garg-WEAT (per-category RND) plot
+# =============================================================================
+
+def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=None):
+    """Plot per-category mean RND over time. One line per category (leadership,
+    housework, stem) on a single axis, with 95% CI ribbons.
+
+    Companion to plot_garg_trend — same metric (relative norm distance,
+    Garg sign convention), same gender axis, but partitioned into named
+    occupation buckets. The expected DataFrame is
+    analyze_garg_weat.build_summary's output: columns unit_name / category /
+    mean_rnd / ci_low / ci_high / n_occupations / n_consistent.
+
+    Empty / all-NaN safeguards mirror plot_garg_trend: log loudly, refuse
+    to write a blank PDF.
+    """
+    figures_dir = Path(figures_dir)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = f"__{embedding_source}" if embedding_source else ""
+    out_path = figures_dir / f"fig2_garg_weat_categories{suffix}.pdf"
+
+    if df is None or df.empty:
+        logger.warning(
+            "plot_garg_weat_categories_trend called with empty DataFrame; "
+            f"skipping write of {out_path}"
+        )
+        return
+
+    if "mean_rnd" in df.columns and df["mean_rnd"].isna().all():
+        logger.error(
+            "plot_garg_weat_categories_trend: every mean_rnd is NaN — refusing "
+            "to write a blank figure. Check the analyze_garg_weat log for "
+            f"vocab/consistent-set diagnostics. (Would have written {out_path}.)"
+        )
+        return
+
+    df = df.copy()
+
+    def _parse_decade(unit_name):
+        s = str(unit_name)
+        if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
+            return int(s[:4])
+        return None
+
+    df["start_year"] = df["unit_name"].apply(_parse_decade)
+    n_parsed = int(df["start_year"].notna().sum())
+    if n_parsed == 0:
+        logger.warning(
+            "plot_garg_weat_categories_trend: no unit_name parsed as a "
+            f"'YYYYs' decade (sample: {list(df['unit_name'].unique()[:5])}); "
+            "skipping."
+        )
+        return
+
+    df = df.dropna(subset=["start_year"]).sort_values("start_year")
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+
+    # Distinct, accessible colours per category — falls back to matplotlib
+    # default cycle for any extra/renamed category the user adds later.
+    palette = {
+        "leadership": "#1f4e79",
+        "housework":  "#c0392b",
+        "stem":       "#2e7d32",
+    }
+    markers = {"leadership": "o", "housework": "s", "stem": "^"}
+    default_cycle = plt.rcParams["axes.prop_cycle"].by_key().get("color", [])
+
+    for i, (cat_name, group) in enumerate(df.groupby("category")):
+        group = group.sort_values("start_year")
+        color = palette.get(cat_name) or default_cycle[i % len(default_cycle)]
+        marker = markers.get(cat_name, "o")
+
+        ax.plot(
+            group["start_year"],
+            group["mean_rnd"],
+            marker=marker,
+            color=color,
+            linewidth=1.8,
+            label=cat_name.title(),
+        )
+        if "ci_low" in group.columns and "ci_high" in group.columns:
+            ax.fill_between(
+                group["start_year"],
+                group["ci_low"],
+                group["ci_high"],
+                color=color,
+                alpha=0.15,
+            )
+
+    ax.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
+    ax.set_xlabel("Decade")
+    ax.set_ylabel(
+        "Mean RND  (||v − c_male|| − ||v − c_female||)\n"
+        "larger = more female-leaning"
+    )
+    title_src = f" — {embedding_source}" if embedding_source else ""
+    ax.set_title(
+        f"Per-category mean gender-norm-distance over time{title_src}"
+    )
+    ax.legend(title="Category", loc="best", framealpha=0.85)
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(out_path, format="pdf", bbox_inches="tight")
+    plt.close()
+    logger.info(f"Saved Garg-WEAT categories figure: {out_path}")
+
+
+# =============================================================================
 # WEAT mode plots
 # =============================================================================
 
@@ -1711,6 +1822,18 @@ def main(config="config/config.yml", mode=None):
             plot_garg_trend(df, figures_dir, logger, embedding_source=embedding_source)
         else:
             logger.error(f"Garg summary not found at {summary_path}")
+
+    elif analysis_mode == "garg_weat":
+        summary_path = results_dir / "garg_weat_summary_by_category.parquet"
+        if summary_path.exists():
+            df = pd.read_parquet(summary_path)
+            logger.info(f"Loaded {summary_path}: {len(df)} rows")
+            embedding_source = config_data.get("embedding_source")
+            plot_garg_weat_categories_trend(
+                df, figures_dir, logger, embedding_source=embedding_source,
+            )
+        else:
+            logger.error(f"Garg-WEAT summary not found at {summary_path}")
 
     logger.info("=" * 80)
     logger.info("Visualization completed!")
