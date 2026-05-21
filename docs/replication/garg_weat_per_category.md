@@ -147,6 +147,18 @@ python -m scripts.analyze_garg_weat --config config/profiles/<arm>.yml
 python -m scripts.visualize main --config config/profiles/<arm>.yml
 ```
 
+### Slurm wrappers (English and Chinese kept separate)
+
+| Script | Covers | Default arms |
+|---|---|---|
+| `slurm/prepare_wordlists.slurm` | English precheck | COHA configs → `wordlists/en/garg_weat` |
+| `slurm/garg_weat_all_sources.slurm` | **English** analyze + visualize | COHA trained / HistWords SGNS / SVD + google_ngram eng-all / eng-fiction-all |
+| `slurm/prepare_wordlists_zh.slurm` | **Chinese** precheck (formal) | RMRB + China-Ngram (pooled) → `wordlists/zh/garg_weat_formal` |
+| `slurm/garg_weat_zh.slurm` | **Chinese** analyze + visualize | RMRB + China-Ngram (pass Weibo / newspaper configs as args on PKU) |
+
+Each multi-source script also accepts an explicit config list as positional
+args, and skips any arm whose `models_dir` is missing or empty.
+
 Outputs land in the profile's `results_dir` / `figures_dir`:
 
 ```

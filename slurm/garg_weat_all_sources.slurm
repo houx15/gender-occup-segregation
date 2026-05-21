@@ -10,10 +10,11 @@
 #SBATCH --output=logs/garg_weat_all_sources_%j.out
 #SBATCH --error=logs/garg_weat_all_sources_%j.err
 
-# Run analyze_garg_weat + visualize for every embedding source we have on
-# disk, producing one per-category-trend PDF per source. Mirrors
-# fig2_all_sources.slurm but for the per-category RND metric instead of
-# Garg's aggregate Fig 2 line.
+# ENGLISH garg_weat pipeline: analyze_garg_weat + visualize for every English
+# embedding source on disk, one per-category-trend PDF per source. Mirrors
+# fig2_all_sources.slurm but for the per-category RND metric. The Chinese arms
+# live in a separate script — slurm/garg_weat_zh.slurm — to keep the two
+# pipelines (and their servers) apart.
 
 module load anaconda3/2023.3
 conda activate llm
@@ -24,6 +25,8 @@ DEFAULT_CONFIGS=(
     "config/profiles/garg_weat_coha_trained.yml"
     "config/profiles/garg_weat_coha_histwords_sgns.yml"
     "config/profiles/garg_weat_coha_histwords_svd.yml"
+    "config/profiles/garg_weat_google_ngram_eng_all.yml"
+    "config/profiles/garg_weat_google_ngram_eng_fiction_all.yml"
 )
 
 if [ "$#" -gt 0 ]; then
