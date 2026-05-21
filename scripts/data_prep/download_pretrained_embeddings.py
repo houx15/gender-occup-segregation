@@ -12,6 +12,12 @@ Sources supported:
                         Used for Fig 2 replication on the published vectors.
   histwords_coha_all    HistWords COHA bundle (SGNS + SVD + PPMI). ~1 GB zip.
                         Use this if you also want SVD for SI Appendix.
+  google_ngram_eng_all  HistWords Google Books Ngram "English (All)" SGNS, per
+                        decade 1800s–1990s. Same .npy + vocab.pkl layout as
+                        COHA. NOT US-specific — broader-English scale check.
+  google_ngram_eng_fiction_all
+                        HistWords Google Books Ngram "English Fiction" SGNS,
+                        per decade 1800s–1990s. Fiction register companion.
   glove_wiki_gigaword   GloVe Wikipedia 2014 + Gigaword 5. ~822 MB zip →
                         glove.6B.{50,100,200,300}d.txt.
   glove_commoncrawl     GloVe 840B/300d Common Crawl. ~2 GB zip.
@@ -99,6 +105,28 @@ SOURCES: Dict[str, Source] = {
             "you also want the SVD vectors for the SI Appendix figures."
         ),
     ),
+    "google_ngram_eng_all": Source(
+        name="google_ngram_eng_all",
+        url="http://snap.stanford.edu/historical_embeddings/eng-all_sgns.zip",
+        archive_filename="eng-all_sgns.zip",
+        decompress="zip",
+        note=(
+            "HistWords Google Books Ngram 'English (All)' SGNS vectors per "
+            "decade (1800s–1990s). Same .npy + vocab.pkl layout as the COHA "
+            "vectors. Note: 'All English', NOT US-specific — a broader-English, "
+            "larger-scale companion to the COHA arms, not American per se."
+        ),
+    ),
+    "google_ngram_eng_fiction_all": Source(
+        name="google_ngram_eng_fiction_all",
+        url="http://snap.stanford.edu/historical_embeddings/eng-fiction-all_sgns.zip",
+        archive_filename="eng-fiction-all_sgns.zip",
+        decompress="zip",
+        note=(
+            "HistWords Google Books Ngram 'English Fiction (All)' SGNS vectors "
+            "per decade (1800s–1990s). Same layout as eng-all; fiction register."
+        ),
+    ),
     "glove_wiki_gigaword": Source(
         name="glove_wiki_gigaword",
         url="https://nlp.stanford.edu/data/glove.6B.zip",
@@ -144,6 +172,8 @@ SOURCES: Dict[str, Source] = {
 _DETECT_PATTERNS: Dict[str, List[tuple[str, str]]] = {
     "histwords_coha_sgns": [("*-w.npy", "HistWords {YYYY}-w.npy files")],
     "histwords_coha_all":  [("*-w.npy", "HistWords {YYYY}-w.npy files")],
+    "google_ngram_eng_all":          [("*-w.npy", "HistWords {YYYY}-w.npy files")],
+    "google_ngram_eng_fiction_all":  [("*-w.npy", "HistWords {YYYY}-w.npy files")],
     "glove_wiki_gigaword": [("glove.*.txt", "GloVe text-format vectors")],
     "glove_commoncrawl":   [("glove.*.txt", "GloVe text-format vectors")],
     "google_news_word2vec": [("*.model", "gensim KeyedVectors split-save"),
