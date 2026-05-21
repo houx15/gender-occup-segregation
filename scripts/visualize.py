@@ -1762,6 +1762,16 @@ _WEIBO_CORRELATES = [
 ]
 
 
+def _annotate_ideation_direction(ax):
+    """Mark the two ends of an oriented-RND y-axis so the direction is legible:
+    our convention is higher = less traditional, so the top reads 'less
+    traditional' and the bottom 'more traditional'."""
+    ax.text(0.02, 0.97, "↑ less traditional", transform=ax.transAxes,
+            va="top", ha="left", fontsize=7, color="#888888")
+    ax.text(0.02, 0.03, "↓ more traditional", transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=7, color="#888888")
+
+
 def plot_garg_weat_weibo_survey_scatter(summary_df, provincial_csv, figures_dir, logger,
                                         category_sign=None, ideation_col="cfps_ideation_2020"):
     """Focused Weibo survey correlation: per-category oriented RND vs the
@@ -1809,9 +1819,8 @@ def plot_garg_weat_weibo_survey_scatter(summary_df, provincial_csv, figures_dir,
         else:
             ax.set_title(cat.title(), fontsize=11)
         ax.set_xlabel("CFPS gender ideation", fontsize=10)
-        ax.set_ylabel(
-            f"{cat.title()} gender norm\n(higher = less traditional)", fontsize=8
-        )
+        ax.set_ylabel(f"{cat.title()} gender norm (RND)", fontsize=9)
+        _annotate_ideation_direction(ax)
     plt.tight_layout()
     path = get_figure_path("garg_weat_weibo_survey_scatter", figures_dir)
     plt.savefig(path, format="pdf"); plt.close()
@@ -1856,9 +1865,7 @@ def plot_garg_weat_weibo_correlation(summary_df, provincial_csv, figures_dir, lo
         if merged.empty:
             logger.info(f"  Weibo correlation {cat}: no province overlap")
             continue
-        ylabel = (
-            f"{cat.title()} gender norm from Weibo\n(higher = less traditional)"
-        )
+        ylabel = f"{cat.title()} gender norm from Weibo (RND)"
         fig, axes = plt.subplots(nrows, ncols, figsize=(6 * ncols, 5 * nrows),
                                  squeeze=False)
         for i, (lab, _fn) in enumerate(avail):
@@ -1880,6 +1887,7 @@ def plot_garg_weat_weibo_correlation(summary_df, provincial_csv, figures_dir, lo
                 ax.set_title(lab, fontsize=10)
             ax.set_xlabel(lab, fontsize=9)
             ax.set_ylabel(ylabel, fontsize=8)
+            _annotate_ideation_direction(ax)
         for j in range(len(avail), nrows * ncols):
             axes[j // ncols][j % ncols].set_axis_off()
         plt.tight_layout()
