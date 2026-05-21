@@ -11,9 +11,12 @@ paths:
   raw_data_dir: "/scratch/network/yh6580/chinese_corpus/xiandai_20250422/xiandai"
   corpora_dir: "/scratch/network/yh6580/renminribao/corpora"
   models_dir: "/scratch/network/yh6580/renminribao/models"
-  results_dir: "/scratch/network/yh6580/renminribao/results_garg_weat_renminribao"
+  # garg_weat outputs co-located with china_ngram under gender-occup (models +
+  # corpora stay under renminribao/). Leaf names keep the source tag so the two
+  # Chinese arms don't collide.
+  results_dir: "/scratch/network/yh6580/gender-occup/results_garg_weat_renminribao"
   log_dir: "/scratch/network/yh6580/renminribao/logs"
-  figures_dir: "/scratch/network/yh6580/renminribao/figures_garg_weat_renminribao"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_renminribao"
 
 wordlists:
   dir: "wordlists/zh/garg_weat_formal"
