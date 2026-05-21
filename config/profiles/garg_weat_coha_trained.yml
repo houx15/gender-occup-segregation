@@ -54,6 +54,14 @@ analysis:
   occupation_strategy: "whole_token"
   min_coverage: 0.5
   seed: 42
+  # Orient each dimension onto a single gender-ideation axis where
+  # higher = less traditional. Leadership/science female-leaning is
+  # progressive (+1); family female-leaning is the traditional view, so
+  # reverse it (-1).
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
   # Version 1 — faithful to Garg's sns.tsplot band: with-replacement
   # bootstrap over the consistent occupation set, ~68% (≈ ±1 SE).
   bootstrap:

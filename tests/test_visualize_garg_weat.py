@@ -61,6 +61,53 @@ def test_writes_pdf_for_decade_units(tmp_path):
     )
 
 
+def test_apply_ideation_sign_reverses_only_marked_categories():
+    from scripts.visualize import apply_ideation_sign
+
+    df = pd.DataFrame({
+        "category": ["leadership", "family", "science"],
+        "mean_rnd": [0.4, 0.5, 0.3],
+        "ci_low": [0.2, 0.3, 0.1],
+        "ci_high": [0.6, 0.7, 0.5],
+    })
+    out = apply_ideation_sign(
+        df, {"leadership": 1, "family": -1, "science": 1},
+        ["mean_rnd", "ci_low", "ci_high"],
+    )
+    # leadership/science untouched
+    assert out.loc[out["category"] == "leadership", "mean_rnd"].iloc[0] == 0.4
+    assert out.loc[out["category"] == "science", "mean_rnd"].iloc[0] == 0.3
+    # family negated (band bounds negated too — order swap is fine for fill)
+    fam = out[out["category"] == "family"].iloc[0]
+    assert fam["mean_rnd"] == -0.5
+    assert fam["ci_low"] == -0.3
+    assert fam["ci_high"] == -0.7
+
+
+def test_apply_ideation_sign_none_is_identity():
+    from scripts.visualize import apply_ideation_sign
+
+    df = pd.DataFrame({"category": ["family"], "mean_rnd": [0.5]})
+    out = apply_ideation_sign(df, None, ["mean_rnd"])
+    assert out["mean_rnd"].iloc[0] == 0.5
+
+
+def test_reversed_category_legend_and_pdf(tmp_path):
+    from scripts.visualize import plot_garg_weat_categories_trend
+
+    df = _make_summary(
+        units=["1910s", "1950s", "1990s"],
+        categories=["leadership", "family", "science"],
+    )
+    plot_garg_weat_categories_trend(
+        df, tmp_path, logging.getLogger("test"), embedding_source="trained_coha",
+        category_sign={"leadership": 1, "family": -1, "science": 1},
+    )
+    assert any(
+        "fig2_garg_weat_categories__trained_coha" in n for n in _pdfs(tmp_path)
+    )
+
+
 def test_subsample_band_writes_tagged_pdf(tmp_path):
     from scripts.visualize import plot_garg_weat_categories_trend
 

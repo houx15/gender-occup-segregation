@@ -398,10 +398,30 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
 # Garg-WEAT (per-category RND) plot
 # =============================================================================
 
+def apply_ideation_sign(df, category_sign, value_cols):
+    """Re-orient RND values onto a gender-ideation axis.
+
+    For leadership/science, more female-leaning (higher RND) already means
+    less-traditional ideation; for family it's the reverse — a more
+    female-leaning 'family' is the *traditional* view. Multiplying family's
+    values by -1 (via category_sign) puts every line on one axis where
+    higher = less traditional. Negating a band swaps its low/high, but
+    fill_between handles unordered bounds, so callers don't need to re-sort.
+    """
+    if not category_sign:
+        return df
+    df = df.copy()
+    signs = df["category"].map(lambda c: category_sign.get(c, 1))
+    for col in value_cols:
+        if col in df.columns:
+            df[col] = df[col] * signs
+    return df
+
+
 def plot_garg_weat_categories_trend(
     df, figures_dir, logger, embedding_source=None,
     band_cols=("ci_low", "ci_high"), band_tag="", line_col="mean_rnd",
-    band_label=None,
+    band_label=None, category_sign=None,
 ):
     """Plot per-category mean RND over time. One line per category (leadership,
     family, science) on a single axis, with a shaded uncertainty band.
@@ -462,6 +482,12 @@ def plot_garg_weat_categories_trend(
 
     df = df.dropna(subset=["start_year"]).sort_values("start_year")
 
+    low_col, high_col = band_cols
+    df = apply_ideation_sign(df, category_sign, [line_col, low_col, high_col])
+    reversed_cats = (
+        [c for c, s in category_sign.items() if s < 0] if category_sign else []
+    )
+
     fig, ax = plt.subplots(figsize=(11, 6))
 
     # Distinct, accessible colours per category — falls back to matplotlib
@@ -479,15 +505,15 @@ def plot_garg_weat_categories_trend(
         color = palette.get(cat_name) or default_cycle[i % len(default_cycle)]
         marker = markers.get(cat_name, "o")
 
+        label = cat_name.title() + (" (rev.)" if cat_name in reversed_cats else "")
         ax.plot(
             group["start_year"],
             group[line_col],
             marker=marker,
             color=color,
             linewidth=1.8,
-            label=cat_name.title(),
+            label=label,
         )
-        low_col, high_col = band_cols
         if low_col in group.columns and high_col in group.columns:
             ax.fill_between(
                 group["start_year"],
@@ -499,15 +525,28 @@ def plot_garg_weat_categories_trend(
 
     ax.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
     ax.set_xlabel("Decade")
-    ax.set_ylabel(
-        "Mean RND  (||v − c_male|| − ||v − c_female||)\n"
-        "larger = more female-leaning"
-    )
+    if reversed_cats:
+        ax.set_ylabel(
+            "Gender ideation  (oriented RND)\n"
+            "higher = less traditional"
+        )
+    else:
+        ax.set_ylabel(
+            "Mean RND  (||v − c_male|| − ||v − c_female||)\n"
+            "larger = more female-leaning"
+        )
     title_src = f" — {embedding_source}" if embedding_source else ""
     band_note = f"  [{band_label}]" if band_label else ""
     ax.set_title(
-        f"Per-category mean gender-norm-distance over time{title_src}{band_note}"
+        f"Per-category gender-ideation over time{title_src}{band_note}"
     )
+    if reversed_cats:
+        fig.text(
+            0.5, -0.02,
+            f"{', '.join(sorted(reversed_cats))} reversed (RND × −1) so all "
+            "lines share a 'less traditional = up' axis",
+            ha="center", fontsize=8, color="grey",
+        )
     ax.legend(title="Category", loc="best", framealpha=0.85)
     ax.grid(True, alpha=0.3)
 
@@ -1841,18 +1880,22 @@ def main(config="config/config.yml", mode=None):
             df = pd.read_parquet(summary_path)
             logger.info(f"Loaded {summary_path}: {len(df)} rows")
             embedding_source = config_data.get("embedding_source")
+            # Per-category orientation onto a gender-ideation axis (e.g.
+            # family reversed): config analysis.ideation_sign maps
+            # category -> +1/-1. Absent -> raw RND, no flip.
+            category_sign = config_data.get("analysis", {}).get("ideation_sign")
             # Two versions of the band on the same trend:
             #   bootstrap — Garg's with-replacement occupation bootstrap
             #   subsample — keep 80% of words without replacement, N rounds
             plot_garg_weat_categories_trend(
                 df, figures_dir, logger, embedding_source=embedding_source,
                 band_cols=("ci_low", "ci_high"), band_tag="bootstrap",
-                band_label="bootstrap CI (Garg)",
+                band_label="bootstrap CI (Garg)", category_sign=category_sign,
             )
             plot_garg_weat_categories_trend(
                 df, figures_dir, logger, embedding_source=embedding_source,
                 band_cols=("sub_low", "sub_high"), band_tag="subsample",
-                band_label="80% word-subsample band",
+                band_label="80% word-subsample band", category_sign=category_sign,
             )
         else:
             logger.error(f"Garg-WEAT summary not found at {summary_path}")
