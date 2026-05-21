@@ -7,18 +7,19 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-user=yh6580@princeton.edu
 
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate opinion
-
+module load anaconda3/2023.3
+conda activate llm
 # Runs the full English pipeline (ngram_en or coha) via run_pipeline.sh.
 #
 # Usage:
 #   sbatch slurm/full_pipeline_en.slurm
 #   sbatch slurm/full_pipeline_en.slurm config/profiles/coha_server.yml
 #   sbatch slurm/full_pipeline_en.slurm config/profiles/ngram_en_server.yml
+#   sbatch slurm/full_pipeline_en.slurm config/profiles/coha_garg.yml --force-analyze
 
 CONFIG="${1:-config/profiles/ngram_en_server.yml}"
+shift || true   # remaining args (e.g., --force-analyze) flow through
 
-echo "Running English full pipeline with config=$CONFIG"
+echo "Running English full pipeline with config=$CONFIG  extra_args=$*"
 
-bash run_pipeline.sh --config "$CONFIG"
+bash run_pipeline.sh --config "$CONFIG" "$@"

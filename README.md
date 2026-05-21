@@ -15,6 +15,7 @@ This project measures how gender associations with occupations and social concep
 **Analysis modes:**
 - **Prestige** — Projects occupations onto gender + 4 prestige axes (evaluation, potency, activity, general prestige). Computes Pearson correlations between gender typing and prestige over time.
 - **WEAT** — Computes Cohen's d effect sizes for 3 gender norm dimensions: work-family, leadership, and STEM. Supports cross-provincial comparison and correlation with socioeconomic indicators.
+- **Garg-WEAT** — Garg's relative norm distance (RND) per concept category (leadership / family / science), oriented onto a single gender-ideation axis (higher = less traditional), with bootstrap + word-subsample bands. The RND counterpart to WEAT's Cohen's d; runs on the same models, longitudinal or provincial. See [`docs/replication/garg_weat_per_category.md`](docs/replication/garg_weat_per_category.md).
 
 ## Quick Start
 
@@ -328,6 +329,13 @@ Edit the `#SBATCH` headers in the slurm scripts to adjust resources and email.
 | `oov_unit_coverage.csv` | OOV diagnostics per unit |
 | `gender_axes.csv` | Gender axis metadata |
 
+### Garg-WEAT Mode
+
+| File | Description |
+|------|-------------|
+| `garg_weat_rnd_long.parquet` | RND per category word per unit (long: unit_name, category, occupation, rnd, in_vocab) |
+| `garg_weat_summary_by_category.parquet` | Per (unit, category) mean RND + bootstrap and subsample bands (main result) |
+
 ### Visualizations
 
 | Plot | Mode | Description |
@@ -341,6 +349,9 @@ Edit the `#SBATCH` headers in the slurm scripts to adjust resources and email.
 | `weat_longitudinal_by_dimension` | WEAT | Per-dimension trend with effect size reference lines |
 | `weat_projection_boxplots` | WEAT | Projection distributions per unit (diagnostic) |
 | `weat_choropleth_*` | WEAT | Provincial maps (requires geopandas + shapefile) |
+| `fig2_garg_weat_categories__<src>__{bootstrap,subsample}` | Garg-WEAT | Per-category RND trend on the gender-ideation axis (longitudinal) |
+| `garg_weat_provincial_{rankings,heatmap}` | Garg-WEAT | Cross-province RND per category |
+| `garg_weat_choropleth_*` | Garg-WEAT | Provincial RND maps (requires geopandas + shapefile) |
 | `*_correlation.pdf` | Correlation | Scatter plots with regression lines |
 
 ## English Pipeline
@@ -392,6 +403,38 @@ Notes on COHA data layout:
 - Free archives are bundled by n-gram size (`coha-5-grams.zip`, etc.), **not** by decade. After decompression, each archive expands into per-decade TSV files that the builder auto-buckets into decade slice dirs (`1940s/`, `1950s/`, …).
 - The builder reads decade from filenames via regex — verify one decompressed filename contains a decade marker (e.g. `..._1940s_...`) before running the pipeline. If not, adjust `decade_from_filename` in `scripts/data_prep/build_corpora_coha.py`.
 - Do not mix n-gram sizes in one run. Set `coha.n` to the size you downloaded and keep one archive set per config.
+
+### Garg (2018) replication
+
+A third analysis mode, `garg`, replicates Fig 2 of Garg et al. 2018 (gender-occupation bias trend across COHA decades) using the relative norm distance metric. The full methodology, training-parameter rationale, end-to-end run instructions (including Dropbox-shared COHA archives), and acceptance criteria live in [`docs/replication/garg_2018.md`](docs/replication/garg_2018.md).
+
+```bash
+# Same flow as COHA above, but with the Garg-pinned profile
+python -m scripts.data_prep.download_coha --config config/profiles/coha_garg.yml
+sbatch slurm/full_pipeline_en.slurm config/profiles/coha_garg.yml
+# → figures_garg/fig2_garg_replication.pdf
+```
+
+### Garg-WEAT (per-category RND)
+
+The `garg_weat` mode extends Garg's RND to concept categories (leadership /
+family / science) on a gender-ideation axis, and runs on every corpus —
+including pre-trained HistWords **Google Books Ngram** English vectors that need
+no training:
+
+```bash
+# Pre-trained Google Books "English (All)" + "English Fiction" vectors
+python -m scripts.data_prep.download_pretrained_embeddings \
+    --source=google_ngram_eng_all \
+    --target_dir=/scratch/network/yh6580/gender-occup/data/pretrained_embeddings
+python -m scripts.analyze_garg_weat --config config/profiles/garg_weat_google_ngram_eng_all.yml
+python -m scripts.visualize main      --config config/profiles/garg_weat_google_ngram_eng_all.yml
+```
+
+The same mode powers the Chinese RND arms (Renminribao, China Ngram, Weibo,
+provincial newspapers) on their existing models. Full methodology, the family
+sign-flip, the two uncertainty bands, every arm, and run commands are in
+[`docs/replication/garg_weat_per_category.md`](docs/replication/garg_weat_per_category.md).
 
 ## Methodology
 

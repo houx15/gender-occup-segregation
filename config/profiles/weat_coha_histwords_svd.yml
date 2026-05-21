@@ -1,0 +1,40 @@
+# WEAT analysis on the published HistWords COHA SVD vectors
+# (Hamilton et al. 2016).
+# Companion to coha_histwords_svd.yml — same models_dir, different metric.
+#
+# NOTE: same script-side gap as weat_coha_histwords_sgns.yml —
+# analyze_weat.py needs the format-aware dispatch from analyze_garg.py
+# before this profile will run.
+#
+# Expect very sparse vocab in early decades (1810s SVD vocab is only
+# ~1,200 words); STEM/leadership attribute terms with anachronistic
+# vocabulary ("algorithm", "corporation", "promotion") will OOV heavily.
+# The Step 0 OOV check in analyze_weat will surface this — use the
+# coverage CSV to decide whether to prune or replace attribute terms.
+language: "en"
+data_source: "coha"
+analysis_mode: "weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/histwords_coha_all/coha-word/svd"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_weat_histwords_svd"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_weat_histwords_svd"
+
+embedding:
+  format: histwords
+
+embedding_source: "histwords_svd"
+
+wordlists:
+  dir: "wordlists/en/weat_formal"
+  weat_gender_file: "gender_words.json"
+  weat_domestic_work_file: "domestic_work_words.json"
+  weat_leadership_file: "leadership_words.json"
+  weat_stem_file: "stem_words.json"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  decade_range: [1910, 1990]

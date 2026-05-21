@@ -7,8 +7,8 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-user=yh6580@princeton.edu
 
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate opinion
+module load anaconda3/2023.3
+conda activate llm
 
 # Usage:
 #   sbatch slurm/full_pipeline.slurm

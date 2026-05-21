@@ -384,3 +384,181 @@ class TestBuildCorporaCohaIntegration:
         assert not (tmp_path / "corpora").exists() or not any(
             (tmp_path / "corpora").rglob("*.txt")
         )
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# COHA full-text release (one document per file, prose with @@<id> header
+# and @ @ @ @ @ @ @ @ @ @ redaction markers). This is what the corpusdata.org
+# paid full-text release ships, and is closer to what HistWords/Garg actually
+# trained on than the n-gram release.
+# ────────────────────────────────────────────────────────────────────────────
+
+
+class TestParseCohaFulltext:
+    """Unit tests for parse_coha_fulltext."""
+
+    def test_strips_header_line(self):
+        from scripts.data_prep.build_corpora_coha import parse_coha_fulltext
+
+        text = "@@1076\n\nThe quick brown fox jumps over the lazy dog .\n"
+        chunks = parse_coha_fulltext(text, min_tokens=2)
+        joined = " ".join(chunks)
+        assert "1076" not in joined
+        assert "the quick brown fox" in joined
+
+    def test_splits_on_redaction_marker(self):
+        from scripts.data_prep.build_corpora_coha import parse_coha_fulltext
+
+        # Two separate sentences separated by the 10-@ redaction marker.
+        text = (
+            "@@42\n\n"
+            "The first segment goes here .\n"
+            "@ @ @ @ @ @ @ @ @ @\n"
+            "And the second segment continues there .\n"
+        )
+        chunks = parse_coha_fulltext(text, min_tokens=2)
+        # Should produce two distinct chunks, neither containing @ tokens
+        assert len(chunks) == 2
+        assert all("@" not in c for c in chunks)
+        assert "first segment" in chunks[0]
+        assert "second segment" in chunks[1]
+
+    def test_lowercases_and_drops_punctuation(self):
+        from scripts.data_prep.build_corpora_coha import parse_coha_fulltext
+
+        text = "@@1\n\nHello , World ! It 's NICE .\n"
+        chunks = parse_coha_fulltext(text, min_tokens=2)
+        assert len(chunks) == 1
+        # Lowercased, punctuation tokens dropped, apostrophes preserved
+        assert chunks[0] == "hello world it 's nice"
+
+    def test_drops_chunks_below_min_tokens(self):
+        from scripts.data_prep.build_corpora_coha import parse_coha_fulltext
+
+        # Tiny segment between two redactions should be dropped.
+        text = (
+            "@@1\n\n"
+            "The first lengthy segment here please .\n"
+            "@ @ @ @ @ @ @ @ @ @\n"
+            "tiny\n"
+            "@ @ @ @ @ @ @ @ @ @\n"
+            "Another sufficiently long second segment here .\n"
+        )
+        chunks = parse_coha_fulltext(text, min_tokens=5)
+        assert len(chunks) == 2  # the 1-token "tiny" chunk dropped
+        assert all(len(c.split()) >= 5 for c in chunks)
+
+    def test_handles_multiple_redaction_markers_in_a_row(self):
+        from scripts.data_prep.build_corpora_coha import parse_coha_fulltext
+
+        text = (
+            "@@1\n\n"
+            "First proper segment here .\n"
+            "@ @ @ @ @ @ @ @ @ @\n"
+            "@ @ @ @ @ @ @ @ @ @\n"
+            "Second proper segment here .\n"
+        )
+        chunks = parse_coha_fulltext(text, min_tokens=2)
+        # Two real segments; empty middle dropped
+        assert len(chunks) == 2
+
+    def test_returns_empty_list_for_header_only(self):
+        from scripts.data_prep.build_corpora_coha import parse_coha_fulltext
+
+        text = "@@99\n\n\n"
+        chunks = parse_coha_fulltext(text, min_tokens=2)
+        assert chunks == []
+
+
+class TestBuildCorporaCohaFulltextIntegration:
+    """End-to-end build_corpora dispatch for coha.format: fulltext."""
+
+    def _run(self, tmp_path):
+        import logging
+        from scripts.data_prep.build_corpora_coha import build_corpora
+
+        decomp_dir = tmp_path / "decomp"
+        decomp_dir.mkdir()
+
+        # Two documents from 1900s decade, one from 1910s.
+        (decomp_dir / "fic_1900_1076.txt").write_text(
+            "@@1076\n\nA pleasant morning in the green meadow rolled along .\n",
+            encoding="utf-8",
+        )
+        (decomp_dir / "mag_1905_99.txt").write_text(
+            "@@99\n\nThe second 1900s document mentions women and men .\n",
+            encoding="utf-8",
+        )
+        (decomp_dir / "fic_1912_500.txt").write_text(
+            "@@500\n\nIn the 1910s decade the world was changing fast .\n",
+            encoding="utf-8",
+        )
+
+        config = {
+            "coha": {"format": "fulltext", "min_chunk_tokens": 3},
+            "paths": {
+                "coha_decompressed_dir": str(decomp_dir),
+                "corpora_dir": str(tmp_path / "corpora"),
+            },
+        }
+        logger = logging.getLogger("test_fulltext")
+        build_corpora(config, logger)
+        return tmp_path / "corpora"
+
+    def test_decade_dirs_created(self, tmp_path):
+        corpora_dir = self._run(tmp_path)
+        assert (corpora_dir / "1900s").is_dir()
+        assert (corpora_dir / "1910s").is_dir()
+
+    def test_documents_aggregated_per_decade(self, tmp_path):
+        corpora_dir = self._run(tmp_path)
+        content_1900 = "".join(
+            f.read_text(encoding="utf-8")
+            for f in (corpora_dir / "1900s").glob("corpus_*.txt")
+        )
+        # Both 1900s docs should land in the same decade dir
+        assert "pleasant morning" in content_1900
+        assert "women and men" in content_1900
+
+        content_1910 = "".join(
+            f.read_text(encoding="utf-8")
+            for f in (corpora_dir / "1910s").glob("corpus_*.txt")
+        )
+        assert "1910s decade" in content_1910 or "decade the world" in content_1910
+
+    def test_default_format_is_ngram_for_backcompat(self, tmp_path):
+        """Old configs without coha.format must still hit the n-gram code path."""
+        import logging
+        from scripts.data_prep.build_corpora_coha import build_corpora
+
+        decomp_dir = tmp_path / "decomp"
+        decomp_dir.mkdir()
+        (decomp_dir / "w4_1940.txt").write_text(
+            "the quick brown fox\t50\n", encoding="utf-8"
+        )
+        config = {
+            "coha": {"ngram_order": 4, "min_freq": 1},  # no 'format' key
+            "paths": {
+                "coha_decompressed_dir": str(decomp_dir),
+                "corpora_dir": str(tmp_path / "corpora"),
+            },
+        }
+        logger = logging.getLogger("test_default_format")
+        build_corpora(config, logger)
+        content = "".join(
+            f.read_text(encoding="utf-8")
+            for f in (tmp_path / "corpora" / "1940s").glob("corpus_*.txt")
+        )
+        # n-gram path produces space-joined ngrams (no @ tokens, no header artifacts)
+        assert "the quick brown fox" in content
+
+
+def test_decade_from_filename_handles_fulltext_pattern():
+    """Filenames like fic_1900_1076.txt must yield 1900s."""
+    from pathlib import Path
+
+    from scripts.data_prep.build_corpora_coha import decade_from_filename
+
+    assert decade_from_filename(Path("fic_1900_1076.txt")) == "1900s"
+    assert decade_from_filename(Path("mag_1955_99.txt")) == "1950s"
+    assert decade_from_filename(Path("news_2005_42.txt")) == "2000s"

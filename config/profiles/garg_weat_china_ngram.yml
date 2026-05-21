@@ -1,0 +1,70 @@
+# Garg-WEAT per-category RND on the EXISTING Chinese Google-ngram models.
+# No training — reuses the models trained for ngram_weat.yml; only the analysis
+# metric changes (Cohen's d -> Garg relative norm distance). ngram_weat.yml is
+# left untouched.
+language: "zh"
+data_source: "ngram"
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_ngram_dir: "/scratch/network/yh6580/gender-occup/raw_ngrams"
+  decompressed_dir: "/scratch/network/yh6580/gender-occup/raw_ngrams_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/corpora"
+  models_dir: "/scratch/network/yh6580/gender-occup/models"
+  results_dir: "/scratch/network/yh6580/gender-occup/results_garg_weat_china_ngram"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_china_ngram"
+
+wordlists:
+  dir: "wordlists/zh/garg_weat_formal"
+  gender_words_file: "gender_words.json"
+  categories:
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
+
+ngram:
+  language: "chi_sim"
+  n: 5
+  min_year: 1940
+  max_year: 2020
+
+time_slices:
+  window_size: 10
+  step_size: 5
+  start_year: 1940
+  end_year: 2020
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 50
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  # Drives discover_models' unit-name parsing (units are '1940_1949' windows).
+  model_name_template: "chi_sim_5gram_{slice_name}.model"
+
+embedding_source: "china_ngram"
+
+corpus:
+  use_counts: false
+  min_count_threshold: 1
+  tokenizer: "whitespace"
+
+analysis:
+  seed: 42
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95

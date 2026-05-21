@@ -94,6 +94,10 @@ A positive Cohen's $d$ in the Work--Family dimension, for instance, indicates th
 
 Before computing effect sizes, we assess the comparability of projection distributions across time slices by calculating the coefficient of variation (CV) of per-slice means and standard deviations. If either CV exceeds 0.3, indicating substantial distributional drift across periods, projections are z-score standardized within each time slice before computing Cohen's $d$. This guards against conflating changes in the overall geometry of the embedding space with genuine shifts in gender associations.
 
+### 5.5 Alternative metric: relative norm distance (Garg-WEAT)
+
+As a complementary measure on the *same* trained models, we also compute Garg's relative norm distance (RND; Garg et al., 2018): for each concept word, the difference in distance to the male vs. female centroid, $\lVert v_w - c_{\text{male}}\rVert - \lVert v_w - c_{\text{female}}\rVert$ (positive = female-leaning). Words are grouped into the leadership, family, and science categories and oriented onto a single gender-ideation axis (higher = less traditional), with family reversed because its female association is the *traditional* view. Uncertainty is reported as both a with-replacement bootstrap (Garg's convention) and an 80% word-subsample band. This RND view does not replace the Cohen's $d$ index; the two are reported side by side. Full procedure: [`replication/garg_weat_per_category.md`](replication/garg_weat_per_category.md).
+
 ---
 
 ## 6. Survey Data

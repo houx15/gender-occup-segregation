@@ -30,7 +30,12 @@ DATA_SOURCE_DEFAULTS = {
     "coha": "longitudinal",
 }
 
-VALID_ANALYSIS_MODES = {"prestige", "weat"}
+VALID_ANALYSIS_MODES = {"prestige", "weat", "garg", "garg_weat"}
+
+# Embedding formats that bypass our download/corpus/train pipeline. Profiles
+# using these formats only need models_dir/results_dir/log_dir; the corpus
+# and raw-data paths are not required.
+PRETRAINED_EMBEDDING_FORMATS = {"histwords", "word2vec_bin", "glove_text"}
 
 
 def load_config(config_path: str) -> dict:
@@ -77,24 +82,32 @@ def _validate_config(config: dict) -> None:
         )
 
     paths = config.get("paths", {})
-    required_paths = ["base_dir", "corpora_dir", "models_dir", "results_dir", "log_dir"]
+    # When using a pretrained-embedding format, we bypass corpus building and
+    # training entirely — only models_dir/results_dir/log_dir matter.
+    embedding_format = config.get("embedding", {}).get("format", "gensim_kv")
+    is_pretrained = embedding_format in PRETRAINED_EMBEDDING_FORMATS
+    if is_pretrained:
+        required_paths = ["base_dir", "models_dir", "results_dir", "log_dir"]
+    else:
+        required_paths = ["base_dir", "corpora_dir", "models_dir", "results_dir", "log_dir"]
     for key in required_paths:
         if key not in paths:
             raise ValueError(f"Missing required path: paths.{key}")
 
-    if data_source == "ngram":
-        if "raw_ngram_dir" not in paths:
-            raise ValueError("ngram data_source requires paths.raw_ngram_dir")
-    if data_source == "coha":
-        if "raw_coha_dir" not in paths:
-            raise ValueError("coha data_source requires paths.raw_coha_dir")
-        if "coha_decompressed_dir" not in paths:
-            raise ValueError("coha data_source requires paths.coha_decompressed_dir")
-        if "coha" not in config:
-            raise ValueError("coha data_source requires a top-level 'coha' config block")
-    if data_source in ("ngram", "renminribao"):
-        if "time_slices" not in config:
-            raise ValueError(f"{data_source} data_source requires time_slices config")
+    if not is_pretrained:
+        if data_source == "ngram":
+            if "raw_ngram_dir" not in paths:
+                raise ValueError("ngram data_source requires paths.raw_ngram_dir")
+        if data_source == "coha":
+            if "raw_coha_dir" not in paths:
+                raise ValueError("coha data_source requires paths.raw_coha_dir")
+            if "coha_decompressed_dir" not in paths:
+                raise ValueError("coha data_source requires paths.coha_decompressed_dir")
+            if "coha" not in config:
+                raise ValueError("coha data_source requires a top-level 'coha' config block")
+        if data_source in ("ngram", "renminribao"):
+            if "time_slices" not in config:
+                raise ValueError(f"{data_source} data_source requires time_slices config")
 
 
 def _resolve_paths(config: dict) -> None:
@@ -205,6 +218,9 @@ def get_wordlist_dir(config: dict) -> Path:
 
     if analysis_mode == "prestige":
         return repo_root / "wordlists" / language / "prestige"
+
+    if analysis_mode == "garg":
+        return repo_root / "wordlists" / language / "garg"
 
     # WEAT
     data_source = config["data_source"]

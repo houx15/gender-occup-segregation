@@ -1,0 +1,37 @@
+# Garg (2018) Fig 2 replication on the published HistWords COHA SVD vectors.
+# Companion to coha_histwords_sgns.yml — see that file for the run procedure.
+#
+# Download (the SVD vectors live in the same bundle as everything else):
+#   python -m scripts.data_prep.download_pretrained_embeddings \
+#       --source=histwords_coha_all \
+#       --target_dir=/scratch/network/yh6580/gender-occup/data/pretrained_embeddings
+language: "en"
+data_source: "coha"
+analysis_mode: "garg"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  # coha-word.zip extracts to histwords_coha_all/coha-word/{sgns,svd,ppmi}/;
+  # the SVD per-decade .npy + .pkl files live in coha-word/svd/.
+  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/histwords_coha_all/coha-word/svd"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_histwords_svd"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_histwords_svd"
+
+embedding:
+  format: histwords
+
+embedding_source: "histwords_svd"
+
+wordlists:
+  dir: "wordlists/en/garg"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+  occupation_percentages_file: "occupation_percentages_gender.csv"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  consistent_occupations: true
+  # See coha_histwords_sgns.yml — same census-coverage rationale.
+  decade_range: [1910, 1990]

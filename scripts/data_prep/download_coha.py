@@ -86,16 +86,27 @@ def main(config: str = "config/config.yml", max_workers: int = 4, skip_decompres
         raise ValueError("download_coha requires data_source='coha' in config")
 
     urls: List[str] = cfg.get("coha", {}).get("source_archive_urls", [])
-    if not urls:
-        raise ValueError(
-            "config.coha.source_archive_urls is empty. "
-            "Paste the download URLs from your corpusdata.org signup email."
-        )
-
     raw_dir = Path(cfg["paths"]["raw_coha_dir"])
     decomp_dir = Path(cfg["paths"]["coha_decompressed_dir"])
     log_dir = Path(cfg["paths"]["log_dir"])
     logger = _setup_logging(log_dir)
+
+    if not urls:
+        # If the user pre-staged data into coha_decompressed_dir (e.g., they
+        # already have the COHA full-text release locally), skip cleanly
+        # instead of hard-failing — the corpus builder will pick those files up.
+        if decomp_dir.exists() and any(decomp_dir.rglob("*.txt")):
+            logger.info(
+                f"source_archive_urls is empty but {decomp_dir} already contains "
+                "*.txt files; skipping download."
+            )
+            return
+        raise ValueError(
+            "config.coha.source_archive_urls is empty and no pre-decompressed "
+            f"*.txt files were found under {decomp_dir}. Either paste the "
+            "download URLs from your corpusdata.org signup email, or place the "
+            "data under coha_decompressed_dir manually."
+        )
 
     logger.info("=" * 80)
     logger.info(f"Starting COHA download ({len(urls)} URLs)")

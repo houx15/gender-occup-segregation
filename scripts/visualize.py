@@ -278,6 +278,298 @@ def plot_prestige_by_category(df, config, figures_dir, logger):
 
 
 # =============================================================================
+# Garg (2018) replication mode plots
+# =============================================================================
+
+def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
+    """Plot Garg (2018) Fig 2 replication: mean relative norm distance by decade.
+
+    Args:
+        df: summary DataFrame from analyze_garg.build_summary, with at least
+            columns unit_name / mean_rnd / ci_low / ci_high. If a non-null
+            mean_pct_diff column is present, an "Avg. Women Occupation %
+            Difference" overlay is rendered on a twin y-axis (matching Garg's
+            plot_creation.plot_averagebias_over_time_consistentoccupations).
+        figures_dir: directory to write the figure into.
+        logger: logger for status messages.
+        embedding_source: optional short label like "trained_coha" or
+            "histwords_sgns". Flows into the figure filename suffix
+            (fig2_garg_replication__{source}.pdf) and title so runs against
+            different embedding sources do not overwrite each other.
+
+    Empty-DataFrame behavior: logs a WARNING and returns early without writing
+    a figure. This avoids producing misleading empty plots when the upstream
+    analyzer wrote a zero-row summary (e.g. all decades skipped).
+    """
+    figures_dir = Path(figures_dir)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = f"__{embedding_source}" if embedding_source else ""
+    out_path = figures_dir / f"fig2_garg_replication{suffix}.pdf"
+
+    if df is None or df.empty:
+        logger.warning(
+            "plot_garg_trend called with empty DataFrame; skipping write of "
+            f"{out_path}"
+        )
+        return
+
+    # Same shape as empty for the eye, but technically different — catch it
+    # explicitly so the user gets a loud error instead of an empty PDF.
+    if "mean_rnd" in df.columns and df["mean_rnd"].isna().all():
+        logger.error(
+            "plot_garg_trend: every mean_rnd is NaN — refusing to write a "
+            "blank figure. Check the analyze_garg log for vocab/OOV "
+            f"diagnostics. (Would have written {out_path}.)"
+        )
+        return
+
+    df_sorted = df.sort_values("unit_name").reset_index(drop=True)
+
+    has_pct_overlay = (
+        "mean_pct_diff" in df_sorted.columns
+        and df_sorted["mean_pct_diff"].notna().any()
+    )
+
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+
+    bias_color = "#1f4e79"  # blue, matches Garg's ax1
+    pct_color = "#2e7d32"   # green, matches Garg's ax2
+
+    ax1.plot(
+        df_sorted["unit_name"],
+        df_sorted["mean_rnd"],
+        marker="o",
+        color=bias_color,
+        linewidth=1.8,
+        label="Avg. women bias (embedding)",
+    )
+    ax1.fill_between(
+        df_sorted["unit_name"],
+        df_sorted["ci_low"],
+        df_sorted["ci_high"],
+        color=bias_color,
+        alpha=0.18,
+        label="95% CI",
+    )
+    ax1.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
+    ax1.set_xlabel("Decade")
+    ax1.set_ylabel(
+        "Avg. women bias  (||v − c_male|| − ||v − c_female||)",
+        color=bias_color,
+    )
+    ax1.tick_params(axis="y", labelcolor=bias_color)
+    ax1.tick_params(axis="x", rotation=45)
+
+    if has_pct_overlay:
+        ax2 = ax1.twinx()
+        ax2.plot(
+            df_sorted["unit_name"],
+            df_sorted["mean_pct_diff"],
+            marker="s",
+            color=pct_color,
+            linewidth=1.8,
+            label="Avg. women occupation % difference (census)",
+        )
+        ax2.set_ylabel(
+            "Avg. women occupation % difference  (2·female_share − 1)·100",
+            color=pct_color,
+        )
+        ax2.tick_params(axis="y", labelcolor=pct_color)
+
+        h1, l1 = ax1.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        ax1.legend(h1 + h2, l1 + l2, loc="best", framealpha=0.85)
+    else:
+        ax1.legend(loc="best", framealpha=0.85)
+
+    title_src = f" — {embedding_source}" if embedding_source else ""
+    ax1.set_title(
+        f"Garg (2018) Fig 2 replication: average gender bias of occupations{title_src}"
+    )
+
+    plt.tight_layout()
+    plt.savefig(out_path, format="pdf", bbox_inches="tight")
+    plt.close()
+    logger.info(f"Saved Garg trend figure: {out_path}")
+
+
+# =============================================================================
+# Garg-WEAT (per-category RND) plot
+# =============================================================================
+
+def apply_ideation_sign(df, category_sign, value_cols):
+    """Re-orient RND values onto a gender-ideation axis.
+
+    For leadership/science, more female-leaning (higher RND) already means
+    less-traditional ideation; for family it's the reverse — a more
+    female-leaning 'family' is the *traditional* view. Multiplying family's
+    values by -1 (via category_sign) puts every line on one axis where
+    higher = less traditional. Negating a band swaps its low/high, but
+    fill_between handles unordered bounds, so callers don't need to re-sort.
+    """
+    if not category_sign:
+        return df
+    df = df.copy()
+    signs = df["category"].map(lambda c: category_sign.get(c, 1))
+    for col in value_cols:
+        if col in df.columns:
+            df[col] = df[col] * signs
+    return df
+
+
+def plot_garg_weat_categories_trend(
+    df, figures_dir, logger, embedding_source=None,
+    band_cols=("ci_low", "ci_high"), band_tag="", line_col="mean_rnd",
+    band_label=None, category_sign=None,
+):
+    """Plot per-category mean RND over time. One line per category (leadership,
+    family, science) on a single axis, with a shaded uncertainty band.
+
+    Companion to plot_garg_trend — same metric (relative norm distance,
+    Garg sign convention), same gender axis, but partitioned into named
+    occupation buckets. The expected DataFrame is
+    analyze_garg_weat.build_summary's output.
+
+    ``band_cols`` selects which (low, high) column pair shades the ribbon, and
+    ``band_tag`` is appended to the filename — so the same summary renders both
+    the Garg-style with-replacement bootstrap band (``ci_low``/``ci_high``) and
+    the 80%-subsample band (``sub_low``/``sub_high``) as separate figures.
+
+    Empty / all-NaN safeguards mirror plot_garg_trend: log loudly, refuse
+    to write a blank PDF.
+    """
+    figures_dir = Path(figures_dir)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = f"__{embedding_source}" if embedding_source else ""
+    tag = f"__{band_tag}" if band_tag else ""
+    out_path = figures_dir / f"fig2_garg_weat_categories{suffix}{tag}.pdf"
+
+    if df is None or df.empty:
+        logger.warning(
+            "plot_garg_weat_categories_trend called with empty DataFrame; "
+            f"skipping write of {out_path}"
+        )
+        return
+
+    if line_col in df.columns and df[line_col].isna().all():
+        logger.error(
+            f"plot_garg_weat_categories_trend: every {line_col} is NaN — "
+            "refusing to write a blank figure. Check the analyze_garg_weat log "
+            f"for vocab/consistent-set diagnostics. (Would have written "
+            f"{out_path}.)"
+        )
+        return
+
+    df = df.copy()
+
+    def _parse_decade(unit_name):
+        """Start year from a longitudinal unit name. Handles decade labels
+        ('1990s' -> 1990, COHA/HistWords) and rolling-window slices
+        ('1940_1949' -> 1940, the ngram / renminribao pipelines), matching
+        plot_weat_longitudinal_trend.parse_year. Province and province-year
+        units (e.g. '北京', '北京_2020') don't parse here — those route to the
+        provincial RND plots instead of this trend.
+        """
+        s = str(unit_name)
+        # Decade label: '1990s' -> 1990
+        if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
+            return int(s[:4])
+        # Window slice: '1940_1949' -> 1940 (non-numeric prefixes -> None)
+        try:
+            return int(s.split("_")[0])
+        except (ValueError, IndexError):
+            return None
+
+    df["start_year"] = df["unit_name"].apply(_parse_decade)
+    n_parsed = int(df["start_year"].notna().sum())
+    if n_parsed == 0:
+        logger.warning(
+            "plot_garg_weat_categories_trend: no unit_name parsed as a "
+            "'YYYYs' decade or 'YYYY_YYYY' window (sample: "
+            f"{list(df['unit_name'].unique()[:5])}); skipping. Province / "
+            "province-year units should use the provincial RND plots instead."
+        )
+        return
+
+    df = df.dropna(subset=["start_year"]).sort_values("start_year")
+
+    low_col, high_col = band_cols
+    df = apply_ideation_sign(df, category_sign, [line_col, low_col, high_col])
+    reversed_cats = (
+        [c for c, s in category_sign.items() if s < 0] if category_sign else []
+    )
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+
+    # Distinct, accessible colours per category — falls back to matplotlib
+    # default cycle for any extra/renamed category the user adds later.
+    palette = {
+        "leadership": "#1f4e79",
+        "family":     "#c0392b",
+        "science":    "#2e7d32",
+    }
+    markers = {"leadership": "o", "family": "s", "science": "^"}
+    default_cycle = plt.rcParams["axes.prop_cycle"].by_key().get("color", [])
+
+    for i, (cat_name, group) in enumerate(df.groupby("category")):
+        group = group.sort_values("start_year")
+        color = palette.get(cat_name) or default_cycle[i % len(default_cycle)]
+        marker = markers.get(cat_name, "o")
+
+        label = cat_name.title() + (" (rev.)" if cat_name in reversed_cats else "")
+        ax.plot(
+            group["start_year"],
+            group[line_col],
+            marker=marker,
+            color=color,
+            linewidth=1.8,
+            label=label,
+        )
+        if low_col in group.columns and high_col in group.columns:
+            ax.fill_between(
+                group["start_year"],
+                group[low_col],
+                group[high_col],
+                color=color,
+                alpha=0.15,
+            )
+
+    ax.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
+    ax.set_xlabel("Decade")
+    if reversed_cats:
+        ax.set_ylabel(
+            "Gender ideation  (oriented RND)\n"
+            "higher = less traditional"
+        )
+    else:
+        ax.set_ylabel(
+            "Mean RND  (||v − c_male|| − ||v − c_female||)\n"
+            "larger = more female-leaning"
+        )
+    title_src = f" — {embedding_source}" if embedding_source else ""
+    band_note = f"  [{band_label}]" if band_label else ""
+    ax.set_title(
+        f"Per-category gender-ideation over time{title_src}{band_note}"
+    )
+    if reversed_cats:
+        fig.text(
+            0.5, -0.02,
+            f"{', '.join(sorted(reversed_cats))} reversed (RND × −1) so all "
+            "lines share a 'less traditional = up' axis",
+            ha="center", fontsize=8, color="grey",
+        )
+    ax.legend(title="Category", loc="best", framealpha=0.85)
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(out_path, format="pdf", bbox_inches="tight")
+    plt.close()
+    logger.info(f"Saved Garg-WEAT categories figure: {out_path}")
+
+
+# =============================================================================
 # WEAT mode plots
 # =============================================================================
 
@@ -334,16 +626,22 @@ def plot_weat_rankings(weat_df, figures_dir, logger, data_source=None):
 def plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=None):
     """Plot Cohen's d trend over time for longitudinal WEAT analysis.
 
-    Units are expected to be time slices like '1940_1949'. If units don't
-    parse as year ranges, this plot is skipped.
+    Recognised unit formats:
+      - '1940_1949' (rolling-window slices used by the ngram pipeline)
+      - '1990s'      (decade labels used by the COHA + HistWords pipelines)
+    If units don't parse as either, this plot is skipped.
     """
     if weat_df.empty:
         return
 
-    # Try to parse units as time slices (start_year_end_year)
     def parse_year(unit_name):
+        s = str(unit_name)
+        # Decade label: '1990s' -> 1990
+        if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
+            return int(s[:4])
+        # Window slice: '1940_1949' -> 1940
         try:
-            parts = str(unit_name).split("_")
+            parts = s.split("_")
             return int(parts[0])
         except (ValueError, IndexError):
             return None
@@ -352,7 +650,15 @@ def plot_weat_longitudinal_trend(weat_df, figures_dir, logger, data_source=None)
     weat_df["start_year"] = weat_df["unit"].apply(parse_year)
 
     # Only proceed if most units parse as years
-    if weat_df["start_year"].notna().sum() < 3:
+    n_parsed = int(weat_df["start_year"].notna().sum())
+    if n_parsed < 3:
+        logger.warning(
+            f"plot_weat_longitudinal_trend: only {n_parsed} of "
+            f"{len(weat_df)} units parsed as years (sample units: "
+            f"{list(weat_df['unit'].unique()[:5])}); skipping. Add the "
+            "format to parse_year() above if this is a new unit naming "
+            "convention."
+        )
         return
 
     weat_df = weat_df.dropna(subset=["start_year"]).sort_values("start_year")
@@ -537,11 +843,16 @@ def _match_province_in_shapefile(dim_data, china):
     return matched
 
 
-def _plot_single_choropleth(merged, title, filename, figures_dir, logger):
-    """Render and save a single choropleth map with province name labels."""
+def _plot_single_choropleth(merged, title, filename, figures_dir, logger,
+                            value_col="cohens_d"):
+    """Render and save a single choropleth map with province name labels.
+
+    ``value_col`` selects the column to colour by (default ``cohens_d`` for the
+    WEAT path; the Garg-WEAT provincial path passes its oriented RND column).
+    """
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
     merged.plot(
-        column="cohens_d", ax=ax, legend=True, cmap="RdBu_r",
+        column=value_col, ax=ax, legend=True, cmap="RdBu_r",
         missing_kwds={"color": "lightgrey", "label": "No data"},
         edgecolor="black", linewidth=0.3,
     )
@@ -566,7 +877,7 @@ def _plot_single_choropleth(merged, title, filename, figures_dir, logger):
             except Exception:
                 continue
             # Provinces with data get dark label; no-data provinces get lighter
-            has_data = pd.notna(row.get("cohens_d"))
+            has_data = pd.notna(row.get(value_col))
             ax.annotate(
                 short_name,
                 xy=(pt.x, pt.y),
@@ -881,6 +1192,260 @@ def plot_weat_year_comparison(weat_df, figures_dir, logger):
         plt.savefig(path, format="pdf")
         plt.close()
         logger.info(f"  Saved: {path.name}")
+
+
+# =============================================================================
+# Garg-WEAT provincial plots (cross-province RND — the per-province analogue of
+# the longitudinal trend, replacing the Cohen's d provincial view). Reuses the
+# metric-agnostic helpers (_match_province_in_shapefile, _plot_single_choropleth,
+# _parse_province_year, province name maps); the Cohen's d functions above are
+# left untouched.
+# =============================================================================
+
+def _find_china_shapefile(extra=None):
+    """Return the first existing China province shapefile, or None.
+
+    ``extra`` (e.g. config['paths']['shapefile']) is tried first so a profile
+    can point at its own shapefile.
+    """
+    candidates = []
+    if extra:
+        candidates.append(Path(extra))
+    candidates += [
+        Path("/lustre/home/2401111059/youth-analysis/configs/china_shp/chn_admbnda_adm1_ocha_2020.shp"),
+        Path("data/shapefiles/china_provinces.shp"),
+        Path("provincial/data/china_provinces.shp"),
+        Path("shapefiles/china_provinces.shp"),
+    ]
+    for sp in candidates:
+        if sp and sp.exists():
+            return sp
+    return None
+
+
+def _garg_weat_unit_kind(unit_names):
+    """Classify garg_weat summary units to choose the right plots.
+
+    Returns 'longitudinal' (decade '1990s' or window '1940_1949'),
+    'province_year' ('北京_2020'), or 'province' ('北京'), by majority vote over
+    a sample. A window like '1990_1999' is longitudinal (both sides 4-digit
+    years), not province-year — the head must be non-numeric for province-year.
+    """
+    from collections import Counter
+
+    def classify(u):
+        s = str(u)
+        if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
+            return "longitudinal"
+        if "_" in s:
+            head, tail = s.rsplit("_", 1)
+            head_year = head.isdigit() and len(head) == 4
+            tail_year = tail.isdigit() and len(tail) == 4
+            if head_year and tail_year:
+                return "longitudinal"
+            if (not head_year) and tail_year:
+                return "province_year"
+        if s.isdigit():
+            return "longitudinal"
+        return "province"
+
+    sample = list(pd.unique(list(unit_names)))[:12]
+    if not sample:
+        return "longitudinal"
+    return Counter(classify(u) for u in sample).most_common(1)[0][0]
+
+
+def _garg_weat_provincial_frame(summary_df, category_sign=None):
+    """Shape build_summary output into a province-level RND frame.
+
+    Returns (df, reversed_cats) where df has columns [province, category, value]
+    — value is the (sign-oriented) mean RND, averaged across years when the
+    units are province-year (e.g. '北京_2020'). reversed_cats lists the
+    categories flipped by ideation_sign (for axis labelling).
+    """
+    df = summary_df.copy()
+    df = df[df["mean_rnd"].notna()]
+    if df.empty:
+        return df.assign(province=[], value=[]), []
+
+    # Orient onto the gender-ideation axis (higher = less traditional).
+    df = apply_ideation_sign(df, category_sign, ["mean_rnd"])
+    reversed_cats = (
+        [c for c, s in category_sign.items() if s < 0] if category_sign else []
+    )
+
+    # province / province-year -> province (drop the year, average over it).
+    def to_province(u):
+        prov, _year = _parse_province_year(u)
+        return prov if prov is not None else str(u)
+
+    df["province"] = df["unit_name"].apply(to_province)
+    out = (
+        df.groupby(["province", "category"], as_index=False)["mean_rnd"]
+        .mean()
+        .rename(columns={"mean_rnd": "value"})
+    )
+    return out, reversed_cats
+
+
+def _rnd_axis_label(reversed_cats):
+    return (
+        "Gender ideation (oriented RND)\nhigher = less traditional"
+        if reversed_cats
+        else "Mean RND  (larger = more female-leaning)"
+    )
+
+
+def plot_garg_weat_provincial_rankings(summary_df, figures_dir, logger,
+                                       category_sign=None, data_source=None):
+    """Horizontal bar rankings of per-province RND, one panel per category.
+
+    The RND analogue of plot_weat_rankings; reads build_summary output.
+    """
+    df, reversed_cats = _garg_weat_provincial_frame(summary_df, category_sign)
+    if df.empty:
+        logger.warning("plot_garg_weat_provincial_rankings: no in-vocab rows; skipping")
+        return
+
+    source_label = DATA_SOURCE_LABELS.get(data_source, "")
+    source_suffix = f"  [Data: {source_label}]" if source_label else ""
+    categories = sorted(df["category"].unique())
+    n_prov = df["province"].nunique()
+
+    fig, axes = plt.subplots(
+        1, len(categories),
+        figsize=(6 * len(categories), max(6, n_prov * 0.3)),
+    )
+    if len(categories) == 1:
+        axes = [axes]
+
+    for ax, cat in zip(axes, categories):
+        cat_data = df[df["category"] == cat].sort_values("value")
+        colors = ["#c0392b" if v > 0 else "#1f4e79" for v in cat_data["value"]]
+        ax.barh(cat_data["province"], cat_data["value"], color=colors, alpha=0.8)
+        ax.axvline(x=0, color="black", linewidth=0.5)
+        label = cat.title() + (" (rev.)" if cat in reversed_cats else "")
+        ax.set_title(f"{label}{source_suffix}")
+        ax.set_xlabel(_rnd_axis_label(reversed_cats))
+
+    plt.tight_layout()
+    path = get_figure_path("garg_weat_provincial_rankings", figures_dir)
+    plt.savefig(path, format="pdf")
+    plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
+def plot_garg_weat_provincial_heatmap(summary_df, figures_dir, logger,
+                                      category_sign=None, data_source=None):
+    """Province × category heatmap of per-province RND.
+
+    The RND analogue of plot_weat_heatmap.
+    """
+    df, reversed_cats = _garg_weat_provincial_frame(summary_df, category_sign)
+    if df.empty:
+        logger.warning("plot_garg_weat_provincial_heatmap: no in-vocab rows; skipping")
+        return
+
+    pivot = df.pivot_table(index="province", columns="category", values="value")
+    if pivot.empty:
+        return
+
+    source_label = DATA_SOURCE_LABELS.get(data_source, "")
+    source_suffix = f"  [Data: {source_label}]" if source_label else ""
+    rev_note = " — (rev.): " + ", ".join(sorted(reversed_cats)) if reversed_cats else ""
+
+    fig, ax = plt.subplots(figsize=(10, max(6, len(pivot) * 0.4)))
+    sns.heatmap(pivot, annot=True, fmt=".2f", cmap="RdBu_r", center=0, ax=ax)
+    ax.set_title(f"Per-province gender-ideation RND{source_suffix}{rev_note}")
+    plt.tight_layout()
+    path = get_figure_path("garg_weat_provincial_heatmap", figures_dir)
+    plt.savefig(path, format="pdf")
+    plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
+def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
+                                         category_sign=None, shapefile=None):
+    """Choropleth maps of per-province RND, one per category.
+
+    The RND analogue of plot_weat_choropleth. For province-year units it also
+    draws per-year maps. Skips gracefully if geopandas or a shapefile are
+    unavailable. Reuses the WEAT choropleth leaf helpers.
+    """
+    try:
+        import geopandas as gpd
+    except ImportError:
+        logger.info("  Skipping RND choropleth maps (geopandas not installed)")
+        return
+
+    if summary_df is None or summary_df.empty or "unit_name" not in summary_df.columns:
+        return
+
+    sp = _find_china_shapefile(shapefile)
+    if sp is None:
+        logger.info("  Skipping RND choropleth maps (no China shapefile found)")
+        return
+    china = gpd.read_file(sp)
+
+    df = summary_df.copy()
+    df = df[df["mean_rnd"].notna()]
+    if df.empty:
+        return
+    df = apply_ideation_sign(df, category_sign, ["mean_rnd"])
+
+    sample_units = df["unit_name"].unique()[:5]
+    parsed = [_parse_province_year(u) for u in sample_units]
+    is_province_year = (
+        sum(1 for p, _y in parsed if p is not None) >= len(sample_units) // 2 + 1
+    )
+
+    for cat in sorted(df["category"].unique()):
+        cat_raw = df[df["category"] == cat][["unit_name", "mean_rnd"]].rename(
+            columns={"mean_rnd": "value"}
+        )
+
+        if is_province_year:
+            cat_raw[["province_short", "year"]] = cat_raw["unit_name"].apply(
+                lambda u: pd.Series(_parse_province_year(u))
+            )
+            cat_raw = cat_raw.dropna(subset=["province_short"])
+            if cat_raw.empty:
+                continue
+            cat_raw["province"] = cat_raw["province_short"].map(SHORT_TO_FULL_PROVINCE)
+            cat_raw = cat_raw.dropna(subset=["province"])
+
+            for year in sorted(cat_raw["year"].unique()):
+                year_data = cat_raw[cat_raw["year"] == year][["province", "value"]]
+                if year_data.empty or year_data["value"].isna().all():
+                    continue
+                merged = _match_province_in_shapefile(year_data, china)
+                if merged["value"].notna().sum() == 0:
+                    continue
+                _plot_single_choropleth(
+                    merged, f"{cat.title()} {int(year)}",
+                    f"garg_weat_choropleth_{cat}_{int(year)}",
+                    figures_dir, logger, value_col="value",
+                )
+
+            avg_data = cat_raw.groupby("province")["value"].mean().reset_index()
+            merged = _match_province_in_shapefile(avg_data, china)
+            if merged["value"].notna().sum() > 0:
+                _plot_single_choropleth(
+                    merged, f"{cat.title()} Average",
+                    f"garg_weat_choropleth_{cat}_overall",
+                    figures_dir, logger, value_col="value",
+                )
+        else:
+            cat_data = cat_raw.rename(columns={"unit_name": "province"})
+            merged = _match_province_in_shapefile(cat_data, china)
+            if merged["value"].notna().sum() == 0:
+                logger.info(f"  Skipping RND choropleth for {cat}: no matches")
+                continue
+            _plot_single_choropleth(
+                merged, f"{cat.title()} — RND by Province",
+                f"garg_weat_choropleth_{cat}", figures_dir, logger,
+                value_col="value",
+            )
 
 
 # =============================================================================
@@ -1496,7 +2061,7 @@ def main(config="config/config.yml", mode=None):
 
     Args:
         config: Path to configuration file
-        mode: "prestige", "weat", or None (auto-detect from config)
+        mode: "prestige", "weat", "garg", or None (auto-detect from config)
     """
     config_data = load_config(config)
     logger = setup_logging(Path(config_data["paths"]["log_dir"]), "visualize.log")
@@ -1575,6 +2140,67 @@ def main(config="config/config.yml", mode=None):
             proj_df = pd.read_csv(proj_path)
             logger.info(f"Loaded {proj_path}: {len(proj_df)} rows")
             plot_weat_projection_boxplots(proj_df, figures_dir, logger)
+
+    elif analysis_mode == "garg":
+        summary_path = results_dir / "garg_average_bias_by_decade.parquet"
+        if summary_path.exists():
+            df = pd.read_parquet(summary_path)
+            logger.info(f"Loaded {summary_path}: {len(df)} rows")
+            embedding_source = config_data.get("embedding_source")
+            plot_garg_trend(df, figures_dir, logger, embedding_source=embedding_source)
+        else:
+            logger.error(f"Garg summary not found at {summary_path}")
+
+    elif analysis_mode == "garg_weat":
+        summary_path = results_dir / "garg_weat_summary_by_category.parquet"
+        if summary_path.exists():
+            df = pd.read_parquet(summary_path)
+            logger.info(f"Loaded {summary_path}: {len(df)} rows")
+            embedding_source = config_data.get("embedding_source")
+            # Per-category orientation onto a gender-ideation axis (e.g.
+            # family reversed): config analysis.ideation_sign maps
+            # category -> +1/-1. Absent -> raw RND, no flip.
+            category_sign = config_data.get("analysis", {}).get("ideation_sign")
+            ds = config_data.get("data_source")
+            kind = (
+                _garg_weat_unit_kind(df["unit_name"]) if not df.empty
+                else "longitudinal"
+            )
+            logger.info(f"garg_weat units classified as: {kind}")
+
+            if kind == "longitudinal":
+                # Two versions of the band on the same trend:
+                #   bootstrap — Garg's with-replacement occupation bootstrap
+                #   subsample — keep 80% of words without replacement, N rounds
+                plot_garg_weat_categories_trend(
+                    df, figures_dir, logger, embedding_source=embedding_source,
+                    band_cols=("ci_low", "ci_high"), band_tag="bootstrap",
+                    band_label="bootstrap CI (Garg)", category_sign=category_sign,
+                )
+                plot_garg_weat_categories_trend(
+                    df, figures_dir, logger, embedding_source=embedding_source,
+                    band_cols=("sub_low", "sub_high"), band_tag="subsample",
+                    band_label="80% word-subsample band", category_sign=category_sign,
+                )
+            else:
+                # Provincial cross-section (province or province-year): RND
+                # replaces the Cohen's d provincial view (rankings / heatmap /
+                # choropleth). Cohen's d plots stay available via analyze_weat.
+                shapefile = config_data.get("paths", {}).get("shapefile")
+                plot_garg_weat_provincial_rankings(
+                    df, figures_dir, logger,
+                    category_sign=category_sign, data_source=ds,
+                )
+                plot_garg_weat_provincial_heatmap(
+                    df, figures_dir, logger,
+                    category_sign=category_sign, data_source=ds,
+                )
+                plot_garg_weat_provincial_choropleth(
+                    df, figures_dir, logger,
+                    category_sign=category_sign, shapefile=shapefile,
+                )
+        else:
+            logger.error(f"Garg-WEAT summary not found at {summary_path}")
 
     logger.info("=" * 80)
     logger.info("Visualization completed!")

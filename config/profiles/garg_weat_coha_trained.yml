@@ -1,0 +1,75 @@
+# Garg-WEAT per-category RND analysis on our from-scratch trained COHA SGNS
+# embeddings. Companion to coha_garg.yml (same models_dir, different metric:
+# RND partitioned into leadership / family / science buckets).
+language: "en"
+data_source: "coha"
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_coha_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha"
+  coha_decompressed_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/corpora_en_coha"
+  # Reuses the models trained for the Garg replication.
+  models_dir: "/scratch/network/yh6580/gender-occup/data/models_en_coha_garg"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_garg_weat_trained_coha"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_trained_coha"
+
+# Required by config_loader's validator when data_source=coha + gensim_kv format.
+coha:
+  format: fulltext
+  min_chunk_tokens: 5
+  source_archive_urls: []
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 100
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "coha_{unit_name}.model"
+
+corpus:
+  min_words: 2
+  tokenizer: "whitespace"
+  lowercase: true
+
+wordlists:
+  dir: "wordlists/en/garg_weat"
+  gender_words_file: "gender_words.json"
+  # Pipeline consumes the cleaned lists produced by scripts.prepare_wordlists
+  # (dedup + >=80% OOV coverage). Raw curated inputs live in candidates_*.txt.
+  categories:
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
+
+embedding_source: "trained_coha"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  seed: 42
+  # Orient each dimension onto a single gender-ideation axis where
+  # higher = less traditional. Leadership/science female-leaning is
+  # progressive (+1); family female-leaning is the traditional view, so
+  # reverse it (-1).
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
+  # Version 1 — faithful to Garg's sns.tsplot band: with-replacement
+  # bootstrap over the consistent occupation set, ~68% (≈ ±1 SE).
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  # Version 2 — keep 80% of each dimension's words (no replacement), 100
+  # rounds, 95% band: sensitivity to which words were chosen.
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95

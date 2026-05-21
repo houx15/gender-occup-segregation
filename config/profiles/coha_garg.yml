@@ -1,0 +1,74 @@
+# Garg et al. 2018 Fig 2 replication — COHA decade embeddings
+# See docs/replication/garg_2018.md for the full methodology and run instructions.
+language: "en"
+data_source: "coha"
+analysis_mode: "garg"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_coha_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha"
+  coha_decompressed_dir: "/scratch/network/yh6580/gender-occup/data/raw_coha_decompressed"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/corpora_en_coha"
+  # Garg run uses separate model/results/figures dirs so it does not collide
+  # with the prestige run (config/profiles/coha_server.yml).
+  models_dir: "/scratch/network/yh6580/gender-occup/data/models_en_coha_garg"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_en_coha_garg"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg"
+
+coha:
+  # COHA paid full-text release (one document per file, prose with @@<id>
+  # header and `@ @ @ @ @ @ @ @ @ @` redaction markers). This is the format
+  # HistWords / Garg actually trained on. To use the free n-gram release
+  # instead, set format: ngram and add `ngram_order: 5`.
+  format: fulltext
+  # Drop chunks (inter-redaction segments) shorter than this many tokens —
+  # avoids polluting SGNS with 1-2 word fragments left over after splitting
+  # on the redaction marker.
+  min_chunk_tokens: 5
+  # If left empty AND coha_decompressed_dir already has *.txt files, the
+  # download step is auto-skipped. Paste mentor-shared Dropbox URLs here
+  # only if you actually need a download (append ?dl=1 to force direct
+  # download from Dropbox shared links).
+  source_archive_urls: []
+
+# Training params pinned to HistWords (Hamilton et al. 2016) SGNS COHA settings,
+# which are the vectors Garg et al. 2018 actually consumed for Fig 2.
+# Do not change without updating docs/replication/garg_2018.md.
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 100
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  model_name_template: "coha_{unit_name}.model"
+
+corpus:
+  min_words: 2
+  tokenizer: "whitespace"
+  lowercase: true
+
+wordlists:
+  dir: "wordlists/en/garg"
+  occupations_file: "occupations.txt"
+  gender_words_file: "gender_words.json"
+  # IPUMS census female-share-of-occupation by year, vendored from Garg's
+  # repo. Used by analyze_garg to overlay "Avg. Women Occupation %
+  # Difference" on Fig 2 (Garg 2018, plot_creation.py:115).
+  occupation_percentages_file: "occupation_percentages_gender.csv"
+
+# Plot/title label identifying the embedding source — flows into figure
+# filename suffix and title so Fig 2 from different vector sources do not
+# overwrite each other.
+embedding_source: "trained_coha"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  # When true, restrict every decade's mean to the SAME set of occupations
+  # (those in vocab AND with valid census data in every decade). Matches
+  # Garg's plot_averagebias_over_time_consistentoccupations behaviour.
+  consistent_occupations: true

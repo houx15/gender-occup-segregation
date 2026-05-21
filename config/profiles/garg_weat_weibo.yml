@@ -1,0 +1,72 @@
+# Garg-WEAT per-category RND on the EXISTING Weibo provincial models.
+# No training — reuses the models trained for weibo_server.yml. Units are
+# provinces (e.g. '北京'), so this is a cross-province comparison, NOT a time
+# trend: it gives the same provincial picture Cohen's d did, via Garg's RND.
+# weibo_server.yml (Cohen's d) is left untouched.
+language: "zh"
+data_source: "weibo"
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/gpfs/share/home/2401111059/gender-occup-segregation"
+  raw_data_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/raw_weibo"
+  corpora_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/corpora"
+  models_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/models"
+  results_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/results_garg_weat_weibo"
+  log_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/logs"
+  figures_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/figures_garg_weat_weibo"
+
+wordlists:
+  dir: "wordlists/zh/garg_weat_informal"
+  gender_words_file: "gender_words.json"
+  categories:
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
+
+provincial:
+  province_groups:
+    - ["北京", "天津", "河北", "山西"]
+    - ["内蒙古", "辽宁", "吉林", "黑龙江"]
+    - ["上海", "江苏"]
+    - ["福建", "江西", "山东"]
+    - ["河南", "湖北", "湖南"]
+    - ["广西", "海南"]
+    - ["重庆", "四川", "贵州", "云南"]
+    - ["西藏", "陕西", "甘肃", "青海", "宁夏", "新疆"]
+    - ["中国台湾", "中国香港", "中国澳门"]
+    - ["浙江", "安徽"]
+    - ["广东"]
+  min_documents: 1000
+
+embedding:
+  vector_size: 300
+  window: 5
+  min_count: 20
+  sg: 1
+  negative: 10
+  workers: 8
+  epochs: 10
+  seed: 42
+  # Units are province names (e.g. '北京'); drives discover_models parsing.
+  model_name_template: "model_{unit_name}.model"
+
+embedding_source: "weibo"
+
+corpus:
+  tokenizer: "jieba"
+  min_words: 5
+
+analysis:
+  seed: 42
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95

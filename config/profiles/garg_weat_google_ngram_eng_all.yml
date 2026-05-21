@@ -1,0 +1,58 @@
+# Garg-WEAT per-category RND on the published HistWords Google Books Ngram
+# "English (All)" SGNS vectors (Hamilton et al. 2016). Pre-trained — no
+# training. Same machinery as the COHA HistWords arms (format: histwords).
+#
+# NOT US-specific: this is Google Books "All English" (British + American +
+# everything), a broader-English / larger-scale companion to the COHA arms,
+# not American per se. COHA is the American corpus.
+#
+# Fetch the vectors first:
+#   python -m scripts.data_prep.download_pretrained_embeddings \
+#       --source=google_ngram_eng_all \
+#       --target_dir=/scratch/network/yh6580/gender-occup/data/pretrained_embeddings
+# then confirm the resolved models_dir in MANIFEST.json matches below.
+language: "en"
+data_source: "ngram"   # HistWords eng-all is Google Books ngram-derived
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/pretrained_embeddings/google_ngram_eng_all/sgns"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/results_garg_weat_google_ngram_eng_all"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_google_ngram_eng_all"
+
+embedding:
+  format: histwords
+
+embedding_source: "google_ngram_eng_all"
+
+wordlists:
+  dir: "wordlists/en/garg_weat"
+  gender_words_file: "gender_words.json"
+  # Cleaned lists from scripts.prepare_wordlists (dedup + >=80% OOV coverage).
+  categories:
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
+
+analysis:
+  occupation_strategy: "whole_token"
+  min_coverage: 0.5
+  # eng-all spans 1800s–1990s; use the full range (richer English trend).
+  # Clip here to [1910, 1990] if you want a strict side-by-side with COHA.
+  decade_range: [1800, 1990]
+  seed: 42
+  # Single gender-ideation axis, higher = less traditional. Family female-
+  # leaning is the traditional view, so reverse it (-1).
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95
