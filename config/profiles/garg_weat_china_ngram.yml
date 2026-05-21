@@ -12,9 +12,9 @@ paths:
   decompressed_dir: "/scratch/network/yh6580/gender-occup/raw_ngrams_decompressed"
   corpora_dir: "/scratch/network/yh6580/gender-occup/corpora"
   models_dir: "/scratch/network/yh6580/gender-occup/models"
-  results_dir: "/scratch/network/yh6580/gender-occup/results_garg_weat"
+  results_dir: "/scratch/network/yh6580/gender-occup/results_garg_weat_china_ngram"
   log_dir: "/scratch/network/yh6580/gender-occup/logs"
-  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_china_ngram"
 
 wordlists:
   dir: "wordlists/zh/garg_weat_formal"
@@ -47,6 +47,8 @@ embedding:
   seed: 42
   # Drives discover_models' unit-name parsing (units are '1940_1949' windows).
   model_name_template: "chi_sim_5gram_{slice_name}.model"
+
+embedding_source: "china_ngram"
 
 corpus:
   use_counts: false

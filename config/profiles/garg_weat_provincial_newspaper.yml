@@ -49,6 +49,8 @@ embedding:
   # Units are province-year (e.g. '北京_2020'); drives discover_models parsing.
   model_name_template: "model_{unit_name}.kv"
 
+embedding_source: "provincial_newspaper"
+
 corpus:
   tokenizer: "jieba"
   min_words: 5

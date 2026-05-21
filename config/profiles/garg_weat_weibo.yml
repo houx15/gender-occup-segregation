@@ -12,9 +12,9 @@ paths:
   raw_data_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/raw_weibo"
   corpora_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/corpora"
   models_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/models"
-  results_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/results_garg_weat"
+  results_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/results_garg_weat_weibo"
   log_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/logs"
-  figures_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/figures_garg_weat"
+  figures_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/figures_garg_weat_weibo"
 
 wordlists:
   dir: "wordlists/zh/garg_weat_informal"
@@ -50,6 +50,8 @@ embedding:
   seed: 42
   # Units are province names (e.g. '北京'); drives discover_models parsing.
   model_name_template: "model_{unit_name}.model"
+
+embedding_source: "weibo"
 
 corpus:
   tokenizer: "jieba"

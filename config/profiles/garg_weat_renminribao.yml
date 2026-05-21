@@ -11,9 +11,9 @@ paths:
   raw_data_dir: "/scratch/network/yh6580/chinese_corpus/xiandai_20250422/xiandai"
   corpora_dir: "/scratch/network/yh6580/renminribao/corpora"
   models_dir: "/scratch/network/yh6580/renminribao/models"
-  results_dir: "/scratch/network/yh6580/renminribao/results_garg_weat"
+  results_dir: "/scratch/network/yh6580/renminribao/results_garg_weat_renminribao"
   log_dir: "/scratch/network/yh6580/renminribao/logs"
-  figures_dir: "/scratch/network/yh6580/renminribao/figures_garg_weat"
+  figures_dir: "/scratch/network/yh6580/renminribao/figures_garg_weat_renminribao"
 
 wordlists:
   dir: "wordlists/zh/garg_weat_formal"
@@ -42,6 +42,8 @@ embedding:
   seed: 42
   # Drives discover_models' unit-name parsing (units are '1940_1949' windows).
   model_name_template: "renminribao_{slice_name}.model"
+
+embedding_source: "renminribao"
 
 corpus:
   tokenizer: "jieba"
