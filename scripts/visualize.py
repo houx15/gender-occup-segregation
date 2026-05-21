@@ -398,15 +398,23 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
 # Garg-WEAT (per-category RND) plot
 # =============================================================================
 
-def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=None):
+def plot_garg_weat_categories_trend(
+    df, figures_dir, logger, embedding_source=None,
+    band_cols=("ci_low", "ci_high"), band_tag="", line_col="mean_rnd",
+    band_label=None,
+):
     """Plot per-category mean RND over time. One line per category (leadership,
-    family, science) on a single axis, with 95% CI ribbons.
+    family, science) on a single axis, with a shaded uncertainty band.
 
     Companion to plot_garg_trend — same metric (relative norm distance,
     Garg sign convention), same gender axis, but partitioned into named
     occupation buckets. The expected DataFrame is
-    analyze_garg_weat.build_summary's output: columns unit_name / category /
-    mean_rnd / ci_low / ci_high / n_occupations / n_consistent.
+    analyze_garg_weat.build_summary's output.
+
+    ``band_cols`` selects which (low, high) column pair shades the ribbon, and
+    ``band_tag`` is appended to the filename — so the same summary renders both
+    the Garg-style with-replacement bootstrap band (``ci_low``/``ci_high``) and
+    the 80%-subsample band (``sub_low``/``sub_high``) as separate figures.
 
     Empty / all-NaN safeguards mirror plot_garg_trend: log loudly, refuse
     to write a blank PDF.
@@ -415,7 +423,8 @@ def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=No
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     suffix = f"__{embedding_source}" if embedding_source else ""
-    out_path = figures_dir / f"fig2_garg_weat_categories{suffix}.pdf"
+    tag = f"__{band_tag}" if band_tag else ""
+    out_path = figures_dir / f"fig2_garg_weat_categories{suffix}{tag}.pdf"
 
     if df is None or df.empty:
         logger.warning(
@@ -424,11 +433,12 @@ def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=No
         )
         return
 
-    if "mean_rnd" in df.columns and df["mean_rnd"].isna().all():
+    if line_col in df.columns and df[line_col].isna().all():
         logger.error(
-            "plot_garg_weat_categories_trend: every mean_rnd is NaN — refusing "
-            "to write a blank figure. Check the analyze_garg_weat log for "
-            f"vocab/consistent-set diagnostics. (Would have written {out_path}.)"
+            f"plot_garg_weat_categories_trend: every {line_col} is NaN — "
+            "refusing to write a blank figure. Check the analyze_garg_weat log "
+            f"for vocab/consistent-set diagnostics. (Would have written "
+            f"{out_path}.)"
         )
         return
 
@@ -471,17 +481,18 @@ def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=No
 
         ax.plot(
             group["start_year"],
-            group["mean_rnd"],
+            group[line_col],
             marker=marker,
             color=color,
             linewidth=1.8,
             label=cat_name.title(),
         )
-        if "ci_low" in group.columns and "ci_high" in group.columns:
+        low_col, high_col = band_cols
+        if low_col in group.columns and high_col in group.columns:
             ax.fill_between(
                 group["start_year"],
-                group["ci_low"],
-                group["ci_high"],
+                group[low_col],
+                group[high_col],
                 color=color,
                 alpha=0.15,
             )
@@ -493,8 +504,9 @@ def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=No
         "larger = more female-leaning"
     )
     title_src = f" — {embedding_source}" if embedding_source else ""
+    band_note = f"  [{band_label}]" if band_label else ""
     ax.set_title(
-        f"Per-category mean gender-norm-distance over time{title_src}"
+        f"Per-category mean gender-norm-distance over time{title_src}{band_note}"
     )
     ax.legend(title="Category", loc="best", framealpha=0.85)
     ax.grid(True, alpha=0.3)
@@ -1829,8 +1841,18 @@ def main(config="config/config.yml", mode=None):
             df = pd.read_parquet(summary_path)
             logger.info(f"Loaded {summary_path}: {len(df)} rows")
             embedding_source = config_data.get("embedding_source")
+            # Two versions of the band on the same trend:
+            #   bootstrap — Garg's with-replacement occupation bootstrap
+            #   subsample — keep 80% of words without replacement, N rounds
             plot_garg_weat_categories_trend(
                 df, figures_dir, logger, embedding_source=embedding_source,
+                band_cols=("ci_low", "ci_high"), band_tag="bootstrap",
+                band_label="bootstrap CI (Garg)",
+            )
+            plot_garg_weat_categories_trend(
+                df, figures_dir, logger, embedding_source=embedding_source,
+                band_cols=("sub_low", "sub_high"), band_tag="subsample",
+                band_label="80% word-subsample band",
             )
         else:
             logger.error(f"Garg-WEAT summary not found at {summary_path}")

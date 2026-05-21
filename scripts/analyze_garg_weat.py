@@ -175,17 +175,102 @@ def compute_consistent_set(
     return consistent
 
 
+def subsample_bands_from_lookup(
+    rnd_lookup: Dict[Tuple[str, str, str], float],
+    units: List[str],
+    consistent_sets: Dict[str, List[str]],
+    fraction: float,
+    n_rounds: int,
+    ci: float,
+    seed: int,
+) -> Dict[Tuple[str, str], Tuple[float, float, float]]:
+    """Word-subsample robustness band, distinct from the with-replacement
+    bootstrap (which Garg uses). Each round keeps ``fraction`` of a category's
+    consistent set, sampled WITHOUT replacement, and the SAME subset is held
+    across every decade so the band isolates word-choice sensitivity rather
+    than per-decade noise.
+
+    ``rnd_lookup`` maps (unit, category, occupation) -> rnd (in-vocab only).
+    Returns dict[(unit, category)] -> (low, high, mean) where low/high are the
+    ``ci`` percentile interval of the n_rounds round-means.
+    """
+    rng = np.random.default_rng(seed)
+    alpha = (1.0 - ci) / 2.0
+    out: Dict[Tuple[str, str], Tuple[float, float, float]] = {}
+
+    for cat_name, consistent in consistent_sets.items():
+        consistent = list(consistent)
+        n = len(consistent)
+        if n == 0:
+            for u in units:
+                out[(u, cat_name)] = (float("nan"), float("nan"), float("nan"))
+            continue
+        k = max(1, int(round(fraction * n)))
+
+        round_means: Dict[str, List[float]] = {u: [] for u in units}
+        for _ in range(n_rounds):
+            if k >= n:
+                subset = consistent  # degenerate: every round identical
+            else:
+                subset = rng.choice(consistent, size=k, replace=False)
+            for u in units:
+                vals = [
+                    rnd_lookup[(u, cat_name, w)]
+                    for w in subset
+                    if (u, cat_name, w) in rnd_lookup
+                ]
+                round_means[u].append(float(np.mean(vals)) if vals else np.nan)
+
+        for u in units:
+            arr = np.asarray(round_means[u], dtype=float)
+            if np.isnan(arr).all():
+                out[(u, cat_name)] = (float("nan"), float("nan"), float("nan"))
+                continue
+            lo = float(np.nanpercentile(arr, 100.0 * alpha))
+            hi = float(np.nanpercentile(arr, 100.0 * (1.0 - alpha)))
+            out[(u, cat_name)] = (lo, hi, float(np.nanmean(arr)))
+    return out
+
+
 def build_summary(
     long_df: pd.DataFrame,
     units: List[str],
     consistent_sets: Dict[str, List[str]],
     logger,
+    boot_n_iter: int = 5000,
+    boot_ci: float = 0.68,
+    sub_fraction: float = 0.8,
+    sub_rounds: int = 100,
+    sub_ci: float = 0.95,
+    seed: int = 42,
 ) -> pd.DataFrame:
-    """Per-(unit, category) summary row using each category's consistent set."""
+    """Per-(unit, category) summary using each category's consistent set.
+
+    Carries TWO uncertainty bands:
+      - ci_low/ci_high: with-replacement bootstrap over the occupation set
+        (Garg's ``sns.tsplot`` method; defaults n_iter=5000, ci=0.68 ≈ ±1 SE).
+      - sub_low/sub_high/sub_mean: keep ``sub_fraction`` of the words without
+        replacement, ``sub_rounds`` rounds, ``sub_ci`` percentile band — probes
+        sensitivity to which words were chosen.
+    """
+    # Lookup for the subsample helper: (unit, category, occupation) -> rnd.
+    in_vocab = long_df[long_df["in_vocab"]]
+    rnd_lookup: Dict[Tuple[str, str, str], float] = {
+        (r.unit_name, r.category, r.occupation): float(r.rnd)
+        for r in in_vocab.itertuples(index=False)
+    }
+    sub_bands = subsample_bands_from_lookup(
+        rnd_lookup, units, consistent_sets,
+        fraction=sub_fraction, n_rounds=sub_rounds, ci=sub_ci, seed=seed,
+    )
+
     rows: List[dict] = []
     for u in units:
         unit_long = long_df[long_df["unit_name"] == u]
         for cat_name, consistent in consistent_sets.items():
+            slow, shigh, smean = sub_bands.get(
+                (u, cat_name), (np.nan, np.nan, np.nan)
+            )
             sub = unit_long[
                 (unit_long["category"] == cat_name)
                 & unit_long["occupation"].isin(consistent)
@@ -195,16 +280,20 @@ def build_summary(
                 rows.append({
                     "unit_name": u, "category": cat_name,
                     "mean_rnd": np.nan, "ci_low": np.nan, "ci_high": np.nan,
+                    "sub_low": slow, "sub_high": shigh, "sub_mean": smean,
                     "n_occupations": 0, "n_consistent": len(consistent),
                 })
                 continue
             rnd_arr = sub["rnd"].to_numpy(dtype=float)
             mean_rnd = float(rnd_arr.mean())
-            ci_low, ci_high = bootstrap_ci(rnd_arr, n_iter=1000, ci=0.95, seed=42)
+            ci_low, ci_high = bootstrap_ci(
+                rnd_arr, n_iter=boot_n_iter, ci=boot_ci, seed=seed
+            )
             rows.append({
                 "unit_name": u, "category": cat_name,
                 "mean_rnd": mean_rnd,
                 "ci_low": float(ci_low), "ci_high": float(ci_high),
+                "sub_low": slow, "sub_high": shigh, "sub_mean": smean,
                 "n_occupations": int(rnd_arr.size),
                 "n_consistent": len(consistent),
             })
@@ -213,6 +302,7 @@ def build_summary(
         rows,
         columns=[
             "unit_name", "category", "mean_rnd", "ci_low", "ci_high",
+            "sub_low", "sub_high", "sub_mean",
             "n_occupations", "n_consistent",
         ],
     )
@@ -311,7 +401,29 @@ def main(config: str = "config/config.yml", unit: Optional[str] = None) -> None:
 
     long_combined = pd.concat(long_frames, ignore_index=True)
     consistent_sets = compute_consistent_set(long_combined, categories, units, logger)
-    summary_df = build_summary(long_combined, units, consistent_sets, logger)
+
+    analysis_cfg = config_data.get("analysis", {})
+    boot_cfg = analysis_cfg.get("bootstrap", {})
+    sub_cfg = analysis_cfg.get("subsample", {})
+    seed = int(analysis_cfg.get("seed", 42))
+    logger.info(
+        "Uncertainty: bootstrap(n_iter=%s, ci=%s) + subsample(fraction=%s, "
+        "n_rounds=%s, ci=%s), seed=%s"
+        % (
+            boot_cfg.get("n_iter", 5000), boot_cfg.get("ci", 0.68),
+            sub_cfg.get("fraction", 0.8), sub_cfg.get("n_rounds", 100),
+            sub_cfg.get("ci", 0.95), seed,
+        )
+    )
+    summary_df = build_summary(
+        long_combined, units, consistent_sets, logger,
+        boot_n_iter=int(boot_cfg.get("n_iter", 5000)),
+        boot_ci=float(boot_cfg.get("ci", 0.68)),
+        sub_fraction=float(sub_cfg.get("fraction", 0.8)),
+        sub_rounds=int(sub_cfg.get("n_rounds", 100)),
+        sub_ci=float(sub_cfg.get("ci", 0.95)),
+        seed=seed,
+    )
 
     results_dir = Path(config_data["paths"]["results_dir"])
     results_dir.mkdir(parents=True, exist_ok=True)

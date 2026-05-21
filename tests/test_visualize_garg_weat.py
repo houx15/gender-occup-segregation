@@ -32,6 +32,9 @@ def _make_summary(
                 "mean_rnd": mean_rnd - 0.1 * i,
                 "ci_low": mean_rnd - 0.2 - 0.1 * i,
                 "ci_high": mean_rnd + 0.2 - 0.1 * i,
+                "sub_low": mean_rnd - 0.3 - 0.1 * i,
+                "sub_high": mean_rnd + 0.3 - 0.1 * i,
+                "sub_mean": mean_rnd - 0.1 * i,
                 "n_occupations": 10,
                 "n_consistent": 10,
             })
@@ -56,6 +59,23 @@ def test_writes_pdf_for_decade_units(tmp_path):
     assert any("fig2_garg_weat_categories__trained_coha" in n for n in names), (
         f"expected PDF with source suffix; got {names}"
     )
+
+
+def test_subsample_band_writes_tagged_pdf(tmp_path):
+    from scripts.visualize import plot_garg_weat_categories_trend
+
+    df = _make_summary(
+        units=["1910s", "1950s", "1990s"],
+        categories=["leadership", "family", "science"],
+    )
+    plot_garg_weat_categories_trend(
+        df, tmp_path, logging.getLogger("test"), embedding_source="trained_coha",
+        band_cols=("sub_low", "sub_high"), band_tag="subsample",
+    )
+    names = _pdfs(tmp_path)
+    assert any(
+        "fig2_garg_weat_categories__trained_coha__subsample" in n for n in names
+    ), f"expected subsample-tagged PDF; got {names}"
 
 
 def test_empty_dataframe_skips_write(tmp_path, caplog):

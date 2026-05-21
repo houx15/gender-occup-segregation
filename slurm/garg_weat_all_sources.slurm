@@ -115,21 +115,26 @@ for CONFIG in "${CONFIGS[@]}"; do
         continue
     fi
 
-    FIG_PATH="$FIG_DIR/fig2_garg_weat_categories__${SRC}.pdf"
-    if [ ! -f "$FIG_PATH" ]; then
-        echo "  ERROR: expected figure not written: $FIG_PATH"
+    FIG_BOOT="$FIG_DIR/fig2_garg_weat_categories__${SRC}__bootstrap.pdf"
+    FIG_SUB="$FIG_DIR/fig2_garg_weat_categories__${SRC}__subsample.pdf"
+    MISSING=""
+    [ ! -f "$FIG_BOOT" ] && MISSING="$FIG_BOOT"
+    [ ! -f "$FIG_SUB" ] && MISSING="$MISSING $FIG_SUB"
+    if [ -n "$MISSING" ]; then
+        echo "  ERROR: expected figure(s) not written:$MISSING"
         echo "         (visualize exited 0 — check the analyze_garg_weat log"
         echo "          above for consistent-set / OOV diagnostics)"
         STATUSES+=("no_figure_written")
         RESULT_PATHS+=("$SUMMARY_PATH")
-        FIG_PATHS+=("$FIG_PATH")
+        FIG_PATHS+=("$MISSING")
         continue
     fi
     STATUSES+=("ok")
     RESULT_PATHS+=("$SUMMARY_PATH")
-    FIG_PATHS+=("$FIG_PATH")
+    FIG_PATHS+=("$FIG_BOOT ; $FIG_SUB")
     echo "  ok: $SUMMARY_PATH"
-    echo "  fig: $FIG_PATH"
+    echo "  fig (bootstrap): $FIG_BOOT"
+    echo "  fig (subsample): $FIG_SUB"
 done
 
 echo ""

@@ -30,3 +30,15 @@ analysis:
   occupation_strategy: "whole_token"
   min_coverage: 0.5
   decade_range: [1910, 1990]
+  seed: 42
+  # Version 1 — faithful to Garg's sns.tsplot band: with-replacement
+  # bootstrap over the consistent occupation set, ~68% (≈ ±1 SE).
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  # Version 2 — keep 80% of each dimension's words (no replacement), 100
+  # rounds, 95% band: sensitivity to which words were chosen.
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95

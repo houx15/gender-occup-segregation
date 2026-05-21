@@ -299,6 +299,66 @@ def test_unit_skipped_when_gender_centroids_unobtainable(tmp_path, monkeypatch, 
     assert set(summary["unit_name"]) == {"1990s"}
 
 
+def test_summary_carries_both_uncertainty_bands(tmp_path, monkeypatch):
+    """Summary has the Garg bootstrap band (ci_low/ci_high) AND the 80%
+    word-subsample band (sub_low/sub_high/sub_mean), with sub band bracketing
+    sub_mean."""
+    cfg = _write_config(tmp_path, categories=_CATEGORIES)
+    kvs = _two_unit_kvs()
+    _touch_models(Path(yaml.safe_load(cfg.read_text())["paths"]["models_dir"]),
+                  list(kvs))
+
+    import scripts.analyze_garg as ag
+    monkeypatch.setattr(ag, "load_model", _make_loader(kvs))
+
+    import scripts.analyze_garg_weat as agw
+    agw.main(config=str(cfg))
+
+    results_dir = Path(yaml.safe_load(cfg.read_text())["paths"]["results_dir"])
+    summary = pd.read_parquet(results_dir / "garg_weat_summary_by_category.parquet")
+    assert {"ci_low", "ci_high", "sub_low", "sub_high", "sub_mean"} <= set(summary.columns)
+    valid = summary.dropna(subset=["sub_mean"])
+    assert (valid["sub_low"] <= valid["sub_mean"] + 1e-9).all()
+    assert (valid["sub_mean"] <= valid["sub_high"] + 1e-9).all()
+
+
+def test_subsample_bands_nondegenerate_and_fixed_subset():
+    """With 5 occupations and fraction 0.8 (k=4 < 5) the band has spread; the
+    same subset is held across units so a unit with a constant offset shifts
+    the band by exactly that offset."""
+    import scripts.analyze_garg_weat as agw
+
+    occs = ["a", "b", "c", "d", "e"]
+    units = ["1990s", "2000s"]
+    lookup = {}
+    for w_i, w in enumerate(occs):
+        lookup[("1990s", "lead", w)] = float(w_i)        # 0..4
+        lookup[("2000s", "lead", w)] = float(w_i) + 10.0  # same shape, +10
+    bands = agw.subsample_bands_from_lookup(
+        lookup, units, {"lead": occs},
+        fraction=0.8, n_rounds=200, ci=0.95, seed=42,
+    )
+    lo90, hi90, mean90 = bands[("1990s", "lead")]
+    lo00, hi00, mean00 = bands[("2000s", "lead")]
+    assert lo90 < hi90               # k=4<5 → real spread
+    assert lo90 <= mean90 <= hi90
+    # Fixed subset across units → 2000s is exactly +10 shifted.
+    assert abs(mean00 - (mean90 + 10.0)) < 1e-9
+    assert abs((hi00 - lo00) - (hi90 - lo90)) < 1e-9
+
+
+def test_subsample_band_zero_width_when_all_equal():
+    import scripts.analyze_garg_weat as agw
+    occs = ["a", "b", "c", "d", "e"]
+    lookup = {("1990s", "x", w): 5.0 for w in occs}
+    bands = agw.subsample_bands_from_lookup(
+        lookup, ["1990s"], {"x": occs},
+        fraction=0.8, n_rounds=50, ci=0.95, seed=1,
+    )
+    lo, hi, mean = bands[("1990s", "x")]
+    assert lo == hi == mean == 5.0
+
+
 def test_consistent_set_per_category_drops_unit_oov(tmp_path, monkeypatch):
     """An occupation in vocab in one unit but not the other should be excluded
     from BOTH decades' mean for its category (per-category consistent set)."""
