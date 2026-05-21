@@ -1,0 +1,68 @@
+# Garg-WEAT per-category RND on the EXISTING provincial-newspaper models.
+# No training — reuses the models trained for provincial_newspaper_server.yml.
+# Units are province-year (e.g. '北京_2020'), so this supports both a
+# cross-province comparison and per-year choropleths via Garg's RND, replacing
+# the Cohen's d view. provincial_newspaper_server.yml is left untouched.
+language: "zh"
+data_source: "newspaper"
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/lustre/home/2401111059/gender-occup-segregation"
+  raw_data_dir: "/lustre/home/2401111059/newspaper_data/provincial_newspaper"
+  corpora_dir: "/lustre/home/2401111059/gender-occup-segregation/data/provincial_newspaper/corpora"
+  models_dir: "/lustre/home/2401111059/gender-occup-segregation/data/provincial_newspaper/models"
+  results_dir: "/lustre/home/2401111059/gender-occup-segregation/data/provincial_newspaper/results_garg_weat"
+  log_dir: "/lustre/home/2401111059/gender-occup-segregation/logs/provincial_newspaper"
+  figures_dir: "/lustre/home/2401111059/gender-occup-segregation/figures/provincial_newspaper_garg_weat"
+  shapefile: "/lustre/home/2401111059/youth-analysis/configs/china_shp/chn_admbnda_adm1_ocha_2020.shp"
+
+wordlists:
+  dir: "wordlists/zh/garg_weat_formal"
+  gender_words_file: "gender_words.json"
+  categories:
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
+
+provincial:
+  province_groups:
+    - ["山东"]
+    - ["海南", "青海", "西藏"]
+    - ["河南", "贵州", "天津"]
+    - ["浙江", "云南", "甘肃"]
+    - ["河北", "安徽", "四川", "黑龙江", "吉林"]
+    - ["内蒙古", "广西", "北京", "山西", "福建"]
+    - ["广东", "江西", "湖南", "重庆", "宁夏"]
+    - ["上海", "新疆", "辽宁", "陕西", "湖北"]
+  min_documents: 500
+
+embedding:
+  vector_size: 300
+  window: 5
+  min_count: 20
+  sg: 1
+  negative: 10
+  workers: 8
+  epochs: 10
+  seed: 42
+  # Units are province-year (e.g. '北京_2020'); drives discover_models parsing.
+  model_name_template: "model_{unit_name}.kv"
+
+corpus:
+  tokenizer: "jieba"
+  min_words: 5
+
+analysis:
+  seed: 42
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95

@@ -163,3 +163,103 @@ def test_unparseable_units_skip_with_warning(tmp_path, caplog):
             df, tmp_path, logging.getLogger("test"),
         )
     assert _pdfs(tmp_path) == []
+
+
+def test_window_format_units_render_trend(tmp_path):
+    """RMRB / china-ngram slices like '1940_1949' must parse as start-year
+    so the Chinese longitudinal RND trend renders (not just COHA 'YYYYs')."""
+    from scripts.visualize import plot_garg_weat_categories_trend
+
+    df = _make_summary(
+        units=["1940_1949", "1950_1959", "1960_1969"],
+        categories=["leadership", "family", "science"],
+    )
+    plot_garg_weat_categories_trend(
+        df, tmp_path, logging.getLogger("test"), embedding_source="renminribao",
+    )
+    assert any(
+        "fig2_garg_weat_categories__renminribao" in n for n in _pdfs(tmp_path)
+    ), f"expected window-format trend PDF; got {_pdfs(tmp_path)}"
+
+
+def test_province_units_skip_trend(tmp_path, caplog):
+    """Province units (e.g. '北京') must NOT render as a trend — they belong to
+    the provincial RND plots. The trend plot should skip with a warning."""
+    from scripts.visualize import plot_garg_weat_categories_trend
+
+    df = _make_summary(
+        units=["北京", "上海", "广东"],
+        categories=["leadership"],
+    )
+    with caplog.at_level(logging.WARNING):
+        plot_garg_weat_categories_trend(
+            df, tmp_path, logging.getLogger("test"),
+        )
+    assert _pdfs(tmp_path) == []
+
+
+# --- Provincial RND plots + unit-kind detection -----------------------------
+
+def test_unit_kind_classifier():
+    from scripts.visualize import _garg_weat_unit_kind
+    assert _garg_weat_unit_kind(["1990s", "2000s"]) == "longitudinal"
+    assert _garg_weat_unit_kind(["1940_1949", "1990_1999"]) == "longitudinal"
+    assert _garg_weat_unit_kind(["北京_2020", "广东_2023"]) == "province_year"
+    assert _garg_weat_unit_kind(["北京", "上海", "广东"]) == "province"
+
+
+def test_provincial_rankings_and_heatmap(tmp_path):
+    from scripts.visualize import (
+        plot_garg_weat_provincial_rankings, plot_garg_weat_provincial_heatmap,
+    )
+    df = _make_summary(
+        units=["北京", "上海", "广东", "四川"],
+        categories=["leadership", "family", "science"],
+    )
+    sign = {"leadership": 1, "family": -1, "science": 1}
+    plot_garg_weat_provincial_rankings(
+        df, tmp_path, logging.getLogger("test"),
+        category_sign=sign, data_source="weibo",
+    )
+    plot_garg_weat_provincial_heatmap(
+        df, tmp_path, logging.getLogger("test"),
+        category_sign=sign, data_source="weibo",
+    )
+    names = _pdfs(tmp_path)
+    assert any("garg_weat_provincial_rankings" in n for n in names), names
+    assert any("garg_weat_provincial_heatmap" in n for n in names), names
+
+
+def test_provincial_frame_averages_over_years_and_orients():
+    """province-year units collapse to province-level means, and family is
+    sign-flipped onto the ideation axis."""
+    from scripts.visualize import _garg_weat_provincial_frame
+
+    rows = [
+        {"unit_name": "北京_2020", "category": "family", "mean_rnd": 0.4},
+        {"unit_name": "北京_2021", "category": "family", "mean_rnd": 0.6},
+        {"unit_name": "北京_2020", "category": "leadership", "mean_rnd": 0.2},
+    ]
+    df = pd.DataFrame(rows)
+    out, reversed_cats = _garg_weat_provincial_frame(
+        df, {"leadership": 1, "family": -1, "science": 1}
+    )
+    assert reversed_cats == ["family"]
+    fam = out[(out["province"] == "北京") & (out["category"] == "family")]
+    # mean(0.4, 0.6) = 0.5, flipped -> -0.5
+    assert abs(fam["value"].iloc[0] - (-0.5)) < 1e-9
+    lead = out[(out["province"] == "北京") & (out["category"] == "leadership")]
+    assert abs(lead["value"].iloc[0] - 0.2) < 1e-9
+
+
+def test_provincial_choropleth_skips_without_shapefile(tmp_path, caplog):
+    """No shapefile / no geopandas → graceful skip, no crash, no PDF."""
+    from scripts.visualize import plot_garg_weat_provincial_choropleth
+
+    df = _make_summary(units=["北京", "上海"], categories=["leadership"])
+    with caplog.at_level(logging.INFO):
+        plot_garg_weat_provincial_choropleth(
+            df, tmp_path, logging.getLogger("test"),
+            category_sign=None, shapefile="/nonexistent/path.shp",
+        )
+    assert not any(n.startswith("garg_weat_choropleth") for n in _pdfs(tmp_path))

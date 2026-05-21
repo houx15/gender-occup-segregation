@@ -1,0 +1,67 @@
+# Garg-WEAT per-category RND on the EXISTING Renminribao models.
+# No training — reuses the models trained for renminribao_weat.yml; only the
+# analysis metric changes (Cohen's d -> Garg relative norm distance). The
+# Cohen's d profile (renminribao_weat.yml) is left untouched.
+language: "zh"
+data_source: "renminribao"
+analysis_mode: "garg_weat"
+
+paths:
+  base_dir: "/scratch/network/yh6580/renminribao"
+  raw_data_dir: "/scratch/network/yh6580/chinese_corpus/xiandai_20250422/xiandai"
+  corpora_dir: "/scratch/network/yh6580/renminribao/corpora"
+  models_dir: "/scratch/network/yh6580/renminribao/models"
+  results_dir: "/scratch/network/yh6580/renminribao/results_garg_weat"
+  log_dir: "/scratch/network/yh6580/renminribao/logs"
+  figures_dir: "/scratch/network/yh6580/renminribao/figures_garg_weat"
+
+wordlists:
+  dir: "wordlists/zh/garg_weat_formal"
+  gender_words_file: "gender_words.json"
+  # Consumes the cleaned lists produced by scripts.prepare_wordlists
+  # (dedup + OOV coverage). Raw seeds live in candidates_*.txt.
+  categories:
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
+
+time_slices:
+  window_size: 10
+  step_size: 5
+  start_year: 1940
+  end_year: 2020
+
+embedding:
+  vector_size: 300
+  window: 4
+  min_count: 50
+  sg: 1
+  negative: 15
+  workers: 16
+  epochs: 5
+  seed: 42
+  # Drives discover_models' unit-name parsing (units are '1940_1949' windows).
+  model_name_template: "renminribao_{slice_name}.model"
+
+corpus:
+  tokenizer: "jieba"
+  min_words: 5
+
+analysis:
+  seed: 42
+  # Single gender-ideation axis, higher = less traditional. Leadership/science
+  # female-leaning is progressive (+1); family female-leaning is traditional,
+  # so reverse it (-1).
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
+  # Version 1 — Garg's with-replacement occupation bootstrap (~68% / ±1 SE).
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  # Version 2 — keep 80% of each category's words (no replacement), 100 rounds.
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95
