@@ -274,23 +274,53 @@ def _province_year_summary(provinces, years, categories=("leadership", "family",
     return pd.DataFrame(rows)
 
 
-def test_weibo_survey_scatter(tmp_path):
-    from scripts.visualize import plot_garg_weat_weibo_survey_scatter
+def test_weibo_correlation_multivar(tmp_path):
+    from scripts.visualize import plot_garg_weat_weibo_correlation
+    provinces = ["北京", "上海", "广东", "四川", "山东", "河南"]
     summary = pd.DataFrame([
-        {"unit_name": p, "category": c, "mean_rnd": base + off}
-        for p, base in [("北京", 0.3), ("上海", 0.4), ("广东", 0.2), ("四川", 0.5)]
-        for c, off in [("leadership", 0.0), ("family", 0.1), ("science", -0.05)]
+        {"unit_name": p, "category": c, "mean_rnd": 0.2 + 0.03 * pi + 0.04 * ci}
+        for pi, p in enumerate(provinces)
+        for ci, c in enumerate(["leadership", "family", "science"])
+    ])
+    surv = tmp_path / "provincial_cleaned.csv"
+    n = len(provinces)
+    pd.DataFrame({
+        "province": provinces,
+        "gdp_2024": [30000 + 5000 * i for i in range(n)],
+        "avg_income_2024": [100000 + 10000 * i for i in range(n)],
+        "eduy_gt25_2020": [9.0 + 0.2 * i for i in range(n)],
+        "eduy_m_gt25_2020": [9.5 + 0.2 * i for i in range(n)],
+        "eduy_f_gt25_2020": [8.5 + 0.15 * i for i in range(n)],
+        "emp_2020": [0.6 + 0.02 * i for i in range(n)],
+        "emp_m_2020": [0.7 + 0.02 * i for i in range(n)],
+        "emp_f_2020": [0.55 + 0.02 * i for i in range(n)],
+        "cfps_ideation_2020": [3.0 + 0.05 * i for i in range(n)],
+    }).to_csv(surv, index=False)
+    plot_garg_weat_weibo_correlation(
+        summary, str(surv), tmp_path, logging.getLogger("test"),
+        category_sign={"leadership": 1, "family": -1, "science": 1},
+    )
+    names = _pdfs(tmp_path)
+    assert any("garg_weat_weibo_correlation_leadership" in n for n in names), names
+    assert any("garg_weat_weibo_correlation_family" in n for n in names), names
+
+
+def test_weibo_correlation_degrades_with_missing_columns(tmp_path):
+    """Only the CFPS-ideation panel is available -> still renders, no crash."""
+    from scripts.visualize import plot_garg_weat_weibo_correlation
+    summary = pd.DataFrame([
+        {"unit_name": p, "category": "leadership", "mean_rnd": 0.2 + 0.05 * i}
+        for i, p in enumerate(["北京", "上海", "广东", "四川"])
     ])
     surv = tmp_path / "provincial_cleaned.csv"
     pd.DataFrame({
         "province": ["北京", "上海", "广东", "四川"],
         "cfps_ideation_2020": [3.0, 2.8, 2.5, 3.2],
     }).to_csv(surv, index=False)
-    plot_garg_weat_weibo_survey_scatter(
-        summary, str(surv), tmp_path, logging.getLogger("test"),
-        category_sign={"leadership": 1, "family": -1, "science": 1},
+    plot_garg_weat_weibo_correlation(
+        summary, str(surv), tmp_path, logging.getLogger("test"), category_sign=None,
     )
-    assert any("garg_weat_weibo_survey_scatter" in n for n in _pdfs(tmp_path)), _pdfs(tmp_path)
+    assert any("garg_weat_weibo_correlation_leadership" in n for n in _pdfs(tmp_path))
 
 
 def test_newspaper_survey_scatter(tmp_path):

@@ -1742,52 +1742,92 @@ def plot_garg_weat_province_trends(summary_df, survey_csv_path, figures_dir, log
     logger.info(f"  Saved: {path.name}")
 
 
-def plot_garg_weat_weibo_survey_scatter(summary_df, provincial_csv, figures_dir, logger,
-                                        category_sign=None, ideation_col="cfps_ideation_2020"):
-    """Cross-province oriented RND per category vs the most-recent provincial
-    survey ideation (Weibo). Reads provincial_cleaned.csv (Chinese-province key,
-    e.g. cfps_ideation_2020). Weibo is a cross-section, so this is one point per
-    province.
+# Province-level correlates from provincial_cleaned.csv. Each entry is
+# (axis label, builder over the survey df, required columns) — mirrors the
+# previous Weibo Cohen's d correlation panels (log GDP / education / employment
+# / log income / education gap M-F / employment gap M-F / CFPS ideation).
+_WEIBO_CORRELATES = [
+    ("log(GDP)", lambda d: np.log(d["gdp_2024"]), ["gdp_2024"]),
+    ("Average Years of Education Attainment",
+     lambda d: d["eduy_gt25_2020"], ["eduy_gt25_2020"]),
+    ("Employment Rate", lambda d: d["emp_2020"], ["emp_2020"]),
+    ("log(Average Income)", lambda d: np.log(d["avg_income_2024"]), ["avg_income_2024"]),
+    ("Difference in Education Years (Male - Female)",
+     lambda d: d["eduy_m_gt25_2020"] - d["eduy_f_gt25_2020"],
+     ["eduy_m_gt25_2020", "eduy_f_gt25_2020"]),
+    ("Difference in Employment Rate (Male - Female)",
+     lambda d: d["emp_m_2020"] - d["emp_f_2020"], ["emp_m_2020", "emp_f_2020"]),
+    ("Gender Ideation in Survey (CFPS)",
+     lambda d: d["cfps_ideation_2020"], ["cfps_ideation_2020"]),
+]
+
+
+def plot_garg_weat_weibo_correlation(summary_df, provincial_csv, figures_dir, logger,
+                                     category_sign=None):
+    """Per-category oriented RND vs province-level socioeconomic + survey
+    variables (Weibo cross-section): one multi-panel figure per category,
+    reproducing the previous Weibo Cohen's d correlation panels. Variables whose
+    columns are absent from the CSV are skipped, so it degrades gracefully.
     """
     p = Path(provincial_csv)
     if not p.exists():
-        logger.info(f"  Skipping Weibo survey scatter: {provincial_csv} not found")
+        logger.info(f"  Skipping Weibo correlation: {provincial_csv} not found")
         return
     long = _garg_weat_oriented_units(summary_df, category_sign)  # unit = province (zh)
     if long.empty:
         return
     surv = pd.read_csv(p)
-    if "province" not in surv.columns or ideation_col not in surv.columns:
-        logger.info(
-            f"  Skipping Weibo survey scatter: '{ideation_col}'/'province' "
-            f"missing from {p.name}"
-        )
-        return
-    surv = surv[["province", ideation_col]].dropna()
-    data = long.merge(surv, left_on="unit", right_on="province", how="inner")
-    if data.empty:
-        logger.info("  Skipping Weibo survey scatter: no province overlap")
+    if "province" not in surv.columns:
+        logger.info("  Skipping Weibo correlation: no 'province' column")
         return
 
-    categories = sorted(long["category"].unique())
-    fig, axes = plt.subplots(1, len(categories), figsize=(6 * len(categories), 5.5),
-                             squeeze=False)
-    axes = axes[0]
-    fig.suptitle("Weibo gender-ideation RND vs survey (by province)",
-                 fontsize=13, fontweight="bold")
-    for ax, cat in zip(axes, categories):
-        cd = data[data["category"] == cat].dropna(subset=[ideation_col, "value"])
-        ax.scatter(cd[ideation_col], cd["value"], c="#1f4e79", s=70, alpha=0.8,
-                   edgecolors="white", linewidths=0.5)
-        _draw_fit(ax, cd[ideation_col].values, cd["value"].values)
-        ax.set_title(cat.title(), fontsize=12, fontweight="bold")
-        ax.set_xlabel(f"Survey gender ideation ({ideation_col})", fontsize=9)
-        ax.set_ylabel("RND (oriented, higher = less traditional)", fontsize=9)
-        ax.grid(True, alpha=0.3)
-    plt.tight_layout()
-    path = get_figure_path("garg_weat_weibo_survey_scatter", figures_dir)
-    plt.savefig(path, format="pdf"); plt.close()
-    logger.info(f"  Saved: {path.name}")
+    avail = [(lab, fn) for lab, fn, cols in _WEIBO_CORRELATES
+             if all(c in surv.columns for c in cols)]
+    if not avail:
+        logger.info("  Skipping Weibo correlation: no usable provincial variables")
+        return
+    xvars = surv[["province"]].copy()
+    for lab, fn in avail:
+        xvars[lab] = fn(surv)
+
+    ncols = 3
+    nrows = (len(avail) + ncols - 1) // ncols
+    for cat in sorted(long["category"].unique()):
+        cd = long[long["category"] == cat][["unit", "value"]].rename(
+            columns={"unit": "province"}
+        )
+        merged = cd.merge(xvars, on="province", how="inner")
+        if merged.empty:
+            logger.info(f"  Weibo correlation {cat}: no province overlap")
+            continue
+        ylabel = f"{cat.title()} gender norm from Weibo (RND, oriented)"
+        fig, axes = plt.subplots(nrows, ncols, figsize=(6 * ncols, 5 * nrows),
+                                 squeeze=False)
+        for i, (lab, _fn) in enumerate(avail):
+            ax = axes[i // ncols][i % ncols]
+            sub = merged[[lab, "value"]].dropna()
+            if len(sub) >= 2:
+                sns.regplot(
+                    x=lab, y="value", data=sub, ax=ax,
+                    scatter_kws={"s": 45, "alpha": 0.75, "color": "#4878a8"},
+                    line_kws={"color": "red", "linewidth": 1.5},
+                )
+                title = lab
+                if len(sub) >= 3:
+                    r, pval = pearsonr(sub[lab].values, sub["value"].values)
+                    pstr = f"p={pval:.3f}" if pval >= 0.001 else "p<0.001"
+                    title = f"{lab}\nr={r:.3f}, {pstr}"
+                ax.set_title(title, fontsize=10)
+            else:
+                ax.set_title(lab, fontsize=10)
+            ax.set_xlabel(lab, fontsize=9)
+            ax.set_ylabel(ylabel, fontsize=8)
+        for j in range(len(avail), nrows * ncols):
+            axes[j // ncols][j % ncols].set_axis_off()
+        plt.tight_layout()
+        path = get_figure_path(f"garg_weat_weibo_correlation_{cat}", figures_dir)
+        plt.savefig(path, format="pdf"); plt.close()
+        logger.info(f"  Saved: {path.name}")
 
 
 # =============================================================================
@@ -2570,14 +2610,14 @@ def main(config="config/config.yml", mode=None):
                     # survey value per province.
                     prov_csv = Path("data/surveys/provincial/provincial_cleaned.csv")
                     if prov_csv.exists():
-                        plot_garg_weat_weibo_survey_scatter(
+                        plot_garg_weat_weibo_correlation(
                             df, str(prov_csv), figures_dir, logger,
                             category_sign=category_sign,
                         )
                     else:
                         logger.info(
                             f"  No provincial survey at {prov_csv}; "
-                            "skipping Weibo survey scatter"
+                            "skipping Weibo correlation"
                         )
         else:
             logger.error(f"Garg-WEAT summary not found at {summary_path}")

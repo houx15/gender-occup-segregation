@@ -183,7 +183,7 @@ figures_dir/
   garg_weat_choropleth_grid.pdf                     # newspaper: category × recent years
   garg_weat_scatter_{cfps,cgss,combined}.pdf        # newspaper: RND vs survey ideation
   garg_weat_province_longitudinal_trends.pdf        # newspaper: per-province RND vs survey
-  garg_weat_weibo_survey_scatter.pdf                # Weibo: RND vs survey (by province)
+  garg_weat_weibo_correlation_<category>.pdf        # Weibo: RND vs province GDP/edu/employment/ideation
 ```
 
 The provincial RND view also reproduces the survey-correlation figures the
@@ -192,7 +192,10 @@ oriented RND shares the survey's "higher = less traditional" direction:
 - **Newspaper** (province-year) merges `data/surveys/processed/gender_ideation_by_province_year.csv`
   (CFPS / CGSS by year) → aggregated grid, CFPS/CGSS/combined scatters, per-province trends.
 - **Weibo** (province cross-section) merges `data/surveys/provincial/provincial_cleaned.csv`
-  using the most-recent provincial value (`cfps_ideation_2020`) → one cross-province scatter.
+  → one multi-panel figure per category correlating the oriented RND against
+  province-level log(GDP), education, employment, log(income), the education and
+  employment gaps (M−F), and CFPS gender ideation (the panels the previous Weibo
+  Cohen's d analysis used). Variables absent from the CSV are skipped.
 
 ---
 
