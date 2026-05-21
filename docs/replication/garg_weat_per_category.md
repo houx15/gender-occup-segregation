@@ -123,8 +123,10 @@ The Chinese category seeds were derived from the existing WEAT *target* lists
 (`domestic_work_words.json["family"]`, `leadership_words.json["leadership"]`,
 `stem_words.json["stem"]`) plus the register's `gender_words.json`. Each
 `candidates_<cat>.txt` is dedup + OOV-pruned into `cleaned_<cat>.txt` by
-`scripts/prepare_wordlists.py` (≥80% model coverage); the configs consume the
-`cleaned_*` lists. Review/replace the seeds freely.
+`scripts/prepare_wordlists.py`; the configs consume the `cleaned_*` lists. The
+coverage threshold is **≥80% for English**, **≥70% for Chinese** (the Chinese
+seeds include lower-frequency terms that dip below 0.8 in the sparser early
+decades). Review/replace the seeds freely.
 
 ---
 

@@ -24,7 +24,8 @@
 #   python -m scripts.prepare_wordlists \
 #       --configs=config/profiles/garg_weat_weibo.yml \
 #       --wordlist_dir=wordlists/zh/garg_weat_informal \
-#       --candidates=candidates_leadership.txt,candidates_family.txt,candidates_science.txt
+#       --candidates=candidates_leadership.txt,candidates_family.txt,candidates_science.txt \
+#       --threshold=0.7
 # (provincial newspaper uses the formal register but also runs on PKU.)
 
 module load anaconda3/2023.3
@@ -34,7 +35,10 @@ set -u
 
 CONFIGS="config/profiles/garg_weat_renminribao.yml,config/profiles/garg_weat_china_ngram.yml"
 CANDIDATES="candidates_leadership.txt,candidates_family.txt,candidates_science.txt"
-THRESHOLD="${1:-0.8}"
+# Chinese OOV threshold is 0.7 (vs 0.8 for English) — the Chinese category
+# seeds include lower-frequency terms whose coverage dips below 0.8 in the
+# sparser early decades. Override by passing a value as the first arg.
+THRESHOLD="${1:-0.7}"
 
 echo "=========================================="
 echo "Chinese wordlist precheck (formal register)"
