@@ -252,6 +252,83 @@ def test_provincial_frame_averages_over_years_and_orients():
     assert abs(lead["value"].iloc[0] - 0.2) < 1e-9
 
 
+def _province_year_summary(provinces, years, categories=("leadership", "family", "science")):
+    rows = []
+    for pi, p in enumerate(provinces):
+        for yi, y in enumerate(years):
+            for ci, c in enumerate(categories):
+                rows.append({
+                    "unit_name": f"{p}_{y}",
+                    "category": c,
+                    "mean_rnd": 0.2 + 0.05 * pi + 0.03 * yi + 0.04 * ci,
+                })
+    return pd.DataFrame(rows)
+
+
+def test_weibo_survey_scatter(tmp_path):
+    from scripts.visualize import plot_garg_weat_weibo_survey_scatter
+    summary = pd.DataFrame([
+        {"unit_name": p, "category": c, "mean_rnd": base + off}
+        for p, base in [("北京", 0.3), ("上海", 0.4), ("广东", 0.2), ("四川", 0.5)]
+        for c, off in [("leadership", 0.0), ("family", 0.1), ("science", -0.05)]
+    ])
+    surv = tmp_path / "provincial_cleaned.csv"
+    pd.DataFrame({
+        "province": ["北京", "上海", "广东", "四川"],
+        "cfps_ideation_2020": [3.0, 2.8, 2.5, 3.2],
+    }).to_csv(surv, index=False)
+    plot_garg_weat_weibo_survey_scatter(
+        summary, str(surv), tmp_path, logging.getLogger("test"),
+        category_sign={"leadership": 1, "family": -1, "science": 1},
+    )
+    assert any("garg_weat_weibo_survey_scatter" in n for n in _pdfs(tmp_path)), _pdfs(tmp_path)
+
+
+def test_newspaper_survey_scatter(tmp_path):
+    from scripts.visualize import plot_garg_weat_survey_scatter
+    summary = _province_year_summary(["北京", "上海", "广东"], [2018, 2020, 2022])
+    surv = tmp_path / "survey.csv"
+    srows = []
+    for i, prov_en in enumerate(["Beijing", "Shanghai", "Guangdong"]):
+        for j, y in enumerate([2018, 2020, 2022]):
+            for ds in ["CFPS", "CGSS"]:
+                srows.append({"dataset": ds, "year": y, "province": prov_en,
+                              "gender_ideation_mean": 0.40 + 0.05 * i + 0.02 * j})
+    pd.DataFrame(srows).to_csv(surv, index=False)
+    plot_garg_weat_survey_scatter(
+        summary, str(surv), tmp_path, logging.getLogger("test"),
+        category_sign={"leadership": 1, "family": -1, "science": 1},
+    )
+    names = _pdfs(tmp_path)
+    assert any("garg_weat_scatter_combined" in n for n in names), names
+    assert any("garg_weat_scatter_cfps" in n for n in names), names
+
+
+def test_province_trends(tmp_path):
+    from scripts.visualize import plot_garg_weat_province_trends
+    summary = _province_year_summary(["河南", "浙江", "内蒙古", "辽宁"], [2018, 2020, 2022])
+    surv = tmp_path / "survey.csv"
+    pd.DataFrame({
+        "dataset": ["CFPS", "CFPS"], "year": [2018, 2020],
+        "province": ["Henan", "Henan"], "gender_ideation_mean": [0.45, 0.50],
+    }).to_csv(surv, index=False)
+    plot_garg_weat_province_trends(
+        summary, str(surv), tmp_path, logging.getLogger("test"),
+        category_sign={"leadership": 1, "family": -1, "science": 1},
+    )
+    assert any("garg_weat_province_longitudinal_trends" in n for n in _pdfs(tmp_path))
+
+
+def test_choropleth_grid_skips_without_shapefile(tmp_path):
+    from scripts.visualize import plot_garg_weat_choropleth_grid
+    summary = _province_year_summary(["北京", "上海"], [2018, 2020])
+    plot_garg_weat_choropleth_grid(
+        summary, tmp_path, logging.getLogger("test"),
+        category_sign=None, shapefile="/nonexistent/path.shp",
+    )
+    assert not any("garg_weat_choropleth_grid" in n for n in _pdfs(tmp_path))
+
+
 def test_provincial_choropleth_skips_without_shapefile(tmp_path, caplog):
     """No shapefile / no geopandas → graceful skip, no crash, no PDF."""
     from scripts.visualize import plot_garg_weat_provincial_choropleth

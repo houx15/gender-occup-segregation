@@ -1,0 +1,5370 @@
+{
+  "中国青年报": {
+    "province": "全国",
+    "article_count": 88074
+  },
+  "人民日报": {
+    "province": "全国",
+    "article_count": 54165
+  },
+  "中国证券报": {
+    "province": "全国",
+    "article_count": 49693
+  },
+  "每周电脑报": {
+    "province": "全国",
+    "article_count": 44285
+  },
+  "证券日报": {
+    "province": "全国",
+    "article_count": 38302
+  },
+  "中国医药导报": {
+    "province": "全国",
+    "article_count": 36804
+  },
+  "上海证券报": {
+    "province": "全国",
+    "article_count": 35086
+  },
+  "21世纪经济报道": {
+    "province": "全国",
+    "article_count": 35033
+  },
+  "经济日报": {
+    "province": "全国",
+    "article_count": 33359
+  },
+  "光明日报": {
+    "province": "全国",
+    "article_count": 31695
+  },
+  "国际商报": {
+    "province": "全国",
+    "article_count": 30559
+  },
+  "金融时报": {
+    "province": "全国",
+    "article_count": 29261
+  },
+  "证券时报": {
+    "province": "全国",
+    "article_count": 29163
+  },
+  "北京商报": {
+    "province": "北京",
+    "article_count": 27925
+  },
+  "科技日报": {
+    "province": "全国",
+    "article_count": 25644
+  },
+  "南方日报": {
+    "province": "行业",
+    "article_count": 24944
+  },
+  "湖北日报": {
+    "province": "湖北",
+    "article_count": 24276
+  },
+  "第一财经日报": {
+    "province": "全国",
+    "article_count": 24120
+  },
+  "法制日报": {
+    "province": "全国",
+    "article_count": 23686
+  },
+  "解放军报": {
+    "province": "全国",
+    "article_count": 22604
+  },
+  "吉林日报": {
+    "province": "吉林",
+    "article_count": 22512
+  },
+  "河北日报": {
+    "province": "河北",
+    "article_count": 21822
+  },
+  "四川日报": {
+    "province": "四川",
+    "article_count": 21688
+  },
+  "人民政协报": {
+    "province": "全国",
+    "article_count": 21521
+  },
+  "文汇报": {
+    "province": "行业",
+    "article_count": 21506
+  },
+  "经济参考报": {
+    "province": "全国",
+    "article_count": 20781
+  },
+  "浙江日报": {
+    "province": "浙江",
+    "article_count": 20204
+  },
+  "解放日报": {
+    "province": "行业",
+    "article_count": 20188
+  },
+  "湖南日报": {
+    "province": "湖南",
+    "article_count": 20119
+  },
+  "陕西日报": {
+    "province": "陕西",
+    "article_count": 19996
+  },
+  "中国经济时报": {
+    "province": "全国",
+    "article_count": 19819
+  },
+  "中国教育报": {
+    "province": "全国",
+    "article_count": 19801
+  },
+  "贵州日报": {
+    "province": "贵州",
+    "article_count": 19257
+  },
+  "人民法院报": {
+    "province": "全国",
+    "article_count": 19037
+  },
+  "中国文化报": {
+    "province": "全国",
+    "article_count": 18983
+  },
+  "中国社会科学报": {
+    "province": "全国",
+    "article_count": 18788
+  },
+  "甘肃日报": {
+    "province": "甘肃",
+    "article_count": 18459
+  },
+  "北京日报": {
+    "province": "北京",
+    "article_count": 18353
+  },
+  "中华工商时报": {
+    "province": "全国",
+    "article_count": 18248
+  },
+  "人民公安报": {
+    "province": "全国",
+    "article_count": 18112
+  },
+  "检察日报": {
+    "province": "全国",
+    "article_count": 17750
+  },
+  "深圳特区报": {
+    "province": "广东",
+    "article_count": 17462
+  },
+  "中国纪检监察报": {
+    "province": "全国",
+    "article_count": 17425
+  },
+  "工人日报": {
+    "province": "全国",
+    "article_count": 17311
+  },
+  "广西日报": {
+    "province": "广西",
+    "article_count": 17083
+  },
+  "西藏日报(汉)": {
+    "province": "西藏",
+    "article_count": 16965
+  },
+  "黑龙江日报": {
+    "province": "黑龙江",
+    "article_count": 16869
+  },
+  "海南日报": {
+    "province": "海南",
+    "article_count": 16253
+  },
+  "中国经营报": {
+    "province": "全国",
+    "article_count": 16199
+  },
+  "农民日报": {
+    "province": "全国",
+    "article_count": 16106
+  },
+  "云南日报": {
+    "province": "云南",
+    "article_count": 16048
+  },
+  "山西日报": {
+    "province": "山西",
+    "article_count": 16017
+  },
+  "河南日报": {
+    "province": "河南",
+    "article_count": 15981
+  },
+  "期货日报": {
+    "province": "全国",
+    "article_count": 15980
+  },
+  "辽宁日报": {
+    "province": "辽宁",
+    "article_count": 15841
+  },
+  "健康报": {
+    "province": "全国",
+    "article_count": 15316
+  },
+  "新华日报": {
+    "province": "行业",
+    "article_count": 15226
+  },
+  "青海日报": {
+    "province": "青海",
+    "article_count": 15119
+  },
+  "医药导报": {
+    "province": "全国",
+    "article_count": 14747
+  },
+  "中国环境报": {
+    "province": "全国",
+    "article_count": 14721
+  },
+  "安徽日报": {
+    "province": "安徽",
+    "article_count": 14586
+  },
+  "湖北经济学院学报(人文社会科学版)": {
+    "province": "湖北",
+    "article_count": 14133
+  },
+  "西安日报": {
+    "province": "陕西",
+    "article_count": 14086
+  },
+  "福建日报": {
+    "province": "福建",
+    "article_count": 13955
+  },
+  "重庆日报": {
+    "province": "重庆",
+    "article_count": 13647
+  },
+  "中国质量报": {
+    "province": "全国",
+    "article_count": 13625
+  },
+  "江西日报": {
+    "province": "江西",
+    "article_count": 13618
+  },
+  "中国旅游报": {
+    "province": "全国",
+    "article_count": 13513
+  },
+  "新疆日报(汉)": {
+    "province": "新疆",
+    "article_count": 13423
+  },
+  "深圳商报": {
+    "province": "广东",
+    "article_count": 13387
+  },
+  "中国商报": {
+    "province": "全国",
+    "article_count": 12956
+  },
+  "赤峰学院学报(汉文哲学社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 12816
+  },
+  "人民日报海外版": {
+    "province": "全国",
+    "article_count": 12547
+  },
+  "成都日报": {
+    "province": "四川",
+    "article_count": 12331
+  },
+  "中医药导报": {
+    "province": "全国",
+    "article_count": 12328
+  },
+  "嘉兴日报": {
+    "province": "浙江",
+    "article_count": 12155
+  },
+  "重庆科技学院学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 12128
+  },
+  "天津日报": {
+    "province": "天津",
+    "article_count": 12122
+  },
+  "人民邮电": {
+    "province": "全国",
+    "article_count": 11906
+  },
+  "青岛日报": {
+    "province": "山东",
+    "article_count": 11660
+  },
+  "宁波日报": {
+    "province": "浙江",
+    "article_count": 11657
+  },
+  "中国冶金报": {
+    "province": "全国",
+    "article_count": 11326
+  },
+  "粮油市场报": {
+    "province": "行业",
+    "article_count": 11221
+  },
+  "东莞日报": {
+    "province": "广东",
+    "article_count": 11150
+  },
+  "中国经济导报": {
+    "province": "全国",
+    "article_count": 11087
+  },
+  "中国国土资源报": {
+    "province": "全国",
+    "article_count": 10979
+  },
+  "济南日报": {
+    "province": "山东",
+    "article_count": 10724
+  },
+  "中国医药报": {
+    "province": "全国",
+    "article_count": 10635
+  },
+  "中国工商报": {
+    "province": "全国",
+    "article_count": 10611
+  },
+  "杭州日报": {
+    "province": "浙江",
+    "article_count": 10610
+  },
+  "中国消费者报": {
+    "province": "全国",
+    "article_count": 10537
+  },
+  "医药经济报": {
+    "province": "全国",
+    "article_count": 10531
+  },
+  "昆明日报": {
+    "province": "云南",
+    "article_count": 10355
+  },
+  "中国石油报": {
+    "province": "全国",
+    "article_count": 10218
+  },
+  "华夏时报": {
+    "province": "全国",
+    "article_count": 10190
+  },
+  "内蒙古日报(汉)": {
+    "province": "内蒙古",
+    "article_count": 10168
+  },
+  "山西高等学校社会科学学报": {
+    "province": "山西",
+    "article_count": 10085
+  },
+  "中国新闻出版广电报": {
+    "province": "全国",
+    "article_count": 10018
+  },
+  "宁夏日报": {
+    "province": "宁夏",
+    "article_count": 9920
+  },
+  "中国电力报": {
+    "province": "全国",
+    "article_count": 9877
+  },
+  "中国工业报": {
+    "province": "全国",
+    "article_count": 9725
+  },
+  "中国能源报": {
+    "province": "全国",
+    "article_count": 9604
+  },
+  "台州日报": {
+    "province": "浙江",
+    "article_count": 9575
+  },
+  "南京日报": {
+    "province": "江苏",
+    "article_count": 9531
+  },
+  "中国国防报": {
+    "province": "全国",
+    "article_count": 9475
+  },
+  "长江日报": {
+    "province": "行业",
+    "article_count": 9473
+  },
+  "中国石化报": {
+    "province": "全国",
+    "article_count": 9436
+  },
+  "中国矿业报": {
+    "province": "全国",
+    "article_count": 9232
+  },
+  "国家电网报": {
+    "province": "全国",
+    "article_count": 9228
+  },
+  "团结报": {
+    "province": "全国",
+    "article_count": 9212
+  },
+  "中国国门时报": {
+    "province": "全国",
+    "article_count": 9210
+  },
+  "中国妇女报": {
+    "province": "全国",
+    "article_count": 9171
+  },
+  "兰州日报": {
+    "province": "甘肃",
+    "article_count": 9101
+  },
+  "中国保险报": {
+    "province": "全国",
+    "article_count": 8923
+  },
+  "Transactions of Nonferrous Metals Society of China": {
+    "province": "全国",
+    "article_count": 8823
+  },
+  "佛山日报": {
+    "province": "广东",
+    "article_count": 8754
+  },
+  "中国建设报": {
+    "province": "全国",
+    "article_count": 8747
+  },
+  "苏州日报": {
+    "province": "江苏",
+    "article_count": 8745
+  },
+  "齐齐哈尔大学学报(哲学社会科学版)": {
+    "province": "黑龙江",
+    "article_count": 8743
+  },
+  "中国社会报": {
+    "province": "全国",
+    "article_count": 8707
+  },
+  "惠州日报": {
+    "province": "广东",
+    "article_count": 8572
+  },
+  "中国中医药报": {
+    "province": "全国",
+    "article_count": 8509
+  },
+  "山西经济日报": {
+    "province": "山西",
+    "article_count": 8494
+  },
+  "上海金融报": {
+    "province": "上海",
+    "article_count": 8488
+  },
+  "学习时报": {
+    "province": "全国",
+    "article_count": 8456
+  },
+  "贵阳日报": {
+    "province": "贵州",
+    "article_count": 8456
+  },
+  "佳木斯大学社会科学学报": {
+    "province": "黑龙江",
+    "article_count": 8428
+  },
+  "金华日报": {
+    "province": "浙江",
+    "article_count": 8412
+  },
+  "珠海特区报": {
+    "province": "广东",
+    "article_count": 8255
+  },
+  "中国艺术报": {
+    "province": "全国",
+    "article_count": 8243
+  },
+  "焦作日报": {
+    "province": "河南",
+    "article_count": 8222
+  },
+  "南宁日报": {
+    "province": "广西",
+    "article_count": 8212
+  },
+  "绵阳日报": {
+    "province": "四川",
+    "article_count": 8133
+  },
+  "大连日报": {
+    "province": "辽宁",
+    "article_count": 8102
+  },
+  "绍兴日报": {
+    "province": "浙江",
+    "article_count": 8098
+  },
+  "楚雄日报(汉)": {
+    "province": "云南",
+    "article_count": 8087
+  },
+  "中国产经新闻": {
+    "province": "全国",
+    "article_count": 7981
+  },
+  "长春日报": {
+    "province": "吉林",
+    "article_count": 7959
+  },
+  "中国组织人事报": {
+    "province": "全国",
+    "article_count": 7904
+  },
+  "河北经济日报": {
+    "province": "河北",
+    "article_count": 7844
+  },
+  "长沙晚报": {
+    "province": "湖南",
+    "article_count": 7774
+  },
+  "中国有色金属报": {
+    "province": "全国",
+    "article_count": 7768
+  },
+  "洛阳日报": {
+    "province": "河南",
+    "article_count": 7728
+  },
+  "内蒙古农业大学学报(社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 7718
+  },
+  "江苏经济报": {
+    "province": "江苏",
+    "article_count": 7647
+  },
+  "遵义日报": {
+    "province": "贵州",
+    "article_count": 7587
+  },
+  "凉山日报(汉)": {
+    "province": "云南",
+    "article_count": 7515
+  },
+  "江苏法制报": {
+    "province": "江苏",
+    "article_count": 7505
+  },
+  "中华合作时报": {
+    "province": "行业",
+    "article_count": 7399
+  },
+  "国际医药卫生导报": {
+    "province": "全国",
+    "article_count": 7385
+  },
+  "中国城乡金融报": {
+    "province": "行业",
+    "article_count": 7373
+  },
+  "中国劳动保障报": {
+    "province": "行业",
+    "article_count": 7350
+  },
+  "云南经济日报": {
+    "province": "云南",
+    "article_count": 7327
+  },
+  "辽宁师专学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 7322
+  },
+  "三峡日报": {
+    "province": "行业",
+    "article_count": 7308
+  },
+  "人民武警报": {
+    "province": "行业",
+    "article_count": 7268
+  },
+  "中国民航报": {
+    "province": "全国",
+    "article_count": 7249
+  },
+  "中国交通报": {
+    "province": "全国",
+    "article_count": 7231
+  },
+  "连云港日报": {
+    "province": "江苏",
+    "article_count": 7225
+  },
+  "大理日报(汉)": {
+    "province": "云南",
+    "article_count": 7185
+  },
+  "中国纺织报": {
+    "province": "全国",
+    "article_count": 7171
+  },
+  "常德日报": {
+    "province": "湖南",
+    "article_count": 7169
+  },
+  "河南师范大学学报(哲学社会科学版)": {
+    "province": "河南",
+    "article_count": 7155
+  },
+  "文艺报": {
+    "province": "行业",
+    "article_count": 7129
+  },
+  "德州日报": {
+    "province": "山东",
+    "article_count": 7094
+  },
+  "包头日报": {
+    "province": "内蒙古",
+    "article_count": 7076
+  },
+  "厦门日报": {
+    "province": "福建",
+    "article_count": 7058
+  },
+  "中国人口报": {
+    "province": "行业",
+    "article_count": 7018
+  },
+  "无锡日报": {
+    "province": "江苏",
+    "article_count": 6969
+  },
+  "扬州日报": {
+    "province": "江苏",
+    "article_count": 6966
+  },
+  "承德日报": {
+    "province": "河北",
+    "article_count": 6911
+  },
+  "黄冈日报": {
+    "province": "湖北",
+    "article_count": 6883
+  },
+  "开封日报": {
+    "province": "河南",
+    "article_count": 6860
+  },
+  "中国财经报": {
+    "province": "全国",
+    "article_count": 6856
+  },
+  "中国县域经济报": {
+    "province": "全国",
+    "article_count": 6845
+  },
+  "郴州日报": {
+    "province": "湖南",
+    "article_count": 6844
+  },
+  "晋中日报": {
+    "province": "山西",
+    "article_count": 6825
+  },
+  "徐州日报": {
+    "province": "江苏",
+    "article_count": 6799
+  },
+  "丽水日报": {
+    "province": "浙江",
+    "article_count": 6740
+  },
+  "沈阳日报": {
+    "province": "辽宁",
+    "article_count": 6719
+  },
+  "广元日报": {
+    "province": "四川",
+    "article_count": 6706
+  },
+  "巴中日报": {
+    "province": "四川",
+    "article_count": 6670
+  },
+  "商洛日报": {
+    "province": "陕西",
+    "article_count": 6662
+  },
+  "每日经济新闻": {
+    "province": "全国",
+    "article_count": 6659
+  },
+  "滨海时报": {
+    "province": "行业",
+    "article_count": 6658
+  },
+  "衢州日报": {
+    "province": "浙江",
+    "article_count": 6653
+  },
+  "南昌日报": {
+    "province": "江西",
+    "article_count": 6648
+  },
+  "六盘水日报": {
+    "province": "贵州",
+    "article_count": 6637
+  },
+  "吕梁日报": {
+    "province": "山西",
+    "article_count": 6631
+  },
+  "马鞍山日报": {
+    "province": "安徽",
+    "article_count": 6613
+  },
+  "黔西南日报": {
+    "province": "贵州",
+    "article_count": 6586
+  },
+  "中国建材报": {
+    "province": "全国",
+    "article_count": 6581
+  },
+  "广西大学学报(哲学社会科学版)": {
+    "province": "广西",
+    "article_count": 6566
+  },
+  "中国企业报": {
+    "province": "全国",
+    "article_count": 6565
+  },
+  "中国信息报": {
+    "province": "全国",
+    "article_count": 6545
+  },
+  "石家庄日报": {
+    "province": "河北",
+    "article_count": 6524
+  },
+  "汉中日报": {
+    "province": "陕西",
+    "article_count": 6512
+  },
+  "钦州日报": {
+    "province": "广西",
+    "article_count": 6483
+  },
+  "中山日报": {
+    "province": "广东",
+    "article_count": 6475
+  },
+  "宝鸡日报": {
+    "province": "陕西",
+    "article_count": 6443
+  },
+  "中国气象报": {
+    "province": "全国",
+    "article_count": 6441
+  },
+  "平顶山日报": {
+    "province": "河南",
+    "article_count": 6436
+  },
+  "大同日报": {
+    "province": "山西",
+    "article_count": 6430
+  },
+  "桂林日报": {
+    "province": "广西",
+    "article_count": 6420
+  },
+  "四平日报": {
+    "province": "吉林",
+    "article_count": 6386
+  },
+  "中国黄金报": {
+    "province": "全国",
+    "article_count": 6385
+  },
+  "赣南日报": {
+    "province": "江西",
+    "article_count": 6357
+  },
+  "中国改革报": {
+    "province": "全国",
+    "article_count": 6355
+  },
+  "东营日报": {
+    "province": "山东",
+    "article_count": 6311
+  },
+  "安阳日报": {
+    "province": "河南",
+    "article_count": 6281
+  },
+  "临汾日报": {
+    "province": "山西",
+    "article_count": 6270
+  },
+  "发展导报": {
+    "province": "行业",
+    "article_count": 6268
+  },
+  "汕头日报": {
+    "province": "广东",
+    "article_count": 6218
+  },
+  "牡丹江师范学院学报(哲学社会科学版)": {
+    "province": "黑龙江",
+    "article_count": 6217
+  },
+  "长春理工大学学报(社会科学版)": {
+    "province": "吉林",
+    "article_count": 6210
+  },
+  "安徽工业大学学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 6198
+  },
+  "山西师大学报(社会科学版)": {
+    "province": "山西",
+    "article_count": 6176
+  },
+  "民主与法制时报": {
+    "province": "行业",
+    "article_count": 6175
+  },
+  "邯郸日报": {
+    "province": "河北",
+    "article_count": 6173
+  },
+  "烟台日报": {
+    "province": "山东",
+    "article_count": 6152
+  },
+  "玉溪日报": {
+    "province": "云南",
+    "article_count": 6150
+  },
+  "太行日报": {
+    "province": "行业",
+    "article_count": 6126
+  },
+  "中国邮政报": {
+    "province": "全国",
+    "article_count": 6112
+  },
+  "延安日报": {
+    "province": "陕西",
+    "article_count": 6109
+  },
+  "中国民族报": {
+    "province": "全国",
+    "article_count": 6108
+  },
+  "朝阳日报": {
+    "province": "辽宁",
+    "article_count": 6094
+  },
+  "长治日报": {
+    "province": "山西",
+    "article_count": 6092
+  },
+  "兵团日报(汉)": {
+    "province": "新疆",
+    "article_count": 6011
+  },
+  "韶关日报": {
+    "province": "广东",
+    "article_count": 6009
+  },
+  "常州日报": {
+    "province": "江苏",
+    "article_count": 5986
+  },
+  "抚州日报": {
+    "province": "江西",
+    "article_count": 5984
+  },
+  "九江日报": {
+    "province": "江西",
+    "article_count": 5983
+  },
+  "商丘日报": {
+    "province": "河南",
+    "article_count": 5978
+  },
+  "贵州民族报": {
+    "province": "贵州",
+    "article_count": 5972
+  },
+  "张家口日报": {
+    "province": "河北",
+    "article_count": 5962
+  },
+  "威海日报": {
+    "province": "山东",
+    "article_count": 5941
+  },
+  "泉州晚报": {
+    "province": "福建",
+    "article_count": 5933
+  },
+  "莱芜日报": {
+    "province": "山东",
+    "article_count": 5882
+  },
+  "中国电子报": {
+    "province": "行业",
+    "article_count": 5872
+  },
+  "通辽日报": {
+    "province": "内蒙古",
+    "article_count": 5855
+  },
+  "哈尔滨日报": {
+    "province": "黑龙江",
+    "article_count": 5849
+  },
+  "榆林日报": {
+    "province": "陕西",
+    "article_count": 5837
+  },
+  "衡阳日报": {
+    "province": "湖南",
+    "article_count": 5837
+  },
+  "中国水利报": {
+    "province": "全国",
+    "article_count": 5828
+  },
+  "张掖日报": {
+    "province": "甘肃",
+    "article_count": 5821
+  },
+  "海东时报": {
+    "province": "青海",
+    "article_count": 5812
+  },
+  "梅州日报": {
+    "province": "广东",
+    "article_count": 5805
+  },
+  "菏泽日报": {
+    "province": "山东",
+    "article_count": 5799
+  },
+  "福州日报": {
+    "province": "福建",
+    "article_count": 5789
+  },
+  "上饶日报": {
+    "province": "江西",
+    "article_count": 5786
+  },
+  "西江日报": {
+    "province": "行业",
+    "article_count": 5783
+  },
+  "现代物流报": {
+    "province": "行业",
+    "article_count": 5765
+  },
+  "长沙铁道学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 5733
+  },
+  "衡水日报": {
+    "province": "河北",
+    "article_count": 5722
+  },
+  "财会信报": {
+    "province": "行业",
+    "article_count": 5722
+  },
+  "中国航空报": {
+    "province": "全国",
+    "article_count": 5718
+  },
+  "中国食品安全报": {
+    "province": "全国",
+    "article_count": 5681
+  },
+  "潍坊日报": {
+    "province": "山东",
+    "article_count": 5681
+  },
+  "郑州日报": {
+    "province": "河南",
+    "article_count": 5664
+  },
+  "淄博日报": {
+    "province": "山东",
+    "article_count": 5643
+  },
+  "巴彦淖尔日报(汉)": {
+    "province": "内蒙古",
+    "article_count": 5580
+  },
+  "阜阳师范学院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 5566
+  },
+  "铜仁日报": {
+    "province": "贵州",
+    "article_count": 5556
+  },
+  "中国体育报": {
+    "province": "全国",
+    "article_count": 5554
+  },
+  "盘锦日报": {
+    "province": "辽宁",
+    "article_count": 5548
+  },
+  "陕西师范大学学报(哲学社会科学版)": {
+    "province": "陕西",
+    "article_count": 5539
+  },
+  "中国知识产权报": {
+    "province": "全国",
+    "article_count": 5522
+  },
+  "中国贸易报": {
+    "province": "全国",
+    "article_count": 5506
+  },
+  "鄂尔多斯日报": {
+    "province": "内蒙古",
+    "article_count": 5503
+  },
+  "中国水运报": {
+    "province": "全国",
+    "article_count": 5503
+  },
+  "天水日报": {
+    "province": "甘肃",
+    "article_count": 5497
+  },
+  "中国食品报": {
+    "province": "全国",
+    "article_count": 5489
+  },
+  "东方烟草报": {
+    "province": "行业",
+    "article_count": 5486
+  },
+  "安康日报": {
+    "province": "陕西",
+    "article_count": 5481
+  },
+  "许昌日报": {
+    "province": "河南",
+    "article_count": 5467
+  },
+  "闽东日报": {
+    "province": "福建",
+    "article_count": 5450
+  },
+  "民主与法制": {
+    "province": "全国",
+    "article_count": 5446
+  },
+  "太原日报": {
+    "province": "山西",
+    "article_count": 5403
+  },
+  "中国文物报": {
+    "province": "全国",
+    "article_count": 5401
+  },
+  "新华每日电讯": {
+    "province": "全国",
+    "article_count": 5400
+  },
+  "北海日报": {
+    "province": "广西",
+    "article_count": 5399
+  },
+  "郑州航空工业管理学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 5366
+  },
+  "闽南日报": {
+    "province": "福建",
+    "article_count": 5362
+  },
+  "攀枝花日报": {
+    "province": "四川",
+    "article_count": 5356
+  },
+  "人民铁道": {
+    "province": "全国",
+    "article_count": 5343
+  },
+  "昌吉日报(汉)": {
+    "province": "新疆",
+    "article_count": 5323
+  },
+  "郑州大学学报(哲学社会科学版)": {
+    "province": "河南",
+    "article_count": 5270
+  },
+  "驻马店日报": {
+    "province": "河南",
+    "article_count": 5221
+  },
+  "白银日报": {
+    "province": "甘肃",
+    "article_count": 5220
+  },
+  "湖州日报": {
+    "province": "浙江",
+    "article_count": 5211
+  },
+  "中国审计报": {
+    "province": "行业",
+    "article_count": 5207
+  },
+  "湄洲日报": {
+    "province": "福建",
+    "article_count": 5186
+  },
+  "三峡大学学报(人文社会科学版)": {
+    "province": "湖北",
+    "article_count": 5151
+  },
+  "中华读书报": {
+    "province": "行业",
+    "article_count": 5148
+  },
+  "宿迁日报": {
+    "province": "江苏",
+    "article_count": 5137
+  },
+  "邵阳日报": {
+    "province": "湖南",
+    "article_count": 5125
+  },
+  "雅安日报": {
+    "province": "四川",
+    "article_count": 5120
+  },
+  "云南政协报": {
+    "province": "云南",
+    "article_count": 5111
+  },
+  "唐山劳动日报": {
+    "province": "河北",
+    "article_count": 5074
+  },
+  "鹤壁日报": {
+    "province": "河南",
+    "article_count": 5066
+  },
+  "毕节日报": {
+    "province": "贵州",
+    "article_count": 5064
+  },
+  "中国海洋报": {
+    "province": "全国",
+    "article_count": 5063
+  },
+  "本溪日报": {
+    "province": "辽宁",
+    "article_count": 5061
+  },
+  "阿克苏日报(汉)": {
+    "province": "新疆",
+    "article_count": 5049
+  },
+  "甘肃经济日报": {
+    "province": "甘肃",
+    "article_count": 5044
+  },
+  "西南民族学院学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 5043
+  },
+  "海口日报": {
+    "province": "海南",
+    "article_count": 5040
+  },
+  "咸阳日报": {
+    "province": "陕西",
+    "article_count": 5027
+  },
+  "中国航天报": {
+    "province": "全国",
+    "article_count": 5026
+  },
+  "中国税务报": {
+    "province": "全国",
+    "article_count": 5021
+  },
+  "辽宁大学学报(哲学社会科学版)": {
+    "province": "辽宁",
+    "article_count": 5005
+  },
+  "淮南日报": {
+    "province": "安徽",
+    "article_count": 5001
+  },
+  "酒泉日报": {
+    "province": "甘肃",
+    "article_count": 4983
+  },
+  "阳泉日报": {
+    "province": "山西",
+    "article_count": 4970
+  },
+  "乐山日报": {
+    "province": "四川",
+    "article_count": 4963
+  },
+  "益阳日报": {
+    "province": "湖南",
+    "article_count": 4961
+  },
+  "农资导报": {
+    "province": "行业",
+    "article_count": 4958
+  },
+  "中国高新技术产业导报": {
+    "province": "行业",
+    "article_count": 4954
+  },
+  "通信信息报": {
+    "province": "全国",
+    "article_count": 4945
+  },
+  "新乡日报": {
+    "province": "河南",
+    "article_count": 4944
+  },
+  "黑龙江经济报": {
+    "province": "黑龙江",
+    "article_count": 4938
+  },
+  "重庆商报": {
+    "province": "重庆",
+    "article_count": 4929
+  },
+  "江门日报": {
+    "province": "广东",
+    "article_count": 4921
+  },
+  "保定日报": {
+    "province": "河北",
+    "article_count": 4894
+  },
+  "温州日报": {
+    "province": "浙江",
+    "article_count": 4889
+  },
+  "合肥工业大学学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 4865
+  },
+  "新农村商报": {
+    "province": "行业",
+    "article_count": 4834
+  },
+  "赤峰日报": {
+    "province": "内蒙古",
+    "article_count": 4830
+  },
+  "渭南日报": {
+    "province": "陕西",
+    "article_count": 4826
+  },
+  "联合日报": {
+    "province": "行业",
+    "article_count": 4811
+  },
+  "首都师范大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 4809
+  },
+  "舟山日报": {
+    "province": "浙江",
+    "article_count": 4791
+  },
+  "法制生活报": {
+    "province": "行业",
+    "article_count": 4787
+  },
+  "西北大学学报(哲学社会科学版)": {
+    "province": "陕西",
+    "article_count": 4781
+  },
+  "中国房地产报": {
+    "province": "行业",
+    "article_count": 4777
+  },
+  "淮海工学院学报(人文社会科学版)": {
+    "province": "行业",
+    "article_count": 4770
+  },
+  "朔州日报": {
+    "province": "山西",
+    "article_count": 4741
+  },
+  "安庆师范学院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 4729
+  },
+  "企业家日报": {
+    "province": "行业",
+    "article_count": 4728
+  },
+  "岳阳日报": {
+    "province": "湖南",
+    "article_count": 4717
+  },
+  "世界金属导报": {
+    "province": "全国",
+    "article_count": 4712
+  },
+  "运城日报": {
+    "province": "山西",
+    "article_count": 4710
+  },
+  "青海师范大学学报(哲学社会科学版)": {
+    "province": "青海",
+    "article_count": 4704
+  },
+  "信阳师范学院学报(哲学社会科学版)": {
+    "province": "河南",
+    "article_count": 4696
+  },
+  "中南民族大学学报(人文社会科学版)": {
+    "province": "行业",
+    "article_count": 4694
+  },
+  "湖南师范大学社会科学学报": {
+    "province": "湖南",
+    "article_count": 4682
+  },
+  "周口日报": {
+    "province": "河南",
+    "article_count": 4677
+  },
+  "湘潭日报": {
+    "province": "湖南",
+    "article_count": 4648
+  },
+  "吉首大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 4648
+  },
+  "东南大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 4643
+  },
+  "新余日报": {
+    "province": "江西",
+    "article_count": 4637
+  },
+  "西南农业大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 4637
+  },
+  "忻州日报": {
+    "province": "山西",
+    "article_count": 4566
+  },
+  "广西师范大学学报(哲学社会科学版)": {
+    "province": "广西",
+    "article_count": 4560
+  },
+  "贵州政协报": {
+    "province": "贵州",
+    "article_count": 4547
+  },
+  "达州日报": {
+    "province": "四川",
+    "article_count": 4542
+  },
+  "沈阳师范大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 4514
+  },
+  "湘潭师范学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 4489
+  },
+  "芜湖日报": {
+    "province": "安徽",
+    "article_count": 4464
+  },
+  "中国花卉报": {
+    "province": "行业",
+    "article_count": 4461
+  },
+  "闽西日报": {
+    "province": "福建",
+    "article_count": 4454
+  },
+  "柴达木日报": {
+    "province": "青海",
+    "article_count": 4454
+  },
+  "消费日报": {
+    "province": "行业",
+    "article_count": 4434
+  },
+  "伊犁日报(汉)": {
+    "province": "新疆",
+    "article_count": 4401
+  },
+  "河南大学学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 4400
+  },
+  "中国会计报": {
+    "province": "全国",
+    "article_count": 4395
+  },
+  "华夏酒报": {
+    "province": "行业",
+    "article_count": 4363
+  },
+  "河北科技报": {
+    "province": "河北",
+    "article_count": 4356
+  },
+  "河南教育学院学报(哲学社会科学版)": {
+    "province": "河南",
+    "article_count": 4355
+  },
+  "长江大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 4351
+  },
+  "永州日报": {
+    "province": "湖南",
+    "article_count": 4347
+  },
+  "沧州日报": {
+    "province": "河北",
+    "article_count": 4342
+  },
+  "锦州日报": {
+    "province": "辽宁",
+    "article_count": 4323
+  },
+  "闽北日报": {
+    "province": "福建",
+    "article_count": 4317
+  },
+  "湖北师范学院学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 4312
+  },
+  "内蒙古师范大学学报(哲学社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 4311
+  },
+  "鞍山日报": {
+    "province": "辽宁",
+    "article_count": 4307
+  },
+  "孝感日报": {
+    "province": "湖北",
+    "article_count": 4291
+  },
+  "平凉日报": {
+    "province": "甘肃",
+    "article_count": 4289
+  },
+  "北大荒日报": {
+    "province": "行业",
+    "article_count": 4254
+  },
+  "联合时报": {
+    "province": "行业",
+    "article_count": 4243
+  },
+  "中国煤炭报": {
+    "province": "全国",
+    "article_count": 4205
+  },
+  "中国出版传媒商报": {
+    "province": "全国",
+    "article_count": 4202
+  },
+  "呼和浩特日报(汉)": {
+    "province": "内蒙古",
+    "article_count": 4200
+  },
+  "银川日报": {
+    "province": "宁夏",
+    "article_count": 4198
+  },
+  "华南师范大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 4186
+  },
+  "中国安全生产报": {
+    "province": "全国",
+    "article_count": 4180
+  },
+  "湖北大学学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 4168
+  },
+  "宜春日报": {
+    "province": "江西",
+    "article_count": 4164
+  },
+  "贵州师范大学学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 4123
+  },
+  "广西法治日报": {
+    "province": "广西",
+    "article_count": 4122
+  },
+  "济宁日报": {
+    "province": "山东",
+    "article_count": 4120
+  },
+  "中国教师报": {
+    "province": "全国",
+    "article_count": 4086
+  },
+  "云南师范大学学报(哲学社会科学版)": {
+    "province": "云南",
+    "article_count": 4085
+  },
+  "中国绿色时报": {
+    "province": "全国",
+    "article_count": 4065
+  },
+  "自贡日报": {
+    "province": "四川",
+    "article_count": 4065
+  },
+  "北京大学学报(哲学社会科学版)": {
+    "province": "北京",
+    "article_count": 4062
+  },
+  "丹东日报": {
+    "province": "辽宁",
+    "article_count": 4041
+  },
+  "重庆大学学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 4028
+  },
+  "营口日报": {
+    "province": "辽宁",
+    "article_count": 4015
+  },
+  "襄阳日报": {
+    "province": "湖北",
+    "article_count": 4010
+  },
+  "河北大学学报(哲学社会科学版)": {
+    "province": "河北",
+    "article_count": 4009
+  },
+  "湖北民族学院学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 4001
+  },
+  "普洱日报": {
+    "province": "云南",
+    "article_count": 3978
+  },
+  "齐齐哈尔日报": {
+    "province": "黑龙江",
+    "article_count": 3969
+  },
+  "中国联合商报": {
+    "province": "行业",
+    "article_count": 3965
+  },
+  "成都大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 3962
+  },
+  "秦皇岛日报": {
+    "province": "河北",
+    "article_count": 3959
+  },
+  "中国铁道建筑报": {
+    "province": "全国",
+    "article_count": 3958
+  },
+  "佳木斯日报": {
+    "province": "黑龙江",
+    "article_count": 3953
+  },
+  "滁州日报": {
+    "province": "安徽",
+    "article_count": 3952
+  },
+  "建筑时报": {
+    "province": "行业",
+    "article_count": 3934
+  },
+  "中国船舶报": {
+    "province": "全国",
+    "article_count": 3934
+  },
+  "淮安日报": {
+    "province": "江苏",
+    "article_count": 3918
+  },
+  "福建师范大学学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 3905
+  },
+  "宁夏大学学报(人文社会科学版)": {
+    "province": "宁夏",
+    "article_count": 3894
+  },
+  "西北师大学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 3885
+  },
+  "太原师范学院学报(社会科学版)": {
+    "province": "山西",
+    "article_count": 3883
+  },
+  "鄂州日报": {
+    "province": "湖北",
+    "article_count": 3880
+  },
+  "高等函授学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 3836
+  },
+  "四川师范大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 3824
+  },
+  "三亚日报": {
+    "province": "海南",
+    "article_count": 3819
+  },
+  "湘潭大学学报(哲学社会科学版)": {
+    "province": "湖南",
+    "article_count": 3801
+  },
+  "辽宁工程技术大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 3791
+  },
+  "乌海日报": {
+    "province": "内蒙古",
+    "article_count": 3778
+  },
+  "巴音郭楞日报(汉)": {
+    "province": "新疆",
+    "article_count": 3756
+  },
+  "中国社会科学院研究生院学报": {
+    "province": "行业",
+    "article_count": 3753
+  },
+  "安徽农业大学学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 3737
+  },
+  "民族日报": {
+    "province": "行业",
+    "article_count": 3724
+  },
+  "淮阴师范学院学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 3724
+  },
+  "深圳大学学报(人文社会科学版)": {
+    "province": "广东",
+    "article_count": 3723
+  },
+  "政府采购信息报": {
+    "province": "行业",
+    "article_count": 3720
+  },
+  "复旦学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 3698
+  },
+  "延安大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 3693
+  },
+  "广西民族学院学报(哲学社会科学版)": {
+    "province": "广西",
+    "article_count": 3684
+  },
+  "湖南大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 3683
+  },
+  "山西大学学报(哲学社会科学版)": {
+    "province": "山西",
+    "article_count": 3649
+  },
+  "各界导报": {
+    "province": "行业",
+    "article_count": 3647
+  },
+  "十堰日报": {
+    "province": "湖北",
+    "article_count": 3637
+  },
+  "合肥晚报": {
+    "province": "安徽",
+    "article_count": 3623
+  },
+  "乌鲁木齐晚报(汉)": {
+    "province": "新疆",
+    "article_count": 3612
+  },
+  "武汉理工大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 3601
+  },
+  "广西民族大学学报(哲学社会科学版)": {
+    "province": "广西",
+    "article_count": 3601
+  },
+  "汕尾日报": {
+    "province": "广东",
+    "article_count": 3598
+  },
+  "农村金融时报": {
+    "province": "行业",
+    "article_count": 3597
+  },
+  "南京师范大学文学院学报": {
+    "province": "江苏",
+    "article_count": 3596
+  },
+  "长白山日报": {
+    "province": "吉林",
+    "article_count": 3594
+  },
+  "沈阳农业大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 3594
+  },
+  "辽源日报": {
+    "province": "吉林",
+    "article_count": 3593
+  },
+  "河南法制报": {
+    "province": "河南",
+    "article_count": 3555
+  },
+  "黑河日报": {
+    "province": "黑龙江",
+    "article_count": 3542
+  },
+  "宜宾日报": {
+    "province": "四川",
+    "article_count": 3521
+  },
+  "美术报": {
+    "province": "行业",
+    "article_count": 3515
+  },
+  "广州大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 3499
+  },
+  "西宁晚报": {
+    "province": "青海",
+    "article_count": 3497
+  },
+  "南京师大学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 3488
+  },
+  "宝鸡文理学院学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 3475
+  },
+  "张家界日报": {
+    "province": "湖南",
+    "article_count": 3452
+  },
+  "人民代表报": {
+    "province": "行业",
+    "article_count": 3444
+  },
+  "贵州民族学院学报(哲学社会科学版)": {
+    "province": "贵州",
+    "article_count": 3444
+  },
+  "江淮时报": {
+    "province": "行业",
+    "article_count": 3442
+  },
+  "上海法治报": {
+    "province": "上海",
+    "article_count": 3427
+  },
+  "邢台日报": {
+    "province": "河北",
+    "article_count": 3426
+  },
+  "上海师范大学学报(哲学社会科学版)": {
+    "province": "上海",
+    "article_count": 3426
+  },
+  "山西青年报": {
+    "province": "山西",
+    "article_count": 3396
+  },
+  "河北师范大学学报(哲学社会科学版)": {
+    "province": "河北",
+    "article_count": 3390
+  },
+  "吉林大学社会科学学报": {
+    "province": "吉林",
+    "article_count": 3365
+  },
+  "通信产业报": {
+    "province": "全国",
+    "article_count": 3360
+  },
+  "贵州大学学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 3340
+  },
+  "南京体育学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 3339
+  },
+  "金融投资报": {
+    "province": "行业",
+    "article_count": 3329
+  },
+  "山东大学学报(哲学社会科学版)": {
+    "province": "山东",
+    "article_count": 3326
+  },
+  "中山大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 3320
+  },
+  "中国边防警察报": {
+    "province": "全国",
+    "article_count": 3308
+  },
+  "克孜勒苏日报(汉)": {
+    "province": "新疆",
+    "article_count": 3306
+  },
+  "新华书目报": {
+    "province": "行业",
+    "article_count": 3298
+  },
+  "华北电力大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 3298
+  },
+  "江苏教育学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 3293
+  },
+  "中国计算机报": {
+    "province": "全国",
+    "article_count": 3289
+  },
+  "南昌大学学报(人文社会科学版)": {
+    "province": "江西",
+    "article_count": 3268
+  },
+  "双鸭山日报": {
+    "province": "黑龙江",
+    "article_count": 3263
+  },
+  "陇南日报": {
+    "province": "甘肃",
+    "article_count": 3260
+  },
+  "甘南日报(汉文版)": {
+    "province": "甘肃",
+    "article_count": 3254
+  },
+  "东北师大学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 3245
+  },
+  "南京理工大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 3244
+  },
+  "中国政府采购报": {
+    "province": "全国",
+    "article_count": 3236
+  },
+  "华中师范大学学报(人文社会科学版)": {
+    "province": "湖北",
+    "article_count": 3235
+  },
+  "通化日报": {
+    "province": "吉林",
+    "article_count": 3234
+  },
+  "中国城市报": {
+    "province": "全国",
+    "article_count": 3215
+  },
+  "吉林师范大学学报(人文社会科学版)": {
+    "province": "吉林",
+    "article_count": 3215
+  },
+  "北京理工大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 3191
+  },
+  "人民公安报·消防周刊": {
+    "province": "行业",
+    "article_count": 3182
+  },
+  "新金融观察": {
+    "province": "全国",
+    "article_count": 3181
+  },
+  "山西农业大学学报(社会科学版)": {
+    "province": "山西",
+    "article_count": 3155
+  },
+  "电子报": {
+    "province": "全国",
+    "article_count": 3139
+  },
+  "渤海大学学报(哲学社会科学版)": {
+    "province": "辽宁",
+    "article_count": 3139
+  },
+  "聊城大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 3136
+  },
+  "湖南中医药导报": {
+    "province": "全国",
+    "article_count": 3135
+  },
+  "内蒙古民族大学学报(社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 3132
+  },
+  "德宏团结报": {
+    "province": "云南",
+    "article_count": 3121
+  },
+  "定西日报": {
+    "province": "甘肃",
+    "article_count": 3117
+  },
+  "重庆工商大学学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 3109
+  },
+  "濮阳日报": {
+    "province": "河南",
+    "article_count": 3096
+  },
+  "上海大学学报(社会科学版)": {
+    "province": "上海",
+    "article_count": 3091
+  },
+  "南通日报": {
+    "province": "江苏",
+    "article_count": 3071
+  },
+  "四川大学学报(哲学社会科学版)": {
+    "province": "四川",
+    "article_count": 3063
+  },
+  "西北民族大学学报(哲学社会科学版)": {
+    "province": "甘肃",
+    "article_count": 3058
+  },
+  "新疆师范大学学报(哲学社会科学版)": {
+    "province": "新疆",
+    "article_count": 3057
+  },
+  "廊坊日报": {
+    "province": "河北",
+    "article_count": 3048
+  },
+  "盐城师范学院学报(人文社会科学版)": {
+    "province": "江苏",
+    "article_count": 3046
+  },
+  "中国档案报": {
+    "province": "全国",
+    "article_count": 3043
+  },
+  "湖南科技大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 3016
+  },
+  "湖南医科大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 3012
+  },
+  "玉林日报": {
+    "province": "广西",
+    "article_count": 3006
+  },
+  "华中农业大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 3004
+  },
+  "西北农林科技大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 2999
+  },
+  "图们江报": {
+    "province": "行业",
+    "article_count": 2993
+  },
+  "中国基金报": {
+    "province": "行业",
+    "article_count": 2993
+  },
+  "浙江大学学报(人文社会科学版)": {
+    "province": "浙江",
+    "article_count": 2989
+  },
+  "南华大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 2957
+  },
+  "武汉大学学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 2955
+  },
+  "暨南学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 2931
+  },
+  "西南交通大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 2926
+  },
+  "辽宁工业大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 2924
+  },
+  "国际金融报": {
+    "province": "全国",
+    "article_count": 2923
+  },
+  "广东科技报": {
+    "province": "广东",
+    "article_count": 2895
+  },
+  "柳州日报": {
+    "province": "广西",
+    "article_count": 2894
+  },
+  "海南师范大学学报(社会科学版)": {
+    "province": "海南",
+    "article_count": 2892
+  },
+  "西南民族大学学报(人文社会科学版)": {
+    "province": "四川",
+    "article_count": 2892
+  },
+  "计算机世界": {
+    "province": "全国",
+    "article_count": 2884
+  },
+  "华东师范大学学报(哲学社会科学版)": {
+    "province": "上海",
+    "article_count": 2867
+  },
+  "伊春日报": {
+    "province": "黑龙江",
+    "article_count": 2861
+  },
+  "云南民族大学学报(哲学社会科学版)": {
+    "province": "云南",
+    "article_count": 2845
+  },
+  "电脑报": {
+    "province": "全国",
+    "article_count": 2825
+  },
+  "中南大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 2819
+  },
+  "石嘴山日报": {
+    "province": "宁夏",
+    "article_count": 2793
+  },
+  "北华大学学报(社会科学版)": {
+    "province": "吉林",
+    "article_count": 2777
+  },
+  "广西师范学院学报(哲学社会科学版)": {
+    "province": "广西",
+    "article_count": 2768
+  },
+  "四川经济日报": {
+    "province": "四川",
+    "article_count": 2767
+  },
+  "社会科学报": {
+    "province": "行业",
+    "article_count": 2765
+  },
+  "四川法制报": {
+    "province": "四川",
+    "article_count": 2765
+  },
+  "黄石日报": {
+    "province": "湖北",
+    "article_count": 2744
+  },
+  "哈尔滨商业大学学报(社会科学版)": {
+    "province": "黑龙江",
+    "article_count": 2744
+  },
+  "山东师范大学学报(人文社会科学版)": {
+    "province": "山东",
+    "article_count": 2741
+  },
+  "安徽师范大学学报(人文社会科学版)": {
+    "province": "安徽",
+    "article_count": 2734
+  },
+  "中国畜牧兽医报": {
+    "province": "全国",
+    "article_count": 2733
+  },
+  "经济观察报": {
+    "province": "全国",
+    "article_count": 2714
+  },
+  "中国化工报": {
+    "province": "全国",
+    "article_count": 2697
+  },
+  "上海科技报": {
+    "province": "上海",
+    "article_count": 2684
+  },
+  "西部法制报": {
+    "province": "行业",
+    "article_count": 2667
+  },
+  "石河子大学学报(哲学社会科学版)": {
+    "province": "新疆",
+    "article_count": 2667
+  },
+  "博尔塔拉报(汉)": {
+    "province": "新疆",
+    "article_count": 2663
+  },
+  "大连海事大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 2663
+  },
+  "拉萨晚报": {
+    "province": "西藏",
+    "article_count": 2659
+  },
+  "呼伦贝尔日报": {
+    "province": "内蒙古",
+    "article_count": 2652
+  },
+  "广播电视大学学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 2648
+  },
+  "厦门大学学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 2636
+  },
+  "哈尔滨工业大学学报(社会科学版)": {
+    "province": "黑龙江",
+    "article_count": 2623
+  },
+  "山东理工大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 2618
+  },
+  "中国摄影报": {
+    "province": "全国",
+    "article_count": 2601
+  },
+  "东北农业大学学报(社会科学版)": {
+    "province": "黑龙江",
+    "article_count": 2600
+  },
+  "西安文理学院学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 2589
+  },
+  "重庆交通大学学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 2589
+  },
+  "湖南农业大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 2587
+  },
+  "四川政协报": {
+    "province": "四川",
+    "article_count": 2583
+  },
+  "黄山日报": {
+    "province": "安徽",
+    "article_count": 2581
+  },
+  "石油管道报": {
+    "province": "行业",
+    "article_count": 2567
+  },
+  "清华大学学报(哲学社会科学版)": {
+    "province": "北京",
+    "article_count": 2565
+  },
+  "长春工程学院学报(社会科学版)": {
+    "province": "吉林",
+    "article_count": 2557
+  },
+  "锡林郭勒日报(汉)": {
+    "province": "内蒙古",
+    "article_count": 2541
+  },
+  "北京师范大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 2541
+  },
+  "武汉科技大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 2539
+  },
+  "世界计算机周刊": {
+    "province": "全国",
+    "article_count": 2519
+  },
+  "重庆理工大学学报(社会科学)": {
+    "province": "重庆",
+    "article_count": 2508
+  },
+  "西华大学学报(哲学社会科学版)": {
+    "province": "四川",
+    "article_count": 2497
+  },
+  "华中科技大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 2495
+  },
+  "长春工业大学学报(社会科学版)": {
+    "province": "吉林",
+    "article_count": 2479
+  },
+  "淮北煤炭师范学院学报(哲学社会科学版)": {
+    "province": "安徽",
+    "article_count": 2474
+  },
+  "山西法制报": {
+    "province": "山西",
+    "article_count": 2467
+  },
+  "中南林业科技大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 2453
+  },
+  "广州日报": {
+    "province": "广东",
+    "article_count": 2450
+  },
+  "镇江日报": {
+    "province": "江苏",
+    "article_count": 2447
+  },
+  "江南大学学报(人文社会科学版)": {
+    "province": "江苏",
+    "article_count": 2437
+  },
+  "塔城日报(汉)": {
+    "province": "新疆",
+    "article_count": 2422
+  },
+  "延边大学学报(社会科学版)": {
+    "province": "吉林",
+    "article_count": 2417
+  },
+  "蚌埠日报": {
+    "province": "安徽",
+    "article_count": 2398
+  },
+  "重庆文理学院学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 2392
+  },
+  "华兴时报": {
+    "province": "行业",
+    "article_count": 2390
+  },
+  "广东工业大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 2385
+  },
+  "佛山科学技术学院学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 2384
+  },
+  "扬州大学学报(人文社会科学版)": {
+    "province": "江苏",
+    "article_count": 2381
+  },
+  "南京医科大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 2380
+  },
+  "中国地质大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 2373
+  },
+  "西藏民族学院学报(哲学社会科学版)": {
+    "province": "西藏",
+    "article_count": 2371
+  },
+  "吐鲁番日报(汉)": {
+    "province": "新疆",
+    "article_count": 2362
+  },
+  "中国集邮报": {
+    "province": "全国",
+    "article_count": 2362
+  },
+  "喀什日报(汉)": {
+    "province": "新疆",
+    "article_count": 2361
+  },
+  "淮海工学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 2361
+  },
+  "首都建设报": {
+    "province": "行业",
+    "article_count": 2336
+  },
+  "湛江日报": {
+    "province": "广东",
+    "article_count": 2328
+  },
+  "四川理工学院学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 2324
+  },
+  "西华师范大学学报(哲学社会科学版)": {
+    "province": "四川",
+    "article_count": 2322
+  },
+  "中国电影报": {
+    "province": "全国",
+    "article_count": 2317
+  },
+  "石油大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 2308
+  },
+  "郑州轻工业学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 2304
+  },
+  "昆明理工大学学报(社会科学版)": {
+    "province": "云南",
+    "article_count": 2302
+  },
+  "沈阳工程学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 2296
+  },
+  "西安电子科技大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 2294
+  },
+  "潮州日报": {
+    "province": "广东",
+    "article_count": 2293
+  },
+  "西安交通大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 2293
+  },
+  "光华时报": {
+    "province": "行业",
+    "article_count": 2282
+  },
+  "吴忠日报": {
+    "province": "宁夏",
+    "article_count": 2281
+  },
+  "河南工业大学学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 2276
+  },
+  "江苏教育报": {
+    "province": "江苏",
+    "article_count": 2275
+  },
+  "黔南日报": {
+    "province": "贵州",
+    "article_count": 2274
+  },
+  "三明日报": {
+    "province": "福建",
+    "article_count": 2268
+  },
+  "安徽经济报": {
+    "province": "安徽",
+    "article_count": 2258
+  },
+  "辽宁工学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 2251
+  },
+  "河南科技大学学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 2246
+  },
+  "华南理工大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 2244
+  },
+  "机电商报": {
+    "province": "行业",
+    "article_count": 2240
+  },
+  "燕山大学学报(哲学社会科学版)": {
+    "province": "河北",
+    "article_count": 2240
+  },
+  "中煤地质报": {
+    "province": "行业",
+    "article_count": 2237
+  },
+  "同济大学学报(社会科学版)": {
+    "province": "上海",
+    "article_count": 2235
+  },
+  "湖南工业大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 2229
+  },
+  "辽宁师范大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 2228
+  },
+  "福建农林大学学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 2224
+  },
+  "哈尔滨师范大学社会科学学报": {
+    "province": "黑龙江",
+    "article_count": 2198
+  },
+  "中国海洋大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 2192
+  },
+  "河北工程大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 2192
+  },
+  "大兴安岭日报": {
+    "province": "黑龙江",
+    "article_count": 2180
+  },
+  "黄河报": {
+    "province": "行业",
+    "article_count": 2174
+  },
+  "东北大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 2169
+  },
+  "福州大学学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 2166
+  },
+  "中国农机化导报": {
+    "province": "全国",
+    "article_count": 2160
+  },
+  "中国自然资源报": {
+    "province": "全国",
+    "article_count": 2144
+  },
+  "太原理工大学学报(社会科学版)": {
+    "province": "山西",
+    "article_count": 2142
+  },
+  "北京科技大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 2139
+  },
+  "乌兰察布日报": {
+    "province": "内蒙古",
+    "article_count": 2137
+  },
+  "湖南工程学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 2129
+  },
+  "北京航空航天大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 2126
+  },
+  "中国新闻出版报": {
+    "province": "行业",
+    "article_count": 2123
+  },
+  "重庆邮电大学学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 2109
+  },
+  "西南科技大学学报(哲学社会科学版)": {
+    "province": "四川",
+    "article_count": 2107
+  },
+  "中北大学学报(社会科学版)": {
+    "province": "山西",
+    "article_count": 2099
+  },
+  "海南大学学报(人文社会科学版)": {
+    "province": "海南",
+    "article_count": 2095
+  },
+  "北京工商大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 2086
+  },
+  "中华建筑报": {
+    "province": "行业",
+    "article_count": 2085
+  },
+  "烟台大学学报(哲学社会科学版)": {
+    "province": "山东",
+    "article_count": 2082
+  },
+  "西南大学学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 2079
+  },
+  "山西大同大学学报(社会科学版)": {
+    "province": "山西",
+    "article_count": 2073
+  },
+  "山南报(汉)": {
+    "province": "西藏",
+    "article_count": 2063
+  },
+  "浙江法制报": {
+    "province": "浙江",
+    "article_count": 2058
+  },
+  "抚顺日报": {
+    "province": "辽宁",
+    "article_count": 2049
+  },
+  "济南大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 2047
+  },
+  "山东科技报": {
+    "province": "山东",
+    "article_count": 2044
+  },
+  "海南报": {
+    "province": "青海",
+    "article_count": 2038
+  },
+  "中国矿业大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 2036
+  },
+  "西昌学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 2035
+  },
+  "河北理工大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 2027
+  },
+  "西北工业大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 2018
+  },
+  "华侨大学学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 2014
+  },
+  "天津大学学报(社会科学版)": {
+    "province": "天津",
+    "article_count": 2012
+  },
+  "山东农业大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 2007
+  },
+  "南京大学学报(哲学.人文科学.社会科学版)": {
+    "province": "江苏",
+    "article_count": 2002
+  },
+  "克拉玛依日报": {
+    "province": "新疆",
+    "article_count": 1985
+  },
+  "邵阳学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 1981
+  },
+  "合肥学院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 1980
+  },
+  "组织人事报": {
+    "province": "行业",
+    "article_count": 1979
+  },
+  "五邑大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 1976
+  },
+  "山西科技报": {
+    "province": "山西",
+    "article_count": 1973
+  },
+  "江西农业大学学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 1972
+  },
+  "苏州大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 1969
+  },
+  "淮北师范大学学报(哲学社会科学版)": {
+    "province": "安徽",
+    "article_count": 1962
+  },
+  "山东科技大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 1952
+  },
+  "重庆工学院学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 1949
+  },
+  "宁德师专学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 1949
+  },
+  "四川师范学院学报(哲学社会科学版)": {
+    "province": "四川",
+    "article_count": 1941
+  },
+  "长沙理工大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 1938
+  },
+  "日喀则报(汉)": {
+    "province": "西藏",
+    "article_count": 1923
+  },
+  "贵州工业大学学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 1920
+  },
+  "中国信息化周报": {
+    "province": "行业",
+    "article_count": 1909
+  },
+  "云南财贸学院学报(社会科学版)": {
+    "province": "云南",
+    "article_count": 1905
+  },
+  "云南法制报": {
+    "province": "云南",
+    "article_count": 1903
+  },
+  "华东理工大学学报(社会科学版)": {
+    "province": "上海",
+    "article_count": 1902
+  },
+  "南通大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1893
+  },
+  "中央民族大学学报(哲学社会科学版)": {
+    "province": "北京",
+    "article_count": 1891
+  },
+  "北京邮电大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 1886
+  },
+  "文学报": {
+    "province": "行业",
+    "article_count": 1885
+  },
+  "广东建设报": {
+    "province": "广东",
+    "article_count": 1879
+  },
+  "成都理工大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 1876
+  },
+  "东方城乡报": {
+    "province": "行业",
+    "article_count": 1873
+  },
+  "中国测绘报": {
+    "province": "行业",
+    "article_count": 1860
+  },
+  "漳州师范学院学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 1859
+  },
+  "廊坊师范学院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 1854
+  },
+  "科学导报": {
+    "province": "行业",
+    "article_count": 1842
+  },
+  "安徽理工大学学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 1838
+  },
+  "中国石油大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1837
+  },
+  "兰州大学学报(社会科学版)": {
+    "province": "甘肃",
+    "article_count": 1834
+  },
+  "绍兴文理学院学报(哲学社会科学)": {
+    "province": "浙江",
+    "article_count": 1833
+  },
+  "中国农业大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 1829
+  },
+  "河海大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 1828
+  },
+  "伊犁师范学院学报(社会科学版)": {
+    "province": "新疆",
+    "article_count": 1827
+  },
+  "中国人民公安大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1826
+  },
+  "中国老年报": {
+    "province": "行业",
+    "article_count": 1824
+  },
+  "沈阳建筑大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 1815
+  },
+  "西安建筑科技大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 1813
+  },
+  "辽东学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1812
+  },
+  "苏州科技学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1809
+  },
+  "北京科技报": {
+    "province": "北京",
+    "article_count": 1797
+  },
+  "重庆师范大学学报(哲学社会科学版)": {
+    "province": "重庆",
+    "article_count": 1792
+  },
+  "湘声报": {
+    "province": "行业",
+    "article_count": 1791
+  },
+  "信阳日报": {
+    "province": "河南",
+    "article_count": 1790
+  },
+  "内蒙古大学学报(哲学社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 1778
+  },
+  "江西师范大学学报(哲学社会科学版)": {
+    "province": "江西",
+    "article_count": 1773
+  },
+  "人民公安报·交通安全周刊": {
+    "province": "行业",
+    "article_count": 1770
+  },
+  "Social Sciences in China": {
+    "province": "全国",
+    "article_count": 1765
+  },
+  "新疆大学学报(哲学社会科学版)": {
+    "province": "新疆",
+    "article_count": 1760
+  },
+  "大连理工大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 1754
+  },
+  "新乡学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 1753
+  },
+  "天文学报": {
+    "province": "行业",
+    "article_count": 1747
+  },
+  "河北北方学院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 1733
+  },
+  "辽宁医学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 1733
+  },
+  "21世纪药店": {
+    "province": "全国",
+    "article_count": 1731
+  },
+  "内江日报": {
+    "province": "四川",
+    "article_count": 1710
+  },
+  "新疆大学学报(哲学·人文社会科学版)": {
+    "province": "新疆",
+    "article_count": 1698
+  },
+  "青岛科技大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 1693
+  },
+  "贵阳学院学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 1685
+  },
+  "吉林农村报": {
+    "province": "吉林",
+    "article_count": 1680
+  },
+  "广西政协报": {
+    "province": "广西",
+    "article_count": 1679
+  },
+  "江苏大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1674
+  },
+  "河北科技师范学院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 1662
+  },
+  "西安石油大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 1660
+  },
+  "和田日报(汉)": {
+    "province": "新疆",
+    "article_count": 1658
+  },
+  "江苏农业科技报": {
+    "province": "江苏",
+    "article_count": 1654
+  },
+  "北京工业大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 1652
+  },
+  "南京航空航天大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1651
+  },
+  "中国渔业报": {
+    "province": "全国",
+    "article_count": 1638
+  },
+  "河南科技报": {
+    "province": "河南",
+    "article_count": 1632
+  },
+  "天津师范大学学报(社会科学版)": {
+    "province": "天津",
+    "article_count": 1631
+  },
+  "人民长江报": {
+    "province": "行业",
+    "article_count": 1621
+  },
+  "西北第二民族学院学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 1613
+  },
+  "海南农垦报": {
+    "province": "青海",
+    "article_count": 1612
+  },
+  "内蒙古师大学报(哲学社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 1607
+  },
+  "大庆日报": {
+    "province": "黑龙江",
+    "article_count": 1606
+  },
+  "中国服饰报": {
+    "province": "全国",
+    "article_count": 1604
+  },
+  "中国包装报": {
+    "province": "全国",
+    "article_count": 1597
+  },
+  "浙江师范大学学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 1594
+  },
+  "昭乌达蒙族师专学报(汉文哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 1589
+  },
+  "安徽大学学报(哲学社会科学版)": {
+    "province": "安徽",
+    "article_count": 1581
+  },
+  "鲁东大学学报(哲学社会科学版)": {
+    "province": "山东",
+    "article_count": 1572
+  },
+  "重庆政协报": {
+    "province": "重庆",
+    "article_count": 1567
+  },
+  "山东师大学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 1564
+  },
+  "河北农民报": {
+    "province": "河北",
+    "article_count": 1563
+  },
+  "集美大学学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 1563
+  },
+  "盐城工学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1559
+  },
+  "甘肃联合大学学报(社会科学版)": {
+    "province": "甘肃",
+    "article_count": 1550
+  },
+  "长安大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 1536
+  },
+  "北方民族大学学报(哲学社会科学版)": {
+    "province": "宁夏",
+    "article_count": 1531
+  },
+  "中国美术报": {
+    "province": "全国",
+    "article_count": 1524
+  },
+  "北京林业大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 1520
+  },
+  "音乐周报": {
+    "province": "行业",
+    "article_count": 1516
+  },
+  "华南农业大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 1516
+  },
+  "盐阜大众报": {
+    "province": "行业",
+    "article_count": 1514
+  },
+  "协商新报": {
+    "province": "行业",
+    "article_count": 1501
+  },
+  "西南师范大学学报(人文社会科学版)": {
+    "province": "行业",
+    "article_count": 1497
+  },
+  "大众卫生报": {
+    "province": "行业",
+    "article_count": 1496
+  },
+  "河北科技大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 1495
+  },
+  "南京中医药大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1487
+  },
+  "山西政协报": {
+    "province": "山西",
+    "article_count": 1476
+  },
+  "民营经济报": {
+    "province": "行业",
+    "article_count": 1463
+  },
+  "福建医科大学学报(社会科学版)": {
+    "province": "福建",
+    "article_count": 1460
+  },
+  "南京农业大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1456
+  },
+  "China Nonferrous Metals Monthly": {
+    "province": "全国",
+    "article_count": 1454
+  },
+  "内蒙古大学学报(人文社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 1452
+  },
+  "南京林业大学学报(人文社会科学版)": {
+    "province": "江苏",
+    "article_count": 1447
+  },
+  "湖南文理学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 1446
+  },
+  "重庆邮电学院学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 1445
+  },
+  "西部时报": {
+    "province": "行业",
+    "article_count": 1440
+  },
+  "经理日报": {
+    "province": "行业",
+    "article_count": 1424
+  },
+  "红河日报": {
+    "province": "云南",
+    "article_count": 1414
+  },
+  "安徽商贸职业技术学院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 1412
+  },
+  "阜新日报": {
+    "province": "辽宁",
+    "article_count": 1411
+  },
+  "河南理工大学学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 1404
+  },
+  "祁连山报": {
+    "province": "行业",
+    "article_count": 1401
+  },
+  "江西教育学院学报(社会科学)": {
+    "province": "江西",
+    "article_count": 1401
+  },
+  "南开学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 1400
+  },
+  "江汉大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1397
+  },
+  "四川科技报": {
+    "province": "四川",
+    "article_count": 1396
+  },
+  "中南民族学院学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 1393
+  },
+  "北京联合大学学报(人文社会科学版)": {
+    "province": "北京",
+    "article_count": 1392
+  },
+  "烟台师范学院学报(哲学社会科学版)": {
+    "province": "山东",
+    "article_count": 1389
+  },
+  "家庭医生报": {
+    "province": "行业",
+    "article_count": 1388
+  },
+  "西南石油大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 1378
+  },
+  "西藏大学学报(社会科学版)": {
+    "province": "西藏",
+    "article_count": 1378
+  },
+  "南京工业大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1373
+  },
+  "林芝报(汉)": {
+    "province": "西藏",
+    "article_count": 1372
+  },
+  "中国农村信用合作报": {
+    "province": "行业",
+    "article_count": 1365
+  },
+  "上海交通大学学报(哲学社会科学版)": {
+    "province": "上海",
+    "article_count": 1360
+  },
+  "齐齐哈尔师范学院学报(哲学社会科学版)": {
+    "province": "黑龙江",
+    "article_count": 1354
+  },
+  "聊城师范学院学报(哲学社会科学版)": {
+    "province": "山东",
+    "article_count": 1353
+  },
+  "战士报": {
+    "province": "行业",
+    "article_count": 1346
+  },
+  "沈阳大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 1345
+  },
+  "洛阳理工学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 1343
+  },
+  "中国远洋海运报": {
+    "province": "全国",
+    "article_count": 1335
+  },
+  "健康时报": {
+    "province": "行业",
+    "article_count": 1334
+  },
+  "天津政法报": {
+    "province": "天津",
+    "article_count": 1333
+  },
+  "韶关学院学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 1331
+  },
+  "锦州师范学院学报(哲学社会科学版)": {
+    "province": "辽宁",
+    "article_count": 1330
+  },
+  "汕头大学学报(人文社会科学版)": {
+    "province": "广东",
+    "article_count": 1328
+  },
+  "友报": {
+    "province": "行业",
+    "article_count": 1302
+  },
+  "金陵科技学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1298
+  },
+  "杭州师范大学学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 1295
+  },
+  "北京化工大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 1288
+  },
+  "北京交通大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 1286
+  },
+  "云南大学学报(社会科学版)": {
+    "province": "云南",
+    "article_count": 1280
+  },
+  "西藏日报": {
+    "province": "西藏",
+    "article_count": 1279
+  },
+  "绍兴文理学院学报(哲学社会科学版)": {
+    "province": "浙江",
+    "article_count": 1278
+  },
+  "温州大学学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 1269
+  },
+  "阿勒泰日报(汉)": {
+    "province": "新疆",
+    "article_count": 1263
+  },
+  "鹤岗日报": {
+    "province": "黑龙江",
+    "article_count": 1262
+  },
+  "陇东报": {
+    "province": "行业",
+    "article_count": 1261
+  },
+  "内蒙古工业大学学报(社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 1261
+  },
+  "浙江树人大学学报(人文社会科学版)": {
+    "province": "浙江",
+    "article_count": 1253
+  },
+  "镇江师专学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1252
+  },
+  "华北水利水电大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1246
+  },
+  "南阳师范学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 1243
+  },
+  "民主协商报": {
+    "province": "行业",
+    "article_count": 1240
+  },
+  "江苏科技报": {
+    "province": "江苏",
+    "article_count": 1236
+  },
+  "云南财经大学学报(社会科学版)": {
+    "province": "云南",
+    "article_count": 1232
+  },
+  "中国红十字报": {
+    "province": "全国",
+    "article_count": 1231
+  },
+  "沈阳师范学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 1226
+  },
+  "中国电脑教育报": {
+    "province": "全国",
+    "article_count": 1220
+  },
+  "上海中医药报": {
+    "province": "上海",
+    "article_count": 1201
+  },
+  "徐州工程学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1201
+  },
+  "保健时报": {
+    "province": "行业",
+    "article_count": 1195
+  },
+  "江苏科技大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1195
+  },
+  "云南民族学院学报(哲学社会科学版)": {
+    "province": "云南",
+    "article_count": 1189
+  },
+  "浙江工业大学学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 1183
+  },
+  "温州师范学院学报(哲学社会科学版)": {
+    "province": "浙江",
+    "article_count": 1176
+  },
+  "亚洲中心时报(汉)": {
+    "province": "行业",
+    "article_count": 1174
+  },
+  "河北联合大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 1173
+  },
+  "云南农业大学学报(社会科学版)": {
+    "province": "云南",
+    "article_count": 1173
+  },
+  "果洛报": {
+    "province": "青海",
+    "article_count": 1172
+  },
+  "上海理工大学学报(社会科学版)": {
+    "province": "上海",
+    "article_count": 1171
+  },
+  "山东医科大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 1145
+  },
+  "哈密日报(汉)": {
+    "province": "新疆",
+    "article_count": 1142
+  },
+  "莱阳农学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1141
+  },
+  "牡丹江日报": {
+    "province": "黑龙江",
+    "article_count": 1125
+  },
+  "公益时报": {
+    "province": "行业",
+    "article_count": 1121
+  },
+  "贵州民族大学学报(哲学社会科学版)": {
+    "province": "贵州",
+    "article_count": 1104
+  },
+  "井冈山大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 1103
+  },
+  "徐州师范大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 1094
+  },
+  "金昌日报": {
+    "province": "甘肃",
+    "article_count": 1067
+  },
+  "东华大学学报(社会科学版)": {
+    "province": "上海",
+    "article_count": 1062
+  },
+  "南京工程学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1054
+  },
+  "陕西理工学院学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 1053
+  },
+  "陕西科技报": {
+    "province": "陕西",
+    "article_count": 1051
+  },
+  "杭州师范学院学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 1050
+  },
+  "淮北煤师院学报(哲学社会科学版)": {
+    "province": "安徽",
+    "article_count": 1047
+  },
+  "日照日报": {
+    "province": "山东",
+    "article_count": 1038
+  },
+  "淮北煤师院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 1036
+  },
+  "青海民族大学学报(社会科学版)": {
+    "province": "青海",
+    "article_count": 1023
+  },
+  "湘潭大学社会科学学报": {
+    "province": "湖南",
+    "article_count": 1020
+  },
+  "甘肃教育学院学报(社会科学版)": {
+    "province": "甘肃",
+    "article_count": 1012
+  },
+  "常州大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 1011
+  },
+  "沈阳工业大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 1010
+  },
+  "云南科技报": {
+    "province": "云南",
+    "article_count": 1002
+  },
+  "常德师范学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 1000
+  },
+  "青岛农业大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 999
+  },
+  "惠州学院学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 997
+  },
+  "海口晚报": {
+    "province": "海南",
+    "article_count": 988
+  },
+  "银川晚报": {
+    "province": "宁夏",
+    "article_count": 987
+  },
+  "暨南学报(哲学社会科学)": {
+    "province": "行业",
+    "article_count": 983
+  },
+  "法制周报": {
+    "province": "行业",
+    "article_count": 982
+  },
+  "东华理工大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 980
+  },
+  "海峡财经导报": {
+    "province": "行业",
+    "article_count": 976
+  },
+  "新疆科技报(汉)": {
+    "province": "新疆",
+    "article_count": 974
+  },
+  "武汉大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 974
+  },
+  "山东工业大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 973
+  },
+  "泸州日报": {
+    "province": "四川",
+    "article_count": 972
+  },
+  "中国应急管理报": {
+    "province": "全国",
+    "article_count": 965
+  },
+  "河南工程学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 965
+  },
+  "中国图书商报": {
+    "province": "全国",
+    "article_count": 961
+  },
+  "成都行政学院学报(哲学社会科学)": {
+    "province": "四川",
+    "article_count": 959
+  },
+  "延边日报(汉)": {
+    "province": "吉林",
+    "article_count": 958
+  },
+  "国际出版周报": {
+    "province": "全国",
+    "article_count": 950
+  },
+  "铁岭日报": {
+    "province": "辽宁",
+    "article_count": 949
+  },
+  "江苏师范大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 949
+  },
+  "甘孜日报(汉文)": {
+    "province": "云南",
+    "article_count": 944
+  },
+  "重庆交通学院学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 944
+  },
+  "南京邮电大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 943
+  },
+  "长春师范学院学报(人文社会科学版)": {
+    "province": "吉林",
+    "article_count": 941
+  },
+  "华中师范大学学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 939
+  },
+  "南昌航空大学学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 917
+  },
+  "中共成都市委党校学报(哲学社会科学)": {
+    "province": "四川",
+    "article_count": 910
+  },
+  "贵阳师专学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 909
+  },
+  "鸡西日报": {
+    "province": "黑龙江",
+    "article_count": 899
+  },
+  "九江学院学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 899
+  },
+  "华中理工大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 894
+  },
+  "广安日报": {
+    "province": "四川",
+    "article_count": 888
+  },
+  "海南师范学院学报(社会科学版)": {
+    "province": "青海",
+    "article_count": 878
+  },
+  "重庆师院学报(哲学社会科学版)": {
+    "province": "重庆",
+    "article_count": 874
+  },
+  "衡阳师专学报(社会科学)": {
+    "province": "湖南",
+    "article_count": 874
+  },
+  "贵州教育学院学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 870
+  },
+  "泰安日报": {
+    "province": "山东",
+    "article_count": 865
+  },
+  "长沙电力学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 865
+  },
+  "中国书法报": {
+    "province": "行业",
+    "article_count": 859
+  },
+  "眉山日报": {
+    "province": "四川",
+    "article_count": 856
+  },
+  "中国禁毒报": {
+    "province": "行业",
+    "article_count": 852
+  },
+  "延边大学学报(哲学社会科学版)": {
+    "province": "吉林",
+    "article_count": 851
+  },
+  "河北理工学院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 842
+  },
+  "南通师专学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 841
+  },
+  "南通师范学院学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 833
+  },
+  "南方周末": {
+    "province": "全国",
+    "article_count": 828
+  },
+  "宁德师范学院学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 823
+  },
+  "天津师大学报(社会科学版)": {
+    "province": "天津",
+    "article_count": 822
+  },
+  "杭州电子科技大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 821
+  },
+  "经济信息时报": {
+    "province": "行业",
+    "article_count": 814
+  },
+  "杭州大学学报(哲学社会科学版)": {
+    "province": "浙江",
+    "article_count": 812
+  },
+  "南昌航空工业学院学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 808
+  },
+  "黄石理工学院学报(人文社会科学版)": {
+    "province": "湖北",
+    "article_count": 800
+  },
+  "新能源汽车报": {
+    "province": "行业",
+    "article_count": 797
+  },
+  "江苏工业学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 789
+  },
+  "安庆师院社会科学学报": {
+    "province": "安徽",
+    "article_count": 781
+  },
+  "克孜勒苏报(汉)": {
+    "province": "新疆",
+    "article_count": 780
+  },
+  "西南师范大学学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 780
+  },
+  "新清华": {
+    "province": "全国",
+    "article_count": 774
+  },
+  "安徽教育学院学报(哲学社会科学版)": {
+    "province": "安徽",
+    "article_count": 774
+  },
+  "广州师院学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 768
+  },
+  "江苏教育学院学报(社会科学)": {
+    "province": "江苏",
+    "article_count": 767
+  },
+  "三江源报": {
+    "province": "青海",
+    "article_count": 757
+  },
+  "衡阳师范学院学报(社会科学)": {
+    "province": "湖南",
+    "article_count": 752
+  },
+  "兰州文理学院学报(社会科学版)": {
+    "province": "甘肃",
+    "article_count": 740
+  },
+  "盐城师专学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 740
+  },
+  "中南民族学院学报(人文社会科学版)": {
+    "province": "行业",
+    "article_count": 739
+  },
+  "湘潭大学学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 726
+  },
+  "渝州大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 723
+  },
+  "西北民族学院学报(哲学社会科学版.汉文)": {
+    "province": "行业",
+    "article_count": 716
+  },
+  "石家庄铁道大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 711
+  },
+  "河北师范大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 711
+  },
+  "湖南科技报": {
+    "province": "湖南",
+    "article_count": 710
+  },
+  "扬州师院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 710
+  },
+  "湖北理工学院学报(人文社会科学版)": {
+    "province": "湖北",
+    "article_count": 701
+  },
+  "河北工业大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 696
+  },
+  "贵州民族学院学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 691
+  },
+  "大众科技报": {
+    "province": "行业",
+    "article_count": 684
+  },
+  ",": {
+    "province": "未知",
+    "article_count": 681
+  },
+  "湖南农业大学学报(社会科学版.素质教育研究)": {
+    "province": "湖南",
+    "article_count": 673
+  },
+  "青岛海洋大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 659
+  },
+  "汉中师范学院学报(社会科学)": {
+    "province": "陕西",
+    "article_count": 654
+  },
+  "南昌大学学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 652
+  },
+  "哈尔滨师专学报(社会科学版)": {
+    "province": "黑龙江",
+    "article_count": 648
+  },
+  "安庆日报": {
+    "province": "安徽",
+    "article_count": 645
+  },
+  "陇东学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 629
+  },
+  "海南大学学报(社会科学版)": {
+    "province": "海南",
+    "article_count": 627
+  },
+  "安徽师大学报(哲学社会科学版)": {
+    "province": "安徽",
+    "article_count": 627
+  },
+  "中国畜牧报": {
+    "province": "全国",
+    "article_count": 616
+  },
+  "格尔木日报": {
+    "province": "青海",
+    "article_count": 615
+  },
+  "闽南师范大学学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 615
+  },
+  "语言文字周报": {
+    "province": "行业",
+    "article_count": 614
+  },
+  "新疆大学学报(哲学人文社会科学版)": {
+    "province": "新疆",
+    "article_count": 612
+  },
+  "怀化学院学报(社会科学)": {
+    "province": "湖南",
+    "article_count": 609
+  },
+  "云南农业大学学报(社会科学)": {
+    "province": "云南",
+    "article_count": 605
+  },
+  "IT时报": {
+    "province": "全国",
+    "article_count": 603
+  },
+  "焦作工学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 594
+  },
+  "上海交通大学学报(社会科学版)": {
+    "province": "上海",
+    "article_count": 588
+  },
+  "甘肃法制报": {
+    "province": "甘肃",
+    "article_count": 584
+  },
+  "首都医科大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 583
+  },
+  "中国远洋报": {
+    "province": "行业",
+    "article_count": 580
+  },
+  "西藏民族大学学报(哲学社会科学版)": {
+    "province": "西藏",
+    "article_count": 575
+  },
+  "山西党校报": {
+    "province": "山西",
+    "article_count": 573
+  },
+  "惠州大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 571
+  },
+  "大飞机报": {
+    "province": "行业",
+    "article_count": 569
+  },
+  "内蒙古民族师院学报(哲学社会科学汉文版)": {
+    "province": "内蒙古",
+    "article_count": 559
+  },
+  "韶关大学学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 559
+  },
+  "浙江大学学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 549
+  },
+  "陕西师大学报(哲学社会科学版)": {
+    "province": "陕西",
+    "article_count": 548
+  },
+  "贵州教育学院学报(社会科学)": {
+    "province": "贵州",
+    "article_count": 548
+  },
+  "上饶师范学院学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 543
+  },
+  "辽宁商务职业学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 542
+  },
+  "河池师专学报(社会科学版)": {
+    "province": "广西",
+    "article_count": 540
+  },
+  "福建公安高等专科学校学报.社会公共安全研究": {
+    "province": "福建",
+    "article_count": 532
+  },
+  "边防警察报": {
+    "province": "行业",
+    "article_count": 529
+  },
+  "西藏民族学院学报(社会科学版)": {
+    "province": "西藏",
+    "article_count": 527
+  },
+  "宁波师院学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 525
+  },
+  "乐山师专学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 517
+  },
+  "东华理工学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 517
+  },
+  "宜兴日报": {
+    "province": "行业",
+    "article_count": 506
+  },
+  "宁夏大学学报(社会科学版)": {
+    "province": "宁夏",
+    "article_count": 505
+  },
+  "西安石油学院学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 505
+  },
+  "暨南大学华文学院学报": {
+    "province": "广东",
+    "article_count": 504
+  },
+  "黄南报": {
+    "province": "青海",
+    "article_count": 501
+  },
+  "中国特产报": {
+    "province": "全国",
+    "article_count": 500
+  },
+  "锦州医学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 488
+  },
+  "网络世界": {
+    "province": "全国",
+    "article_count": 483
+  },
+  "北京师范大学学报(人文社会科学版)": {
+    "province": "北京",
+    "article_count": 482
+  },
+  "湖北民族学院学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 477
+  },
+  "锦州师院学报(哲学社会科学版)": {
+    "province": "辽宁",
+    "article_count": 477
+  },
+  "淮南工业学院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 471
+  },
+  "哈尔滨学院学报(社会科学)": {
+    "province": "黑龙江",
+    "article_count": 467
+  },
+  "洛阳工学院学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 461
+  },
+  "浙江树人大学学报(人文社会科学)": {
+    "province": "浙江",
+    "article_count": 459
+  },
+  "渝西学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 459
+  },
+  "江阴日报": {
+    "province": "行业",
+    "article_count": 458
+  },
+  "广西医科大学学报(社会科学版)": {
+    "province": "广西",
+    "article_count": 454
+  },
+  "南京大学学报(哲学·人文科学·社会科学)": {
+    "province": "江苏",
+    "article_count": 450
+  },
+  "湘潭工学院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 447
+  },
+  "华北理工大学学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 435
+  },
+  "韶关学院学报(社会科学)": {
+    "province": "广东",
+    "article_count": 418
+  },
+  "广东民族学院学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 409
+  },
+  "南通工学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 408
+  },
+  "人民武警": {
+    "province": "全国",
+    "article_count": 406
+  },
+  "经济视点报": {
+    "province": "行业",
+    "article_count": 405
+  },
+  "世界报": {
+    "province": "行业",
+    "article_count": 400
+  },
+  "海南师范学院学报(人文社会科学版)": {
+    "province": "青海",
+    "article_count": 398
+  },
+  "湖北师范大学学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 395
+  },
+  "吉林党校报": {
+    "province": "吉林",
+    "article_count": 391
+  },
+  "中南工业大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 390
+  },
+  "昌都报": {
+    "province": "西藏",
+    "article_count": 383
+  },
+  "太原学院学报(社会科学版)": {
+    "province": "山西",
+    "article_count": 383
+  },
+  "河北师院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 382
+  },
+  "新乡师专学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 381
+  },
+  "渝州大学学报(哲学·社会科学版)": {
+    "province": "行业",
+    "article_count": 376
+  },
+  "江苏理工大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 376
+  },
+  "华东船舶工业学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 373
+  },
+  "农业科技报": {
+    "province": "行业",
+    "article_count": 369
+  },
+  "福州大学学报(社会科学版)": {
+    "province": "福建",
+    "article_count": 360
+  },
+  "张家口师专学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 357
+  },
+  "贵阳师范高等专科学校学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 356
+  },
+  "武威日报": {
+    "province": "甘肃",
+    "article_count": 354
+  },
+  "恩施日报": {
+    "province": "湖北",
+    "article_count": 354
+  },
+  "市场报": {
+    "province": "行业",
+    "article_count": 354
+  },
+  "山西大学师范学院学报(哲学社会科学版)": {
+    "province": "山西",
+    "article_count": 353
+  },
+  "同济大学学报(人文·社会科学版)": {
+    "province": "上海",
+    "article_count": 352
+  },
+  "淄博学院学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 347
+  },
+  "德州学院学报(哲学社会科学版)": {
+    "province": "山东",
+    "article_count": 343
+  },
+  "华东冶金学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 339
+  },
+  "三晋都市报": {
+    "province": "行业",
+    "article_count": 338
+  },
+  "西南大学学报(人文社会科学版)": {
+    "province": "重庆",
+    "article_count": 334
+  },
+  "锦州医科大学学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 326
+  },
+  "农村医药报（汉）": {
+    "province": "行业",
+    "article_count": 321
+  },
+  "南京邮电学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 311
+  },
+  "西昌学院学报(人文社会科学版)": {
+    "province": "行业",
+    "article_count": 311
+  },
+  "石狮日报": {
+    "province": "行业",
+    "article_count": 302
+  },
+  "驻马店师专学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 302
+  },
+  "民族医药报": {
+    "province": "行业",
+    "article_count": 296
+  },
+  "湖北医药导报": {
+    "province": "湖北",
+    "article_count": 296
+  },
+  "内蒙古民族师院学报(哲学社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 294
+  },
+  "中国青年农业科学学术年报": {
+    "province": "行业",
+    "article_count": 292
+  },
+  "武汉教育学院学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 291
+  },
+  "泰州日报": {
+    "province": "江苏",
+    "article_count": 290
+  },
+  "安庆师范大学学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 289
+  },
+  "沈阳建筑工程学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 289
+  },
+  "石家庄铁道学院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 287
+  },
+  "铜陵有色报": {
+    "province": "安徽",
+    "article_count": 283
+  },
+  "国际经贸消息": {
+    "province": "全国",
+    "article_count": 282
+  },
+  "红河州党校学报(哲学社会科学)": {
+    "province": "云南",
+    "article_count": 282
+  },
+  "浙江理工大学学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 281
+  },
+  "中国市场监管报": {
+    "province": "行业",
+    "article_count": 278
+  },
+  "西南电力报": {
+    "province": "行业",
+    "article_count": 277
+  },
+  "长沙水电师院学报(社会科学版)": {
+    "province": "湖南",
+    "article_count": 275
+  },
+  "大理学院学报(社会科学)": {
+    "province": "云南",
+    "article_count": 266
+  },
+  "汉中师院学报(哲学社会科学版)": {
+    "province": "陕西",
+    "article_count": 263
+  },
+  "厂长经理日报": {
+    "province": "行业",
+    "article_count": 262
+  },
+  "苏州铁道师范学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 261
+  },
+  "医院院长论坛-首都医科大学学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 260
+  },
+  "宁夏大学学报(哲学社会科学版)": {
+    "province": "宁夏",
+    "article_count": 257
+  },
+  "北京师范学院学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 247
+  },
+  "咸宁日报": {
+    "province": "湖北",
+    "article_count": 245
+  },
+  "宝鸡师院学报(哲学社会科学版)": {
+    "province": "陕西",
+    "article_count": 244
+  },
+  "长沙水电师院社会科学学报": {
+    "province": "湖南",
+    "article_count": 244
+  },
+  "浙江大学学报(人文社会科学版)预印本": {
+    "province": "浙江",
+    "article_count": 243
+  },
+  "聊城大学学报(哲学社会科学版)": {
+    "province": "山东",
+    "article_count": 242
+  },
+  "上海师范大学学报(哲学社会科学.教育版)": {
+    "province": "上海",
+    "article_count": 239
+  },
+  "韩山师范学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 232
+  },
+  "郑州工业大学学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 230
+  },
+  "福建农业大学学报(社会科学版)": {
+    "province": "福建",
+    "article_count": 223
+  },
+  "河北职业技术师范学院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 222
+  },
+  "铜川日报": {
+    "province": "陕西",
+    "article_count": 221
+  },
+  "北方时报": {
+    "province": "行业",
+    "article_count": 220
+  },
+  "公安大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 218
+  },
+  "南京化工大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 217
+  },
+  "武汉水利电力大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 217
+  },
+  "成都行政学院学报(社会科学类)": {
+    "province": "四川",
+    "article_count": 212
+  },
+  "江苏石油化工学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 211
+  },
+  "河池学院学报(哲学社会科学版)": {
+    "province": "广西",
+    "article_count": 211
+  },
+  "中国食品质量报": {
+    "province": "行业",
+    "article_count": 209
+  },
+  "西南林业大学学报(社会科学)": {
+    "province": "行业",
+    "article_count": 208
+  },
+  "苏州科技大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 207
+  },
+  "新疆法制报(汉)": {
+    "province": "新疆",
+    "article_count": 205
+  },
+  "武汉交通科技大学学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 205
+  },
+  "天津教育报": {
+    "province": "天津",
+    "article_count": 204
+  },
+  "宝鸡文理学院学报(人文社会科学版)": {
+    "province": "陕西",
+    "article_count": 204
+  },
+  "淮阴师专学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 199
+  },
+  "福建工商时报": {
+    "province": "福建",
+    "article_count": 198
+  },
+  "南京大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 198
+  },
+  "南充日报": {
+    "province": "四川",
+    "article_count": 195
+  },
+  "青岛化工学院学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 195
+  },
+  "北京科技大学学报(人文社会科学版)": {
+    "province": "北京",
+    "article_count": 193
+  },
+  "盐城师专学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 192
+  },
+  "山东师大学报(人文社会科学版)": {
+    "province": "山东",
+    "article_count": 192
+  },
+  "九江学院学报(哲学社会科学版)": {
+    "province": "江西",
+    "article_count": 191
+  },
+  "荆门大学学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 190
+  },
+  "华中科技大学学报(人文社会科学版)": {
+    "province": "湖北",
+    "article_count": 189
+  },
+  "2007高技术新材料产业发展研讨会暨《材料导报》编委会年会论文集": {
+    "province": "行业",
+    "article_count": 189
+  },
+  "学知报": {
+    "province": "行业",
+    "article_count": 187
+  },
+  "杭州师范学院学报(人文社会科学版)": {
+    "province": "浙江",
+    "article_count": 185
+  },
+  "中国农业大学社会科学学报": {
+    "province": "北京",
+    "article_count": 183
+  },
+  "长沙水电师院学报(社会科学学报)": {
+    "province": "湖南",
+    "article_count": 182
+  },
+  "西北民族学院学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 181
+  },
+  "暨南学报(人文科学与社会科学版)": {
+    "province": "行业",
+    "article_count": 181
+  },
+  "嘉应大学学报(社会科学)": {
+    "province": "行业",
+    "article_count": 180
+  },
+  "漳州师院学报(哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 175
+  },
+  "长春师院学报(社会科学版)": {
+    "province": "吉林",
+    "article_count": 174
+  },
+  "武汉大学学报(人文社会科学版)": {
+    "province": "湖北",
+    "article_count": 173
+  },
+  "宝鸡文理学院学报(哲学社会科学版)": {
+    "province": "陕西",
+    "article_count": 172
+  },
+  "武汉交通科技大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 172
+  },
+  "北方法制报": {
+    "province": "行业",
+    "article_count": 171
+  },
+  "河套大学学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 168
+  },
+  "《医药导报》第八届编委会成立大会暨2009年度全国医药学术交流会和临床药学与药学服务研究进展培训班论文集": {
+    "province": "行业",
+    "article_count": 167
+  },
+  "安顺师专学报(社会科学版)": {
+    "province": "贵州",
+    "article_count": 166
+  },
+  "东北电力报": {
+    "province": "行业",
+    "article_count": 164
+  },
+  "杭州教育学院学报(社会科学版)": {
+    "province": "浙江",
+    "article_count": 164
+  },
+  "三明师专学报(社会科学专辑)": {
+    "province": "福建",
+    "article_count": 163
+  },
+  "安徽教育学院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 162
+  },
+  "华中电力报": {
+    "province": "行业",
+    "article_count": 160
+  },
+  "阿坝日报": {
+    "province": "行业",
+    "article_count": 159
+  },
+  "上海师范大学学报(哲学社会科学.基础教育版)": {
+    "province": "上海",
+    "article_count": 159
+  },
+  "巢湖日报": {
+    "province": "安徽",
+    "article_count": 157
+  },
+  "锡林郭勒日报": {
+    "province": "内蒙古",
+    "article_count": 157
+  },
+  "江汉大学学报(人文社会科学版)": {
+    "province": "行业",
+    "article_count": 154
+  },
+  "郑州大学学报(社会科学版)": {
+    "province": "河南",
+    "article_count": 154
+  },
+  "中国职工科技报": {
+    "province": "行业",
+    "article_count": 153
+  },
+  "陕西理工大学学报(社会科学版)": {
+    "province": "陕西",
+    "article_count": 151
+  },
+  "庆阳师专学报(社会科学版)": {
+    "province": "甘肃",
+    "article_count": 150
+  },
+  "北京化工大学学报(哲学社会科学版)": {
+    "province": "北京",
+    "article_count": 149
+  },
+  "房地产时报": {
+    "province": "行业",
+    "article_count": 147
+  },
+  "零陵师专学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 143
+  },
+  "西海农民报": {
+    "province": "行业",
+    "article_count": 142
+  },
+  "吉林师范学院学报(哲学社会科学版)": {
+    "province": "吉林",
+    "article_count": 141
+  },
+  "无锡轻工大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 140
+  },
+  "河南大学学报(哲学社会科学版)": {
+    "province": "河南",
+    "article_count": 138
+  },
+  "闽商报": {
+    "province": "行业",
+    "article_count": 137
+  },
+  "湖南大学社会科学学报": {
+    "province": "湖南",
+    "article_count": 137
+  },
+  "南京建筑工程学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 136
+  },
+  "东北电力大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 135
+  },
+  "华东电力报": {
+    "province": "行业",
+    "article_count": 134
+  },
+  "韩山师专学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 134
+  },
+  "承德师专学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 133
+  },
+  "重庆师范大学学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 130
+  },
+  "长春光学精密机械学院学报(社会科学版)": {
+    "province": "吉林",
+    "article_count": 130
+  },
+  "大理师专学报(社会科学版)": {
+    "province": "云南",
+    "article_count": 130
+  },
+  "乌鲁木齐职业大学学报(人文社会科学版)": {
+    "province": "新疆",
+    "article_count": 130
+  },
+  "中国社会科学院院报": {
+    "province": "行业",
+    "article_count": 127
+  },
+  "石河子日报(汉)": {
+    "province": "新疆",
+    "article_count": 126
+  },
+  "绍兴师专学报(哲学社会科学版)": {
+    "province": "浙江",
+    "article_count": 126
+  },
+  "常州教育学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 126
+  },
+  "盐城师范学院学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 125
+  },
+  "华北电力报": {
+    "province": "行业",
+    "article_count": 124
+  },
+  "重庆理工大学学报(社会科学版)": {
+    "province": "重庆",
+    "article_count": 124
+  },
+  "电脑商报": {
+    "province": "行业",
+    "article_count": 123
+  },
+  "延边日报": {
+    "province": "吉林",
+    "article_count": 122
+  },
+  "惠阳师专学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 121
+  },
+  "绍兴文理学院学报(人文社会科学)": {
+    "province": "浙江",
+    "article_count": 119
+  },
+  "盐城师专学报(人文社会科学版)": {
+    "province": "江苏",
+    "article_count": 119
+  },
+  "喀什师范学院学报(哲学社会科学版)": {
+    "province": "新疆",
+    "article_count": 117
+  },
+  "辽宁教育学院学报(社会科学版)": {
+    "province": "辽宁",
+    "article_count": 117
+  },
+  "长沙电力学院社会科学学报": {
+    "province": "湖南",
+    "article_count": 117
+  },
+  "北京航空航天大学社会科学学报": {
+    "province": "北京",
+    "article_count": 115
+  },
+  "山东矿业学院学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 114
+  },
+  "职大学报(哲学社会科学)": {
+    "province": "行业",
+    "article_count": 112
+  },
+  "武汉冶金科技大学学报(社会科学版)": {
+    "province": "湖北",
+    "article_count": 112
+  },
+  "围棋报": {
+    "province": "行业",
+    "article_count": 111
+  },
+  "厦大中文学报": {
+    "province": "行业",
+    "article_count": 111
+  },
+  "北方交通大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 109
+  },
+  "亚太经济时报": {
+    "province": "行业",
+    "article_count": 108
+  },
+  "阿克苏日报": {
+    "province": "新疆",
+    "article_count": 107
+  },
+  "甘肃教育学院学报(哲学社会科学版)": {
+    "province": "甘肃",
+    "article_count": 107
+  },
+  "远东经贸导报": {
+    "province": "行业",
+    "article_count": 107
+  },
+  "中国畜牧水产报": {
+    "province": "全国",
+    "article_count": 105
+  },
+  "岳阳晚报": {
+    "province": "湖南",
+    "article_count": 105
+  },
+  "中华新闻报": {
+    "province": "行业",
+    "article_count": 105
+  },
+  "吐鲁番报(汉)": {
+    "province": "新疆",
+    "article_count": 103
+  },
+  "公共商务信息导报": {
+    "province": "行业",
+    "article_count": 102
+  },
+  "菏泽师专学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 102
+  },
+  "TRANSACTIONS OF NONFERROUS METALS SOCIETY OF CHINA(ENGLISH EDITION)": {
+    "province": "全国",
+    "article_count": 102
+  },
+  "华侨大学学报(人文社会科学版)": {
+    "province": "福建",
+    "article_count": 101
+  },
+  "东南大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 101
+  },
+  "中国现代企业报": {
+    "province": "行业",
+    "article_count": 97
+  },
+  "中共成都市委党校学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 97
+  },
+  "郑州工学院学报(哲学社会科学版)": {
+    "province": "河南",
+    "article_count": 96
+  },
+  "瓜果蔬菜报.农业信息周刊": {
+    "province": "行业",
+    "article_count": 92
+  },
+  "华侨大学学报(社会科学版)": {
+    "province": "福建",
+    "article_count": 90
+  },
+  "医学参考报·灾害救援医学频道": {
+    "province": "行业",
+    "article_count": 89
+  },
+  "今日信息报": {
+    "province": "行业",
+    "article_count": 89
+  },
+  "中国人事报": {
+    "province": "行业",
+    "article_count": 88
+  },
+  "博尔塔拉报": {
+    "province": "新疆",
+    "article_count": 85
+  },
+  "北京农业工程大学社会科学学报": {
+    "province": "北京",
+    "article_count": 85
+  },
+  "湘潭大学社会科学学报(研究生论丛)": {
+    "province": "湖南",
+    "article_count": 85
+  },
+  "医药养生保健报": {
+    "province": "行业",
+    "article_count": 84
+  },
+  "昌吉日报": {
+    "province": "新疆",
+    "article_count": 83
+  },
+  "达县师范高等专科学校学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 80
+  },
+  "山东大学学报(人文社会科学版)": {
+    "province": "山东",
+    "article_count": 79
+  },
+  "河海大学学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 76
+  },
+  "佛山大学佛山师专学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 74
+  },
+  "中山大学学报(哲学社会科学版)": {
+    "province": "广东",
+    "article_count": 74
+  },
+  "玉林师范学院学报(哲学社会科学版)": {
+    "province": "广西",
+    "article_count": 74
+  },
+  "内蒙古大学学报(人文.社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 73
+  },
+  "塔城报": {
+    "province": "新疆",
+    "article_count": 72
+  },
+  "江西教育学院学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 70
+  },
+  "玉林师范学院学报(哲学社会科学)": {
+    "province": "广西",
+    "article_count": 68
+  },
+  "哈密报(汉)": {
+    "province": "新疆",
+    "article_count": 67
+  },
+  "河西学院学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 67
+  },
+  "湖北科技报": {
+    "province": "湖北",
+    "article_count": 66
+  },
+  "郑州工业大学学报(哲学社会科学版)": {
+    "province": "河南",
+    "article_count": 66
+  },
+  "中国机电日报": {
+    "province": "全国",
+    "article_count": 65
+  },
+  "克孜勒苏报": {
+    "province": "新疆",
+    "article_count": 63
+  },
+  "安庆师院学报(社会科学版)": {
+    "province": "安徽",
+    "article_count": 63
+  },
+  "青海民族学院学报(社会科学版)": {
+    "province": "青海",
+    "article_count": 63
+  },
+  "江南游报": {
+    "province": "行业",
+    "article_count": 62
+  },
+  "大理师专学报(哲学社会科学版)": {
+    "province": "云南",
+    "article_count": 62
+  },
+  "商务时报": {
+    "province": "行业",
+    "article_count": 59
+  },
+  "河池学院学报(社会科学版)": {
+    "province": "广西",
+    "article_count": 58
+  },
+  "中国乡镇企业报": {
+    "province": "全国",
+    "article_count": 58
+  },
+  "中国教育资讯报": {
+    "province": "全国",
+    "article_count": 57
+  },
+  "西华师范学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 57
+  },
+  "卫生与生活报": {
+    "province": "行业",
+    "article_count": 56
+  },
+  "法治快报": {
+    "province": "行业",
+    "article_count": 55
+  },
+  "巴音郭楞日报": {
+    "province": "新疆",
+    "article_count": 54
+  },
+  "中国国门时报(中国出入境检验疫报)": {
+    "province": "行业",
+    "article_count": 54
+  },
+  "阿勒泰日报": {
+    "province": "新疆",
+    "article_count": 53
+  },
+  "上饶师专学报(社会科学版)": {
+    "province": "江西",
+    "article_count": 53
+  },
+  "南京大学学报(哲学.人文科学.社会科学)": {
+    "province": "江苏",
+    "article_count": 53
+  },
+  "湛江师范学院学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 52
+  },
+  "电子科技大学学报(社会科学版)": {
+    "province": "四川",
+    "article_count": 50
+  },
+  "地质勘查导报": {
+    "province": "行业",
+    "article_count": 50
+  },
+  "财经时报": {
+    "province": "行业",
+    "article_count": 49
+  },
+  "那曲报": {
+    "province": "西藏",
+    "article_count": 48
+  },
+  "日喀则报": {
+    "province": "西藏",
+    "article_count": 48
+  },
+  "广东职业技术师范学院学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 47
+  },
+  "绥化日报": {
+    "province": "黑龙江",
+    "article_count": 45
+  },
+  "物资信息报": {
+    "province": "行业",
+    "article_count": 44
+  },
+  "邵阳学院学报社会科学版邵阳学院教育教学改革论文专辑2008": {
+    "province": "湖南",
+    "article_count": 44
+  },
+  "西昌师专学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 44
+  },
+  "襄阳师专学报(哲学社会科学版)": {
+    "province": "湖北",
+    "article_count": 43
+  },
+  "音乐生活报": {
+    "province": "行业",
+    "article_count": 42
+  },
+  "达县师范高等专科学校学报(社会科学)": {
+    "province": "行业",
+    "article_count": 41
+  },
+  "湛江海洋大学学报(社会科学)": {
+    "province": "广东",
+    "article_count": 39
+  },
+  "日喀则日报(汉)": {
+    "province": "西藏",
+    "article_count": 37
+  },
+  "国防时报": {
+    "province": "行业",
+    "article_count": 37
+  },
+  "延边大学社会科学学报": {
+    "province": "吉林",
+    "article_count": 37
+  },
+  "林芝报": {
+    "province": "西藏",
+    "article_count": 35
+  },
+  "韶关大学韶关师专学报(社会科学版)": {
+    "province": "广东",
+    "article_count": 35
+  },
+  "西北建筑工程学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 34
+  },
+  "固原日报": {
+    "province": "宁夏",
+    "article_count": 33
+  },
+  "北京社会报": {
+    "province": "北京",
+    "article_count": 32
+  },
+  "四川师范大学学报(哲学社会科学版)": {
+    "province": "四川",
+    "article_count": 32
+  },
+  "淄博学院学报(人文社会科学版)": {
+    "province": "山东",
+    "article_count": 32
+  },
+  "河池师范高等专科学校学报(社会科学版)": {
+    "province": "广西",
+    "article_count": 32
+  },
+  "北京大学学报(外国语言文学专刊)": {
+    "province": "北京",
+    "article_count": 32
+  },
+  "中卫日报": {
+    "province": "宁夏",
+    "article_count": 31
+  },
+  "南通大学学报(哲学社会科学版)": {
+    "province": "江苏",
+    "article_count": 31
+  },
+  "北方经济时报": {
+    "province": "行业",
+    "article_count": 30
+  },
+  "华中理工大学学报": {
+    "province": "行业",
+    "article_count": 30
+  },
+  "福建科技报": {
+    "province": "福建",
+    "article_count": 29
+  },
+  "华东旅游报": {
+    "province": "行业",
+    "article_count": 29
+  },
+  "四川文理学院学报(社会科学)": {
+    "province": "四川",
+    "article_count": 29
+  },
+  "中国物资报": {
+    "province": "全国",
+    "article_count": 28
+  },
+  "日喀则日报": {
+    "province": "西藏",
+    "article_count": 28
+  },
+  "喀什师范学院学报(社会科学)": {
+    "province": "新疆",
+    "article_count": 28
+  },
+  "广东民族学院学报(外国文学语言专辑)": {
+    "province": "广东",
+    "article_count": 27
+  },
+  "三明师专学报(社会科学版)": {
+    "province": "福建",
+    "article_count": 26
+  },
+  "中国汽车报": {
+    "province": "全国",
+    "article_count": 26
+  },
+  "三峡学刊(四川三峡学院社会科学学报)": {
+    "province": "四川",
+    "article_count": 25
+  },
+  "内蒙古林学院学报(哲学社会科学版)": {
+    "province": "内蒙古",
+    "article_count": 25
+  },
+  "三江学院学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 24
+  },
+  "成才导报.教育周刊": {
+    "province": "行业",
+    "article_count": 23
+  },
+  "延安大学学报(哲学社会科学版)": {
+    "province": "陕西",
+    "article_count": 22
+  },
+  "湖南经济报": {
+    "province": "湖南",
+    "article_count": 21
+  },
+  "柴达木报": {
+    "province": "青海",
+    "article_count": 20
+  },
+  "北京动力经济学院学报(社会科学版)": {
+    "province": "北京",
+    "article_count": 20
+  },
+  "河北建筑科技学院学报(社会科学版)": {
+    "province": "河北",
+    "article_count": 20
+  },
+  "福建公安高等专科学校学报(社会公共安全研究)": {
+    "province": "福建",
+    "article_count": 20
+  },
+  "2011年中国儿童青少年营养与健康报告会论文汇编": {
+    "province": "行业",
+    "article_count": 20
+  },
+  "《医药导报》第八届编委会成立大会暨2009年度全国医药学术交流会和临床药学与药学服务研究进展培训班资料汇编": {
+    "province": "行业",
+    "article_count": 19
+  },
+  "山东大学学报(社会科学版)": {
+    "province": "山东",
+    "article_count": 19
+  },
+  "苏州城市建设环境保护学院学报(社会科学版)": {
+    "province": "江苏",
+    "article_count": 19
+  },
+  "厦门大学学报( 哲学社会科学版)": {
+    "province": "福建",
+    "article_count": 19
+  },
+  "和田日报（汉）": {
+    "province": "新疆",
+    "article_count": 18
+  },
+  "同济医科大学学报(社会科学版)": {
+    "province": "行业",
+    "article_count": 18
+  },
+  "新疆大学学报(社会科学版)": {
+    "province": "新疆",
+    "article_count": 18
+  },
+  "当代汽车报": {
+    "province": "行业",
+    "article_count": 17
+  },
+  "北京大学学报(英语语言文学专刊)": {
+    "province": "北京",
+    "article_count": 17
+  },
+  "电子资讯时报": {
+    "province": "全国",
+    "article_count": 17
+  },
+  "人才市场报": {
+    "province": "行业",
+    "article_count": 16
+  },
+  "北京人才市场报": {
+    "province": "北京",
+    "article_count": 16
+  },
+  "南平师专学报(社会科学版)": {
+    "province": "福建",
+    "article_count": 15
+  },
+  "经济日报.农村版": {
+    "province": "行业",
+    "article_count": 15
+  },
+  "2002年中国镍钴市场报告会论文集": {
+    "province": "行业",
+    "article_count": 13
+  },
+  "东方航空报": {
+    "province": "行业",
+    "article_count": 12
+  },
+  "嘉应大学学报(哲学社会科学)": {
+    "province": "行业",
+    "article_count": 12
+  },
+  "云南大学学报(哲学社会科学版)": {
+    "province": "云南",
+    "article_count": 12
+  },
+  "中俄经贸时报": {
+    "province": "行业",
+    "article_count": 12
+  },
+  "农村医药报(汉)": {
+    "province": "行业",
+    "article_count": 11
+  },
+  "合肥日报": {
+    "province": "安徽",
+    "article_count": 10
+  },
+  "就业时报": {
+    "province": "行业",
+    "article_count": 10
+  },
+  "北京现代商报": {
+    "province": "北京",
+    "article_count": 10
+  },
+  "信息时报": {
+    "province": "行业",
+    "article_count": 9
+  },
+  "陇南报": {
+    "province": "甘肃",
+    "article_count": 9
+  },
+  "北京化工学院学报(哲学社会科学版)": {
+    "province": "北京",
+    "article_count": 8
+  },
+  "中国工业报(中国机电日报 )": {
+    "province": "行业",
+    "article_count": 8
+  },
+  "国际经贸消息报": {
+    "province": "全国",
+    "article_count": 7
+  },
+  "中国成人教育信息报": {
+    "province": "全国",
+    "article_count": 7
+  },
+  "中国儿童少年营养与健康报告2009：关注儿童肥胖 远离慢性疾病": {
+    "province": "行业",
+    "article_count": 7
+  },
+  "湖南城市学院学报(人文社会科学版)": {
+    "province": "湖南",
+    "article_count": 7
+  },
+  "海峡时报": {
+    "province": "行业",
+    "article_count": 6
+  },
+  "就业扩张与工资增长（2001-2010）——开放宏观视角下中国劳动市场报告简报": {
+    "province": "行业",
+    "article_count": 6
+  },
+  "乌鲁木齐晚报": {
+    "province": "新疆",
+    "article_count": 6
+  },
+  "关注西部地区儿童营养与健康促进社会和谐发展——中国儿童少年营养与健康报告2008": {
+    "province": "行业",
+    "article_count": 6
+  },
+  "培养健康饮食行为 促进儿童健康成长——中国儿童少年营养与健康报告2011": {
+    "province": "行业",
+    "article_count": 6
+  },
+  "改善农村学生营养 共同托起民族未来——中国儿童少年营养与健康报告2012": {
+    "province": "行业",
+    "article_count": 6
+  },
+  "塔城日报": {
+    "province": "新疆",
+    "article_count": 5
+  },
+  "新闻出版报": {
+    "province": "行业",
+    "article_count": 5
+  },
+  "中国技术市场报": {
+    "province": "全国",
+    "article_count": 5
+  },
+  "适时营养干预 弥合健康差距——中国儿童少年营养与健康报告2010": {
+    "province": "行业",
+    "article_count": 5
+  },
+  "山西发展导报": {
+    "province": "山西",
+    "article_count": 4
+  },
+  "中国社会科学院报": {
+    "province": "行业",
+    "article_count": 4
+  },
+  "中国足球报": {
+    "province": "全国",
+    "article_count": 4
+  },
+  "新疆日报": {
+    "province": "新疆",
+    "article_count": 3
+  },
+  "经济消息报": {
+    "province": "行业",
+    "article_count": 2
+  },
+  "福建邮电报": {
+    "province": "福建",
+    "article_count": 2
+  },
+  "大理学院学报(社会科学版)": {
+    "province": "云南",
+    "article_count": 2
+  },
+  "法制导报": {
+    "province": "行业",
+    "article_count": 1
+  },
+  "天津工商报": {
+    "province": "天津",
+    "article_count": 1
+  },
+  "宜昌日报": {
+    "province": "湖北",
+    "article_count": 1
+  },
+  "中国农机化报": {
+    "province": "行业",
+    "article_count": 1
+  },
+  "井冈山学院学报(哲学社会科学版)": {
+    "province": "行业",
+    "article_count": 1
+  },
+  "中国现代化报告2009——文化现代化研究（综述篇）": {
+    "province": "行业",
+    "article_count": 1
+  },
+  "北京社区报": {
+    "province": "北京",
+    "article_count": 1
+  },
+  "中国县域经济报(中国农机化报 )": {
+    "province": "行业",
+    "article_count": 1
+  },
+  "国际经贸消息(公共商务信息导报)": {
+    "province": "行业",
+    "article_count": 1
+  }
+}

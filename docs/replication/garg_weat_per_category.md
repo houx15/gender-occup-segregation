@@ -179,7 +179,20 @@ figures_dir/
   fig2_garg_weat_categories__<src>__subsample.pdf
   garg_weat_provincial_{rankings,heatmap}.pdf       # provincial
   garg_weat_choropleth_<category>[_<year>|_overall].pdf
+  # provincial survey-correlation extras (when the survey CSV is present):
+  garg_weat_choropleth_grid.pdf                     # newspaper: category × recent years
+  garg_weat_scatter_{cfps,cgss,combined}.pdf        # newspaper: RND vs survey ideation
+  garg_weat_province_longitudinal_trends.pdf        # newspaper: per-province RND vs survey
+  garg_weat_weibo_survey_scatter.pdf                # Weibo: RND vs survey (by province)
 ```
+
+The provincial RND view also reproduces the survey-correlation figures the
+Cohen's d analysis had — per-category (leadership / family / science) since the
+oriented RND shares the survey's "higher = less traditional" direction:
+- **Newspaper** (province-year) merges `data/surveys/processed/gender_ideation_by_province_year.csv`
+  (CFPS / CGSS by year) → aggregated grid, CFPS/CGSS/combined scatters, per-province trends.
+- **Weibo** (province cross-section) merges `data/surveys/provincial/provincial_cleaned.csv`
+  using the most-recent provincial value (`cfps_ideation_2020`) → one cross-province scatter.
 
 ---
 

@@ -1449,6 +1449,310 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
 
 
 # =============================================================================
+# Garg-WEAT provincial survey-correlation plots (RND analogues of the WEAT
+# aggregated grid / CFPS-CGSS scatters / province longitudinal trends). All
+# operate on the oriented RND (higher = less traditional), which shares the
+# survey's direction, so the expected correlation with survey ideation is
+# positive. Reuse the WEAT helpers; the WEAT functions are left untouched.
+# =============================================================================
+
+def _garg_weat_oriented_units(summary_df, category_sign=None):
+    """Per-unit oriented RND long frame with columns [unit, category, value].
+
+    Keeps the raw unit name (renamed 'unit') so the province-year helpers and
+    _merge_weat_survey work unchanged.
+    """
+    df = summary_df.copy()
+    df = df[df["mean_rnd"].notna()]
+    if df.empty:
+        return pd.DataFrame(columns=["unit", "category", "value"])
+    df = apply_ideation_sign(df, category_sign, ["mean_rnd"])
+    return df.rename(
+        columns={"unit_name": "unit", "mean_rnd": "value"}
+    )[["unit", "category", "value"]]
+
+
+def _draw_fit(ax, x, y):
+    """Overlay an OLS line + r / p / equation annotation on a scatter axis."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    m = ~(np.isnan(x) | np.isnan(y))
+    if m.sum() < 3:
+        return
+    xv, yv = x[m], y[m]
+    slope, intercept = np.polyfit(xv, yv, 1)
+    xl = np.linspace(xv.min(), xv.max(), 100)
+    ax.plot(xl, slope * xl + intercept, "--", color="gray", linewidth=1.5, zorder=3)
+    r, p = pearsonr(xv, yv)
+    p_str = f"p = {p:.3f}" if p >= 0.001 else "p < 0.001"
+    ax.text(
+        0.05, 0.95, f"r = {r:.3f}\n{p_str}\ny = {slope:.2f}x + {intercept:.2f}",
+        transform=ax.transAxes, fontsize=9, verticalalignment="top",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
+    )
+
+
+def plot_garg_weat_choropleth_grid(summary_df, figures_dir, logger,
+                                   category_sign=None, shapefile=None):
+    """Category × recent-years grid of oriented-RND choropleths (province-year).
+    RND analogue of plot_choropleth_aggregated_grid.
+    """
+    try:
+        import geopandas as gpd
+    except ImportError:
+        logger.info("  Skipping RND choropleth grid (geopandas not installed)")
+        return
+    sp = _find_china_shapefile(shapefile)
+    if sp is None:
+        logger.info("  Skipping RND choropleth grid (no China shapefile)")
+        return
+
+    long = _garg_weat_oriented_units(summary_df, category_sign)
+    if long.empty:
+        return
+    long[["province_short", "year"]] = long["unit"].apply(
+        lambda u: pd.Series(_parse_province_year(u))
+    )
+    long = long.dropna(subset=["province_short"])
+    if long.empty:
+        logger.info("  Skipping RND grid (units are not province-year)")
+        return
+    long["year"] = long["year"].astype(int)
+
+    china = gpd.read_file(sp)
+    categories = sorted(long["category"].unique())
+    years = sorted(long["year"].unique())[-4:]  # most recent up to 4
+    vmax = max(abs(long["value"].min()), abs(long["value"].max())) or 1.0
+    norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
+
+    fig, axes = plt.subplots(
+        len(categories), len(years),
+        figsize=(5 * len(years), 5 * len(categories)), squeeze=False,
+    )
+    fig.suptitle(
+        "Gender-ideation RND by province (newspapers)",
+        fontsize=16, fontweight="bold", y=0.98,
+    )
+    for r, cat in enumerate(categories):
+        for c, year in enumerate(years):
+            ax = axes[r][c]
+            sub = long[(long["category"] == cat) & (long["year"] == year)][
+                ["province_short", "value"]
+            ].copy()
+            if sub.empty:
+                ax.set_axis_off(); ax.set_title("n=0", fontsize=9); continue
+            sub["province"] = sub["province_short"].map(SHORT_TO_FULL_PROVINCE)
+            sub = sub.dropna(subset=["province"])
+            merged = _match_province_in_shapefile(sub[["province", "value"]], china)
+            n = int(merged["value"].notna().sum())
+            merged.plot(
+                column="value", ax=ax, cmap="RdBu_r", norm=norm,
+                missing_kwds={"color": "lightgrey"}, edgecolor="black", linewidth=0.15,
+            )
+            ax.set_axis_off(); ax.set_title(f"n={n}", fontsize=9)
+        axes[r][0].text(
+            -0.05, 0.5, cat.title(), transform=axes[r][0].transAxes,
+            rotation=90, va="center", ha="right", fontsize=12, fontweight="bold",
+        )
+    for c, year in enumerate(years):
+        axes[0][c].text(
+            0.5, 1.12, str(year), transform=axes[0][c].transAxes,
+            ha="center", va="bottom", fontsize=12, fontweight="bold",
+        )
+    cbar_ax = fig.add_axes([0.93, 0.15, 0.015, 0.70])
+    sm = plt.cm.ScalarMappable(cmap="RdBu_r", norm=norm); sm.set_array([])
+    fig.colorbar(sm, cax=cbar_ax).set_label("RND (oriented)", fontsize=10)
+    plt.tight_layout(rect=[0, 0, 0.92, 0.96])
+    path = get_figure_path("garg_weat_choropleth_grid", figures_dir)
+    plt.savefig(path, format="pdf"); plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
+def plot_garg_weat_survey_scatter(summary_df, survey_csv_path, figures_dir, logger,
+                                  category_sign=None):
+    """Per-category oriented RND vs survey gender ideation (province-year).
+    Writes garg_weat_scatter_{cfps,cgss,combined}. RND analogue of
+    plot_survey_embedding_scatter.
+    """
+    long = _garg_weat_oriented_units(summary_df, category_sign)
+    if long.empty:
+        return
+    merged = _merge_weat_survey(long, survey_csv_path)  # carries category, value
+    if merged.empty:
+        logger.info("  Skipping RND survey scatter: no merged data")
+        return
+    merged = merged[merged["dataset"].isin(["CFPS", "CGSS"])]
+    if merged.empty:
+        logger.info("  Skipping RND survey scatter: no CFPS/CGSS rows")
+        return
+
+    categories = sorted(long["category"].unique())
+    period_bins = [(2007, 2009), (2010, 2014), (2015, 2019), (2020, 2024)]
+    period_colors = ["#1b9e77", "#d95f02", "#7570b3", "#e7298a"]
+    period_labels = ["2007–2009", "2010–2014", "2015–2019", "2020–2024"]
+    markers = {"CFPS": "P", "CGSS": "X"}
+
+    def _period(y):
+        for i, (lo, hi) in enumerate(period_bins):
+            if lo <= y <= hi:
+                return i
+        return None
+    merged["period"] = merged["year"].apply(_period)
+
+    def _scatter(data, suffix):
+        fig, axes = plt.subplots(
+            1, len(categories), figsize=(6 * len(categories), 5.5), squeeze=False,
+        )
+        axes = axes[0]
+        for ax, cat in zip(axes, categories):
+            cd = data[data["category"] == cat].dropna(
+                subset=["gender_ideation_mean", "value"]
+            )
+            for pi in range(len(period_bins)):
+                sub = cd[cd["period"] == pi]
+                if sub.empty:
+                    continue
+                if suffix == "combined":
+                    for ds, mk in markers.items():
+                        s2 = sub[sub["dataset"] == ds]
+                        if not s2.empty:
+                            ax.scatter(s2["gender_ideation_mean"], s2["value"],
+                                       c=period_colors[pi], marker=mk, s=70,
+                                       alpha=0.8, edgecolors="white", linewidths=0.5)
+                else:
+                    ax.scatter(sub["gender_ideation_mean"], sub["value"],
+                               c=period_colors[pi], marker="o", s=70, alpha=0.8,
+                               edgecolors="white", linewidths=0.5,
+                               label=period_labels[pi])
+            _draw_fit(ax, cd["gender_ideation_mean"].values, cd["value"].values)
+            ax.set_title(cat.title(), fontsize=12, fontweight="bold")
+            ax.set_xlabel("Survey gender ideation", fontsize=10)
+            ax.set_ylabel("RND (oriented, higher = less traditional)", fontsize=9)
+            ax.grid(True, alpha=0.3)
+        axes[0].legend(fontsize=7, loc="lower right", framealpha=0.9)
+        plt.tight_layout()
+        path = get_figure_path(f"garg_weat_scatter_{suffix}", figures_dir)
+        plt.savefig(path, format="pdf"); plt.close()
+        logger.info(f"  Saved: {path.name}")
+
+    cfps = merged[merged["dataset"] == "CFPS"]
+    if not cfps.empty:
+        _scatter(cfps, "cfps")
+    cgss = merged[merged["dataset"] == "CGSS"]
+    if not cgss.empty:
+        _scatter(cgss, "cgss")
+    _scatter(merged, "combined")
+
+
+def plot_garg_weat_province_trends(summary_df, survey_csv_path, figures_dir, logger,
+                                   category_sign=None):
+    """Per-province dual-axis trends: oriented RND per category (left) vs survey
+    ideation (right) over years. RND analogue of plot_province_longitudinal_trends.
+    """
+    long = _garg_weat_oriented_units(summary_df, category_sign)
+    if long.empty:
+        return
+    long[["province_short", "year"]] = long["unit"].apply(
+        lambda u: pd.Series(_parse_province_year(u))
+    )
+    long = long.dropna(subset=["province_short"])
+    if long.empty:
+        logger.info("  Skipping RND province trends (units not province-year)")
+        return
+    long["year"] = long["year"].astype(int)
+    merged = _merge_weat_survey(
+        _garg_weat_oriented_units(summary_df, category_sign), survey_csv_path
+    )
+
+    target = ["河南", "浙江", "内蒙古", "辽宁"]
+    categories = sorted(long["category"].unique())
+    palette = {"leadership": "#1f4e79", "family": "#c0392b", "science": "#2e7d32"}
+
+    fig, axes = plt.subplots(1, len(target), figsize=(5 * len(target), 5), squeeze=False)
+    axes = axes[0]
+    fig.suptitle(
+        "Province longitudinal trends: gender-ideation RND vs survey",
+        fontsize=14, fontweight="bold",
+    )
+    for ax1, prov in zip(axes, target):
+        pv = long[long["province_short"] == prov]
+        for cat in categories:
+            cd = pv[pv["category"] == cat].sort_values("year")
+            if cd.empty:
+                continue
+            ax1.plot(cd["year"], cd["value"], "o-", color=palette.get(cat),
+                     markersize=4, linewidth=1.4, label=cat.title())
+        ax1.axhline(y=0, color="gray", linestyle="--", alpha=0.3)
+        ax1.set_ylabel("RND (oriented)", fontsize=9)
+        ax1.set_title(prov, fontsize=12, fontweight="bold")
+        ax1.grid(True, alpha=0.2)
+        ax2 = ax1.twinx()
+        if not merged.empty:
+            ps = merged[merged["province_short"] == prov]
+            for ds, grp in ps.groupby("dataset"):
+                grp = grp.drop_duplicates(subset=["year"]).sort_values("year")
+                ax2.plot(grp["year"], grp["gender_ideation_mean"], "--", marker="X",
+                         markersize=6, linewidth=1.3, alpha=0.85, color="#8e44ad",
+                         label=f"{ds}")
+        ax2.set_ylim(0, 1)
+        ax2.set_ylabel("Survey ideation", fontsize=9, color="#8e44ad")
+        ax2.tick_params(axis="y", labelcolor="#8e44ad", labelsize=8)
+    axes[0].legend(fontsize=7, loc="best")
+    plt.tight_layout()
+    path = get_figure_path("garg_weat_province_longitudinal_trends", figures_dir)
+    plt.savefig(path, format="pdf"); plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
+def plot_garg_weat_weibo_survey_scatter(summary_df, provincial_csv, figures_dir, logger,
+                                        category_sign=None, ideation_col="cfps_ideation_2020"):
+    """Cross-province oriented RND per category vs the most-recent provincial
+    survey ideation (Weibo). Reads provincial_cleaned.csv (Chinese-province key,
+    e.g. cfps_ideation_2020). Weibo is a cross-section, so this is one point per
+    province.
+    """
+    p = Path(provincial_csv)
+    if not p.exists():
+        logger.info(f"  Skipping Weibo survey scatter: {provincial_csv} not found")
+        return
+    long = _garg_weat_oriented_units(summary_df, category_sign)  # unit = province (zh)
+    if long.empty:
+        return
+    surv = pd.read_csv(p)
+    if "province" not in surv.columns or ideation_col not in surv.columns:
+        logger.info(
+            f"  Skipping Weibo survey scatter: '{ideation_col}'/'province' "
+            f"missing from {p.name}"
+        )
+        return
+    surv = surv[["province", ideation_col]].dropna()
+    data = long.merge(surv, left_on="unit", right_on="province", how="inner")
+    if data.empty:
+        logger.info("  Skipping Weibo survey scatter: no province overlap")
+        return
+
+    categories = sorted(long["category"].unique())
+    fig, axes = plt.subplots(1, len(categories), figsize=(6 * len(categories), 5.5),
+                             squeeze=False)
+    axes = axes[0]
+    fig.suptitle("Weibo gender-ideation RND vs survey (by province)",
+                 fontsize=13, fontweight="bold")
+    for ax, cat in zip(axes, categories):
+        cd = data[data["category"] == cat].dropna(subset=[ideation_col, "value"])
+        ax.scatter(cd[ideation_col], cd["value"], c="#1f4e79", s=70, alpha=0.8,
+                   edgecolors="white", linewidths=0.5)
+        _draw_fit(ax, cd[ideation_col].values, cd["value"].values)
+        ax.set_title(cat.title(), fontsize=12, fontweight="bold")
+        ax.set_xlabel(f"Survey gender ideation ({ideation_col})", fontsize=9)
+        ax.set_ylabel("RND (oriented, higher = less traditional)", fontsize=9)
+        ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    path = get_figure_path("garg_weat_weibo_survey_scatter", figures_dir)
+    plt.savefig(path, format="pdf"); plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
+# =============================================================================
 # Composite: WEAT + Survey overlay
 # =============================================================================
 
@@ -2199,6 +2503,44 @@ def main(config="config/config.yml", mode=None):
                     df, figures_dir, logger,
                     category_sign=category_sign, shapefile=shapefile,
                 )
+                # Survey-correlation extras (RND analogues of the WEAT views).
+                if kind == "province_year":
+                    # Newspaper: province-year survey (CFPS/CGSS by year).
+                    survey_csv = Path(
+                        "data/surveys/processed/gender_ideation_by_province_year.csv"
+                    )
+                    if survey_csv.exists():
+                        plot_garg_weat_choropleth_grid(
+                            df, figures_dir, logger,
+                            category_sign=category_sign, shapefile=shapefile,
+                        )
+                        plot_garg_weat_survey_scatter(
+                            df, str(survey_csv), figures_dir, logger,
+                            category_sign=category_sign,
+                        )
+                        plot_garg_weat_province_trends(
+                            df, str(survey_csv), figures_dir, logger,
+                            category_sign=category_sign,
+                        )
+                    else:
+                        logger.info(
+                            f"  No province-year survey at {survey_csv}; "
+                            "skipping grid / scatter / trends"
+                        )
+                else:
+                    # Weibo (province cross-section): most-recent provincial
+                    # survey value per province.
+                    prov_csv = Path("data/surveys/provincial/provincial_cleaned.csv")
+                    if prov_csv.exists():
+                        plot_garg_weat_weibo_survey_scatter(
+                            df, str(prov_csv), figures_dir, logger,
+                            category_sign=category_sign,
+                        )
+                    else:
+                        logger.info(
+                            f"  No provincial survey at {prov_csv}; "
+                            "skipping Weibo survey scatter"
+                        )
         else:
             logger.error(f"Garg-WEAT summary not found at {summary_path}")
 

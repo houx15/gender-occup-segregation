@@ -88,6 +88,12 @@ provincial/data/*
 !data/surveys/processed/
 !data/surveys/processed/*
 !data/surveys/survey-config.md
+# data/surveys/provincial: keep cleaned CSVs + scripts/docs, drop raw microdata
+# (.dta/.xls) and paper outputs (distribution KDE PDFs).
+data/surveys/provincial/*.dta
+data/surveys/provincial/*.xls
+data/surveys/provincial/*.xlsx
+data/surveys/provincial/distribution/
 !logs/.gitkeep
 !config/config.example.yml
 !config/profiles/
