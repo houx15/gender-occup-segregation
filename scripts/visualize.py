@@ -1436,8 +1436,13 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
                     figures_dir, logger, value_col="value",
                 )
         else:
-            cat_data = cat_raw.rename(columns={"unit_name": "province"})
-            merged = _match_province_in_shapefile(cat_data, china)
+            # Bare-province units (Weibo: '北京') are SHORT names; the shapefile
+            # ADM1_ZH column holds FULL names ('北京市'). Map short -> full
+            # before matching, mirroring plot_weat_choropleth's province branch.
+            cat_data = cat_raw.rename(columns={"unit_name": "province_short"})
+            cat_data["province"] = cat_data["province_short"].map(SHORT_TO_FULL_PROVINCE)
+            cat_data = cat_data.dropna(subset=["province"])
+            merged = _match_province_in_shapefile(cat_data[["province", "value"]], china)
             if merged["value"].notna().sum() == 0:
                 logger.info(f"  Skipping RND choropleth for {cat}: no matches")
                 continue
