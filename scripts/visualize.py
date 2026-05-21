@@ -844,18 +844,24 @@ def _match_province_in_shapefile(dim_data, china):
 
 
 def _plot_single_choropleth(merged, title, filename, figures_dir, logger,
-                            value_col="cohens_d"):
+                            value_col="cohens_d", norm=None):
     """Render and save a single choropleth map with province name labels.
 
     ``value_col`` selects the column to colour by (default ``cohens_d`` for the
     WEAT path; the Garg-WEAT provincial path passes its oriented RND column).
+    ``norm`` (e.g. a ``TwoSlopeNorm``) fixes a symmetric, dataset-wide colour
+    range so the maps are directionally readable and comparable; default None
+    keeps matplotlib's per-map autoscaling (the WEAT behaviour).
     """
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
-    merged.plot(
+    plot_kwargs = dict(
         column=value_col, ax=ax, legend=True, cmap="RdBu_r",
         missing_kwds={"color": "lightgrey", "label": "No data"},
         edgecolor="black", linewidth=0.3,
     )
+    if norm is not None:
+        plot_kwargs["norm"] = norm
+    merged.plot(**plot_kwargs)
 
     # Label each province with its short name at the polygon centroid
     label_col = None
@@ -1223,6 +1229,26 @@ def _find_china_shapefile(extra=None):
     return None
 
 
+def _symmetric_vmax(values):
+    """A 'nice' symmetric colour limit for diverging maps: max |value| rounded
+    up to 1/2/2.5/5 × 10^k. Used so every map in one dataset shares the same
+    0-centred, comparable range (e.g. -0.2..0.2), letting colour encode
+    direction (and the family flip) consistently.
+    """
+    import math
+    arr = np.asarray(list(values), dtype=float)
+    arr = arr[~np.isnan(arr)]
+    v = float(np.max(np.abs(arr))) if arr.size else 1.0
+    if v <= 0:
+        return 1.0
+    exp = math.floor(math.log10(v))
+    base = 10.0 ** exp
+    for m in (1.0, 2.0, 2.5, 5.0, 10.0):
+        if v <= m * base:
+            return m * base
+    return 10.0 * base
+
+
 def _garg_weat_unit_kind(unit_names):
     """Classify garg_weat summary units to choose the right plots.
 
@@ -1393,6 +1419,11 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
         return
     df = apply_ideation_sign(df, category_sign, ["mean_rnd"])
 
+    # One symmetric, 0-centred colour range for EVERY map in this dataset, so
+    # colour encodes direction (and the family flip) and maps are comparable.
+    vmax = _symmetric_vmax(df["mean_rnd"])
+    norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
+
     sample_units = df["unit_name"].unique()[:5]
     parsed = [_parse_province_year(u) for u in sample_units]
     is_province_year = (
@@ -1424,7 +1455,7 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
                 _plot_single_choropleth(
                     merged, f"{cat.title()} {int(year)}",
                     f"garg_weat_choropleth_{cat}_{int(year)}",
-                    figures_dir, logger, value_col="value",
+                    figures_dir, logger, value_col="value", norm=norm,
                 )
 
             avg_data = cat_raw.groupby("province")["value"].mean().reset_index()
@@ -1433,7 +1464,7 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
                 _plot_single_choropleth(
                     merged, f"{cat.title()} Average",
                     f"garg_weat_choropleth_{cat}_overall",
-                    figures_dir, logger, value_col="value",
+                    figures_dir, logger, value_col="value", norm=norm,
                 )
         else:
             # Bare-province units (Weibo: '北京') are SHORT names; the shapefile
@@ -1449,7 +1480,7 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
             _plot_single_choropleth(
                 merged, f"{cat.title()} — RND by Province",
                 f"garg_weat_choropleth_{cat}", figures_dir, logger,
-                value_col="value",
+                value_col="value", norm=norm,
             )
 
 
@@ -1527,7 +1558,9 @@ def plot_garg_weat_choropleth_grid(summary_df, figures_dir, logger,
     china = gpd.read_file(sp)
     categories = sorted(long["category"].unique())
     years = sorted(long["year"].unique())[-4:]  # most recent up to 4
-    vmax = max(abs(long["value"].min()), abs(long["value"].max())) or 1.0
+    # Same nice symmetric range as the individual maps -> comparable within the
+    # dataset, 0-centred so colour encodes direction.
+    vmax = _symmetric_vmax(long["value"])
     norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
 
     fig, axes = plt.subplots(

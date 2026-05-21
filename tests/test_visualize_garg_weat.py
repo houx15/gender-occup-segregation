@@ -200,6 +200,15 @@ def test_province_units_skip_trend(tmp_path, caplog):
 
 # --- Provincial RND plots + unit-kind detection -----------------------------
 
+def test_symmetric_vmax_nice_bounds():
+    from scripts.visualize import _symmetric_vmax
+    assert _symmetric_vmax([0.0]) == 1.0            # degenerate -> 1.0
+    assert _symmetric_vmax([float("nan"), 0.04]) == 0.05
+    assert _symmetric_vmax([0.07, -0.12]) == 0.2    # 0.12 -> 0.2
+    assert _symmetric_vmax([0.3, -0.1]) == 0.5      # 0.3  -> 0.5
+    assert _symmetric_vmax([1.5]) == 2.0            # 1.5  -> 2.0
+
+
 def test_unit_kind_classifier():
     from scripts.visualize import _garg_weat_unit_kind
     assert _garg_weat_unit_kind(["1990s", "2000s"]) == "longitudinal"
