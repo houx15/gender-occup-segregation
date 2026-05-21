@@ -14,16 +14,15 @@
 # Coverage is computed from each source's own models. Override the threshold by
 # passing it as the first arg: sbatch slurm/prepare_wordlists_pku.slurm 0.6
 #
-# Weibo data lives on /gpfs, newspaper on /lustre; both are read via the
-# absolute paths in the configs. If /gpfs and /lustre are NOT co-mounted on the
-# compute nodes, split this into two jobs (one per filesystem).
+# Both arms' trained models live under /lustre (read via the configs' absolute
+# paths), so this runs entirely from the /lustre checkout.
 #
 # Workflow: run this -> review cleaned_*.txt -> sbatch slurm/garg_weat_pku.slurm
 
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate opinion
 
-# Repo checkout (edit if yours is elsewhere, e.g. under /gpfs).
+# Repo checkout (edit if yours is elsewhere).
 REPO_DIR=/lustre/home/2401111059/gender-occup-segregation
 cd "$REPO_DIR"
 

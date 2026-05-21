@@ -15,8 +15,8 @@
 # (slurm/garg_weat_all_sources.slurm).
 #
 # Defaults to the Princeton-hosted longitudinal arms (Renminribao + China
-# Ngram). The provincial arms (Weibo on /gpfs, provincial newspaper on /lustre)
-# live on the PKU server and use a different Slurm style — run those with
+# Ngram). The provincial arms (Weibo + provincial newspaper, both on the PKU
+# /lustre server) use a different Slurm style — run those with
 # slurm/garg_weat_pku.slurm instead.
 #
 # Prereq: cleaned_*.txt must exist — run slurm/prepare_wordlists_zh.slurm first.
