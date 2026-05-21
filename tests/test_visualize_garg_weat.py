@@ -274,6 +274,25 @@ def _province_year_summary(provinces, years, categories=("leadership", "family",
     return pd.DataFrame(rows)
 
 
+def test_weibo_survey_scatter(tmp_path):
+    from scripts.visualize import plot_garg_weat_weibo_survey_scatter
+    summary = pd.DataFrame([
+        {"unit_name": p, "category": c, "mean_rnd": base + off}
+        for p, base in [("北京", 0.3), ("上海", 0.4), ("广东", 0.2), ("四川", 0.5)]
+        for c, off in [("leadership", 0.0), ("family", 0.1), ("science", -0.05)]
+    ])
+    surv = tmp_path / "provincial_cleaned.csv"
+    pd.DataFrame({
+        "province": ["北京", "上海", "广东", "四川"],
+        "cfps_ideation_2020": [3.0, 2.8, 2.5, 3.2],
+    }).to_csv(surv, index=False)
+    plot_garg_weat_weibo_survey_scatter(
+        summary, str(surv), tmp_path, logging.getLogger("test"),
+        category_sign={"leadership": 1, "family": -1, "science": 1},
+    )
+    assert any("garg_weat_weibo_survey_scatter" in n for n in _pdfs(tmp_path)), _pdfs(tmp_path)
+
+
 def test_weibo_correlation_multivar(tmp_path):
     from scripts.visualize import plot_garg_weat_weibo_correlation
     provinces = ["北京", "上海", "广东", "四川", "山东", "河南"]

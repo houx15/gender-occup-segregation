@@ -1762,6 +1762,62 @@ _WEIBO_CORRELATES = [
 ]
 
 
+def plot_garg_weat_weibo_survey_scatter(summary_df, provincial_csv, figures_dir, logger,
+                                        category_sign=None, ideation_col="cfps_ideation_2020"):
+    """Focused Weibo survey correlation: per-category oriented RND vs the
+    province-level CFPS gender ideation, one figure with a subplot per category.
+    (The broader socioeconomic version is plot_garg_weat_weibo_correlation.)
+
+    For Weibo only CFPS is available in provincial_cleaned.csv; CGSS exists only
+    for the newspaper province-year data (plot_garg_weat_survey_scatter).
+    """
+    p = Path(provincial_csv)
+    if not p.exists():
+        logger.info(f"  Skipping Weibo survey scatter: {provincial_csv} not found")
+        return
+    long = _garg_weat_oriented_units(summary_df, category_sign)  # unit = province (zh)
+    if long.empty:
+        return
+    surv = pd.read_csv(p)
+    if "province" not in surv.columns or ideation_col not in surv.columns:
+        logger.info(
+            f"  Skipping Weibo survey scatter: '{ideation_col}'/'province' missing"
+        )
+        return
+    surv = surv[["province", ideation_col]].dropna()
+    data = long.merge(surv, left_on="unit", right_on="province", how="inner")
+    if data.empty:
+        logger.info("  Skipping Weibo survey scatter: no province overlap")
+        return
+
+    categories = sorted(long["category"].unique())
+    fig, axes = plt.subplots(1, len(categories), figsize=(6 * len(categories), 5.5),
+                             squeeze=False)
+    axes = axes[0]
+    fig.suptitle("Weibo gender norm vs CFPS gender ideation (by province)",
+                 fontsize=13, fontweight="bold")
+    for ax, cat in zip(axes, categories):
+        cd = data[data["category"] == cat].dropna(subset=[ideation_col, "value"])
+        if len(cd) >= 2:
+            sns.regplot(x=ideation_col, y="value", data=cd, ax=ax,
+                        scatter_kws={"s": 55, "alpha": 0.8, "color": "#4878a8"},
+                        line_kws={"color": "red", "linewidth": 1.5})
+        if len(cd) >= 3:
+            r, pval = pearsonr(cd[ideation_col].values, cd["value"].values)
+            pstr = f"p={pval:.3f}" if pval >= 0.001 else "p<0.001"
+            ax.set_title(f"{cat.title()}\nr={r:.3f}, {pstr}", fontsize=11)
+        else:
+            ax.set_title(cat.title(), fontsize=11)
+        ax.set_xlabel("CFPS gender ideation", fontsize=10)
+        ax.set_ylabel(
+            f"{cat.title()} gender norm\n(higher = less traditional)", fontsize=8
+        )
+    plt.tight_layout()
+    path = get_figure_path("garg_weat_weibo_survey_scatter", figures_dir)
+    plt.savefig(path, format="pdf"); plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
 def plot_garg_weat_weibo_correlation(summary_df, provincial_csv, figures_dir, logger,
                                      category_sign=None):
     """Per-category oriented RND vs province-level socioeconomic + survey
@@ -1800,7 +1856,9 @@ def plot_garg_weat_weibo_correlation(summary_df, provincial_csv, figures_dir, lo
         if merged.empty:
             logger.info(f"  Weibo correlation {cat}: no province overlap")
             continue
-        ylabel = f"{cat.title()} gender norm from Weibo (RND, oriented)"
+        ylabel = (
+            f"{cat.title()} gender norm from Weibo\n(higher = less traditional)"
+        )
         fig, axes = plt.subplots(nrows, ncols, figsize=(6 * ncols, 5 * nrows),
                                  squeeze=False)
         for i, (lab, _fn) in enumerate(avail):
@@ -2610,6 +2668,12 @@ def main(config="config/config.yml", mode=None):
                     # survey value per province.
                     prov_csv = Path("data/surveys/provincial/provincial_cleaned.csv")
                     if prov_csv.exists():
+                        # Focused survey correlation (CFPS) + broader
+                        # socioeconomic correlation panels.
+                        plot_garg_weat_weibo_survey_scatter(
+                            df, str(prov_csv), figures_dir, logger,
+                            category_sign=category_sign,
+                        )
                         plot_garg_weat_weibo_correlation(
                             df, str(prov_csv), figures_dir, logger,
                             category_sign=category_sign,
