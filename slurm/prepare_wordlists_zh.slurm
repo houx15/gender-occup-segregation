@@ -10,12 +10,14 @@
 #SBATCH --output=logs/prepare_wordlists_zh_%j.out
 #SBATCH --error=logs/prepare_wordlists_zh_%j.err
 
-# CHINESE wordlist precheck for analyze_garg_weat (formal register):
+# CHINESE wordlist precheck for analyze_garg_weat (longitudinal register):
 #   1. per-file dedup (keep first occurrence)
 #   2. OOV prune: drop words in vocab in < THRESHOLD of the pooled models
-# Reads candidates_*.txt, writes cleaned_*.txt under wordlists/zh/garg_weat_formal
-# (raw lists untouched). Coverage is pooled over the Renminribao + China-Ngram
-# models (Princeton), which share the formal register.
+# Reads candidates_*.txt, writes cleaned_*.txt under
+# wordlists/zh/garg_weat_longitudinal (raw lists untouched). Coverage is pooled
+# over the Renminribao + China-Ngram models (Princeton), which share this
+# longitudinal register. The provincial newspaper uses its own list
+# (wordlists/zh/garg_weat_newspaper) — see slurm/prepare_wordlists_pku.slurm.
 #
 # Workflow: run this -> review cleaned_*.txt -> sbatch slurm/garg_weat_zh.slurm
 #
@@ -26,7 +28,7 @@
 #       --wordlist_dir=wordlists/zh/garg_weat_informal \
 #       --candidates=candidates_leadership.txt,candidates_family.txt,candidates_science.txt \
 #       --threshold=0.7
-# (provincial newspaper uses the formal register but also runs on PKU.)
+# (provincial newspaper uses its own list, wordlists/zh/garg_weat_newspaper, on PKU.)
 
 module load anaconda3/2023.3
 conda activate llm
@@ -41,7 +43,7 @@ CANDIDATES="candidates_leadership.txt,candidates_family.txt,candidates_science.t
 THRESHOLD="${1:-0.7}"
 
 echo "=========================================="
-echo "Chinese wordlist precheck (formal register)"
+echo "Chinese wordlist precheck (longitudinal register)"
 echo "  configs:    $CONFIGS"
 echo "  candidates: $CANDIDATES"
 echo "  threshold:  $THRESHOLD"
@@ -49,10 +51,10 @@ echo "=========================================="
 
 python -m scripts.prepare_wordlists \
     --configs="$CONFIGS" \
-    --wordlist_dir="wordlists/zh/garg_weat_formal" \
+    --wordlist_dir="wordlists/zh/garg_weat_longitudinal" \
     --candidates="$CANDIDATES" \
     --threshold="$THRESHOLD"
 
 echo ""
-echo "Done. Review the cleaned_*.txt files under wordlists/zh/garg_weat_formal/,"
+echo "Done. Review the cleaned_*.txt files under wordlists/zh/garg_weat_longitudinal/,"
 echo "then launch: sbatch slurm/garg_weat_zh.slurm"

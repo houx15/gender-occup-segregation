@@ -18,7 +18,7 @@ paths:
   shapefile: "/lustre/home/2401111059/youth-analysis/configs/china_shp/chn_admbnda_adm1_ocha_2020.shp"
 
 wordlists:
-  dir: "wordlists/zh/garg_weat_formal"
+  dir: "wordlists/zh/garg_weat_newspaper"
   gender_words_file: "gender_words.json"
   categories:
     leadership: "cleaned_leadership.txt"

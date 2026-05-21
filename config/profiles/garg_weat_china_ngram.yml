@@ -17,7 +17,7 @@ paths:
   figures_dir: "/scratch/network/yh6580/gender-occup/figures_garg_weat_china_ngram"
 
 wordlists:
-  dir: "wordlists/zh/garg_weat_formal"
+  dir: "wordlists/zh/garg_weat_longitudinal"
   gender_words_file: "gender_words.json"
   categories:
     leadership: "cleaned_leadership.txt"

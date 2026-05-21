@@ -9,8 +9,8 @@
 
 # PKU-server wordlist precheck for the provincial garg_weat arms.
 # dedup + OOV-prune candidates_*.txt -> cleaned_*.txt; Chinese threshold = 0.7.
-#   - Weibo     -> INFORMAL register (wordlists/zh/garg_weat_informal)
-#   - Newspaper -> FORMAL   register (wordlists/zh/garg_weat_formal)
+#   - Weibo     -> wordlists/zh/garg_weat_informal
+#   - Newspaper -> wordlists/zh/garg_weat_newspaper
 # Coverage is computed from each source's own models. Override the threshold by
 # passing it as the first arg: sbatch slurm/prepare_wordlists_pku.slurm 0.6
 #
@@ -43,13 +43,13 @@ python -m scripts.prepare_wordlists \
     --threshold="$THRESHOLD"
 
 echo ""
-echo "=== Provincial newspaper (formal register) ==="
+echo "=== Provincial newspaper (newspaper register) ==="
 python -m scripts.prepare_wordlists \
     --configs=config/profiles/garg_weat_provincial_newspaper.yml \
-    --wordlist_dir=wordlists/zh/garg_weat_formal \
+    --wordlist_dir=wordlists/zh/garg_weat_newspaper \
     --candidates="$CANDIDATES" \
     --threshold="$THRESHOLD"
 
 echo ""
-echo "Done. Review cleaned_*.txt under wordlists/zh/garg_weat_{informal,formal}/,"
+echo "Done. Review cleaned_*.txt under wordlists/zh/garg_weat_{informal,newspaper}/,"
 echo "then: sbatch slurm/garg_weat_pku.slurm"

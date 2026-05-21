@@ -116,7 +116,8 @@ The Chinese arms reuse the exact `models_dir` + `model_name_template` of their
 | Language | Dir | Notes |
 |---|---|---|
 | English | `wordlists/en/garg_weat/` | curated `candidates_*.txt` |
-| Chinese (formal) | `wordlists/zh/garg_weat_formal/` | for RMRB, China Ngram, newspaper |
+| Chinese (longitudinal) | `wordlists/zh/garg_weat_longitudinal/` | for RMRB + China Ngram |
+| Chinese (newspaper) | `wordlists/zh/garg_weat_newspaper/` | for provincial newspaper |
 | Chinese (informal) | `wordlists/zh/garg_weat_informal/` | for Weibo |
 
 The Chinese category seeds were derived from the existing WEAT *target* lists
@@ -155,9 +156,9 @@ python -m scripts.visualize main --config config/profiles/<arm>.yml
 |---|---|---|---|
 | `slurm/prepare_wordlists.slurm` | Princeton | English precheck | COHA configs → `wordlists/en/garg_weat` |
 | `slurm/garg_weat_all_sources.slurm` | Princeton | **English** analyze + visualize | COHA trained / HistWords SGNS / SVD + google_ngram eng-all / eng-fiction-all |
-| `slurm/prepare_wordlists_zh.slurm` | Princeton | **Chinese** precheck (formal) | RMRB + China-Ngram (pooled) → `wordlists/zh/garg_weat_formal` |
+| `slurm/prepare_wordlists_zh.slurm` | Princeton | **Chinese** precheck (longitudinal) | RMRB + China-Ngram (pooled) → `wordlists/zh/garg_weat_longitudinal` |
 | `slurm/garg_weat_zh.slurm` | Princeton | **Chinese** analyze + visualize | RMRB + China-Ngram (longitudinal) |
-| `slurm/prepare_wordlists_pku.slurm` | **PKU** | **Chinese** provincial precheck | Weibo → informal, newspaper → formal (threshold 0.7) |
+| `slurm/prepare_wordlists_pku.slurm` | **PKU** | **Chinese** provincial precheck | Weibo → informal, newspaper → newspaper (threshold 0.7) |
 | `slurm/garg_weat_pku.slurm` | **PKU** | **Chinese** provincial analyze + visualize | Weibo + provincial newspaper |
 
 PKU scripts use that server's conventions (`conda activate opinion`, no `module
