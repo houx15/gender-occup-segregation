@@ -1,36 +1,40 @@
 #!/bin/bash
-#SBATCH --job-name=garg_weat_zh
+#SBATCH --job-name=garg_weat_pku
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
-#SBATCH --time=02:00:00
+#SBATCH --time=08:00:00
 #SBATCH --mail-type=end
-#SBATCH --mail-user=yh6580@princeton.edu
-#SBATCH --output=logs/garg_weat_zh_%j.out
-#SBATCH --error=logs/garg_weat_zh_%j.err
+#SBATCH --mail-user=2401111059@stu.pku.edu.cn
 
-# CHINESE garg_weat pipeline: analyze_garg_weat + visualize for the Chinese
-# embedding sources. Kept separate from the English pipeline
-# (slurm/garg_weat_all_sources.slurm).
+# PKU-server CHINESE PROVINCIAL garg_weat: analyze_garg_weat + visualize for the
+# provincial arms, producing the cross-province RND views (rankings / heatmap /
+# choropleth) that replace the Cohen's d provincial plots.
+#   - Weibo     (informal lists, /gpfs)
+#   - Newspaper (formal lists, /lustre)
+# Prereq: cleaned_*.txt exist — run slurm/prepare_wordlists_pku.slurm first.
 #
-# Defaults to the Princeton-hosted longitudinal arms (Renminribao + China
-# Ngram). The provincial arms (Weibo on /gpfs, provincial newspaper on /lustre)
-# live on the PKU server and use a different Slurm style — run those with
-# slurm/garg_weat_pku.slurm instead.
+# Requires the 'opinion' env to have pyarrow (analyze_garg_weat writes parquet)
+# and geopandas (provincial choropleths) — both already used by the WEAT
+# provincial pipeline. The choropleth uses the China shapefile at
+# /lustre/home/2401111059/youth-analysis/configs/china_shp/...
 #
-# Prereq: cleaned_*.txt must exist — run slurm/prepare_wordlists_zh.slurm first.
+# Pass explicit configs to scope the run, e.g.:
+#   sbatch slurm/garg_weat_pku.slurm config/profiles/garg_weat_weibo.yml
 
-module load anaconda3/2023.3
-conda activate llm
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate opinion
+
+# Repo checkout (edit if yours is elsewhere, e.g. under /gpfs).
+REPO_DIR=/lustre/home/2401111059/gender-occup-segregation
+cd "$REPO_DIR"
 
 set -u
 
 DEFAULT_CONFIGS=(
-    "config/profiles/garg_weat_renminribao.yml"
-    "config/profiles/garg_weat_china_ngram.yml"
+    "config/profiles/garg_weat_weibo.yml"
+    "config/profiles/garg_weat_provincial_newspaper.yml"
 )
-
 if [ "$#" -gt 0 ]; then
     CONFIGS=("$@")
 else
@@ -44,9 +48,8 @@ read_config_value() {
 declare -a STATUSES
 
 echo "=========================================="
-echo "Garg-WEAT (Chinese) multi-source run"
-echo "  Configs: ${#CONFIGS[@]}"
-for cfg in "${CONFIGS[@]}"; do echo "    - $cfg"; done
+echo "Garg-WEAT (PKU provincial) run — ${#CONFIGS[@]} config(s)"
+for cfg in "${CONFIGS[@]}"; do echo "  - $cfg"; done
 echo "=========================================="
 echo ""
 
@@ -54,7 +57,7 @@ i=0
 for CONFIG in "${CONFIGS[@]}"; do
     i=$((i + 1))
     echo "------------------------------------------"
-    echo "[${i}/${#CONFIGS[@]}] $CONFIG"
+    echo "[$i/${#CONFIGS[@]}] $CONFIG"
     echo "------------------------------------------"
 
     if [ ! -f "$CONFIG" ]; then
@@ -94,9 +97,7 @@ for CONFIG in "${CONFIGS[@]}"; do
         STATUSES+=("visualize_failed"); continue
     fi
 
-    # Longitudinal arms emit fig2_garg_weat_categories__*__{bootstrap,subsample};
-    # provincial arms emit garg_weat_provincial_* / garg_weat_choropleth_*.
-    # Don't assert specific names — just report what landed.
+    # Provincial arms emit garg_weat_provincial_* / garg_weat_choropleth_*.
     NPDF=$(find "$FIG_DIR" -maxdepth 1 -name '*garg_weat*.pdf' 2>/dev/null | wc -l | tr -d ' ')
     if [ "$NPDF" -eq 0 ]; then
         echo "  WARN: no garg_weat PDFs under $FIG_DIR"
