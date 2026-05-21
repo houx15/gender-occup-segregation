@@ -208,10 +208,49 @@ def _format_bytes(n: int) -> str:
     return f"{n:.1f} TB"
 
 
+def _remote_size(url: str, logger: logging.Logger) -> Optional[int]:
+    """Best-effort total size of the remote file via a Range probe.
+
+    A ``Range: bytes=0-0`` request returns ``Content-Range: bytes 0-0/<total>``
+    on servers that support it (snap.stanford.edu does). Returns None if the
+    size can't be determined, in which case the caller falls back to the old
+    "skip if present" behaviour.
+    """
+    try:
+        with requests.get(
+            url, headers={"Range": "bytes=0-0"}, stream=True, timeout=60
+        ) as r:
+            cr = r.headers.get("Content-Range")  # e.g. 'bytes 0-0/1686718098'
+            if cr and "/" in cr:
+                total = cr.rsplit("/", 1)[1].strip()
+                if total.isdigit():
+                    return int(total)
+            # Some servers ignore Range and answer 200 with the full length.
+            if r.status_code == 200:
+                cl = r.headers.get("Content-Length")
+                if cl and cl.isdigit():
+                    return int(cl)
+    except requests.RequestException as e:
+        logger.info(f"  could not probe remote size for {url}: {e}")
+    return None
+
+
 def _stream_download(url: str, dest: Path, logger: logging.Logger) -> None:
     if dest.exists() and dest.stat().st_size > 0:
-        logger.info(f"  archive already at {dest} ({_format_bytes(dest.stat().st_size)}), skipping download")
-        return
+        local = dest.stat().st_size
+        remote = _remote_size(url, logger)
+        if remote is not None and local != remote:
+            # Truncated / corrupt leftover from an interrupted run — re-fetch
+            # rather than trusting it (a partial zip would later fail to unzip).
+            logger.warning(
+                f"  existing {dest.name} is {_format_bytes(local)} but remote is "
+                f"{_format_bytes(remote)}; treating as incomplete and re-downloading"
+            )
+        else:
+            logger.info(
+                f"  archive already at {dest} ({_format_bytes(local)}), skipping download"
+            )
+            return
     logger.info(f"  downloading {url} -> {dest}")
     dest.parent.mkdir(parents=True, exist_ok=True)
     with requests.get(url, stream=True, timeout=300) as r:
