@@ -1,6 +1,6 @@
 # Garg-WEAT per-category RND analysis on our from-scratch trained COHA SGNS
 # embeddings. Companion to coha_garg.yml (same models_dir, different metric:
-# RND partitioned into leadership / housework / stem buckets).
+# RND partitioned into leadership / family / science buckets).
 language: "en"
 data_source: "coha"
 analysis_mode: "garg_weat"
@@ -41,10 +41,12 @@ corpus:
 wordlists:
   dir: "wordlists/en/garg_weat"
   gender_words_file: "gender_words.json"
+  # Pipeline consumes the cleaned lists produced by scripts.prepare_wordlists
+  # (dedup + >=80% OOV coverage). Raw curated inputs live in candidates_*.txt.
   categories:
-    leadership: "candidates_leadership.txt"
-    housework: "candidates_housework.txt"
-    stem: "candidates_stem.txt"
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
 
 embedding_source: "trained_coha"
 

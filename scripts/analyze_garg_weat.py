@@ -5,7 +5,7 @@ Garg-WEAT mode: per-category RND analysis.
 Same metric as analyze_garg (relative norm distance against male/female
 centroids, Garg sign convention `||v - c_male|| - ||v - c_female||`,
 L2-normalized vectors), but the occupations are partitioned into named
-buckets (leadership / housework / stem) and the per-decade mean is
+buckets (leadership / family / science) and the per-decade mean is
 computed separately per bucket. The output is one trend line per
 category, all sharing the same gender axis and decade scaffolding.
 
@@ -54,9 +54,9 @@ def load_categories(config: dict, logger) -> Dict[str, List[str]]:
         dir: wordlists/en/garg_weat
         gender_words_file: gender_words.json
         categories:
-          leadership: candidates_leadership.txt
-          housework:  candidates_housework.txt
-          stem:       candidates_stem.txt
+          leadership: cleaned_leadership.txt
+          family:     cleaned_family.txt
+          science:    cleaned_science.txt
     """
     wl_dir = get_wordlist_dir(config)
     cats_cfg = config.get("wordlists", {}).get("categories")

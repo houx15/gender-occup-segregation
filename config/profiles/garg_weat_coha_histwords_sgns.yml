@@ -19,10 +19,12 @@ embedding_source: "histwords_sgns"
 wordlists:
   dir: "wordlists/en/garg_weat"
   gender_words_file: "gender_words.json"
+  # Pipeline consumes the cleaned lists produced by scripts.prepare_wordlists
+  # (dedup + >=80% OOV coverage). Raw curated inputs live in candidates_*.txt.
   categories:
-    leadership: "candidates_leadership.txt"
-    housework: "candidates_housework.txt"
-    stem: "candidates_stem.txt"
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
 
 analysis:
   occupation_strategy: "whole_token"

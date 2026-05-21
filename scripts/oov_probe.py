@@ -19,7 +19,7 @@ Usage:
     python -m scripts.oov_probe \
         --config=config/profiles/coha_garg.yml \
         --wordlist_dir=wordlists/en/garg_weat \
-        --candidates=candidates_leadership.txt,candidates_domestic.txt,candidates_stem.txt \
+        --candidates=candidates_leadership.txt,candidates_family.txt,candidates_science.txt \
         --out=/tmp/oov_trained_coha.csv
 
 Output CSV columns: source, decade, category, word, in_vocab

@@ -34,7 +34,7 @@ CONFIGS=(
     "config/profiles/coha_histwords_svd.yml"
 )
 
-CANDIDATES="candidates_leadership.txt,candidates_housework.txt,candidates_stem.txt"
+CANDIDATES="candidates_leadership.txt,candidates_family.txt,candidates_science.txt"
 
 for CFG in "${CONFIGS[@]}"; do
     SRC=$(python3 -c "import yaml; print(yaml.safe_load(open('$CFG')).get('embedding_source','unknown'))")

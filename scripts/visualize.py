@@ -400,7 +400,7 @@ def plot_garg_trend(df, figures_dir, logger, embedding_source=None):
 
 def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=None):
     """Plot per-category mean RND over time. One line per category (leadership,
-    housework, stem) on a single axis, with 95% CI ribbons.
+    family, science) on a single axis, with 95% CI ribbons.
 
     Companion to plot_garg_trend — same metric (relative norm distance,
     Garg sign convention), same gender axis, but partitioned into named
@@ -458,10 +458,10 @@ def plot_garg_weat_categories_trend(df, figures_dir, logger, embedding_source=No
     # default cycle for any extra/renamed category the user adds later.
     palette = {
         "leadership": "#1f4e79",
-        "housework":  "#c0392b",
-        "stem":       "#2e7d32",
+        "family":     "#c0392b",
+        "science":    "#2e7d32",
     }
-    markers = {"leadership": "o", "housework": "s", "stem": "^"}
+    markers = {"leadership": "o", "family": "s", "science": "^"}
     default_cycle = plt.rcParams["axes.prop_cycle"].by_key().get("color", [])
 
     for i, (cat_name, group) in enumerate(df.groupby("category")):

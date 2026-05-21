@@ -70,10 +70,10 @@ def _two_unit_kvs() -> Dict[str, StubKV]:
         # leadership: male-leaning
         "president": [0.6, 0.0],
         "manager": [0.5, 0.0],
-        # housework: female-leaning
+        # family: female-leaning
         "cooking": [-0.5, 0.0],
         "cleaning": [-0.6, 0.0],
-        # stem: mildly male-leaning
+        # science: mildly male-leaning
         "scientist": [0.3, 0.0],
         "engineer": [0.4, 0.0],
     }
@@ -159,8 +159,8 @@ def _touch_models(models_dir: Path, units: List[str], template: str = "coha_{uni
 
 _CATEGORIES = {
     "leadership": ["president", "manager"],
-    "housework": ["cooking", "cleaning"],
-    "stem": ["scientist", "engineer"],
+    "family": ["cooking", "cleaning"],
+    "science": ["scientist", "engineer"],
 }
 
 
@@ -187,7 +187,7 @@ def test_long_table_schema_and_rowcount(tmp_path, monkeypatch):
     assert set(long_df.columns) >= {"unit_name", "category", "occupation", "rnd", "in_vocab"}
     assert len(long_df) == 12
     assert set(long_df["unit_name"]) == {"1990s", "2000s"}
-    assert set(long_df["category"]) == {"leadership", "housework", "stem"}
+    assert set(long_df["category"]) == {"leadership", "family", "science"}
 
 
 def test_summary_per_unit_per_category(tmp_path, monkeypatch):
@@ -216,10 +216,10 @@ def test_summary_per_unit_per_category(tmp_path, monkeypatch):
     assert summary["mean_rnd"].notna().all()
 
 
-def test_sign_convention_leadership_male_housework_female(tmp_path, monkeypatch):
+def test_sign_convention_leadership_male_family_female(tmp_path, monkeypatch):
     """RND = ||v − c_male|| − ||v − c_female||, so positive = female-leaning.
     Leadership occupations are placed near c_male (positive x) so their
-    mean_rnd should be NEGATIVE; housework is near c_female so POSITIVE.
+    mean_rnd should be NEGATIVE; family is near c_female so POSITIVE.
     """
     cfg = _write_config(tmp_path, categories=_CATEGORIES)
     kvs = _two_unit_kvs()
@@ -235,11 +235,11 @@ def test_sign_convention_leadership_male_housework_female(tmp_path, monkeypatch)
     results_dir = Path(yaml.safe_load(cfg.read_text())["paths"]["results_dir"])
     summary = pd.read_parquet(results_dir / "garg_weat_summary_by_category.parquet")
     leadership = summary[summary["category"] == "leadership"]
-    housework = summary[summary["category"] == "housework"]
+    family = summary[summary["category"] == "family"]
     # Leadership words at +x are closer to c_male=(1,0) → smaller ||v − c_male|| →
     # negative RND.
     assert (leadership["mean_rnd"] < 0).all()
-    assert (housework["mean_rnd"] > 0).all()
+    assert (family["mean_rnd"] > 0).all()
 
 
 def test_decade_range_filter_restricts_units(tmp_path, monkeypatch):
@@ -304,8 +304,8 @@ def test_consistent_set_per_category_drops_unit_oov(tmp_path, monkeypatch):
     from BOTH decades' mean for its category (per-category consistent set)."""
     categories = {
         "leadership": ["president", "manager", "rareleader"],
-        "housework": ["cooking", "cleaning"],
-        "stem": ["scientist", "engineer"],
+        "family": ["cooking", "cleaning"],
+        "science": ["scientist", "engineer"],
     }
     cfg = _write_config(tmp_path, categories=categories)
     # rareleader appears in 1990s only
@@ -339,5 +339,5 @@ def test_consistent_set_per_category_drops_unit_oov(tmp_path, monkeypatch):
     # consistent set = {president, manager} (rareleader dropped) → n_consistent==2
     assert (leadership_rows["n_consistent"] == 2).all()
     # Other categories unchanged
-    housework_rows = summary[summary["category"] == "housework"]
-    assert (housework_rows["n_consistent"] == 2).all()
+    family_rows = summary[summary["category"] == "family"]
+    assert (family_rows["n_consistent"] == 2).all()

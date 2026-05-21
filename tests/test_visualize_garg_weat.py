@@ -47,7 +47,7 @@ def test_writes_pdf_for_decade_units(tmp_path):
 
     df = _make_summary(
         units=["1910s", "1950s", "1990s"],
-        categories=["leadership", "housework", "stem"],
+        categories=["leadership", "family", "science"],
     )
     plot_garg_weat_categories_trend(
         df, tmp_path, logging.getLogger("test"), embedding_source="trained_coha",
