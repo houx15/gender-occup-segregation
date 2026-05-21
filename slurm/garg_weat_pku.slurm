@@ -10,7 +10,7 @@
 # PKU-server CHINESE PROVINCIAL garg_weat: analyze_garg_weat + visualize for the
 # provincial arms, producing the cross-province RND views (rankings / heatmap /
 # choropleth) that replace the Cohen's d provincial plots.
-#   - Weibo     (informal lists, /gpfs)
+#   - Weibo     (informal lists, /lustre)
 #   - Newspaper (formal lists, /lustre)
 # Prereq: cleaned_*.txt exist — run slurm/prepare_wordlists_pku.slurm first.
 #
@@ -25,7 +25,7 @@
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate opinion
 
-# Repo checkout (edit if yours is elsewhere, e.g. under /gpfs).
+# Repo checkout (edit if yours is elsewhere).
 REPO_DIR=/lustre/home/2401111059/gender-occup-segregation
 cd "$REPO_DIR"
 

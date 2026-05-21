@@ -8,13 +8,13 @@ data_source: "weibo"
 analysis_mode: "garg_weat"
 
 paths:
-  base_dir: "/gpfs/share/home/2401111059/gender-occup-segregation"
-  raw_data_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/raw_weibo"
-  corpora_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/corpora"
-  models_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/models"
-  results_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/data/results_garg_weat_weibo"
-  log_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/logs"
-  figures_dir: "/gpfs/share/home/2401111059/gender-occup-segregation/figures_garg_weat_weibo"
+  base_dir: "/lustre/home/2401111059/gender-occup-segregation"
+  raw_data_dir: "/lustre/home/2401111059/gender-occup-segregation/data/raw_weibo"
+  corpora_dir: "/lustre/home/2401111059/gender-occup-segregation/data/corpora"
+  models_dir: "/lustre/home/2401111059/gender-occup-segregation/data/models"
+  results_dir: "/lustre/home/2401111059/gender-occup-segregation/data/results_garg_weat_weibo"
+  log_dir: "/lustre/home/2401111059/gender-occup-segregation/logs"
+  figures_dir: "/lustre/home/2401111059/gender-occup-segregation/figures_garg_weat_weibo"
 
 wordlists:
   dir: "wordlists/zh/garg_weat_informal"

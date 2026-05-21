@@ -97,7 +97,7 @@ shared `analysis` block above.
 | **Google Ngram English Fiction** | `garg_weat_google_ngram_eng_fiction_all.yml` | pre-trained HistWords | decades |
 | **Renminribao** | `garg_weat_renminribao.yml` | Princeton `/scratch` | `1940_1949` windows |
 | **China Ngram** | `garg_weat_china_ngram.yml` | Princeton `/scratch` | `1940_1949` windows |
-| **Weibo** | `garg_weat_weibo.yml` | PKU `/gpfs` | provinces |
+| **Weibo** | `garg_weat_weibo.yml` | PKU `/lustre` | provinces |
 | **Provincial newspaper** | `garg_weat_provincial_newspaper.yml` | PKU `/lustre` | province-year |
 
 The Chinese arms reuse the exact `models_dir` + `model_name_template` of their
