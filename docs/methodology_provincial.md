@@ -90,6 +90,8 @@ The gender axis, concept word lists, projection, and effect size computation fol
 
 For each province (Weibo) or province-year unit (newspapers), we compute Cohen's $d$ as the effect size. Positive values indicate that the first concept group (e.g., family words) is more female-associated than the second group (e.g., work words).
 
+As a complementary measure on the same models, we also compute Garg's relative norm distance (RND) per category (leadership, family, science) for each province / province-year, oriented onto a gender-ideation axis (family reversed) and reported via cross-province rankings, heatmaps, and choropleths. This RND view is reported alongside — not in place of — the Cohen's $d$ index. Full procedure: [`replication/garg_weat_per_category.md`](replication/garg_weat_per_category.md).
+
 ---
 
 ## 6. Visualization
