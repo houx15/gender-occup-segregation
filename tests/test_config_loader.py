@@ -419,3 +419,37 @@ def test_get_model_name_custom_template(tmp_path):
     )
     config = load_config(str(path))
     assert get_model_name("1940_1949", config) == "embed_1940_1949.bin"
+
+
+# ---------------------------------------------------------------------------
+# Validation: analysis.metrics
+# ---------------------------------------------------------------------------
+
+def test_invalid_metrics_entry_rejected():
+    import pytest
+    from scripts.common.config_loader import _validate_config
+    cfg = {
+        "language": "en", "data_source": "coha", "analysis_mode": "garg_weat",
+        "paths": {
+            "base_dir": "b", "models_dir": "m", "results_dir": "r", "log_dir": "l",
+            "raw_coha_dir": "rc", "coha_decompressed_dir": "cd", "corpora_dir": "co",
+        },
+        "coha": {"source_archive_urls": []},
+        "analysis": {"metrics": ["rnd", "bogus"]},
+    }
+    with pytest.raises(ValueError):
+        _validate_config(cfg)
+
+
+def test_valid_metrics_accepted():
+    from scripts.common.config_loader import _validate_config
+    cfg = {
+        "language": "en", "data_source": "coha", "analysis_mode": "garg_weat",
+        "paths": {
+            "base_dir": "b", "models_dir": "m", "results_dir": "r", "log_dir": "l",
+            "raw_coha_dir": "rc", "coha_decompressed_dir": "cd", "corpora_dir": "co",
+        },
+        "coha": {"source_archive_urls": []},
+        "analysis": {"metrics": ["rnd", "cohens_d"]},
+    }
+    _validate_config(cfg)  # should not raise
