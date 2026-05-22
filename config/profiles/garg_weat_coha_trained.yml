@@ -51,6 +51,10 @@ wordlists:
 embedding_source: "trained_coha"
 
 analysis:
+  # Which single-wordlist bias metrics to compute this run.
+  #   rnd      = Garg relative norm distance
+  #   cohens_d = single-list Cohen's d (mean cosine projection onto gender axis)
+  metrics: [rnd, cohens_d]
   occupation_strategy: "whole_token"
   min_coverage: 0.5
   seed: 42

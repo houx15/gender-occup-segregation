@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from scripts.common.metrics import (
-    bootstrap_ci, l2_normalize, relative_norm_distance,
+    bootstrap_ci, l2_normalize, relative_norm_distance, proportion_below,
 )
 
 
@@ -102,3 +102,43 @@ class TestBootstrapCI:
     def test_empty_raises(self):
         with pytest.raises(ValueError):
             bootstrap_ci(np.array([]), n_iter=100, ci=0.95, seed=42)
+
+
+class TestProportionBelow:
+    def test_counts_strictly_below_threshold(self):
+        vals = np.array([-2.0, -0.5, 0.0, 1.0])
+        # < 0 → two of four
+        assert proportion_below(vals, 0.0) == pytest.approx(0.5)
+
+    def test_all_below(self):
+        assert proportion_below(np.array([-1.0, -2.0]), 0.0) == pytest.approx(1.0)
+
+    def test_none_below(self):
+        assert proportion_below(np.array([1.0, 2.0]), 0.0) == pytest.approx(0.0)
+
+    def test_nonzero_threshold(self):
+        # strictly below 1.0 → two of three
+        assert proportion_below(np.array([-1.0, 0.5, 2.0]), 1.0) == pytest.approx(2 / 3)
+
+    def test_empty_raises(self):
+        with pytest.raises(ValueError):
+            proportion_below(np.array([]), 0.0)
+
+
+class TestBootstrapCIStatistic:
+    def test_default_statistic_is_mean(self):
+        rng = np.random.default_rng(5)
+        values = rng.standard_normal(100)
+        a = bootstrap_ci(values, n_iter=300, ci=0.9, seed=11)
+        b = bootstrap_ci(values, n_iter=300, ci=0.9, seed=11, statistic=np.mean)
+        assert a == b
+
+    def test_proportion_statistic_in_unit_interval(self):
+        rng = np.random.default_rng(0)
+        values = rng.standard_normal(200)  # ~half below 0
+        lo, hi = bootstrap_ci(
+            values, n_iter=500, ci=0.95, seed=42,
+            statistic=lambda x: proportion_below(x, 0.0),
+        )
+        assert 0.0 <= lo <= hi <= 1.0
+        assert 0.3 < (lo + hi) / 2 < 0.7

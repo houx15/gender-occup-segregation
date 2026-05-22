@@ -32,6 +32,8 @@ DATA_SOURCE_DEFAULTS = {
 
 VALID_ANALYSIS_MODES = {"prestige", "weat", "garg", "garg_weat"}
 
+VALID_BIAS_METRICS = {"rnd", "cohens_d"}
+
 # Embedding formats that bypass our download/corpus/train pipeline. Profiles
 # using these formats only need models_dir/results_dir/log_dir; the corpus
 # and raw-data paths are not required.
@@ -80,6 +82,20 @@ def _validate_config(config: dict) -> None:
             f"Invalid analysis_mode: {analysis_mode}. "
             f"Must be one of: {list(VALID_ANALYSIS_MODES)}"
         )
+
+    metrics = config.get("analysis", {}).get("metrics")
+    if metrics is not None:
+        if not isinstance(metrics, (list, tuple)) or not metrics:
+            raise ValueError(
+                "analysis.metrics must be a non-empty list, "
+                f"got {metrics!r}"
+            )
+        unknown = [m for m in metrics if m not in VALID_BIAS_METRICS]
+        if unknown:
+            raise ValueError(
+                f"Invalid analysis.metrics entries {unknown}. "
+                f"Must be from: {sorted(VALID_BIAS_METRICS)}"
+            )
 
     paths = config.get("paths", {})
     # When using a pretrained-embedding format, we bypass corpus building and
