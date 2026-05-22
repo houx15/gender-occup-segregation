@@ -70,7 +70,13 @@ def _filter_models(models, unit, decade_range, logger):
         kept = []
         for path, unit_name in models:
             year = decade_to_census_year(unit_name)
-            if year is None or start <= year <= end:
+            if year is None:
+                logger.warning(
+                    f"  decade_range filter: cannot parse decade from "
+                    f"unit_name {unit_name!r}; keeping it"
+                )
+                kept.append((path, unit_name))
+            elif start <= year <= end:
                 kept.append((path, unit_name))
         logger.info(f"decade_range [{start}, {end}]: {len(models)} -> {len(kept)} models")
         models = kept
@@ -95,15 +101,39 @@ def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = N
     decade_range = config_data.get("analysis", {}).get("decade_range")
     models = _filter_models(models, unit, decade_range, logger)
     if not models:
-        logger.error("No models found after filtering — nothing written")
+        logger.error(
+            f"No models found in {config_data['paths']['models_dir']}"
+            + (f" matching unit prefix '{unit}'" if unit else "")
+            + (f" within decade_range {decade_range}" if decade_range else "")
+            + " — nothing written"
+        )
         return
     logger.info(f"Found {len(models)} models")
 
+    analysis_cfg = config_data.get("analysis", {})
+    boot = analysis_cfg.get("bootstrap", {})
+    sub = analysis_cfg.get("subsample", {})
+    seed = int(analysis_cfg.get("seed", 42))
+    logger.info(
+        "Uncertainty: bootstrap(n_iter=%s, ci=%s) + subsample(fraction=%s, "
+        "n_rounds=%s, ci=%s), seed=%s"
+        % (
+            boot.get("n_iter", 5000), boot.get("ci", 0.68),
+            sub.get("fraction", 0.8), sub.get("n_rounds", 100),
+            sub.get("ci", 0.95), seed,
+        )
+    )
+
+    # metric -> (frames_list, units_list); both lists are appended in the loop.
     collected: Dict[str, Tuple[List[pd.DataFrame], List[str]]] = {
         m: ([], []) for m in metrics
     }
     for model_path, unit_name in models:
         model = load_model_for_unit(model_path, config_data)  # loaded ONCE
+        try:
+            logger.info(f"  {unit_name}: vocab_size={len(model.key_to_index)}")
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"  {unit_name}: could not introspect vocab ({e!r})")
         for m in metrics:
             producer = METRIC_SPECS[m][0]
             long_df = producer(model, unit_name, categories, gender_words, logger)
@@ -112,10 +142,6 @@ def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = N
             collected[m][0].append(long_df)
             collected[m][1].append(unit_name)
 
-    analysis_cfg = config_data.get("analysis", {})
-    boot = analysis_cfg.get("bootstrap", {})
-    sub = analysis_cfg.get("subsample", {})
-    seed = int(analysis_cfg.get("seed", 42))
     results_dir = Path(config_data["paths"]["results_dir"])
     results_dir.mkdir(parents=True, exist_ok=True)
 
