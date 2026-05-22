@@ -12,7 +12,10 @@
 
 # ENGLISH garg_weat pipeline: analyze_garg_weat + visualize for every English
 # embedding source on disk, one per-category-trend PDF per source. Mirrors
-# fig2_all_sources.slurm but for the per-category RND metric. The Chinese arms
+# fig2_all_sources.slurm. Runs the analyze_category_bias orchestrator, which
+# reads analysis.metrics from each profile ([rnd, cohens_d]) and computes BOTH
+# the per-category RND and the single-list Cohen's d in one model-load pass.
+# The Chinese arms
 # live in a separate script — slurm/garg_weat_zh.slurm — to keep the two
 # pipelines (and their servers) apart.
 
@@ -93,8 +96,8 @@ for CONFIG in "${CONFIGS[@]}"; do
 
     echo "  source=$SRC  models_dir=$MODELS_DIR"
 
-    if ! python -m scripts.analyze_garg_weat --config="$CONFIG"; then
-        echo "  ERROR: analyze_garg_weat failed"
+    if ! python -m scripts.analyze_category_bias --config="$CONFIG"; then
+        echo "  ERROR: analyze_category_bias failed"
         STATUSES+=("analyze_failed")
         RESULT_PATHS+=("?")
         FIG_PATHS+=("?")

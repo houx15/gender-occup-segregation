@@ -10,8 +10,10 @@
 #SBATCH --output=logs/garg_weat_zh_%j.out
 #SBATCH --error=logs/garg_weat_zh_%j.err
 
-# CHINESE garg_weat pipeline: analyze_garg_weat + visualize for the Chinese
-# embedding sources. Kept separate from the English pipeline
+# CHINESE garg_weat pipeline: analyze_category_bias + visualize for the Chinese
+# embedding sources. The orchestrator reads analysis.metrics ([rnd, cohens_d])
+# from each profile, so this computes BOTH per-category RND and single-list
+# Cohen's d. Kept separate from the English pipeline
 # (slurm/garg_weat_all_sources.slurm).
 #
 # Defaults to the Princeton-hosted longitudinal arms (Renminribao + China
@@ -78,8 +80,8 @@ for CONFIG in "${CONFIGS[@]}"; do
 
     echo "  models_dir=$MODELS_DIR"
 
-    if ! python -m scripts.analyze_garg_weat --config="$CONFIG"; then
-        echo "  ERROR: analyze_garg_weat failed"
+    if ! python -m scripts.analyze_category_bias --config="$CONFIG"; then
+        echo "  ERROR: analyze_category_bias failed"
         STATUSES+=("analyze_failed"); continue
     fi
 

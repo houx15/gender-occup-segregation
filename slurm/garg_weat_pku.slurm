@@ -7,9 +7,10 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-user=2401111059@stu.pku.edu.cn
 
-# PKU-server CHINESE PROVINCIAL garg_weat: analyze_garg_weat + visualize for the
-# provincial arms, producing the cross-province RND views (rankings / heatmap /
-# choropleth) that replace the Cohen's d provincial plots.
+# PKU-server CHINESE PROVINCIAL garg_weat: analyze_category_bias + visualize for
+# the provincial arms. The orchestrator reads analysis.metrics ([rnd, cohens_d])
+# from each profile, so this computes BOTH RND and single-list Cohen's d and
+# produces the cross-province views (rankings / heatmap / choropleth) for each.
 #   - Weibo     (informal lists, /lustre)
 #   - Newspaper (formal lists, /lustre)
 # Prereq: cleaned_*.txt exist — run slurm/prepare_wordlists_pku.slurm first.
@@ -81,8 +82,8 @@ for CONFIG in "${CONFIGS[@]}"; do
 
     echo "  models_dir=$MODELS_DIR"
 
-    if ! python -m scripts.analyze_garg_weat --config="$CONFIG"; then
-        echo "  ERROR: analyze_garg_weat failed"
+    if ! python -m scripts.analyze_category_bias --config="$CONFIG"; then
+        echo "  ERROR: analyze_category_bias failed"
         STATUSES+=("analyze_failed"); continue
     fi
 
