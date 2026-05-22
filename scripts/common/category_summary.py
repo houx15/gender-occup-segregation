@@ -8,7 +8,6 @@ mean and proportion-male-leaned statistics) operates on a generic value column.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Callable, Dict, List, Tuple
 
 import numpy as np
@@ -185,6 +184,9 @@ def build_summary(
                 })
                 continue
             arr = sub[value_col].to_numpy(dtype=float)
+            # Both CIs reuse the same seed: they are valid individually but are
+            # drawn from the same resample indices, so don't read any
+            # correlation between the mean and proportion intervals as meaningful.
             mean_ci_low, mean_ci_high = bootstrap_ci(
                 arr, n_iter=boot_n_iter, ci=boot_ci, seed=seed
             )

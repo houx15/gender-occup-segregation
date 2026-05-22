@@ -8,10 +8,43 @@ import numpy as np
 import pandas as pd
 
 from scripts.common.category_summary import (
-    build_summary, subsample_bands_from_lookup,
+    build_summary, compute_consistent_set, subsample_bands_from_lookup,
 )
 
 logger = logging.getLogger("test")
+
+
+def test_consistent_set_intersects_across_units():
+    # 'a','b' in both units; 'c' only in 1990s → consistent set drops 'c'.
+    rows = [
+        {"unit_name": "1990s", "category": "lead", "occupation": "a", "in_vocab": True},
+        {"unit_name": "1990s", "category": "lead", "occupation": "b", "in_vocab": True},
+        {"unit_name": "1990s", "category": "lead", "occupation": "c", "in_vocab": True},
+        {"unit_name": "2000s", "category": "lead", "occupation": "a", "in_vocab": True},
+        {"unit_name": "2000s", "category": "lead", "occupation": "b", "in_vocab": True},
+        {"unit_name": "2000s", "category": "lead", "occupation": "c", "in_vocab": False},
+    ]
+    consistent = compute_consistent_set(
+        pd.DataFrame(rows), {"lead": ["a", "b", "c"]}, ["1990s", "2000s"], logger,
+    )
+    assert consistent["lead"] == ["a", "b"]
+
+
+def test_consistent_set_empty_when_long_df_empty():
+    empty = pd.DataFrame(
+        columns=["unit_name", "category", "occupation", "in_vocab"]
+    )
+    consistent = compute_consistent_set(empty, {"lead": ["a"]}, [], logger)
+    assert consistent == {"lead": []}
+
+
+def test_subsample_band_empty_consistent_set_is_nan():
+    bands = subsample_bands_from_lookup(
+        {}, ["u"], {"lead": []},
+        fraction=0.8, n_rounds=10, ci=0.95, seed=1,
+    )
+    lo, hi, mean = bands[("u", "lead")]
+    assert np.isnan(lo) and np.isnan(hi) and np.isnan(mean)
 
 
 def _long(value_col="value"):
