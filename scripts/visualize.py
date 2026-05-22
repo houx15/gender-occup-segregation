@@ -847,18 +847,20 @@ def _match_province_in_shapefile(dim_data, china):
 
 
 def _plot_single_choropleth(merged, title, filename, figures_dir, logger,
-                            value_col="cohens_d", norm=None):
+                            value_col="cohens_d", norm=None, cmap="RdBu_r"):
     """Render and save a single choropleth map with province name labels.
 
     ``value_col`` selects the column to colour by (default ``cohens_d`` for the
     WEAT path; the Garg-WEAT provincial path passes its oriented RND column).
     ``norm`` (e.g. a ``TwoSlopeNorm``) fixes a symmetric, dataset-wide colour
     range so the maps are directionally readable and comparable; default None
-    keeps matplotlib's per-map autoscaling (the WEAT behaviour).
+    keeps matplotlib's per-map autoscaling (the WEAT behaviour). ``cmap``
+    defaults to the diverging ``RdBu_r``; pass a sequential colormap (e.g.
+    ``viridis``) for [0,1]-bounded proportions.
     """
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
     plot_kwargs = dict(
-        column=value_col, ax=ax, legend=True, cmap="RdBu_r",
+        column=value_col, ax=ax, legend=True, cmap=cmap,
         missing_kwds={"color": "lightgrey", "label": "No data"},
         edgecolor="black", linewidth=0.3,
     )
@@ -1367,10 +1369,13 @@ def plot_garg_weat_provincial_rankings(summary_df, figures_dir, logger,
 
 def plot_garg_weat_provincial_heatmap(summary_df, figures_dir, logger,
                                       category_sign=None, data_source=None,
-                                      value_col="mean_rnd"):
+                                      value_col="mean_rnd", diverging=True):
     """Province × category heatmap of per-province RND.
 
-    The RND analogue of plot_weat_heatmap.
+    The RND analogue of plot_weat_heatmap. ``diverging`` (default True) keeps
+    the RND behaviour: a diverging ``RdBu_r`` colormap centred at 0. Pass
+    ``diverging=False`` for a proportion in [0,1] (``prop_male``) to use a
+    sequential ``viridis`` ramp over [0,1] instead of centring at 0.
     """
     df, reversed_cats = _garg_weat_provincial_frame(summary_df, category_sign, value_col)
     if df.empty:
@@ -1386,7 +1391,13 @@ def plot_garg_weat_provincial_heatmap(summary_df, figures_dir, logger,
     rev_note = " — (rev.): " + ", ".join(sorted(reversed_cats)) if reversed_cats else ""
 
     fig, ax = plt.subplots(figsize=(10, max(6, len(pivot) * 0.4)))
-    sns.heatmap(pivot, annot=True, fmt=".2f", cmap="RdBu_r", center=0, ax=ax)
+    if diverging:
+        sns.heatmap(pivot, annot=True, fmt=".2f", cmap="RdBu_r", center=0, ax=ax)
+    else:
+        sns.heatmap(
+            pivot, annot=True, fmt=".2f", cmap="viridis",
+            vmin=0.0, vmax=1.0, ax=ax,
+        )
     ax.set_title(f"Per-province gender-ideation RND{source_suffix}{rev_note}")
     plt.tight_layout()
     path = get_figure_path("garg_weat_provincial_heatmap", figures_dir)
@@ -1397,12 +1408,19 @@ def plot_garg_weat_provincial_heatmap(summary_df, figures_dir, logger,
 
 def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
                                          category_sign=None, shapefile=None,
-                                         value_col="mean_rnd"):
+                                         value_col="mean_rnd", diverging=True):
     """Choropleth maps of per-province RND, one per category.
 
     The RND analogue of plot_weat_choropleth. For province-year units it also
     draws per-year maps. Skips gracefully if geopandas or a shapefile are
     unavailable. Reuses the WEAT choropleth leaf helpers.
+
+    ``diverging`` (default True) keeps the RND/projection behaviour: a diverging
+    colormap (``RdBu_r``) with a symmetric, 0-centred ``TwoSlopeNorm`` so colour
+    encodes direction (and the family flip) comparably across maps. Pass
+    ``diverging=False`` for a proportion in [0,1] (e.g. ``prop_male``): a
+    sequential colormap (``viridis``) over a fixed [0,1] normalization, which is
+    comparable across categories and not misleadingly half-coloured.
     """
     try:
         import geopandas as gpd
@@ -1425,10 +1443,17 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
         return
     df = apply_ideation_sign(df, category_sign, [value_col])
 
-    # One symmetric, 0-centred colour range for EVERY map in this dataset, so
-    # colour encodes direction (and the family flip) and maps are comparable.
-    vmax = _symmetric_vmax(df[value_col])
-    norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
+    if diverging:
+        # One symmetric, 0-centred colour range for EVERY map in this dataset,
+        # so colour encodes direction (and the family flip) and maps compare.
+        vmax = _symmetric_vmax(df[value_col])
+        norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
+        cmap = "RdBu_r"
+    else:
+        # Proportions live in [0,1]; a sequential colormap over a fixed [0,1]
+        # scale is comparable across categories (not half a diverging ramp).
+        norm = mcolors.Normalize(vmin=0.0, vmax=1.0)
+        cmap = "viridis"
 
     sample_units = df["unit_name"].unique()[:5]
     parsed = [_parse_province_year(u) for u in sample_units]
@@ -1461,7 +1486,7 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
                 _plot_single_choropleth(
                     merged, f"{cat.title()} {int(year)}",
                     f"garg_weat_choropleth_{cat}_{int(year)}",
-                    figures_dir, logger, value_col="value", norm=norm,
+                    figures_dir, logger, value_col="value", norm=norm, cmap=cmap,
                 )
 
             avg_data = cat_raw.groupby("province")["value"].mean().reset_index()
@@ -1470,7 +1495,7 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
                 _plot_single_choropleth(
                     merged, f"{cat.title()} Average",
                     f"garg_weat_choropleth_{cat}_overall",
-                    figures_dir, logger, value_col="value", norm=norm,
+                    figures_dir, logger, value_col="value", norm=norm, cmap=cmap,
                 )
         else:
             # Bare-province units (Weibo: '北京') are SHORT names; the shapefile
@@ -1486,7 +1511,7 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
             _plot_single_choropleth(
                 merged, f"{cat.title()} — RND by Province",
                 f"garg_weat_choropleth_{cat}", figures_dir, logger,
-                value_col="value", norm=norm,
+                value_col="value", norm=norm, cmap=cmap,
             )
 
 
@@ -2627,12 +2652,28 @@ def main(config="config/config.yml", mode=None):
             # bootstrap and subsample bands; for provincial kinds, the
             # rankings / heatmap / choropleth. Proportions live in [0,1] and are
             # not symmetric around 0, so we never apply the ideation sign there.
-            def _plot_category_summary(sdf, *, value_col, tag, fig_stem, prop=False):
+            def _plot_category_summary(sdf, *, value_col, fig_stem, prop=False):
                 kind_ = (
                     _garg_weat_unit_kind(sdf["unit_name"]) if not sdf.empty
                     else "longitudinal"
                 )
                 csign = None if prop else category_sign
+                # Distinct fig_stem per metric already disambiguates the output
+                # files, so band_tag stays the bare "bootstrap" / "subsample"
+                # (preserving the original RND filenames). Y-axis labels switch
+                # per metric; None keeps the trend's default RND/ideation label.
+                if prop:
+                    ylabel = "Share of male-leaning occupations"
+                elif value_col == "mean_value":
+                    ylabel = "Mean projection onto gender axis (Cohen's d)"
+                else:
+                    ylabel = None  # RND mean: keep existing default label logic
+                if value_col == "mean_rnd":
+                    boot_label = "bootstrap CI (Garg)"
+                    sub_label = "80% word-subsample band"
+                else:
+                    boot_label = "bootstrap CI"
+                    sub_label = "80% word-subsample band"
                 if kind_ == "longitudinal":
                     if prop:
                         bcols_boot = ("prop_ci_low", "prop_ci_high")
@@ -2648,14 +2689,14 @@ def main(config="config/config.yml", mode=None):
                         )
                     plot_garg_weat_categories_trend(
                         sdf, figures_dir, logger, embedding_source=embedding_source,
-                        band_cols=bcols_boot, band_tag=f"{tag}_bootstrap",
-                        band_label="bootstrap CI", line_col=value_col,
+                        band_cols=bcols_boot, band_tag="bootstrap",
+                        band_label=boot_label, line_col=value_col, ylabel=ylabel,
                         category_sign=csign, fig_stem=fig_stem,
                     )
                     plot_garg_weat_categories_trend(
                         sdf, figures_dir, logger, embedding_source=embedding_source,
-                        band_cols=bcols_sub, band_tag=f"{tag}_subsample",
-                        band_label="80% word-subsample band", line_col=value_col,
+                        band_cols=bcols_sub, band_tag="subsample",
+                        band_label=sub_label, line_col=value_col, ylabel=ylabel,
                         category_sign=csign, fig_stem=fig_stem,
                     )
                 else:
@@ -2667,21 +2708,23 @@ def main(config="config/config.yml", mode=None):
                     plot_garg_weat_provincial_heatmap(
                         sdf, figures_dir, logger,
                         category_sign=csign, data_source=ds, value_col=value_col,
+                        diverging=not prop,
                     )
                     plot_garg_weat_provincial_choropleth(
                         sdf, figures_dir, logger,
                         category_sign=csign, shapefile=shapefile, value_col=value_col,
+                        diverging=not prop,
                     )
 
             # RND (unchanged output filenames via the default fig_stem) —
             # the oriented-mean trend plus the male-leaned proportion.
             _plot_category_summary(
-                df, value_col="mean_rnd", tag="garg_weat",
+                df, value_col="mean_rnd",
                 fig_stem="fig2_garg_weat_categories",
             )
             if "prop_male" in df.columns:
                 _plot_category_summary(
-                    df, value_col="prop_male", tag="garg_weat_propmale",
+                    df, value_col="prop_male",
                     fig_stem="fig_propmale_garg_weat_categories", prop=True,
                 )
 
@@ -2691,12 +2734,12 @@ def main(config="config/config.yml", mode=None):
                 pdf = pd.read_parquet(proj_path)
                 logger.info(f"Loaded {proj_path}: {len(pdf)} rows")
                 _plot_category_summary(
-                    pdf, value_col="mean_value", tag="cohens_d_singlelist",
+                    pdf, value_col="mean_value",
                     fig_stem="fig_cohens_d_singlelist_categories",
                 )
                 if "prop_male" in pdf.columns:
                     _plot_category_summary(
-                        pdf, value_col="prop_male", tag="cohens_d_singlelist_propmale",
+                        pdf, value_col="prop_male",
                         fig_stem="fig_propmale_cohens_d_singlelist_categories", prop=True,
                     )
 

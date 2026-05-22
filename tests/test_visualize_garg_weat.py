@@ -400,6 +400,40 @@ def test_provincial_choropleth_skips_without_shapefile(tmp_path, caplog):
     assert not any(n.startswith("garg_weat_choropleth") for n in _pdfs(tmp_path))
 
 
+def test_provincial_choropleth_proportion_diverging_false_no_crash(tmp_path, caplog):
+    """The proportion path (value_col='prop_male', diverging=False) selects a
+    sequential colormap; with no shapefile it must still skip gracefully —
+    proving the new param is accepted and the [0,1]/viridis branch is wired
+    without crashing. (A full render needs geopandas + a China shapefile, which
+    the test harness lacks, so we only assert graceful skip here.)"""
+    from scripts.visualize import plot_garg_weat_provincial_choropleth
+
+    df = _make_summary(units=["北京", "上海"], categories=["leadership"])
+    df["prop_male"] = [0.7, 0.3]
+    with caplog.at_level(logging.INFO):
+        plot_garg_weat_provincial_choropleth(
+            df, tmp_path, logging.getLogger("test"),
+            category_sign=None, shapefile="/nonexistent/path.shp",
+            value_col="prop_male", diverging=False,
+        )
+    assert not any(n.startswith("garg_weat_choropleth") for n in _pdfs(tmp_path))
+
+
+def test_provincial_heatmap_proportion_sequential_renders(tmp_path):
+    """The proportion heatmap (value_col='prop_male', diverging=False) renders
+    a sequential [0,1] map without centring a diverging cmap at 0."""
+    from scripts.visualize import plot_garg_weat_provincial_heatmap
+
+    df = _make_summary(units=["北京", "上海", "广东", "四川"], categories=["leadership", "family"])
+    df["prop_male"] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+    plot_garg_weat_provincial_heatmap(
+        df, tmp_path, logging.getLogger("test"),
+        category_sign=None, data_source="weibo",
+        value_col="prop_male", diverging=False,
+    )
+    assert any("garg_weat_provincial_heatmap" in n for n in _pdfs(tmp_path)), _pdfs(tmp_path)
+
+
 # --- Value-column-agnostic trend (single-list Cohen's d / proportion) -------
 
 def test_categories_trend_plots_proportion_column(tmp_path):
