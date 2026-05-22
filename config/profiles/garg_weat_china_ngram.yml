@@ -56,6 +56,10 @@ corpus:
   tokenizer: "whitespace"
 
 analysis:
+  # Which single-wordlist bias metrics to compute this run.
+  #   rnd      = Garg relative norm distance
+  #   cohens_d = single-list Cohen's d (mean cosine projection onto gender axis)
+  metrics: [rnd, cohens_d]
   seed: 42
   ideation_sign:
     leadership: 1

@@ -53,6 +53,10 @@ corpus:
   min_words: 5
 
 analysis:
+  # Which single-wordlist bias metrics to compute this run.
+  #   rnd      = Garg relative norm distance
+  #   cohens_d = single-list Cohen's d (mean cosine projection onto gender axis)
+  metrics: [rnd, cohens_d]
   seed: 42
   # Single gender-ideation axis, higher = less traditional. Leadership/science
   # female-leaning is progressive (+1); family female-leaning is traditional,
