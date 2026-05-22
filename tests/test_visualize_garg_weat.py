@@ -398,3 +398,50 @@ def test_provincial_choropleth_skips_without_shapefile(tmp_path, caplog):
             category_sign=None, shapefile="/nonexistent/path.shp",
         )
     assert not any(n.startswith("garg_weat_choropleth") for n in _pdfs(tmp_path))
+
+
+# --- Value-column-agnostic trend (single-list Cohen's d / proportion) -------
+
+def test_categories_trend_plots_proportion_column(tmp_path):
+    """The trend renderer must drive an arbitrary line_col (here prop_male in
+    [0,1]) with proportion band columns and a distinct fig_stem, without any
+    hardcoded mean_rnd dependency."""
+    import scripts.visualize as viz
+    df = pd.DataFrame({
+        "unit_name": ["1990s", "2000s"] * 3,
+        "category": ["leadership"] * 2 + ["family"] * 2 + ["science"] * 2,
+        "mean_value": [-0.3, -0.2, 0.3, 0.2, -0.1, -0.05],
+        "prop_male": [0.9, 0.7, 0.1, 0.2, 0.6, 0.5],
+        "prop_ci_low": [0.8, 0.6, 0.05, 0.1, 0.5, 0.4],
+        "prop_ci_high": [0.95, 0.8, 0.2, 0.3, 0.7, 0.6],
+        "prop_sub_low": [0.82, 0.62, 0.06, 0.12, 0.52, 0.42],
+        "prop_sub_high": [0.93, 0.78, 0.18, 0.28, 0.68, 0.58],
+    })
+    viz.plot_garg_weat_categories_trend(
+        df, tmp_path, logging.getLogger("test"),
+        band_cols=("prop_ci_low", "prop_ci_high"), band_tag="proportion_bootstrap",
+        line_col="prop_male", category_sign=None,
+        fig_stem="fig_propmale_garg_weat_categories",
+    )
+    assert any("proportion_bootstrap" in n for n in _pdfs(tmp_path)), _pdfs(tmp_path)
+    assert any("fig_propmale_garg_weat_categories" in n for n in _pdfs(tmp_path)), _pdfs(tmp_path)
+
+
+def test_categories_trend_value_col_agnostic_mean_value(tmp_path):
+    """mean_value (single-list Cohen's d) drives the trend even though the
+    legacy mean_rnd column is absent."""
+    import scripts.visualize as viz
+    df = pd.DataFrame({
+        "unit_name": ["1990s", "2000s"] * 2,
+        "category": ["leadership"] * 2 + ["family"] * 2,
+        "mean_value": [-0.3, -0.2, 0.3, 0.2],
+        "mean_ci_low": [-0.4, -0.3, 0.2, 0.1],
+        "mean_ci_high": [-0.2, -0.1, 0.4, 0.3],
+    })
+    viz.plot_garg_weat_categories_trend(
+        df, tmp_path, logging.getLogger("test"),
+        band_cols=("mean_ci_low", "mean_ci_high"), band_tag="cohens_d_singlelist_bootstrap",
+        line_col="mean_value", category_sign=None,
+        fig_stem="fig_cohens_d_singlelist_categories",
+    )
+    assert any("fig_cohens_d_singlelist_categories" in n for n in _pdfs(tmp_path)), _pdfs(tmp_path)

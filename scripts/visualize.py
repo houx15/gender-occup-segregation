@@ -421,7 +421,8 @@ def apply_ideation_sign(df, category_sign, value_cols):
 def plot_garg_weat_categories_trend(
     df, figures_dir, logger, embedding_source=None,
     band_cols=("ci_low", "ci_high"), band_tag="", line_col="mean_rnd",
-    band_label=None, category_sign=None,
+    band_label=None, category_sign=None, ylabel=None,
+    fig_stem="fig2_garg_weat_categories",
 ):
     """Plot per-category mean RND over time. One line per category (leadership,
     family, science) on a single axis, with a shaded uncertainty band.
@@ -444,7 +445,7 @@ def plot_garg_weat_categories_trend(
 
     suffix = f"__{embedding_source}" if embedding_source else ""
     tag = f"__{band_tag}" if band_tag else ""
-    out_path = figures_dir / f"fig2_garg_weat_categories{suffix}{tag}.pdf"
+    out_path = figures_dir / f"{fig_stem}{suffix}{tag}.pdf"
 
     if df is None or df.empty:
         logger.warning(
@@ -538,7 +539,9 @@ def plot_garg_weat_categories_trend(
 
     ax.axhline(y=0, color="lightgrey", linestyle="--", linewidth=1)
     ax.set_xlabel("Decade")
-    if reversed_cats:
+    if ylabel is not None:
+        ax.set_ylabel(ylabel)
+    elif reversed_cats:
         ax.set_ylabel(
             "Gender ideation  (oriented RND)\n"
             "higher = less traditional"
@@ -1281,21 +1284,21 @@ def _garg_weat_unit_kind(unit_names):
     return Counter(classify(u) for u in sample).most_common(1)[0][0]
 
 
-def _garg_weat_provincial_frame(summary_df, category_sign=None):
-    """Shape build_summary output into a province-level RND frame.
+def _garg_weat_provincial_frame(summary_df, category_sign=None, value_col="mean_rnd"):
+    """Shape build_summary output into a province-level value frame.
 
     Returns (df, reversed_cats) where df has columns [province, category, value]
-    — value is the (sign-oriented) mean RND, averaged across years when the
-    units are province-year (e.g. '北京_2020'). reversed_cats lists the
+    — value is the (sign-oriented) mean of ``value_col``, averaged across years
+    when the units are province-year (e.g. '北京_2020'). reversed_cats lists the
     categories flipped by ideation_sign (for axis labelling).
     """
     df = summary_df.copy()
-    df = df[df["mean_rnd"].notna()]
+    df = df[df[value_col].notna()]
     if df.empty:
         return df.assign(province=[], value=[]), []
 
     # Orient onto the gender-ideation axis (higher = less traditional).
-    df = apply_ideation_sign(df, category_sign, ["mean_rnd"])
+    df = apply_ideation_sign(df, category_sign, [value_col])
     reversed_cats = (
         [c for c, s in category_sign.items() if s < 0] if category_sign else []
     )
@@ -1307,9 +1310,9 @@ def _garg_weat_provincial_frame(summary_df, category_sign=None):
 
     df["province"] = df["unit_name"].apply(to_province)
     out = (
-        df.groupby(["province", "category"], as_index=False)["mean_rnd"]
+        df.groupby(["province", "category"], as_index=False)[value_col]
         .mean()
-        .rename(columns={"mean_rnd": "value"})
+        .rename(columns={value_col: "value"})
     )
     return out, reversed_cats
 
@@ -1323,12 +1326,13 @@ def _rnd_axis_label(reversed_cats):
 
 
 def plot_garg_weat_provincial_rankings(summary_df, figures_dir, logger,
-                                       category_sign=None, data_source=None):
+                                       category_sign=None, data_source=None,
+                                       value_col="mean_rnd"):
     """Horizontal bar rankings of per-province RND, one panel per category.
 
     The RND analogue of plot_weat_rankings; reads build_summary output.
     """
-    df, reversed_cats = _garg_weat_provincial_frame(summary_df, category_sign)
+    df, reversed_cats = _garg_weat_provincial_frame(summary_df, category_sign, value_col)
     if df.empty:
         logger.warning("plot_garg_weat_provincial_rankings: no in-vocab rows; skipping")
         return
@@ -1362,12 +1366,13 @@ def plot_garg_weat_provincial_rankings(summary_df, figures_dir, logger,
 
 
 def plot_garg_weat_provincial_heatmap(summary_df, figures_dir, logger,
-                                      category_sign=None, data_source=None):
+                                      category_sign=None, data_source=None,
+                                      value_col="mean_rnd"):
     """Province × category heatmap of per-province RND.
 
     The RND analogue of plot_weat_heatmap.
     """
-    df, reversed_cats = _garg_weat_provincial_frame(summary_df, category_sign)
+    df, reversed_cats = _garg_weat_provincial_frame(summary_df, category_sign, value_col)
     if df.empty:
         logger.warning("plot_garg_weat_provincial_heatmap: no in-vocab rows; skipping")
         return
@@ -1391,7 +1396,8 @@ def plot_garg_weat_provincial_heatmap(summary_df, figures_dir, logger,
 
 
 def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
-                                         category_sign=None, shapefile=None):
+                                         category_sign=None, shapefile=None,
+                                         value_col="mean_rnd"):
     """Choropleth maps of per-province RND, one per category.
 
     The RND analogue of plot_weat_choropleth. For province-year units it also
@@ -1414,14 +1420,14 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
     china = gpd.read_file(sp)
 
     df = summary_df.copy()
-    df = df[df["mean_rnd"].notna()]
+    df = df[df[value_col].notna()]
     if df.empty:
         return
-    df = apply_ideation_sign(df, category_sign, ["mean_rnd"])
+    df = apply_ideation_sign(df, category_sign, [value_col])
 
     # One symmetric, 0-centred colour range for EVERY map in this dataset, so
     # colour encodes direction (and the family flip) and maps are comparable.
-    vmax = _symmetric_vmax(df["mean_rnd"])
+    vmax = _symmetric_vmax(df[value_col])
     norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
 
     sample_units = df["unit_name"].unique()[:5]
@@ -1431,8 +1437,8 @@ def plot_garg_weat_provincial_choropleth(summary_df, figures_dir, logger,
     )
 
     for cat in sorted(df["category"].unique()):
-        cat_raw = df[df["category"] == cat][["unit_name", "mean_rnd"]].rename(
-            columns={"mean_rnd": "value"}
+        cat_raw = df[df["category"] == cat][["unit_name", value_col]].rename(
+            columns={value_col: "value"}
         )
 
         if is_province_year:
@@ -2616,38 +2622,88 @@ def main(config="config/config.yml", mode=None):
             )
             logger.info(f"garg_weat units classified as: {kind}")
 
-            if kind == "longitudinal":
-                # Two versions of the band on the same trend:
-                #   bootstrap — Garg's with-replacement occupation bootstrap
-                #   subsample — keep 80% of words without replacement, N rounds
-                plot_garg_weat_categories_trend(
-                    df, figures_dir, logger, embedding_source=embedding_source,
-                    band_cols=("ci_low", "ci_high"), band_tag="bootstrap",
-                    band_label="bootstrap CI (Garg)", category_sign=category_sign,
+            # Plot any per-category summary (RND or single-list Cohen's d) on a
+            # chosen value column. For the longitudinal kind, render both the
+            # bootstrap and subsample bands; for provincial kinds, the
+            # rankings / heatmap / choropleth. Proportions live in [0,1] and are
+            # not symmetric around 0, so we never apply the ideation sign there.
+            def _plot_category_summary(sdf, *, value_col, tag, fig_stem, prop=False):
+                kind_ = (
+                    _garg_weat_unit_kind(sdf["unit_name"]) if not sdf.empty
+                    else "longitudinal"
                 )
-                plot_garg_weat_categories_trend(
-                    df, figures_dir, logger, embedding_source=embedding_source,
-                    band_cols=("sub_low", "sub_high"), band_tag="subsample",
-                    band_label="80% word-subsample band", category_sign=category_sign,
+                csign = None if prop else category_sign
+                if kind_ == "longitudinal":
+                    if prop:
+                        bcols_boot = ("prop_ci_low", "prop_ci_high")
+                        bcols_sub = ("prop_sub_low", "prop_sub_high")
+                    else:
+                        bcols_boot = (
+                            ("ci_low", "ci_high") if value_col == "mean_rnd"
+                            else ("mean_ci_low", "mean_ci_high")
+                        )
+                        bcols_sub = (
+                            ("sub_low", "sub_high") if value_col == "mean_rnd"
+                            else ("mean_sub_low", "mean_sub_high")
+                        )
+                    plot_garg_weat_categories_trend(
+                        sdf, figures_dir, logger, embedding_source=embedding_source,
+                        band_cols=bcols_boot, band_tag=f"{tag}_bootstrap",
+                        band_label="bootstrap CI", line_col=value_col,
+                        category_sign=csign, fig_stem=fig_stem,
+                    )
+                    plot_garg_weat_categories_trend(
+                        sdf, figures_dir, logger, embedding_source=embedding_source,
+                        band_cols=bcols_sub, band_tag=f"{tag}_subsample",
+                        band_label="80% word-subsample band", line_col=value_col,
+                        category_sign=csign, fig_stem=fig_stem,
+                    )
+                else:
+                    shapefile = config_data.get("paths", {}).get("shapefile")
+                    plot_garg_weat_provincial_rankings(
+                        sdf, figures_dir, logger,
+                        category_sign=csign, data_source=ds, value_col=value_col,
+                    )
+                    plot_garg_weat_provincial_heatmap(
+                        sdf, figures_dir, logger,
+                        category_sign=csign, data_source=ds, value_col=value_col,
+                    )
+                    plot_garg_weat_provincial_choropleth(
+                        sdf, figures_dir, logger,
+                        category_sign=csign, shapefile=shapefile, value_col=value_col,
+                    )
+
+            # RND (unchanged output filenames via the default fig_stem) —
+            # the oriented-mean trend plus the male-leaned proportion.
+            _plot_category_summary(
+                df, value_col="mean_rnd", tag="garg_weat",
+                fig_stem="fig2_garg_weat_categories",
+            )
+            if "prop_male" in df.columns:
+                _plot_category_summary(
+                    df, value_col="prop_male", tag="garg_weat_propmale",
+                    fig_stem="fig_propmale_garg_weat_categories", prop=True,
                 )
-            else:
-                # Provincial cross-section (province or province-year): RND
-                # replaces the Cohen's d provincial view (rankings / heatmap /
-                # choropleth). Cohen's d plots stay available via analyze_weat.
+
+            # Single-list Cohen's d projection summary, if it was written.
+            proj_path = results_dir / "cohens_d_singlelist_summary_by_category.parquet"
+            if proj_path.exists():
+                pdf = pd.read_parquet(proj_path)
+                logger.info(f"Loaded {proj_path}: {len(pdf)} rows")
+                _plot_category_summary(
+                    pdf, value_col="mean_value", tag="cohens_d_singlelist",
+                    fig_stem="fig_cohens_d_singlelist_categories",
+                )
+                if "prop_male" in pdf.columns:
+                    _plot_category_summary(
+                        pdf, value_col="prop_male", tag="cohens_d_singlelist_propmale",
+                        fig_stem="fig_propmale_cohens_d_singlelist_categories", prop=True,
+                    )
+
+            if kind != "longitudinal":
+                # Survey-correlation extras (RND analogues of the WEAT views),
+                # kept exactly as before for the RND provincial case.
                 shapefile = config_data.get("paths", {}).get("shapefile")
-                plot_garg_weat_provincial_rankings(
-                    df, figures_dir, logger,
-                    category_sign=category_sign, data_source=ds,
-                )
-                plot_garg_weat_provincial_heatmap(
-                    df, figures_dir, logger,
-                    category_sign=category_sign, data_source=ds,
-                )
-                plot_garg_weat_provincial_choropleth(
-                    df, figures_dir, logger,
-                    category_sign=category_sign, shapefile=shapefile,
-                )
-                # Survey-correlation extras (RND analogues of the WEAT views).
                 if kind == "province_year":
                     # Newspaper: province-year survey (CFPS/CGSS by year).
                     survey_csv = Path(
