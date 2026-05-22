@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Callable, Optional
+
 import numpy as np
 
 
@@ -60,13 +62,16 @@ def bootstrap_ci(
     n_iter: int = 1000,
     ci: float = 0.95,
     seed: int = 42,
-    statistic=None,
+    statistic: Optional[Callable[[np.ndarray], float]] = None,
 ) -> tuple[float, float]:
     """Percentile bootstrap CI for a statistic of ``values``.
 
     ``statistic`` is a callable mapping a 1-D resample to a scalar; it
-    defaults to the mean (computed vectorized for speed). Pass e.g.
-    ``lambda x: proportion_below(x, 0.0)`` for the male-leaned proportion.
+    defaults to the mean. Pass e.g. ``lambda x: proportion_below(x, 0.0)``
+    for the male-leaned proportion. As a fast path, ``statistic is None`` or
+    the exact identity ``statistic is np.mean`` use a vectorized mean; any
+    other callable (including a lambda wrapping the mean) takes the per-row
+    loop, which is still sub-millisecond at this project's resample sizes.
     """
     values = np.asarray(values)
     if values.size == 0:

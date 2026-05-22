@@ -116,6 +116,10 @@ class TestProportionBelow:
     def test_none_below(self):
         assert proportion_below(np.array([1.0, 2.0]), 0.0) == pytest.approx(0.0)
 
+    def test_nonzero_threshold(self):
+        # strictly below 1.0 → two of three
+        assert proportion_below(np.array([-1.0, 0.5, 2.0]), 1.0) == pytest.approx(2 / 3)
+
     def test_empty_raises(self):
         with pytest.raises(ValueError):
             proportion_below(np.array([]), 0.0)
