@@ -235,15 +235,15 @@ def aggregate_source(
 
 
 def _human_bytes(n: int) -> str:
-    """1024-based, two-significant-figures, KB/MB/GB/TB."""
+    """1024-based byte sizes; one decimal place above bytes (e.g. 1.5 KB)."""
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if n < 1024 or unit == "TB":
             return f"{n:.1f} {unit}" if unit != "B" else f"{n} B"
         n /= 1024
-    return f"{n:.1f} TB"
+    return f"{n:.1f} TB"  # unreachable, kept to satisfy type-checkers
 
 
-def _fmt(n) -> str:
+def _fmt(n: Optional[Union[int, float]]) -> str:
     if n is None:
         return "n/a"
     if isinstance(n, float):
@@ -274,7 +274,6 @@ def render_markdown(
     # Corpus totals
     lines.append("## Corpus totals")
     lines.append("")
-    union_cell = f" {_fmt(totals.vocab_union_count)} (union)" if totals.vocab_union_count is not None else ""
     lines.append(f"| Units | {docs_header} | Tokens | Raw vocab per unit (min / mean / max){' | Raw vocab union' if totals.vocab_union_count is not None else ''} | Trained-model vocab (sum, min_count={emb.get('min_count', '?')}) |")
     sep_extra = "|---" if totals.vocab_union_count is not None else ""
     lines.append(f"|---|---|---|---{sep_extra}|---|")

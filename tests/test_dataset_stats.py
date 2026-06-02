@@ -242,9 +242,7 @@ class TestModelVocabSize:
         assert model_vocab_size(tmp_path / "nope.model", logger) is None
 
 
-from scripts.common.dataset_stats import (
-    SourceTotals, aggregate_source, render_markdown,
-)
+from scripts.common.dataset_stats import aggregate_source, render_markdown
 
 
 def _stats(unit, docs, tokens, vocab):
