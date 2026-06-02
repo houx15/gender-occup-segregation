@@ -206,6 +206,8 @@ class SourceTotals:
     n_raw_files: int
     n_raw_bytes: int
     vocab_union_count: Optional[int]   # None unless --vocab-union was passed
+    model_vocab_min: Optional[int] = None   # min across units with non-None model vocab
+    model_vocab_max: Optional[int] = None   # max across units with non-None model vocab
 
 
 PerUnitTriple = Tuple[CorpusStats, Optional[int], Optional[RawVolumeEntry]]
@@ -220,6 +222,9 @@ def aggregate_source(
     if not per_unit:
         return SourceTotals(0, 0, 0, 0, 0, 0.0, 0, 0, 0, vocab_union_count)
     vocab_raws = [s.n_vocab_raw for s, _, _ in per_unit.values()]
+    model_vocabs = [v for _, v, _ in per_unit.values() if v is not None]
+    model_vocab_min = min(model_vocabs) if model_vocabs else None
+    model_vocab_max = max(model_vocabs) if model_vocabs else None
     return SourceTotals(
         n_units=len(per_unit),
         n_docs=sum(s.n_docs for s, _, _ in per_unit.values()),
@@ -227,10 +232,12 @@ def aggregate_source(
         vocab_raw_min=min(vocab_raws),
         vocab_raw_max=max(vocab_raws),
         vocab_raw_mean=sum(vocab_raws) / len(vocab_raws),
-        n_model_vocab_sum=sum(v for _, v, _ in per_unit.values() if v is not None),
+        n_model_vocab_sum=sum(model_vocabs),
         n_raw_files=sum(r.n_files for _, _, r in per_unit.values() if r is not None),
         n_raw_bytes=sum(r.n_bytes for _, _, r in per_unit.values() if r is not None),
         vocab_union_count=vocab_union_count,
+        model_vocab_min=model_vocab_min,
+        model_vocab_max=model_vocab_max,
     )
 
 
@@ -342,6 +349,14 @@ def render_markdown(
     template = emb.get("model_name_template", "?")
     models_dir = config.get("paths", {}).get("models_dir", "?")
     lines.append(f"- Model files: `{models_dir}/{template}`")
+    if totals.model_vocab_min is not None:
+        n_with_vocab = sum(1 for _, v, _ in per_unit.values() if v is not None)
+        mean_mv = totals.n_model_vocab_sum / n_with_vocab if n_with_vocab else 0
+        lines.append(
+            f"- Model vocab across {totals.n_units} units: "
+            f"{_fmt(totals.model_vocab_min)} — {_fmt(totals.model_vocab_max)} "
+            f"(mean: {mean_mv:,.0f})"
+        )
     lines.append("")
 
     # Per-unit breakdown

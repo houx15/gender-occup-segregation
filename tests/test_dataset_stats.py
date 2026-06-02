@@ -380,3 +380,63 @@ class TestRenderMarkdownNewColumns:
         assert "1940–1949" in md
         # Tokens/doc value (10.0 formatted with thousands-sep):
         assert "10.0" in md
+
+
+class TestAggregateSourceModelVocabRange:
+    def test_min_and_max_with_some_none(self):
+        per_unit = {
+            "u1": (_stats("u1", 1, 1, 1), 100, None),
+            "u2": (_stats("u2", 1, 1, 1), 200, None),
+            "u3": (_stats("u3", 1, 1, 1), None, None),  # missing model
+            "u4": (_stats("u4", 1, 1, 1), 300, None),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        assert totals.model_vocab_min == 100
+        assert totals.model_vocab_max == 300
+
+    def test_all_none_yields_none(self):
+        per_unit = {
+            "u1": (_stats("u1", 1, 1, 1), None, None),
+            "u2": (_stats("u2", 1, 1, 1), None, None),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        assert totals.model_vocab_min is None
+        assert totals.model_vocab_max is None
+
+
+class TestRenderMarkdownTrainingVocabRange:
+    def _minimal_config(self):
+        return {
+            "language": "zh", "data_source": "renminribao",
+            "embedding": {"vector_size": 300, "window": 4, "min_count": 50,
+                          "sg": 1, "negative": 15, "epochs": 5, "seed": 42,
+                          "workers": 16, "model_name_template": "rmrb_{slice_name}.model"},
+            "paths": {"models_dir": "/data/models", "raw_data_dir": "/data/raw"},
+        }
+
+    def test_training_section_shows_vocab_range_when_any_model_present(self):
+        per_unit = {
+            "1940_1949": (_stats("1940_1949", 1, 1, 1), 100, None),
+            "1950_1959": (_stats("1950_1959", 1, 1, 1), 300, None),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        md = render_markdown(
+            totals=totals, per_unit=per_unit, config=self._minimal_config(),
+            config_path="x.yml", generated_at="2026-06-02",
+        )
+        # Sentence shape from spec: "Model vocab across N units: min — max (mean: …)"
+        assert "Model vocab across 2 units:" in md
+        assert "100" in md
+        assert "300" in md
+        assert "mean: 200" in md  # (100+300)/2
+
+    def test_training_section_suppresses_bullet_when_all_models_missing(self):
+        per_unit = {
+            "u1": (_stats("u1", 1, 1, 1), None, None),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        md = render_markdown(
+            totals=totals, per_unit=per_unit, config=self._minimal_config(),
+            config_path="x.yml", generated_at="2026-06-02",
+        )
+        assert "Model vocab across" not in md
