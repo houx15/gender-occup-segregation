@@ -10,6 +10,7 @@ from scripts.data_prep.raw_volume.provincial_newspaper import walk as _walk_news
 from scripts.data_prep.raw_volume.weibo import walk as _walk_weibo
 from scripts.data_prep.raw_volume.ngram_zh import walk as _walk_ngram_zh
 from scripts.data_prep.raw_volume.ngram_en import walk as _walk_ngram_en
+from scripts.data_prep.raw_volume.coha import walk as _walk_coha
 
 WALKERS = {
     "renminribao": _walk_rmrb,
@@ -19,4 +20,5 @@ WALKERS = {
     # in scripts.common.dataset_stats. The registry uses synthetic keys.
     "ngram_zh": _walk_ngram_zh,
     "ngram_en": _walk_ngram_en,
+    "coha": _walk_coha,
 }
