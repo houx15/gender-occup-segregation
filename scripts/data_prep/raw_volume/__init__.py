@@ -7,8 +7,10 @@ config ``data_source`` strings to walkers; the reporter dispatches on it.
 
 from scripts.data_prep.raw_volume.rmrb import walk as _walk_rmrb
 from scripts.data_prep.raw_volume.provincial_newspaper import walk as _walk_newspaper
+from scripts.data_prep.raw_volume.weibo import walk as _walk_weibo
 
 WALKERS = {
     "renminribao": _walk_rmrb,
     "newspaper": _walk_newspaper,
+    "weibo": _walk_weibo,
 }
