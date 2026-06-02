@@ -240,3 +240,100 @@ class TestModelVocabSize:
 
     def test_missing_file_returns_none(self, tmp_path):
         assert model_vocab_size(tmp_path / "nope.model", logger) is None
+
+
+from scripts.common.dataset_stats import (
+    SourceTotals, aggregate_source, render_markdown,
+)
+
+
+def _stats(unit, docs, tokens, vocab):
+    return CorpusStats(
+        unit_name=unit, n_docs=docs, n_tokens=tokens, n_vocab_raw=vocab,
+        n_corpus_files=1, scanned_at="t", from_cache=False,
+    )
+
+
+def _raw(unit, files, nbytes):
+    return RawVolumeEntry(unit_name=unit, n_files=files, n_bytes=nbytes,
+                          layout_hint="hint")
+
+
+class TestAggregateSource:
+    def test_sums_and_per_unit_stats(self):
+        per_unit = {
+            "u1": (_stats("u1", 10, 100, 50), 20, _raw("u1", 5, 1000)),
+            "u2": (_stats("u2", 20, 300, 80), None, _raw("u2", 7, 2000)),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        assert totals.n_units == 2
+        assert totals.n_docs == 30
+        assert totals.n_tokens == 400
+        assert totals.vocab_raw_min == 50
+        assert totals.vocab_raw_max == 80
+        assert totals.vocab_raw_mean == 65.0
+        assert totals.n_model_vocab_sum == 20  # one None skipped
+        assert totals.n_raw_files == 12
+        assert totals.n_raw_bytes == 3000
+        assert totals.vocab_union_count is None
+
+    def test_vocab_union_passed_through(self):
+        per_unit = {"u1": (_stats("u1", 1, 1, 1), None, None)}
+        totals = aggregate_source(per_unit, vocab_union_count=999)
+        assert totals.vocab_union_count == 999
+
+
+class TestRenderMarkdown:
+    def _minimal_config(self):
+        return {
+            "language": "zh", "data_source": "renminribao",
+            "embedding": {"vector_size": 300, "window": 4, "min_count": 50,
+                          "sg": 1, "negative": 15, "epochs": 5, "seed": 42,
+                          "workers": 16, "model_name_template": "rmrb_{slice_name}.model"},
+            "paths": {"models_dir": "/data/models", "raw_data_dir": "/data/raw"},
+        }
+
+    def test_renders_all_sections(self):
+        per_unit = {
+            "1940_1949": (_stats("1940_1949", 100, 1000, 250), 80, _raw("1940_1949", 12, 5000)),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        md = render_markdown(
+            totals=totals, per_unit=per_unit, config=self._minimal_config(),
+            config_path="config/profiles/renminribao.yml", generated_at="2026-06-02",
+        )
+        assert "# Dataset Summary — renminribao (zh)" in md
+        assert "## Corpus totals" in md
+        assert "## Raw data" in md
+        assert "## Training" in md
+        assert "## Per-unit breakdown" in md
+        assert "1940_1949" in md
+        assert "min_count=50" in md  # pulled from config, not hard-coded
+        assert "vector_size=300" in md
+        assert "config/profiles/renminribao.yml" in md
+        assert "2026-06-02" in md
+
+    def test_ngram_renames_documents_column(self):
+        per_unit = {
+            "1940_1949": (_stats("1940_1949", 7, 21, 3), None, _raw("1940_1949", 1, 10)),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        cfg = self._minimal_config()
+        cfg["data_source"] = "ngram"
+        md = render_markdown(
+            totals=totals, per_unit=per_unit, config=cfg,
+            config_path="x.yml", generated_at="2026-06-02",
+        )
+        assert "N-gram entries" in md
+        # The renamed column carries the same count as Documents would.
+        assert "7" in md
+
+    def test_vocab_union_shown_when_present(self):
+        per_unit = {"u1": (_stats("u1", 1, 1, 1), None, None)}
+        totals = aggregate_source(per_unit, vocab_union_count=12345)
+        md = render_markdown(
+            totals=totals, per_unit=per_unit, config=self._minimal_config(),
+            config_path="x.yml", generated_at="2026-06-02",
+        )
+        assert "12,345" in md or "12345" in md
+        assert "union" in md.lower()

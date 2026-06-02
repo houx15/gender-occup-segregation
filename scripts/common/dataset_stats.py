@@ -189,3 +189,149 @@ def model_vocab_size(model_path: Path, logger: logging.Logger) -> Optional[int]:
     except Exception as e:  # noqa: BLE001 — gensim raises many distinct types
         logger.warning(f"Could not introspect {model_path}: {e!r}")
         return None
+
+
+from typing import Dict, Tuple
+
+
+@dataclass
+class SourceTotals:
+    n_units: int
+    n_docs: int
+    n_tokens: int
+    vocab_raw_min: int
+    vocab_raw_max: int
+    vocab_raw_mean: float
+    n_model_vocab_sum: int             # sum of per-unit model vocabs (None entries skipped)
+    n_raw_files: int
+    n_raw_bytes: int
+    vocab_union_count: Optional[int]   # None unless --vocab-union was passed
+
+
+PerUnitTriple = Tuple[CorpusStats, Optional[int], Optional[RawVolumeEntry]]
+# (corpus_stats, model_vocab_size_or_None, raw_volume_entry_or_None)
+
+
+def aggregate_source(
+    per_unit: Dict[str, PerUnitTriple],
+    vocab_union_count: Optional[int],
+) -> SourceTotals:
+    """Reduce per-unit triples to one source-level summary row."""
+    if not per_unit:
+        return SourceTotals(0, 0, 0, 0, 0, 0.0, 0, 0, 0, vocab_union_count)
+    vocab_raws = [s.n_vocab_raw for s, _, _ in per_unit.values()]
+    return SourceTotals(
+        n_units=len(per_unit),
+        n_docs=sum(s.n_docs for s, _, _ in per_unit.values()),
+        n_tokens=sum(s.n_tokens for s, _, _ in per_unit.values()),
+        vocab_raw_min=min(vocab_raws),
+        vocab_raw_max=max(vocab_raws),
+        vocab_raw_mean=sum(vocab_raws) / len(vocab_raws),
+        n_model_vocab_sum=sum(v for _, v, _ in per_unit.values() if v is not None),
+        n_raw_files=sum(r.n_files for _, _, r in per_unit.values() if r is not None),
+        n_raw_bytes=sum(r.n_bytes for _, _, r in per_unit.values() if r is not None),
+        vocab_union_count=vocab_union_count,
+    )
+
+
+def _human_bytes(n: int) -> str:
+    """1024-based, two-significant-figures, KB/MB/GB/TB."""
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if n < 1024 or unit == "TB":
+            return f"{n:.1f} {unit}" if unit != "B" else f"{n} B"
+        n /= 1024
+    return f"{n:.1f} TB"
+
+
+def _fmt(n) -> str:
+    if n is None:
+        return "n/a"
+    if isinstance(n, float):
+        return f"{n:,.1f}"
+    return f"{n:,}"
+
+
+def render_markdown(
+    totals: SourceTotals,
+    per_unit: Dict[str, PerUnitTriple],
+    config: dict,
+    config_path: str,
+    generated_at: str,
+) -> str:
+    """Render the per-source Markdown summary."""
+    src = config.get("data_source", "?")
+    lang = config.get("language", "?")
+    emb = config.get("embedding", {})
+    is_ngram = src == "ngram"
+    docs_header = "N-gram entries" if is_ngram else "Documents"
+
+    lines: List[str] = []
+    lines.append(f"# Dataset Summary — {src} ({lang})")
+    lines.append("")
+    lines.append(f"Generated {generated_at} from `{config_path}`.")
+    lines.append("")
+
+    # Corpus totals
+    lines.append("## Corpus totals")
+    lines.append("")
+    union_cell = f" {_fmt(totals.vocab_union_count)} (union)" if totals.vocab_union_count is not None else ""
+    lines.append(f"| Units | {docs_header} | Tokens | Raw vocab per unit (min / mean / max){' | Raw vocab union' if totals.vocab_union_count is not None else ''} | Trained-model vocab (sum, min_count={emb.get('min_count', '?')}) |")
+    sep_extra = "|---" if totals.vocab_union_count is not None else ""
+    lines.append(f"|---|---|---|---{sep_extra}|---|")
+    vocab_cells = f"{_fmt(totals.vocab_raw_min)} / {_fmt(totals.vocab_raw_mean)} / {_fmt(totals.vocab_raw_max)}"
+    union_col = f" | {_fmt(totals.vocab_union_count)}" if totals.vocab_union_count is not None else ""
+    lines.append(
+        f"| {_fmt(totals.n_units)} | {_fmt(totals.n_docs)} | {_fmt(totals.n_tokens)} | "
+        f"{vocab_cells}{union_col} | {_fmt(totals.n_model_vocab_sum)} |"
+    )
+    lines.append("")
+
+    # Raw data
+    lines.append("## Raw data")
+    lines.append("")
+    layout_hint = next(
+        (r.layout_hint for _, _, r in per_unit.values() if r is not None), None
+    )
+    raw_dir = config.get("paths", {}).get("raw_data_dir", "?")
+    if layout_hint:
+        lines.append(f"- Layout: `{layout_hint}`")
+    lines.append(f"- raw_data_dir: `{raw_dir}`")
+    lines.append(f"- Source files: {_fmt(totals.n_raw_files)}")
+    lines.append(f"- Bytes: {_human_bytes(totals.n_raw_bytes)}")
+    lines.append("")
+
+    # Training
+    lines.append("## Training")
+    lines.append("")
+    algo = "Word2Vec skip-gram with negative sampling (gensim)" if emb.get("sg") == 1 else "Word2Vec CBOW (gensim)"
+    lines.append(f"- Algorithm: {algo}")
+    params = (
+        f"vector_size={emb.get('vector_size', '?')} · "
+        f"window={emb.get('window', '?')} · "
+        f"min_count={emb.get('min_count', '?')} · "
+        f"sg={emb.get('sg', '?')} · "
+        f"negative={emb.get('negative', '?')} · "
+        f"epochs={emb.get('epochs', '?')} · "
+        f"seed={emb.get('seed', '?')}"
+    )
+    lines.append(f"- `{params}`")
+    template = emb.get("model_name_template", "?")
+    models_dir = config.get("paths", {}).get("models_dir", "?")
+    lines.append(f"- Model files: `{models_dir}/{template}`")
+    lines.append("")
+
+    # Per-unit breakdown
+    lines.append("## Per-unit breakdown")
+    lines.append("")
+    lines.append(f"| Unit | {docs_header} | Tokens | Raw vocab | Model vocab | Raw files | Raw bytes |")
+    lines.append("|---|---|---|---|---|---|---|")
+    for unit_name in sorted(per_unit):
+        stats, mv, raw = per_unit[unit_name]
+        raw_files = _fmt(raw.n_files) if raw is not None else "n/a"
+        raw_bytes = _human_bytes(raw.n_bytes) if raw is not None else "n/a"
+        lines.append(
+            f"| {unit_name} | {_fmt(stats.n_docs)} | {_fmt(stats.n_tokens)} | "
+            f"{_fmt(stats.n_vocab_raw)} | {_fmt(mv)} | {raw_files} | {raw_bytes} |"
+        )
+    lines.append("")
+    return "\n".join(lines)
