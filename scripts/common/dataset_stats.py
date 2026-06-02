@@ -251,6 +251,31 @@ def _fmt(n: Optional[Union[int, float]]) -> str:
     return f"{n:,}"
 
 
+import re
+
+
+def _year_range(unit_name: str) -> str:
+    """Parse year info from common unit-name shapes; returns en-dash range or '—'.
+
+    Examples:
+      '1940_1949'  -> '1940–1949'   (longitudinal slice)
+      '1940s'      -> '1940–1949'   (COHA decade)
+      '北京_2020'  -> '2020'        (province-year)
+      '北京'       -> '—'           (bare province, no year info)
+    """
+    m = re.match(r"^(\d{4})_(\d{4})$", unit_name)
+    if m:
+        return f"{m.group(1)}–{m.group(2)}"
+    m = re.match(r"^(\d{4})s$", unit_name)
+    if m:
+        start = int(m.group(1))
+        return f"{start}–{start + 9}"
+    m = re.match(r"^.+_(\d{4})$", unit_name)
+    if m:
+        return m.group(1)
+    return "—"
+
+
 def render_markdown(
     totals: SourceTotals,
     per_unit: Dict[str, PerUnitTriple],
@@ -322,14 +347,21 @@ def render_markdown(
     # Per-unit breakdown
     lines.append("## Per-unit breakdown")
     lines.append("")
-    lines.append(f"| Unit | {docs_header} | Tokens | Raw vocab | Model vocab | Raw files | Raw bytes |")
-    lines.append("|---|---|---|---|---|---|---|")
+    lines.append(
+        f"| Unit | Year range | {docs_header} | Tokens | Tokens/doc | "
+        f"Raw vocab | Model vocab | Raw files | Raw bytes |"
+    )
+    lines.append("|---|---|---|---|---|---|---|---|---|")
     for unit_name in sorted(per_unit):
         stats, mv, raw = per_unit[unit_name]
         raw_files = _fmt(raw.n_files) if raw is not None else "n/a"
         raw_bytes = _human_bytes(raw.n_bytes) if raw is not None else "n/a"
+        tokens_per_doc = (
+            f"{stats.n_tokens / stats.n_docs:,.1f}" if stats.n_docs > 0 else "—"
+        )
         lines.append(
-            f"| {unit_name} | {_fmt(stats.n_docs)} | {_fmt(stats.n_tokens)} | "
+            f"| {unit_name} | {_year_range(unit_name)} | {_fmt(stats.n_docs)} | "
+            f"{_fmt(stats.n_tokens)} | {tokens_per_doc} | "
             f"{_fmt(stats.n_vocab_raw)} | {_fmt(mv)} | {raw_files} | {raw_bytes} |"
         )
     lines.append("")

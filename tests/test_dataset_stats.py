@@ -335,3 +335,48 @@ class TestRenderMarkdown:
         )
         assert "12,345" in md or "12345" in md
         assert "union" in md.lower()
+
+
+from scripts.common.dataset_stats import _year_range
+
+
+class TestYearRange:
+    def test_slice_format(self):
+        assert _year_range("1940_1949") == "1940–1949"
+
+    def test_coha_decade(self):
+        assert _year_range("1940s") == "1940–1949"
+
+    def test_province_year(self):
+        assert _year_range("北京_2020") == "2020"
+
+    def test_unknown_returns_dash(self):
+        assert _year_range("北京") == "—"
+
+
+class TestRenderMarkdownNewColumns:
+    def _minimal_config(self):
+        return {
+            "language": "zh", "data_source": "renminribao",
+            "embedding": {"vector_size": 300, "window": 4, "min_count": 50,
+                          "sg": 1, "negative": 15, "epochs": 5, "seed": 42,
+                          "workers": 16, "model_name_template": "rmrb_{slice_name}.model"},
+            "paths": {"models_dir": "/data/models", "raw_data_dir": "/data/raw"},
+        }
+
+    def test_per_unit_table_includes_year_range_and_tokens_per_doc(self):
+        # 100 docs, 1000 tokens → 10.0 tokens/doc.
+        per_unit = {
+            "1940_1949": (_stats("1940_1949", 100, 1000, 250), 80, _raw("1940_1949", 12, 5000)),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        md = render_markdown(
+            totals=totals, per_unit=per_unit, config=self._minimal_config(),
+            config_path="x.yml", generated_at="2026-06-02",
+        )
+        # New header columns:
+        assert "| Unit | Year range | Documents | Tokens | Tokens/doc |" in md
+        # Year-range value for 1940_1949:
+        assert "1940–1949" in md
+        # Tokens/doc value (10.0 formatted with thousands-sep):
+        assert "10.0" in md
