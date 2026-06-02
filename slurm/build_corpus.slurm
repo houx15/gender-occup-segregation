@@ -27,7 +27,7 @@ DATA_SOURCE=$(python3 -c "import yaml; print(yaml.safe_load(open('$CONFIG'))['da
 
 echo "Building corpus: data_source=$DATA_SOURCE, config=$CONFIG"
 
-case $data_source in
+case $DATA_SOURCE in
     ngram)                python -m scripts.data_prep.build_corpora_ngram $ARGS ;;
     renminribao)          python -m scripts.data_prep.build_corpora_rmrb $ARGS ;;
     weibo)                python -m scripts.data_prep.build_corpora_weibo $ARGS ;;
