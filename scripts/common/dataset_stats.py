@@ -96,3 +96,63 @@ def cache_is_fresh(unit_dir: Path, corpus_files: List[Path]) -> bool:
     cached = {f["name"]: (f["size"], f["mtime"]) for f in payload.get("corpus_files", [])}
     live = {p.name: (p.stat().st_size, p.stat().st_mtime) for p in corpus_files}
     return cached == live
+
+
+import datetime
+from typing import Set, Tuple, Union
+
+
+def _list_corpus_files(unit_dir: Path) -> List[Path]:
+    """Sorted list of corpus_* files in a unit dir (excludes the .dataset_stats.json sidecar)."""
+    return sorted(p for p in unit_dir.glob("corpus_*") if p.is_file())
+
+
+def scan_corpus_unit(
+    unit_dir: Path,
+    logger: logging.Logger,
+    force: bool = False,
+    return_vocab: bool = False,
+) -> Union[CorpusStats, Tuple[CorpusStats, Set[str]]]:
+    """Count documents, tokens, and unique types in a unit's corpus_* files.
+
+    With ``return_vocab=False`` (default) returns CorpusStats; cache is used
+    when fresh. With ``return_vocab=True`` returns ``(CorpusStats, set[str])``;
+    always rescans (the cache stores counts, not the vocab set).
+    """
+    corpus_files = _list_corpus_files(unit_dir)
+
+    # Cache fast path (only when caller doesn't need the actual vocab set).
+    if not return_vocab and not force and cache_is_fresh(unit_dir, corpus_files):
+        cached = read_cache(unit_dir, logger)
+        if cached is not None:
+            return cached
+
+    # Scan.
+    n_docs = 0
+    n_tokens = 0
+    vocab: Set[str] = set()
+    for path in corpus_files:
+        with path.open("r", encoding="utf-8", buffering=8 * 1024 * 1024) as f:
+            for line in f:
+                tokens = line.split()
+                if not tokens:
+                    continue
+                n_docs += 1
+                n_tokens += len(tokens)
+                vocab.update(tokens)
+
+    stats = CorpusStats(
+        unit_name=unit_dir.name,
+        n_docs=n_docs,
+        n_tokens=n_tokens,
+        n_vocab_raw=len(vocab),
+        n_corpus_files=len(corpus_files),
+        scanned_at=datetime.datetime.now().isoformat(timespec="seconds"),
+        from_cache=False,
+    )
+    if corpus_files:
+        write_cache(unit_dir, stats, corpus_files)
+
+    if return_vocab:
+        return stats, vocab
+    return stats

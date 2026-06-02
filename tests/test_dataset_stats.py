@@ -101,3 +101,82 @@ class TestCacheFreshness:
         unit_dir = tmp_path / "u"
         files = _make_corpus_files(unit_dir, ["x\n"])
         assert cache_is_fresh(unit_dir, files) is False
+
+
+from scripts.common.dataset_stats import scan_corpus_unit
+
+
+class TestScanCorpusUnit:
+    def test_counts_docs_tokens_vocab(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        _make_corpus_files(unit_dir, ["a b c\n", "a b\n"])
+        stats = scan_corpus_unit(unit_dir, logger)
+        assert stats.n_docs == 2
+        assert stats.n_tokens == 5   # 3 + 2
+        assert stats.n_vocab_raw == 3  # {a, b, c}
+        assert stats.n_corpus_files == 2
+        assert stats.from_cache is False
+
+    def test_multi_file_aggregation(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        _make_corpus_files(unit_dir, ["a b\n", "c d\n", "a c\n"])
+        stats = scan_corpus_unit(unit_dir, logger)
+        assert stats.n_docs == 3
+        assert stats.n_tokens == 6
+        assert stats.n_vocab_raw == 4  # {a, b, c, d}
+        assert stats.n_corpus_files == 3
+
+    def test_empty_unit_dir(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        unit_dir.mkdir()
+        stats = scan_corpus_unit(unit_dir, logger)
+        assert stats.n_docs == 0
+        assert stats.n_tokens == 0
+        assert stats.n_vocab_raw == 0
+        assert stats.n_corpus_files == 0
+
+    def test_empty_file(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        _make_corpus_files(unit_dir, [""])
+        stats = scan_corpus_unit(unit_dir, logger)
+        assert stats.n_docs == 0
+        assert stats.n_tokens == 0
+        assert stats.n_vocab_raw == 0
+
+    def test_cache_written_after_scan(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        _make_corpus_files(unit_dir, ["a b\n"])
+        scan_corpus_unit(unit_dir, logger)
+        assert (unit_dir / ".dataset_stats.json").exists()
+
+    def test_cache_hit_skips_scan(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        _make_corpus_files(unit_dir, ["a b c\n"])
+        # First scan: writes cache.
+        scan_corpus_unit(unit_dir, logger)
+        # Mutate cache to a sentinel value so we can detect a re-scan.
+        cache_path = unit_dir / ".dataset_stats.json"
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        payload["n_tokens"] = 99999
+        cache_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        # Second scan: must use cache, not rescan.
+        stats = scan_corpus_unit(unit_dir, logger)
+        assert stats.n_tokens == 99999
+        assert stats.from_cache is True
+
+    def test_force_recomputes_even_with_cache(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        _make_corpus_files(unit_dir, ["a b c\n"])
+        scan_corpus_unit(unit_dir, logger)
+        cache_path = unit_dir / ".dataset_stats.json"
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        payload["n_tokens"] = 99999
+        cache_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        stats = scan_corpus_unit(unit_dir, logger, force=True)
+        assert stats.n_tokens == 3  # rescanned, sentinel overwritten
+
+    def test_returns_vocab_set_when_requested(self, tmp_path):
+        unit_dir = tmp_path / "u"
+        _make_corpus_files(unit_dir, ["a b c\n", "a b\n"])
+        stats, vocab = scan_corpus_unit(unit_dir, logger, return_vocab=True)
+        assert vocab == {"a", "b", "c"}
