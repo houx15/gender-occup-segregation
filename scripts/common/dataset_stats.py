@@ -334,3 +334,102 @@ def render_markdown(
         )
     lines.append("")
     return "\n".join(lines)
+
+
+from scripts.common.config_loader import get_model_name
+
+
+def resolve_walker(config: dict):
+    """Pick the right raw-data walker for this config's data_source.
+
+    Ngram dispatches on language too (ngram_zh vs ngram_en).
+    Returns None if no walker is registered for this source.
+    """
+    from scripts.data_prep.raw_volume import WALKERS
+
+    src = config.get("data_source")
+    if src == "ngram":
+        key = f"ngram_{config.get('language', '')}"
+        return WALKERS.get(key)
+    return WALKERS.get(src)
+
+
+def run(
+    config: dict,
+    config_path: str,
+    force: bool = False,
+    units: Optional[str] = None,
+    no_raw: bool = False,
+    no_model: bool = False,
+    vocab_union: bool = False,
+    logger: Optional[logging.Logger] = None,
+) -> Path:
+    """Orchestrate one source's dataset summary; write Markdown; return its path.
+
+    Args:
+        config: parsed config dict (already validated).
+        config_path: path string for provenance line in the Markdown header.
+        force: ignore sidecar caches, rescan every unit.
+        units: optional comma-separated subset of unit names to include.
+        no_raw: skip the raw-data walker (per-unit raw cells become n/a).
+        no_model: skip per-unit model vocab introspection.
+        vocab_union: opt-in cross-unit raw-vocab union (bypasses cache).
+        logger: optional pre-built logger; default uses a console-only one.
+    """
+    if logger is None:
+        logger = logging.getLogger("describe_dataset")
+        if not logger.handlers:
+            h = logging.StreamHandler()
+            h.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
+            logger.addHandler(h)
+            logger.setLevel(logging.INFO)
+
+    unit_list = discover_units(config)
+    if units:
+        wanted = set(u.strip() for u in units.split(","))
+        unit_list = [u for u in unit_list if u in wanted]
+    if not unit_list:
+        logger.error(f"No units to describe under {config['paths']['corpora_dir']}")
+        raise SystemExit(1)
+    logger.info(f"Describing {len(unit_list)} unit(s): {', '.join(unit_list)}")
+
+    corpora_dir = Path(config["paths"]["corpora_dir"])
+    models_dir = Path(config["paths"]["models_dir"])
+
+    # Raw-data walk (once per source).
+    raw_by_unit: Dict[str, Optional[RawVolumeEntry]] = {u: None for u in unit_list}
+    if not no_raw:
+        walker = resolve_walker(config)
+        if walker is None:
+            logger.warning(f"No raw-data walker for data_source={config.get('data_source')!r}; "
+                           "raw cells will be n/a")
+        else:
+            raw_dir = Path(config["paths"].get("raw_data_dir", ""))
+            raw_by_unit = {u: e for u, e in walker(raw_dir, unit_list, config, logger).items()}
+
+    # Per-unit corpus + model.
+    per_unit: Dict[str, PerUnitTriple] = {}
+    vocab_union_set: Optional[Set[str]] = set() if vocab_union else None
+    for u in unit_list:
+        unit_dir = corpora_dir / u
+        if vocab_union:
+            stats, vocab = scan_corpus_unit(unit_dir, logger, force=force, return_vocab=True)
+            vocab_union_set.update(vocab)
+        else:
+            stats = scan_corpus_unit(unit_dir, logger, force=force)
+        mv = None if no_model else model_vocab_size(models_dir / get_model_name(u, config), logger)
+        per_unit[u] = (stats, mv, raw_by_unit.get(u))
+
+    totals = aggregate_source(
+        per_unit,
+        vocab_union_count=len(vocab_union_set) if vocab_union_set is not None else None,
+    )
+
+    generated_at = datetime.datetime.now().strftime("%Y-%m-%d")
+    md = render_markdown(totals, per_unit, config, config_path, generated_at)
+    results_dir = Path(config["paths"]["results_dir"])
+    results_dir.mkdir(parents=True, exist_ok=True)
+    out_path = results_dir / "dataset_summary.md"
+    out_path.write_text(md, encoding="utf-8")
+    logger.info(f"Wrote {out_path}")
+    return out_path
