@@ -89,18 +89,46 @@ def parse_ngram_line_v3(line: str):
     return result
 
 
+VALID_WEIGHT_MODES = {"presence", "capped_repetition"}
+
+
 def process_ngram_file(file_path, time_slices, config, logger):
-    """Process a single ngram file and write to time-slice corpus files."""
-    min_count = config['corpus']['min_count_threshold']
+    """Process a single ngram file and write to time-slice corpus files.
+
+    Dispatches on ``config['corpus']['weight_mode']`` (default ``"presence"``):
+      - ``"presence"``: dedup-per-slice via set (one line per unique ngram per slice).
+      - ``"capped_repetition"``: emit ``min(match_count, repeat_cap)`` copies of each
+        (ngram, year) entry into every matching slice; cross-year contributions sum.
+    """
+    corpus_cfg = config['corpus']
+    min_count = corpus_cfg['min_count_threshold']
+    weight_mode = corpus_cfg.get('weight_mode', 'presence')
+    if weight_mode not in VALID_WEIGHT_MODES:
+        raise ValueError(
+            f"Invalid corpus.weight_mode={weight_mode!r}; "
+            f"expected one of {sorted(VALID_WEIGHT_MODES)}"
+        )
+    repeat_cap = max(int(corpus_cfg.get('repeat_cap', 100)), 1)
+
     corpora_dir = Path(config['paths']['corpora_dir'])
     os.makedirs(corpora_dir, exist_ok=True)
 
-    logger.info(f"Processing {file_path.name}...")
+    logger.info(f"Processing {file_path.name} (weight_mode={weight_mode}, repeat_cap={repeat_cap})...")
     lines_processed = 0
-    lines_included = defaultdict(int)
+    lines_emitted = defaultdict(int)
     file_index = file_path.name.split("-")[1]
-    write_buffer = defaultdict(set)
+    # Buffer type depends on mode: set for dedup (presence), list for repetition.
+    write_buffer: dict = defaultdict(set) if weight_mode == "presence" else defaultdict(list)
     largest_buffer = 10000
+
+    def _flush(slice_name: str):
+        buf = write_buffer[slice_name]
+        if not buf:
+            return
+        os.makedirs(corpora_dir / slice_name, exist_ok=True)
+        with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as out:
+            out.write("\n".join(list(buf)) + "\n")
+        write_buffer[slice_name] = set() if weight_mode == "presence" else []
 
     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
         for line in f:
@@ -116,25 +144,24 @@ def process_ngram_file(file_path, time_slices, config, logger):
                     if start_year <= year <= end_year:
                         matched_slices.add(f"{start_year}_{end_year}")
                 for slice_name in matched_slices:
-                    write_buffer[slice_name].add(ngram_text)
+                    if weight_mode == "presence":
+                        write_buffer[slice_name].add(ngram_text)
+                        lines_emitted[slice_name] += 1
+                    else:  # capped_repetition
+                        n_repeats = min(match_count, repeat_cap)
+                        write_buffer[slice_name].extend([ngram_text] * n_repeats)
+                        lines_emitted[slice_name] += n_repeats
                     if len(write_buffer[slice_name]) > largest_buffer:
-                        os.makedirs(corpora_dir / slice_name, exist_ok=True)
-                        with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as out:
-                            out.write("\n".join(list(write_buffer[slice_name])) + "\n")
-                        write_buffer[slice_name] = set()
-                    lines_included[slice_name] += 1
+                        _flush(slice_name)
             if lines_processed % 1000000 == 0:
                 logger.info(f"  Processed {lines_processed:,} lines from {file_path.name}")
 
-    for slice_name, buffer in write_buffer.items():
-        if buffer:
-            os.makedirs(corpora_dir / slice_name, exist_ok=True)
-            with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as out:
-                out.write("\n".join(list(buffer)) + "\n")
+    for slice_name in list(write_buffer.keys()):
+        _flush(slice_name)
 
     logger.info(f"Completed {file_path.name}: {lines_processed:,} lines processed")
-    for slice_name, count in lines_included.items():
-        logger.info(f"  {slice_name}: {count:,} n-grams included")
+    for slice_name, count in lines_emitted.items():
+        logger.info(f"  {slice_name}: {count:,} n-gram emissions")
 
 
 def build_corpora(config, logger, specific_slice=None, file_name=None):
