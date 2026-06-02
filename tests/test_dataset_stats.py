@@ -180,3 +180,63 @@ class TestScanCorpusUnit:
         _make_corpus_files(unit_dir, ["a b c\n", "a b\n"])
         stats, vocab = scan_corpus_unit(unit_dir, logger, return_vocab=True)
         assert vocab == {"a", "b", "c"}
+
+
+import sys
+import types
+
+
+def _install_fake_gensim():
+    """Match the pattern in tests/test_analyze_cohens_d_singlelist.py."""
+    if "gensim" in sys.modules and not getattr(sys.modules["gensim"], "_fake", False):
+        try:
+            from gensim.models import KeyedVectors  # noqa: F401
+            return
+        except Exception:
+            pass
+    fake_gensim = types.ModuleType("gensim")
+    fake_gensim._fake = True  # type: ignore[attr-defined]
+    fake_models = types.ModuleType("gensim.models")
+
+    class _FakeKV:
+        @staticmethod
+        def load(path):
+            class _Stub:
+                index_to_key = ["a", "b", "c"]
+            return _Stub()
+
+    fake_models.KeyedVectors = _FakeKV  # type: ignore[attr-defined]
+    fake_gensim.models = fake_models  # type: ignore[attr-defined]
+    sys.modules["gensim"] = fake_gensim
+    sys.modules["gensim.models"] = fake_models
+
+
+_install_fake_gensim()
+
+from scripts.common.dataset_stats import discover_units, model_vocab_size
+
+
+class TestDiscoverUnits:
+    def test_returns_sorted_subdirs(self, tmp_path):
+        corpora = tmp_path / "corpora"
+        (corpora / "1950_1959").mkdir(parents=True)
+        (corpora / "1940_1949").mkdir(parents=True)
+        (corpora / "_skip_file.txt").parent.mkdir(exist_ok=True)
+        (corpora / "_skip_file.txt").write_text("x")
+        config = {"paths": {"corpora_dir": str(corpora)}}
+        units = discover_units(config)
+        assert units == ["1940_1949", "1950_1959"]
+
+    def test_missing_corpora_dir_returns_empty(self, tmp_path):
+        config = {"paths": {"corpora_dir": str(tmp_path / "nope")}}
+        assert discover_units(config) == []
+
+
+class TestModelVocabSize:
+    def test_returns_vocab_count(self, tmp_path):
+        model_path = tmp_path / "m.model"
+        model_path.write_text("stub")  # contents irrelevant — fake gensim ignores
+        assert model_vocab_size(model_path, logger) == 3
+
+    def test_missing_file_returns_none(self, tmp_path):
+        assert model_vocab_size(tmp_path / "nope.model", logger) is None

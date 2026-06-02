@@ -156,3 +156,36 @@ def scan_corpus_unit(
     if return_vocab:
         return stats, vocab
     return stats
+
+
+def discover_units(config: dict) -> List[str]:
+    """Return sorted unit directory names under corpora_dir.
+
+    Mirrors scripts.train_embeddings.discover_units; lifted here so the
+    describe-dataset tool doesn't import the trainer.
+    """
+    corpora_dir = Path(config["paths"]["corpora_dir"])
+    if not corpora_dir.exists():
+        return []
+    return sorted(d.name for d in corpora_dir.iterdir() if d.is_dir())
+
+
+def model_vocab_size(model_path: Path, logger: logging.Logger) -> Optional[int]:
+    """Open a gensim model and return its vocab size; None on missing/corrupt.
+
+    Uses KeyedVectors.load — works for .kv files and for Word2Vec.save_word2vec_format
+    output. For full Word2Vec.save() output, gensim falls back through its loader
+    chain; if that fails the function logs and returns None.
+    """
+    if not model_path.exists():
+        logger.warning(f"Model file missing: {model_path}")
+        return None
+    try:
+        # Local import: gensim is broken on some test envs (scipy.linalg.triu);
+        # only this function actually needs it.
+        from gensim.models import KeyedVectors
+        kv = KeyedVectors.load(str(model_path))
+        return len(kv.index_to_key)
+    except Exception as e:  # noqa: BLE001 — gensim raises many distinct types
+        logger.warning(f"Could not introspect {model_path}: {e!r}")
+        return None
