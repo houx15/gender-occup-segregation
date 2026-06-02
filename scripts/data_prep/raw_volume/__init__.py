@@ -8,9 +8,15 @@ config ``data_source`` strings to walkers; the reporter dispatches on it.
 from scripts.data_prep.raw_volume.rmrb import walk as _walk_rmrb
 from scripts.data_prep.raw_volume.provincial_newspaper import walk as _walk_newspaper
 from scripts.data_prep.raw_volume.weibo import walk as _walk_weibo
+from scripts.data_prep.raw_volume.ngram_zh import walk as _walk_ngram_zh
+from scripts.data_prep.raw_volume.ngram_en import walk as _walk_ngram_en
 
 WALKERS = {
     "renminribao": _walk_rmrb,
     "newspaper": _walk_newspaper,
     "weibo": _walk_weibo,
+    # ngram is dispatched by (language, data_source) — see resolve_walker()
+    # in scripts.common.dataset_stats. The registry uses synthetic keys.
+    "ngram_zh": _walk_ngram_zh,
+    "ngram_en": _walk_ngram_en,
 }
