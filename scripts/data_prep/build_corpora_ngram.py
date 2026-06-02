@@ -181,6 +181,11 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
     raw_ngram_dir = Path(config['paths']['raw_ngram_dir'])
     decompress = True
 
+    # Ensure decompression target dir exists — without this, decompress_file's
+    # open(output_path, 'wb') raises FileNotFoundError on the first run of a
+    # fresh profile (e.g. *_weighted dirs).
+    os.makedirs(decompressed_dir, exist_ok=True)
+
     if file_name:
         ngram_zips = [decompressed_dir / file_name]
         decompress = False
@@ -192,7 +197,13 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
     for single_zip in ngram_zips:
         if decompress:
             ngram_file = decompressed_dir / single_zip.stem
-            decompress_file(single_zip, ngram_file, logger)
+            ok, msg = decompress_file(single_zip, ngram_file, logger)
+            if not ok:
+                # Skip processing — decompression failed (returned False).
+                # Without this guard, process_ngram_file silently reads 0 lines
+                # from the missing file, then os.remove raises FileNotFoundError.
+                logger.error(f"Skipping {single_zip.name}: {msg}")
+                continue
         else:
             ngram_file = single_zip
         process_ngram_file(ngram_file, time_slices, config, logger)
