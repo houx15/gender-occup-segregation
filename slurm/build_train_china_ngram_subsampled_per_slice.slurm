@@ -7,8 +7,8 @@
 #SBATCH --time=144:00:00
 #SBATCH --mail-type=end,fail
 #SBATCH --mail-user=yh6580@princeton.edu
-#SBATCH --output=logs/cnw_per_slice_%j.out
-#SBATCH --error=logs/cnw_per_slice_%j.err
+#SBATCH --output=logs/cns_per_slice_%j.out
+#SBATCH --error=logs/cns_per_slice_%j.err
 
 # Plan-B driver for the subsampled China Ngram retrain under disk-quota
 # pressure: process slices one at a time, train each model immediately, then
