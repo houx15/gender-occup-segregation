@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Set
 
 CACHE_FILENAME = ".dataset_stats.json"
 CACHE_SCHEMA_VERSION = 1
@@ -159,15 +160,42 @@ def scan_corpus_unit(
 
 
 def discover_units(config: dict) -> List[str]:
-    """Return sorted unit directory names under corpora_dir.
+    """Return sorted unit names. Prefers ``corpora_dir`` (current run); falls
+    back to ``models_dir`` when corpora are archived/deleted but trained
+    models are still on disk (e.g. an old Weibo run whose raw shards have
+    rolled off scratch but whose .model files remain). Empty list only when
+    neither dir yields a name.
 
     Mirrors scripts.train_embeddings.discover_units; lifted here so the
     describe-dataset tool doesn't import the trainer.
     """
     corpora_dir = Path(config["paths"]["corpora_dir"])
-    if not corpora_dir.exists():
+    if corpora_dir.exists():
+        names = sorted(d.name for d in corpora_dir.iterdir() if d.is_dir())
+        if names:
+            return names
+    return _discover_units_from_models(config)
+
+
+def _discover_units_from_models(config: dict) -> List[str]:
+    """Recover unit names from model filenames using ``model_name_template``.
+
+    The template is e.g. ``"weibo_{slice_name}.model"``; we convert that to a
+    regex and extract the ``slice_name`` group from each file in models_dir.
+    """
+    models_dir = Path(config.get("paths", {}).get("models_dir", ""))
+    template = config.get("embedding", {}).get("model_name_template")
+    if not models_dir.exists() or not template or "{slice_name}" not in template:
         return []
-    return sorted(d.name for d in corpora_dir.iterdir() if d.is_dir())
+    # Escape literal pieces, then put a capture group where {slice_name} sat.
+    pattern = re.escape(template).replace(re.escape("{slice_name}"), r"(.+)")
+    rx = re.compile(f"^{pattern}$")
+    names: Set[str] = set()
+    for path in models_dir.iterdir():
+        m = rx.match(path.name)
+        if m:
+            names.add(m.group(1))
+    return sorted(names)
 
 
 def model_vocab_size(model_path: Path, logger: logging.Logger) -> Optional[int]:
@@ -218,20 +246,27 @@ def aggregate_source(
     per_unit: Dict[str, PerUnitTriple],
     vocab_union_count: Optional[int],
 ) -> SourceTotals:
-    """Reduce per-unit triples to one source-level summary row."""
+    """Reduce per-unit triples to one source-level summary row.
+
+    Units with ``n_corpus_files == 0`` are model-only (corpus archived or
+    never built). They are EXCLUDED from corpus aggregates (n_docs, tokens,
+    raw-vocab min/max/mean) but still counted in ``n_units`` and contribute
+    to model_vocab aggregates so the per-source training table stays honest.
+    """
     if not per_unit:
         return SourceTotals(0, 0, 0, 0, 0, 0.0, 0, 0, 0, vocab_union_count)
-    vocab_raws = [s.n_vocab_raw for s, _, _ in per_unit.values()]
+    corpus_units = [s for s, _, _ in per_unit.values() if s.n_corpus_files > 0]
+    vocab_raws = [s.n_vocab_raw for s in corpus_units]
     model_vocabs = [v for _, v, _ in per_unit.values() if v is not None]
     model_vocab_min = min(model_vocabs) if model_vocabs else None
     model_vocab_max = max(model_vocabs) if model_vocabs else None
     return SourceTotals(
         n_units=len(per_unit),
-        n_docs=sum(s.n_docs for s, _, _ in per_unit.values()),
-        n_tokens=sum(s.n_tokens for s, _, _ in per_unit.values()),
-        vocab_raw_min=min(vocab_raws),
-        vocab_raw_max=max(vocab_raws),
-        vocab_raw_mean=sum(vocab_raws) / len(vocab_raws),
+        n_docs=sum(s.n_docs for s in corpus_units),
+        n_tokens=sum(s.n_tokens for s in corpus_units),
+        vocab_raw_min=min(vocab_raws) if vocab_raws else 0,
+        vocab_raw_max=max(vocab_raws) if vocab_raws else 0,
+        vocab_raw_mean=(sum(vocab_raws) / len(vocab_raws)) if vocab_raws else 0.0,
         n_model_vocab_sum=sum(model_vocabs),
         n_raw_files=sum(r.n_files for _, _, r in per_unit.values() if r is not None),
         n_raw_bytes=sum(r.n_bytes for _, _, r in per_unit.values() if r is not None),
@@ -371,14 +406,36 @@ def render_markdown(
         stats, mv, raw = per_unit[unit_name]
         raw_files = _fmt(raw.n_files) if raw is not None else "n/a"
         raw_bytes = _human_bytes(raw.n_bytes) if raw is not None else "n/a"
-        tokens_per_doc = (
-            f"{stats.n_tokens / stats.n_docs:,.1f}" if stats.n_docs > 0 else "—"
-        )
+        if stats.n_corpus_files == 0:
+            # Model-only unit (corpus archived or never built). Don't pretend
+            # zero — show n/a so the methods writer can see at a glance which
+            # rows have only model-side information.
+            docs_cell = tokens_cell = tokens_per_doc = raw_vocab_cell = "n/a"
+        else:
+            docs_cell = _fmt(stats.n_docs)
+            tokens_cell = _fmt(stats.n_tokens)
+            tokens_per_doc = (
+                f"{stats.n_tokens / stats.n_docs:,.1f}" if stats.n_docs > 0 else "—"
+            )
+            raw_vocab_cell = _fmt(stats.n_vocab_raw)
         lines.append(
-            f"| {unit_name} | {_year_range(unit_name)} | {_fmt(stats.n_docs)} | "
-            f"{_fmt(stats.n_tokens)} | {tokens_per_doc} | "
-            f"{_fmt(stats.n_vocab_raw)} | {_fmt(mv)} | {raw_files} | {raw_bytes} |"
+            f"| {unit_name} | {_year_range(unit_name)} | {docs_cell} | "
+            f"{tokens_cell} | {tokens_per_doc} | "
+            f"{raw_vocab_cell} | {_fmt(mv)} | {raw_files} | {raw_bytes} |"
         )
+
+    # Footer note for the methods writer when any units are model-only.
+    n_model_only = sum(1 for s, _, _ in per_unit.values() if s.n_corpus_files == 0)
+    if n_model_only:
+        lines.append("")
+        lines.append(
+            f"_Note: {n_model_only} of {len(per_unit)} unit(s) have no corpus on "
+            f"disk (models present, corpora archived or never built). These rows "
+            f"show corpus cells as `n/a` and are excluded from the corpus-totals "
+            f"aggregates above; they remain included in the trained-model vocab "
+            f"line in the Training section._"
+        )
+
     lines.append("")
     return "\n".join(lines)
 
@@ -436,7 +493,10 @@ def run(
         wanted = set(u.strip() for u in units.split(","))
         unit_list = [u for u in unit_list if u in wanted]
     if not unit_list:
-        logger.error(f"No units to describe under {config['paths']['corpora_dir']}")
+        logger.error(
+            f"No units to describe. Tried corpora_dir={config['paths']['corpora_dir']!r} "
+            f"and models_dir={config['paths']['models_dir']!r} (via {config.get('embedding', {}).get('model_name_template', '?')})"
+        )
         raise SystemExit(1)
     logger.info(f"Describing {len(unit_list)} unit(s): {', '.join(unit_list)}")
 

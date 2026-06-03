@@ -231,6 +231,49 @@ class TestDiscoverUnits:
         config = {"paths": {"corpora_dir": str(tmp_path / "nope")}}
         assert discover_units(config) == []
 
+    def test_falls_back_to_models_dir_when_corpora_missing(self, tmp_path):
+        # When corpora_dir is gone but models_dir has trained .model files,
+        # recover unit names by reversing the model_name_template. This is
+        # the "weibo archived but models retained" case.
+        models = tmp_path / "models"
+        models.mkdir()
+        (models / "weibo_beijing_2020.model").write_text("stub")
+        (models / "weibo_shanghai_2020.model").write_text("stub")
+        (models / "unrelated.txt").write_text("stub")
+        config = {
+            "paths": {
+                "corpora_dir": str(tmp_path / "nope"),
+                "models_dir": str(models),
+            },
+            "embedding": {"model_name_template": "weibo_{slice_name}.model"},
+        }
+        assert discover_units(config) == ["beijing_2020", "shanghai_2020"]
+
+    def test_fallback_returns_empty_when_neither_dir_has_anything(self, tmp_path):
+        config = {
+            "paths": {
+                "corpora_dir": str(tmp_path / "nope_corpora"),
+                "models_dir": str(tmp_path / "nope_models"),
+            },
+            "embedding": {"model_name_template": "weibo_{slice_name}.model"},
+        }
+        assert discover_units(config) == []
+
+    def test_prefers_corpora_when_both_exist(self, tmp_path):
+        # If corpora is on disk, use it — even if models_dir has additional
+        # historical models from a previous, larger run.
+        corpora = tmp_path / "corpora"
+        (corpora / "1990_1999").mkdir(parents=True)
+        models = tmp_path / "models"
+        models.mkdir()
+        (models / "chi_sim_5gram_1990_1999.model").write_text("stub")
+        (models / "chi_sim_5gram_1900_1909.model").write_text("stub")  # extra
+        config = {
+            "paths": {"corpora_dir": str(corpora), "models_dir": str(models)},
+            "embedding": {"model_name_template": "chi_sim_5gram_{slice_name}.model"},
+        }
+        assert discover_units(config) == ["1990_1999"]
+
 
 class TestModelVocabSize:
     def test_returns_vocab_count(self, tmp_path):
@@ -245,11 +288,16 @@ class TestModelVocabSize:
 from scripts.common.dataset_stats import aggregate_source, render_markdown
 
 
-def _stats(unit, docs, tokens, vocab):
+def _stats(unit, docs, tokens, vocab, *, n_corpus_files=1):
     return CorpusStats(
         unit_name=unit, n_docs=docs, n_tokens=tokens, n_vocab_raw=vocab,
-        n_corpus_files=1, scanned_at="t", from_cache=False,
+        n_corpus_files=n_corpus_files, scanned_at="t", from_cache=False,
     )
+
+
+def _stats_missing(unit):
+    """A model-only unit — corpus archived/never built (n_corpus_files=0)."""
+    return _stats(unit, docs=0, tokens=0, vocab=0, n_corpus_files=0)
 
 
 def _raw(unit, files, nbytes):
@@ -279,6 +327,39 @@ class TestAggregateSource:
         per_unit = {"u1": (_stats("u1", 1, 1, 1), None, None)}
         totals = aggregate_source(per_unit, vocab_union_count=999)
         assert totals.vocab_union_count == 999
+
+    def test_model_only_units_excluded_from_corpus_aggregates(self):
+        # u1 has corpus + model; u2 is model-only (n_corpus_files=0).
+        # Corpus aggregates should reflect ONLY u1; n_units stays at 2; the
+        # model vocab sum sees both models.
+        per_unit = {
+            "u1": (_stats("u1", 10, 100, 50), 20, None),
+            "u2": (_stats_missing("u2"), 30, None),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        assert totals.n_units == 2          # both still counted overall
+        assert totals.n_docs == 10           # u2 excluded (no corpus)
+        assert totals.n_tokens == 100
+        assert totals.vocab_raw_min == 50    # only u1 contributes
+        assert totals.vocab_raw_max == 50
+        assert totals.vocab_raw_mean == 50.0
+        assert totals.n_model_vocab_sum == 50  # both models counted
+
+    def test_all_units_model_only_yields_zero_corpus_aggregates_no_crash(self):
+        # The fully-archived case (e.g. weibo run where all corpora are gone).
+        # Must not raise min()/max() on empty sequence.
+        per_unit = {
+            "u1": (_stats_missing("u1"), 100, None),
+            "u2": (_stats_missing("u2"), 200, None),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        assert totals.n_units == 2
+        assert totals.n_docs == 0
+        assert totals.n_tokens == 0
+        assert totals.vocab_raw_min == 0
+        assert totals.vocab_raw_max == 0
+        assert totals.vocab_raw_mean == 0.0
+        assert totals.n_model_vocab_sum == 300
 
 
 class TestRenderMarkdown:
@@ -380,6 +461,30 @@ class TestRenderMarkdownNewColumns:
         assert "1940–1949" in md
         # Tokens/doc value (10.0 formatted with thousands-sep):
         assert "10.0" in md
+
+    def test_model_only_unit_renders_na_in_corpus_cells_and_adds_footer_note(self):
+        # u1 has corpus, u2 is model-only. Methods writer should see at a
+        # glance which rows have corpus stats vs. which are model-only.
+        per_unit = {
+            "1940_1949": (_stats("1940_1949", 100, 1000, 250), 80, _raw("1940_1949", 12, 5000)),
+            "2010_2019": (_stats_missing("2010_2019"), 90, None),
+        }
+        totals = aggregate_source(per_unit, vocab_union_count=None)
+        md = render_markdown(
+            totals=totals, per_unit=per_unit, config=self._minimal_config(),
+            config_path="x.yml", generated_at="2026-06-02",
+        )
+        # The model-only row should contain n/a for docs/tokens/raw vocab,
+        # and the model vocab column (80 for u1, 90 for u2) is still shown.
+        # Locate the 2010_2019 row and inspect.
+        row = next(line for line in md.splitlines() if line.startswith("| 2010_2019 "))
+        # All four corpus cells render as n/a:
+        assert row.count("n/a") >= 4
+        # Model vocab still shown:
+        assert "| 90 " in row
+        # Footer note describes the model-only situation:
+        assert "1 of 2 unit(s) have no corpus" in md or "1 of 2 unit(s)" in md
+        assert "archived or never built" in md
 
 
 class TestAggregateSourceModelVocabRange:
