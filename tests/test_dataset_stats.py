@@ -259,6 +259,41 @@ class TestDiscoverUnits:
         }
         assert discover_units(config) == []
 
+    def test_fallback_handles_unit_name_placeholder(self, tmp_path):
+        # Weibo provincial config uses {unit_name}, not {slice_name} — both
+        # are valid (see config_loader._parse_model_template). Sidecar
+        # .vectors.npy files must NOT be discovered as units.
+        models = tmp_path / "models"
+        models.mkdir()
+        (models / "model_北京.model").write_text("stub")
+        (models / "model_北京.model.vectors.npy").write_text("stub")
+        (models / "model_上海.model").write_text("stub")
+        (models / "model_上海.model.vectors.npy").write_text("stub")
+        (models / "training_stats_2024.csv").write_text("stub")
+        config = {
+            "paths": {
+                "corpora_dir": str(tmp_path / "nope"),
+                "models_dir": str(models),
+            },
+            "embedding": {"model_name_template": "model_{unit_name}.model"},
+        }
+        assert discover_units(config) == ["上海", "北京"]
+
+    def test_fallback_handles_province_placeholder(self, tmp_path):
+        # {province} is also accepted by config_loader._parse_model_template.
+        models = tmp_path / "models"
+        models.mkdir()
+        (models / "news_江苏.kv").write_text("stub")
+        (models / "news_浙江.kv").write_text("stub")
+        config = {
+            "paths": {
+                "corpora_dir": str(tmp_path / "nope"),
+                "models_dir": str(models),
+            },
+            "embedding": {"model_name_template": "news_{province}.kv"},
+        }
+        assert discover_units(config) == ["江苏", "浙江"]
+
     def test_prefers_corpora_when_both_exist(self, tmp_path):
         # If corpora is on disk, use it — even if models_dir has additional
         # historical models from a previous, larger run.

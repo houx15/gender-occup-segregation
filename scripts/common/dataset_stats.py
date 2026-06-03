@@ -177,18 +177,27 @@ def discover_units(config: dict) -> List[str]:
     return _discover_units_from_models(config)
 
 
+_TEMPLATE_PLACEHOLDER_RX = re.compile(r"\{(?:unit_name|slice_name|province)\}")
+
+
 def _discover_units_from_models(config: dict) -> List[str]:
     """Recover unit names from model filenames using ``model_name_template``.
 
-    The template is e.g. ``"weibo_{slice_name}.model"``; we convert that to a
-    regex and extract the ``slice_name`` group from each file in models_dir.
+    The template uses one of the placeholders supported by
+    :func:`scripts.common.config_loader._parse_model_template` —
+    ``{unit_name}`` (provinces, COHA decades), ``{slice_name}`` (RMRB/ngram
+    year slices), or ``{province}``. We convert that to a regex and extract
+    the captured name from each matching file in ``models_dir``.
     """
     models_dir = Path(config.get("paths", {}).get("models_dir", ""))
     template = config.get("embedding", {}).get("model_name_template")
-    if not models_dir.exists() or not template or "{slice_name}" not in template:
+    if not models_dir.exists() or not template or not _TEMPLATE_PLACEHOLDER_RX.search(template):
         return []
-    # Escape literal pieces, then put a capture group where {slice_name} sat.
-    pattern = re.escape(template).replace(re.escape("{slice_name}"), r"(.+)")
+    # Escape literal pieces around each placeholder, then stitch with capture
+    # groups in their place. group(1) is the unit name (all configs in this
+    # repo have exactly one placeholder per template).
+    parts = _TEMPLATE_PLACEHOLDER_RX.split(template)
+    pattern = "(.+)".join(re.escape(p) for p in parts)
     rx = re.compile(f"^{pattern}$")
     names: Set[str] = set()
     for path in models_dir.iterdir():
