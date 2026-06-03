@@ -183,7 +183,7 @@ def train_all(config: dict, logger, specific_unit=None, group=None, retrain=Fals
         gc.collect()
 
 
-def main(config="config/config.yml", unit=None, group=None, retrain=False):
+def main(config: str = "config/config.yml", unit: str = None, group: str = None, retrain: bool = False):
     """
     Train Word2Vec embeddings.
 
@@ -192,6 +192,12 @@ def main(config="config/config.yml", unit=None, group=None, retrain=False):
         unit: Train only a specific unit (time slice name or province name)
         group: Train only a specific province group (index)
         retrain: Retrain existing models
+
+    The ``: str`` annotations on ``unit`` / ``group`` are load-bearing: Fire
+    auto-coerces CLI args via ``ast.literal_eval``, and PEP 515 makes
+    ``1940_1949`` a valid int literal (=> ``19401949``). Without the
+    annotation, ``--unit=1940_1949`` would arrive as int and silently fail
+    the ``units[i].startswith(...)`` filter.
     """
     config_data = load_config(config)
     logger = setup_logging(Path(config_data["paths"]["log_dir"]), "train_embeddings.log")

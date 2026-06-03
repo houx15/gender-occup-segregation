@@ -250,8 +250,14 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
             os.remove(ngram_file)
 
 
-def main(file_name=None, config='config/config.yml', slice=None):
-    """Build time-sliced corpora from Chinese Google 5-gram data."""
+def main(file_name: str = None, config: str = 'config/config.yml', slice: str = None):
+    """Build time-sliced corpora from Chinese Google 5-gram data.
+
+    The ``: str`` annotations are load-bearing: Fire auto-coerces CLI args
+    using ``ast.literal_eval``, and PEP 515 makes ``1940_1949`` a valid int
+    literal (=> ``19401949``). Without the annotation, ``--slice=1940_1949``
+    would arrive as an int and crash ``specific_slice.split('_')`` later.
+    """
     config_data = load_config(config)
     logger = setup_logging(Path(config_data['paths']['log_dir']), "build_corpora_ngram.log")
 
