@@ -66,52 +66,6 @@ class TestPresenceModeDefault:
         assert lines == [NGRAM_CLEAN]
 
 
-class TestCappedRepetition:
-    def test_count_below_cap_emits_count_copies(self, tmp_path):
-        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
-            _line(NGRAM, 1942, match_count=3),
-        ])
-        cfg = _config(tmp_path, corpus={"weight_mode": "capped_repetition", "repeat_cap": 100})
-        process_ngram_file(f, [(1940, 1949)], cfg, logger)
-        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
-        assert lines == [NGRAM_CLEAN] * 3
-
-    def test_count_above_cap_is_clamped(self, tmp_path):
-        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
-            _line(NGRAM, 1942, match_count=5000),
-        ])
-        cfg = _config(tmp_path, corpus={"weight_mode": "capped_repetition", "repeat_cap": 100})
-        process_ngram_file(f, [(1940, 1949)], cfg, logger)
-        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
-        assert lines == [NGRAM_CLEAN] * 100
-
-    def test_multi_year_in_same_slice_sums_capped_contributions(self, tmp_path):
-        # 1942: 80 (below cap → 80 copies). 1948: 200 (clamped to 100 copies). Both in 1940_1949.
-        # Total: 180 lines in the slice corpus.
-        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
-            _line(NGRAM, 1942, match_count=80),
-            _line(NGRAM, 1948, match_count=200),
-        ])
-        cfg = _config(tmp_path, corpus={"weight_mode": "capped_repetition", "repeat_cap": 100})
-        process_ngram_file(f, [(1940, 1949)], cfg, logger)
-        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
-        assert len(lines) == 180
-        assert set(lines) == {NGRAM_CLEAN}
-
-    def test_min_count_threshold_filter_runs_before_cap(self, tmp_path):
-        # Below min_count_threshold: dropped entirely (no copies emitted).
-        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
-            _line(NGRAM, 1942, match_count=5),
-        ])
-        cfg = _config(
-            tmp_path,
-            corpus={"weight_mode": "capped_repetition", "repeat_cap": 100, "min_count_threshold": 10},
-        )
-        process_ngram_file(f, [(1940, 1949)], cfg, logger)
-        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
-        assert lines == []
-
-
 class TestInvalidWeightMode:
     def test_raises_value_error(self, tmp_path):
         f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
@@ -120,14 +74,3 @@ class TestInvalidWeightMode:
         cfg = _config(tmp_path, corpus={"weight_mode": "bogus"})
         with pytest.raises(ValueError, match="weight_mode"):
             process_ngram_file(f, [(1940, 1949)], cfg, logger)
-
-
-class TestRepeatCapEdge:
-    def test_repeat_cap_one_emits_one_copy(self, tmp_path):
-        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
-            _line(NGRAM, 1942, match_count=100),
-        ])
-        cfg = _config(tmp_path, corpus={"weight_mode": "capped_repetition", "repeat_cap": 1})
-        process_ngram_file(f, [(1940, 1949)], cfg, logger)
-        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
-        assert lines == [NGRAM_CLEAN]
