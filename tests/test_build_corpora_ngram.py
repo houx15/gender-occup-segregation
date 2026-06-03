@@ -140,6 +140,21 @@ class TestPerYearCapped:
         with pytest.raises(KeyError, match="1942"):
             process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1943: 1_000_000})
 
+    def test_year_total_zero_raises_value_error_with_year_context(self, tmp_path):
+        # Zero-year would otherwise blow up as ZeroDivisionError with no context.
+        # We want a clean ValueError that names the year so operators can find
+        # the bad entry in totalcounts-5.
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=10),
+        ])
+        cfg = _config(tmp_path, corpus={
+            "weight_mode": "per_year_capped",
+            "per_year_token_cap": 100_000_000,
+            "rng_seed": 42,
+        })
+        with pytest.raises(ValueError, match="1942"):
+            process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1942: 0})
+
     def test_per_year_capped_without_year_total_raises_value_error(self, tmp_path):
         f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
             _line(NGRAM, 1942, match_count=10),

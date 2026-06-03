@@ -162,6 +162,10 @@ def process_ngram_file(file_path, time_slices, config, logger, year_total=None):
                         raise KeyError(
                             f"Year {year} missing from totalcounts-5 (raw_ngram_dir/totalcounts-5)"
                         )
+                    if year_total[year] == 0:
+                        raise ValueError(
+                            f"Year {year} has year_total=0 in totalcounts-5; cannot compute scale"
+                        )
                     scale = min(1.0, cap / year_total[year])
                     expected = match_count * scale
                     n_floor = int(expected)
