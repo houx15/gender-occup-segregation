@@ -69,14 +69,21 @@ for CONFIG in "${CONFIGS[@]}"; do
     fi
 
     CORPORA_DIR=$(read_config_value "$CONFIG" "c['paths']['corpora_dir']")
+    MODELS_DIR=$(read_config_value "$CONFIG" "c['paths'].get('models_dir', '')")
     RESULTS_DIR=$(read_config_value "$CONFIG" "c['paths']['results_dir']")
 
-    if [ ! -d "$CORPORA_DIR" ]; then
-        echo "  SKIP: corpora_dir does not exist: $CORPORA_DIR"
-        STATUSES+=("no_corpora_dir"); continue
+    if [ ! -d "$CORPORA_DIR" ] && [ ! -d "$MODELS_DIR" ]; then
+        echo "  SKIP: neither corpora_dir nor models_dir exists"
+        echo "        corpora_dir=$CORPORA_DIR"
+        echo "        models_dir=$MODELS_DIR"
+        STATUSES+=("no_corpora_or_models_dir"); continue
     fi
 
-    echo "  corpora_dir=$CORPORA_DIR"
+    if [ -d "$CORPORA_DIR" ]; then
+        echo "  corpora_dir=$CORPORA_DIR"
+    else
+        echo "  corpora_dir missing — falling back to models_dir=$MODELS_DIR"
+    fi
 
     if ! python -m scripts.describe_dataset --config="$CONFIG"; then
         echo "  ERROR: describe_dataset failed"
