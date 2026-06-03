@@ -55,18 +55,20 @@ Key commits this runbook depends on:
 
 The per-slice driver does **build → train → delete-corpus** per slice, keeping peak disk to one slice's footprint (~3 GB at cap=10⁸). The whole 17-slice sweep is too long for a single 48h job, so split it. Three roughly-equal subsets:
 
+**Slice identifier:** pass the **start year** (4-digit int like `1940`), not the `YYYY_YYYY` range. Fire's CLI parser coerces `1940_1949` to the int `19401949` (PEP 515 — underscores are valid in int literals), which corrupts the value. Start years are unique across the 17 slices, so passing just the start year is unambiguous; the build script looks up the canonical `(start, end)` from the profile.
+
 ```bash
 # Subset 1 — 1940s through mid-1960s (6 slices, smaller corpora):
 sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-  "1940_1949 1945_1954 1950_1959 1955_1964 1960_1969 1965_1974"
+  "1940 1945 1950 1955 1960 1965"
 
 # Subset 2 — late 1960s through mid-2000s (6 slices, mid-size corpora):
 sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-  "1970_1979 1975_1984 1980_1989 1985_1994 1990_1999 1995_2004"
+  "1970 1975 1980 1985 1990 1995"
 
 # Subset 3 — 2000s onward (5 slices, densest corpora):
 sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-  "2000_2009 2005_2014 2010_2019 2015_2020 2020_2020"
+  "2000 2005 2010 2015 2020"
 ```
 
 Each job:
@@ -79,12 +81,12 @@ Jobs queue independently; SLURM will run them concurrently if compute allows. Pe
 ```bash
 # Capture the first job's id, then chain:
 JID1=$(sbatch --parsable slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-  "1940_1949 1945_1954 1950_1959 1955_1964 1960_1969 1965_1974")
+  "1940 1945 1950 1955 1960 1965")
 JID2=$(sbatch --parsable --dependency=afterok:$JID1 \
   slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-  "1970_1979 1975_1984 1980_1989 1985_1994 1990_1999 1995_2004")
+  "1970 1975 1980 1985 1990 1995")
 sbatch --dependency=afterok:$JID2 slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-  "2000_2009 2005_2014 2010_2019 2015_2020 2020_2020"
+  "2000 2005 2010 2015 2020"
 ```
 
 **Monitoring.** Logs land at `logs/cns_per_slice_<jobid>.out` and `.err`. Each iteration prints `[N] SLICE=...`, the `du -sh` of the built corpus, and `[N] reclaimed:` after the delete. The final SUMMARY block lists each slice's status (`ok`, `build_failed`, `no_corpus_dir`, `train_failed`).
@@ -193,9 +195,9 @@ After Step 2 + 3 + 4 complete, the new `models_subsampled/` exists and `sbatch s
 |---|---|---|
 | 0. Cleanup 06-02 partial weighted (one-time) | `rm -rf corpora_weighted ...` (see Step 0) | seconds |
 | 1. Pull corrected code | `git pull` | seconds |
-| 2a. Build+train subsampled (subset 1: 6 slices) | `sbatch ..._subsampled_per_slice.slurm "1940_..._1965_1974"` | ≤48h (≈10–18h typical) |
-| 2b. Build+train subsampled (subset 2: 6 slices) | `sbatch ..._subsampled_per_slice.slurm "1970_..._1995_2004"` | ≤48h |
-| 2c. Build+train subsampled (subset 3: 5 slices) | `sbatch ..._subsampled_per_slice.slurm "2000_..._2020_2020"` | ≤48h |
+| 2a. Build+train subsampled (subset 1: 6 slices) | `sbatch ..._subsampled_per_slice.slurm "1940 1945 1950 1955 1960 1965"` | ≤48h (≈10–18h typical) |
+| 2b. Build+train subsampled (subset 2: 6 slices) | `sbatch ..._subsampled_per_slice.slurm "1970 1975 1980 1985 1990 1995"` | ≤48h |
+| 2c. Build+train subsampled (subset 3: 5 slices) | `sbatch ..._subsampled_per_slice.slurm "2000 2005 2010 2015 2020"` | ≤48h |
 | 3. Analyze + visualize (Renminribao + subsampled) | `sbatch slurm/garg_weat_zh.slurm` | minutes per slice |
 | 4. Methods summary | `sbatch slurm/describe_dataset_zh.slurm` | minutes cold / seconds warm |
 | 5. A/B vs presence-only china-ngram | `sbatch slurm/garg_weat_zh.slurm config/profiles/garg_weat_china_ngram.yml` + describe sibling | same as 3+4 |

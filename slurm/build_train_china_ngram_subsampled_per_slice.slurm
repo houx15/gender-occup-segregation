@@ -22,20 +22,25 @@
 #
 # Usage:
 #   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm
-#   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm "1990_1999 1995_2004"
+#   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm "1990 1995"
+#
+# Slices are identified by their START YEAR (4-digit int). The build/train
+# scripts look up the canonical (start, end) pair from the profile's
+# time_slices block. We pass start year — not YYYY_YYYY — because Fire's
+# CLI parser coerces "1940_1949" to the int 19401949 (PEP 515: underscores
+# are valid inside Python int literals).
 #
 # If args are passed, they override the default slice list (space-separated).
 #
 # 48h wall-clock cap on Princeton: the default 17-slice sweep is risky in
-# one job. Split into 2-3 sbatch invocations covering disjoint slice
-# subsets, e.g.:
+# one job. Split into 2-3 sbatch invocations covering disjoint start years:
 #   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-#     "1940_1949 1945_1954 1950_1959 1955_1964 1960_1969 1965_1974"
+#     "1940 1945 1950 1955 1960 1965"
 #   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-#     "1970_1979 1975_1984 1980_1989 1985_1994 1990_1999 1995_2004"
+#     "1970 1975 1980 1985 1990 1995"
 #   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
-#     "2000_2009 2005_2014 2010_2019 2015_2020 2020_2020"
-# Jobs queue independently; each handles its own slice set's build->train->delete.
+#     "2000 2005 2010 2015 2020"
+# Jobs queue independently; each handles its own start-year set.
 
 module load anaconda3/2023.3
 conda activate llm
@@ -44,11 +49,9 @@ set -u
 
 CONFIG="config/profiles/garg_weat_china_ngram_subsampled.yml"
 
-# Default slice list — must match the time_slices block in the profile:
+# Default slice list — start years matching the time_slices block in the profile:
 #   start_year=1940, end_year=2020, window_size=10, step_size=5 → 17 slices
-DEFAULT_SLICES="1940_1949 1945_1954 1950_1959 1955_1964 1960_1969 1965_1974 \
-1970_1979 1975_1984 1980_1989 1985_1994 1990_1999 1995_2004 \
-2000_2009 2005_2014 2010_2019 2015_2020 2020_2020"
+DEFAULT_SLICES="1940 1945 1950 1955 1960 1965 1970 1975 1980 1985 1990 1995 2000 2005 2010 2015 2020"
 
 if [ "$#" -gt 0 ]; then
     SLICES="$@"
@@ -68,25 +71,30 @@ for SLICE in $SLICES; do
     i=$((i + 1))
     echo ""
     echo "=========================================="
-    echo "[$i] SLICE=$SLICE"
+    echo "[$i] SLICE start_year=$SLICE"
     echo "=========================================="
 
-    # 1. Build corpus for this slice.
+    # 1. Build corpus for this slice (build_corpora_ngram looks up the
+    #    canonical YYYY_YYYY from the profile's time_slices block).
     if ! python -m scripts.data_prep.build_corpora_ngram --config="$CONFIG" --slice="$SLICE"; then
         echo "[$i] BUILD FAILED for $SLICE"
         STATUSES+=("$SLICE build_failed"); continue
     fi
 
-    # 2. Sanity-check the corpus exists and is non-empty before training.
-    SLICE_DIR="$CORPORA_DIR/$SLICE"
-    if [ ! -d "$SLICE_DIR" ]; then
-        echo "[$i] SKIP: $SLICE_DIR not created"
+    # 2. Find the canonical slice dir that was built (e.g. 1940 → 1940_1949,
+    #    2020 → 2020_2020). Glob on "${SLICE}_*" — should match exactly one
+    #    dir because start years are unique across the time_slices.
+    SLICE_DIRS=( "$CORPORA_DIR/${SLICE}_"* )
+    if [ ${#SLICE_DIRS[@]} -ne 1 ] || [ ! -d "${SLICE_DIRS[0]}" ]; then
+        echo "[$i] SKIP: expected one dir at $CORPORA_DIR/${SLICE}_*, found ${#SLICE_DIRS[@]}"
         STATUSES+=("$SLICE no_corpus_dir"); continue
     fi
+    SLICE_DIR="${SLICE_DIRS[0]}"
     SLICE_SIZE=$(du -sh "$SLICE_DIR" | cut -f1)
     echo "[$i] corpus built: $SLICE_DIR ($SLICE_SIZE)"
 
-    # 3. Train one model on this slice (writes to models_dir/, small).
+    # 3. Train one model on this slice. train_embeddings filters units by
+    #    startswith(str(unit)) — passing "1940" matches the "1940_1949" unit.
     if ! python -m scripts.train_embeddings --config="$CONFIG" --unit="$SLICE"; then
         echo "[$i] TRAIN FAILED for $SLICE"
         STATUSES+=("$SLICE train_failed"); continue

@@ -197,6 +197,36 @@ def process_ngram_file(file_path, time_slices, config, logger, year_total=None):
         logger.info(f"  {slice_name}: {count:,} n-gram emissions")
 
 
+def resolve_specific_slice(specific_slice, time_slices):
+    """Look up the canonical (start, end) pair for a --slice CLI argument.
+
+    Accepts either a 4-digit start year (int — the CLI-friendly form that
+    dodges Fire's PEP 515 coercion of ``"1940_1949"`` → int 19401949) or a
+    ``"YYYY_YYYY"`` string. The slice list from the profile is
+    authoritative — a start year that isn't in it raises rather than
+    silently building a bespoke window.
+
+    Returns a single-element list ``[(start, end)]`` to slot back into the
+    caller's ``time_slices`` variable.
+    """
+    if isinstance(specific_slice, int):
+        start_year = specific_slice
+    elif isinstance(specific_slice, str):
+        start_year = int(specific_slice.split('_')[0])
+    else:
+        raise TypeError(
+            f"--slice must be int or str, got {type(specific_slice).__name__}"
+        )
+    matching = [(s, e) for (s, e) in time_slices if s == start_year]
+    if not matching:
+        raise ValueError(
+            f"--slice={specific_slice!r} does not match any slice start year "
+            f"in this profile's time_slices. Valid start years: "
+            f"{[s for (s, _) in time_slices]}"
+        )
+    return matching
+
+
 def build_corpora(config, logger, specific_slice=None, file_name=None):
     """Build all time-sliced corpora from ngram data."""
     ts_config = config['time_slices']
@@ -206,9 +236,8 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
     )
     logger.info(f"Generated {len(time_slices)} time slices")
 
-    if specific_slice:
-        start, end = map(int, specific_slice.split('_'))
-        time_slices = [(start, end)]
+    if specific_slice is not None:
+        time_slices = resolve_specific_slice(specific_slice, time_slices)
 
     decompressed_dir = Path(config['paths']['decompressed_dir'])
     raw_ngram_dir = Path(config['paths']['raw_ngram_dir'])

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.data_prep.build_corpora_ngram import process_ngram_file
+from scripts.data_prep.build_corpora_ngram import process_ngram_file, resolve_specific_slice
 
 logger = logging.getLogger("test")
 
@@ -74,6 +74,49 @@ class TestInvalidWeightMode:
         cfg = _config(tmp_path, corpus={"weight_mode": "bogus"})
         with pytest.raises(ValueError, match="weight_mode"):
             process_ngram_file(f, [(1940, 1949)], cfg, logger)
+
+
+TIME_SLICES = [
+    (1940, 1949), (1945, 1954), (1950, 1959), (1955, 1964),
+    (1960, 1969), (1965, 1974), (1970, 1979), (1975, 1984),
+    (1980, 1989), (1985, 1994), (1990, 1999), (1995, 2004),
+    (2000, 2009), (2005, 2014), (2010, 2019), (2015, 2020),
+    (2020, 2020),
+]
+
+
+class TestResolveSpecificSlice:
+    """Fire coerces ``--slice=1940_1949`` → int 19401949 (PEP 515 underscores
+    in int literals). The SLURM driver works around this by passing start
+    years (int 1940). resolve_specific_slice maps either form to the
+    canonical (start, end) pair from the profile's time_slices."""
+
+    def test_int_start_year_resolves_to_canonical_slice(self):
+        assert resolve_specific_slice(1940, TIME_SLICES) == [(1940, 1949)]
+
+    def test_string_year_range_resolves_to_canonical_slice(self):
+        assert resolve_specific_slice("1940_1949", TIME_SLICES) == [(1940, 1949)]
+
+    def test_string_start_year_only_also_works(self):
+        assert resolve_specific_slice("1940", TIME_SLICES) == [(1940, 1949)]
+
+    def test_clamped_end_slice_2020_resolves(self):
+        # Last slice is (2020, 2020) — clamped at end_year, not full window.
+        assert resolve_specific_slice(2020, TIME_SLICES) == [(2020, 2020)]
+
+    def test_unknown_start_year_raises_value_error_with_valid_years(self):
+        with pytest.raises(ValueError, match="Valid start years"):
+            resolve_specific_slice(1941, TIME_SLICES)
+
+    def test_pep515_coerced_full_int_raises_value_error(self):
+        # Regression: --slice=1940_1949 coerced by Fire to int 19401949
+        # would silently look like start_year=19401949 — must raise.
+        with pytest.raises(ValueError, match="Valid start years"):
+            resolve_specific_slice(19401949, TIME_SLICES)
+
+    def test_non_int_non_str_raises_type_error(self):
+        with pytest.raises(TypeError, match="must be int or str"):
+            resolve_specific_slice(3.14, TIME_SLICES)
 
 
 class TestPerYearCapped:
