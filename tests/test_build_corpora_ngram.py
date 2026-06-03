@@ -74,3 +74,89 @@ class TestInvalidWeightMode:
         cfg = _config(tmp_path, corpus={"weight_mode": "bogus"})
         with pytest.raises(ValueError, match="weight_mode"):
             process_ngram_file(f, [(1940, 1949)], cfg, logger)
+
+
+class TestPerYearCapped:
+    def test_pass_through_when_year_total_below_cap(self, tmp_path):
+        # year_total = 5e7 (below cap 1e8) → scale = 1.0 → emit exactly match_count copies.
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=7),
+        ])
+        cfg = _config(tmp_path, corpus={
+            "weight_mode": "per_year_capped",
+            "per_year_token_cap": 100_000_000,
+            "rng_seed": 42,
+        })
+        process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1942: 50_000_000})
+        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
+        assert lines == [NGRAM_CLEAN] * 7
+
+    def test_scale_down_when_year_total_above_cap_is_deterministic(self, tmp_path):
+        # year_total = 1e9, cap = 1e8 → scale = 0.1. match_count = 100 → expected = 10 (integer; no Bernoulli).
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=100),
+        ])
+        cfg = _config(tmp_path, corpus={
+            "weight_mode": "per_year_capped",
+            "per_year_token_cap": 100_000_000,
+            "rng_seed": 42,
+        })
+        process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1942: 1_000_000_000})
+        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
+        assert lines == [NGRAM_CLEAN] * 10
+
+    def test_bernoulli_fractional_part_is_unbiased(self, tmp_path):
+        # match_count=15, scale=0.1 → expected = 1.5 → n_emit ∈ {1, 2} per trial.
+        # Across 200 seeds, empirical mean should land within 3σ of 1.5.
+        # Var(Bernoulli(0.5)) = 0.25; SE over 200 trials ≈ sqrt(0.25/200) ≈ 0.0354. 3σ ≈ 0.106.
+        n_emits = []
+        for seed in range(200):
+            sub = tmp_path / f"trial_{seed}"
+            sub.mkdir()
+            f = _make_ngram_file(sub, "5-00000-of-00105", [
+                _line(NGRAM, 1942, match_count=15),
+            ])
+            cfg = _config(sub, corpus={
+                "weight_mode": "per_year_capped",
+                "per_year_token_cap": 100_000_000,
+                "rng_seed": seed,
+            })
+            process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1942: 1_000_000_000})
+            n_emits.append(len(_read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")))
+        mean = sum(n_emits) / len(n_emits)
+        assert 1.39 < mean < 1.61, f"Bernoulli looks biased: mean={mean:.3f} over 200 trials"
+        # Also confirm both outcomes occur — guards against a stuck RNG.
+        assert set(n_emits) == {1, 2}
+
+    def test_missing_year_in_totalcounts_raises_key_error(self, tmp_path):
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=10),
+        ])
+        cfg = _config(tmp_path, corpus={
+            "weight_mode": "per_year_capped",
+            "per_year_token_cap": 100_000_000,
+            "rng_seed": 42,
+        })
+        with pytest.raises(KeyError, match="1942"):
+            process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1943: 1_000_000})
+
+    def test_per_year_capped_without_year_total_raises_value_error(self, tmp_path):
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=10),
+        ])
+        cfg = _config(tmp_path, corpus={
+            "weight_mode": "per_year_capped",
+            "per_year_token_cap": 100_000_000,
+            "rng_seed": 42,
+        })
+        with pytest.raises(ValueError, match="year_total"):
+            process_ngram_file(f, [(1940, 1949)], cfg, logger)  # year_total omitted
+
+    def test_presence_mode_does_not_require_year_total(self, tmp_path):
+        # Regression: presence mode should keep working with no year_total argument.
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=5),
+        ])
+        cfg = _config(tmp_path)  # default → presence
+        process_ngram_file(f, [(1940, 1949)], cfg, logger)  # no year_total kwarg
+        assert _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949") == [NGRAM_CLEAN]

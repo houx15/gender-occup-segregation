@@ -15,10 +15,12 @@ from pathlib import Path
 from typing import List, Tuple
 from collections import defaultdict
 
+import numpy as np
 import fire
 
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
+from scripts.data_prep.ngram_totalcounts import load_totalcounts
 
 
 CHINESE_RE = re.compile(r"[\u4e00-\u9fff]")
@@ -89,14 +91,18 @@ def parse_ngram_line_v3(line: str):
     return result
 
 
-VALID_WEIGHT_MODES = {"presence"}
+VALID_WEIGHT_MODES = {"presence", "per_year_capped"}
 
 
-def process_ngram_file(file_path, time_slices, config, logger):
-    """Process a single ngram file in presence-only mode.
+def process_ngram_file(file_path, time_slices, config, logger, year_total=None):
+    """Process a single ngram file and write to time-slice corpus files.
 
-    Dedup-per-slice via set: one corpus line per unique ngram per slice,
-    regardless of match_count (above min_count_threshold).
+    Dispatches on ``config['corpus']['weight_mode']`` (default ``"presence"``):
+      - ``"presence"``: dedup-per-slice via set (one line per unique ngram per slice).
+      - ``"per_year_capped"``: HistWords-style (Hamilton et al. 2016, Appendix A).
+        For each (ngram, year, match_count) row, scale = min(1, cap / year_total[year]);
+        n_emit = floor(match_count * scale) + Bernoulli(frac(match_count * scale)).
+        Requires ``year_total: dict[int, int]`` mapping year → total match_count.
     """
     corpus_cfg = config['corpus']
     min_count = corpus_cfg['min_count_threshold']
@@ -107,6 +113,22 @@ def process_ngram_file(file_path, time_slices, config, logger):
             f"expected one of {sorted(VALID_WEIGHT_MODES)}"
         )
 
+    if weight_mode == "per_year_capped":
+        if year_total is None:
+            raise ValueError(
+                "per_year_capped weight_mode requires year_total argument "
+                "(mapping year -> total match_count from totalcounts-5)"
+            )
+        if 'per_year_token_cap' not in corpus_cfg:
+            logger.warning(
+                "corpus.per_year_token_cap missing; defaulting to 1_000_000_000 (HistWords default)"
+            )
+        if 'rng_seed' not in corpus_cfg:
+            logger.info("corpus.rng_seed missing; defaulting to 0")
+        cap = int(corpus_cfg.get('per_year_token_cap', 1_000_000_000))
+        seed = int(corpus_cfg.get('rng_seed', 0))
+        rng = np.random.default_rng(seed)
+
     corpora_dir = Path(config['paths']['corpora_dir'])
     os.makedirs(corpora_dir, exist_ok=True)
 
@@ -114,7 +136,7 @@ def process_ngram_file(file_path, time_slices, config, logger):
     lines_processed = 0
     lines_emitted = defaultdict(int)
     file_index = file_path.name.split("-")[1]
-    write_buffer: dict = defaultdict(set)
+    write_buffer: dict = defaultdict(set) if weight_mode == "presence" else defaultdict(list)
     largest_buffer = 10000
 
     def _flush(slice_name: str):
@@ -124,7 +146,7 @@ def process_ngram_file(file_path, time_slices, config, logger):
         os.makedirs(corpora_dir / slice_name, exist_ok=True)
         with open(corpora_dir / slice_name / f"corpus_{file_index}.txt", 'a', encoding='utf-8') as out:
             out.write("\n".join(list(buf)) + "\n")
-        write_buffer[slice_name] = set()
+        write_buffer[slice_name] = set() if weight_mode == "presence" else []
 
     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
         for line in f:
@@ -135,13 +157,29 @@ def process_ngram_file(file_path, time_slices, config, logger):
             for ngram_text, year, match_count in entries:
                 if match_count < min_count:
                     continue
+                if weight_mode == "per_year_capped":
+                    if year not in year_total:
+                        raise KeyError(
+                            f"Year {year} missing from totalcounts-5 (raw_ngram_dir/totalcounts-5)"
+                        )
+                    scale = min(1.0, cap / year_total[year])
+                    expected = match_count * scale
+                    n_floor = int(expected)
+                    frac = expected - n_floor
+                    n_emit = n_floor + (1 if rng.random() < frac else 0)
+                    if n_emit <= 0:
+                        continue
                 matched_slices = set()
                 for start_year, end_year in time_slices:
                     if start_year <= year <= end_year:
                         matched_slices.add(f"{start_year}_{end_year}")
                 for slice_name in matched_slices:
-                    write_buffer[slice_name].add(ngram_text)
-                    lines_emitted[slice_name] += 1
+                    if weight_mode == "presence":
+                        write_buffer[slice_name].add(ngram_text)
+                        lines_emitted[slice_name] += 1
+                    else:  # per_year_capped
+                        write_buffer[slice_name].extend([ngram_text] * n_emit)
+                        lines_emitted[slice_name] += n_emit
                     if len(write_buffer[slice_name]) > largest_buffer:
                         _flush(slice_name)
             if lines_processed % 1000000 == 0:
@@ -172,6 +210,12 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
     raw_ngram_dir = Path(config['paths']['raw_ngram_dir'])
     decompress = True
 
+    year_total = None
+    if config['corpus'].get('weight_mode') == 'per_year_capped':
+        totalcounts_path = raw_ngram_dir / 'totalcounts-5'
+        year_total = load_totalcounts(totalcounts_path)
+        logger.info(f"Loaded totalcounts-5 ({len(year_total)} years)")
+
     # Ensure decompression target dir exists — without this, decompress_file's
     # open(output_path, 'wb') raises FileNotFoundError on the first run of a
     # fresh profile (e.g. *_weighted dirs).
@@ -197,7 +241,7 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
                 continue
         else:
             ngram_file = single_zip
-        process_ngram_file(ngram_file, time_slices, config, logger)
+        process_ngram_file(ngram_file, time_slices, config, logger, year_total=year_total)
         if decompress:
             os.remove(ngram_file)
 
