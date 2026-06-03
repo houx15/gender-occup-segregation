@@ -21,7 +21,7 @@
 #   sbatch slurm/train_zh.slurm config/profiles/<file>.yml --retrain          # force retrain
 #
 # Typical Chinese-arm invocations:
-#   sbatch slurm/train_zh.slurm config/profiles/garg_weat_china_ngram_weighted.yml
+#   sbatch slurm/train_zh.slurm config/profiles/garg_weat_china_ngram_subsampled.yml
 #   sbatch slurm/train_zh.slurm config/profiles/garg_weat_renminribao.yml
 
 module load anaconda3/2023.3

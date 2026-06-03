@@ -20,7 +20,7 @@
 #   sbatch slurm/build_corpus_zh.slurm config/profiles/<file>.yml 1940_1949  # specific slice
 #
 # Typical Chinese-arm invocations (Princeton llm env):
-#   sbatch slurm/build_corpus_zh.slurm config/profiles/garg_weat_china_ngram_weighted.yml
+#   sbatch slurm/build_corpus_zh.slurm config/profiles/garg_weat_china_ngram_subsampled.yml
 #   sbatch slurm/build_corpus_zh.slurm config/profiles/garg_weat_china_ngram.yml
 #   sbatch slurm/build_corpus_zh.slurm config/profiles/garg_weat_renminribao.yml
 

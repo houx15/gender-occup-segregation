@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=cnw_per_slice
+#SBATCH --job-name=cns_per_slice
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
@@ -10,19 +10,19 @@
 #SBATCH --output=logs/cnw_per_slice_%j.out
 #SBATCH --error=logs/cnw_per_slice_%j.err
 
-# Plan-B driver for the count-weighted China Ngram retrain under disk-quota
+# Plan-B driver for the subsampled China Ngram retrain under disk-quota
 # pressure: process slices one at a time, train each model immediately, then
-# DELETE that slice's corpus_weighted/<slice>/ to reclaim disk before the
+# DELETE that slice's corpus_subsampled/<slice>/ to reclaim disk before the
 # next slice's build starts.
 #
-# Peak disk during this run ≈ ONE slice's corpus_weighted + cumulative
-# models_weighted (small, ~5 GB total at completion). Compare to running
+# Peak disk during this run ≈ ONE slice's corpus_subsampled + cumulative
+# models_subsampled (small, ~5 GB total at completion). Compare to running
 # slurm/build_corpus_zh.slurm + slurm/train_zh.slurm separately, which
 # would hold ALL slices on disk simultaneously.
 #
 # Usage:
-#   sbatch slurm/build_train_china_ngram_weighted_per_slice.slurm
-#   sbatch slurm/build_train_china_ngram_weighted_per_slice.slurm "1990_1999 1995_2004"
+#   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm
+#   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm "1990_1999 1995_2004"
 #
 # If args are passed, they override the default slice list (space-separated).
 
@@ -31,7 +31,7 @@ conda activate llm
 
 set -u
 
-CONFIG="config/profiles/garg_weat_china_ngram_weighted.yml"
+CONFIG="config/profiles/garg_weat_china_ngram_subsampled.yml"
 
 # Default slice list — must match the time_slices block in the profile:
 #   start_year=1940, end_year=2020, window_size=10, step_size=5 → 17 slices
