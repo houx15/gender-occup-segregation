@@ -34,6 +34,7 @@ set -u
 
 DEFAULT_CONFIGS=(
     "config/profiles/garg_weat_renminribao.yml"
+    "config/profiles/garg_weat_china_ngram.yml"
     "config/profiles/garg_weat_china_ngram_subsampled.yml"
 )
 
