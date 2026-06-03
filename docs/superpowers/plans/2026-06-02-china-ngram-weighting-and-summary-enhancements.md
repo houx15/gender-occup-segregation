@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **2026-06-03 — Superseded for the weighting tasks.** The `capped_repetition` weighting this plan implemented was methods-wrong (compresses the count signal's dynamic range). It has been replaced by HistWords-style per-year token-budget subsampling. See the corrected design at [`docs/superpowers/specs/2026-06-03-china-ngram-histwords-style-subsampling-design.md`](../specs/2026-06-03-china-ngram-histwords-style-subsampling-design.md) and its implementation plan (to be written next). The Q2 dataset_summary tasks in this plan (year range, tokens/doc, model-vocab range) remain correct and have shipped.
+
 **Spec:** [`docs/superpowers/specs/2026-06-02-china-ngram-weighting-and-summary-enhancements-design.md`](../specs/2026-06-02-china-ngram-weighting-and-summary-enhancements-design.md)
 
 **Goal:** Make the Chinese Google 5-gram pipeline count-weighted (capped raw repetition) via a new profile + fresh dirs, and add Year range + Tokens/doc + per-source model-vocab range to `dataset_summary.md`.
@@ -272,7 +274,7 @@ Key changes vs the original:
 cd /Users/houyuxin/08Coding/gender-occup-segregation && python -m pytest tests/test_build_corpora_ngram.py -v
 ```
 
-Expected: 6 passed (TestPresenceModeDefault: 1, TestCappedRepetition: 4, TestInvalidWeightMode: 1, TestRepeatCapEdge: 1).
+Expected: 7 passed (TestPresenceModeDefault: 1, TestCappedRepetition: 4, TestInvalidWeightMode: 1, TestRepeatCapEdge: 1).
 
 - [ ] **Step 5: Commit**
 
@@ -773,7 +775,7 @@ cd /Users/houyuxin/08Coding/gender-occup-segregation && git add scripts/common/d
 cd /Users/houyuxin/08Coding/gender-occup-segregation && python -m pytest tests/test_build_corpora_ngram.py tests/test_dataset_stats.py -v
 ```
 
-Expected: 40 passed (6 from Task 1 + 34 from Tasks 4 & 5).
+Expected: 41 passed (7 from Task 1 + 34 from Tasks 4 & 5).
 
 - [ ] **Step 2: Run the broader test surface to confirm no regression**
 

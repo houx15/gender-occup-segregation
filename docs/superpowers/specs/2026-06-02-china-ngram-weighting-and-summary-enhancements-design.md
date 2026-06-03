@@ -1,7 +1,10 @@
 # China Ngram Count-Weighting + dataset_summary Enhancements — Design Spec
 
 **Date:** 2026-06-02
-**Status:** Approved (pending user review of this file)
+**Status:** Superseded for weighting (Q1) by [`2026-06-03-china-ngram-histwords-style-subsampling-design.md`](2026-06-03-china-ngram-histwords-style-subsampling-design.md). Dataset-summary enhancements (Q2) are unaffected and shipped.
+
+> **2026-06-03 update:** The `capped_repetition` weighting introduced in this spec turned out to be methods-wrong — `min(match_count, cap)` compresses the dynamic range of the count signal, which is the very thing weighting was meant to preserve. HistWords (Hamilton et al. 2016, Appendix A) applies a **per-year** token-budget subsample on the count-proportional stream instead. The corrected design is in the 06-03 spec linked above. This file is kept as historical record of how we got there; the Q2 dataset_summary changes it describes (year range, tokens/doc, model-vocab range) remain correct and shipped.
+
 **Purpose:**
 - (Q1) Make the China Google 5-gram pipeline count-weighted instead of presence-only, so trained embeddings reflect actual corpus frequency rather than ngram-type co-occurrence. Capped raw repetition (`min(match_count, repeat_cap)` per (ngram, year)) to bound disk and training cost. Coexists with the existing presence-only china ngram models via a new profile + fresh directories.
 - (Q2) Surface vocabulary and per-model details in `dataset_summary.md` that a methods section will quote: per-unit year range, mean tokens per training doc, and per-source model-vocab range.
