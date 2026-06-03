@@ -1,7 +1,11 @@
 # Runbook — China Ngram Count-Weighted Retrain (Princeton) + Weibo / Provincial Newspaper Metadata Export (PKU)
 
 **Date:** 2026-06-02
-**Audience:** anyone (incl. future you) coming back to finish or repeat the count-weighted China-Ngram retrain on Princeton scratch, and / or to regenerate the methods-section dataset summaries for Weibo + provincial newspaper on the PKU `/lustre` server.
+**Status:** Superseded by [`2026-06-03-china-ngram-subsampled-retrain-and-pku-metadata.md`](2026-06-03-china-ngram-subsampled-retrain-and-pku-metadata.md). The Princeton workflow described here used the methods-wrong `capped_repetition` weighting (`min(match_count, cap)`); the corrected HistWords-style per-year-capped subsampling lives in the 06-03 runbook. The PKU workflow is unchanged — copied forward verbatim in the new runbook.
+
+> **2026-06-03 update:** Do NOT follow the Princeton steps below. The profile `garg_weat_china_ngram_weighted.yml` and the driver `build_train_china_ngram_weighted_per_slice.slurm` have been deleted; the partial 114 GB `corpora_weighted/` on Princeton scratch should be deleted. See the 06-03 runbook for the corrected procedure.
+
+**Audience:** historical record only. For current procedure, use the 06-03 runbook.
 
 This runbook covers two independent workflows. Run either or both — they don't depend on each other.
 
