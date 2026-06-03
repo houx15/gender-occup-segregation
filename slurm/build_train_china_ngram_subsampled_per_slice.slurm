@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
-#SBATCH --time=144:00:00
+#SBATCH --time=48:00:00
 #SBATCH --mail-type=end,fail
 #SBATCH --mail-user=yh6580@princeton.edu
 #SBATCH --output=logs/cns_per_slice_%j.out
@@ -25,6 +25,17 @@
 #   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm "1990_1999 1995_2004"
 #
 # If args are passed, they override the default slice list (space-separated).
+#
+# 48h wall-clock cap on Princeton: the default 17-slice sweep is risky in
+# one job. Split into 2-3 sbatch invocations covering disjoint slice
+# subsets, e.g.:
+#   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
+#     "1940_1949 1945_1954 1950_1959 1955_1964 1960_1969 1965_1974"
+#   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
+#     "1970_1979 1975_1984 1980_1989 1985_1994 1990_1999 1995_2004"
+#   sbatch slurm/build_train_china_ngram_subsampled_per_slice.slurm \
+#     "2000_2009 2005_2014 2010_2019 2015_2020 2020_2020"
+# Jobs queue independently; each handles its own slice set's build->train->delete.
 
 module load anaconda3/2023.3
 conda activate llm
