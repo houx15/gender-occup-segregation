@@ -29,9 +29,12 @@ mkdir -p logs
 
 echo "Rendering cross-corpus discourse figures into: $FIG_DIR"
 
-python -m scripts.visualize cross_corpus \
+if ! python -m scripts.visualize cross_corpus \
     --institutional_config="$INST_CONFIG" \
-    --public_config="$PUB_CONFIG"
+    --public_config="$PUB_CONFIG"; then
+    echo "ERROR: cross_corpus rendering failed (see above)" >&2
+    exit 1
+fi
 
 # Validation: exactly 8 cross-corpus PDFs.
 NPDF=$(find "$FIG_DIR" -maxdepth 1 -name 'fig_crosscorpus_*.pdf' | wc -l | tr -d ' ')
