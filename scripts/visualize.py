@@ -2998,6 +2998,22 @@ def cross_corpus(
     """
     inst = load_config(institutional_config)
     pub = load_config(public_config)
+
+    if inst["data_source"] == pub["data_source"]:
+        raise ValueError(
+            "cross_corpus: institutional and public profiles share data_source "
+            f"'{inst['data_source']}'; the two corpora would be indistinguishable. "
+            "Pass two profiles with different data_source values."
+        )
+    inst_sign = inst.get("analysis", {}).get("ideation_sign")
+    pub_sign = pub.get("analysis", {}).get("ideation_sign")
+    if inst_sign != pub_sign:
+        raise ValueError(
+            "cross_corpus: the two profiles disagree on analysis.ideation_sign "
+            f"(institutional={inst_sign}, public={pub_sign}); orienting both corpora "
+            "on one axis requires matching signs. Reconcile the profiles."
+        )
+
     logger = setup_logging(Path(inst["paths"]["log_dir"]), "visualize_cross_corpus.log")
     logger.info("=" * 80)
     logger.info("Cross-corpus discourse figures: %s vs %s",
@@ -3027,7 +3043,7 @@ def cross_corpus(
         inst["data_source"]: {"linestyle": "-",  "fillstyle": "full"},
         pub["data_source"]:  {"linestyle": "--", "fillstyle": "none"},
     }
-    category_sign = inst.get("analysis", {}).get("ideation_sign")
+    category_sign = inst_sign
 
     if figures_dir is None:
         figures_dir = Path(inst["paths"]["results_dir"]).parent / "figures_garg_weat_cross_corpus_zh"

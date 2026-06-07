@@ -226,3 +226,49 @@ def test_cross_corpus_missing_parquet_raises(tmp_path):
             institutional_config=str(inst_cfg), public_config=str(pub_cfg),
             figures_dir=str(tmp_path / "figs"),
         )
+
+
+def test_cross_corpus_same_data_source_raises(tmp_path):
+    import scripts.visualize as viz
+
+    units = ["1995_2004", "2000_2009"]
+    cats = ["family"]
+    d1 = tmp_path / "r1"; d2 = tmp_path / "r2"
+    for d in (d1, d2):
+        d.mkdir()
+        _make_cross_summary(["renminribao"], units, cats).drop(columns=["source"]).to_parquet(
+            d / "garg_weat_summary_by_category.parquet"
+        )
+    c1 = tmp_path / "c1.yml"; c2 = tmp_path / "c2.yml"
+    # Both profiles declare the SAME data_source -> ambiguous overlay.
+    _write_profile(c1, data_source="renminribao", results_dir=d1, log_dir=tmp_path / "logs")
+    _write_profile(c2, data_source="renminribao", results_dir=d2, log_dir=tmp_path / "logs")
+
+    with pytest.raises(ValueError, match="data_source"):
+        viz.cross_corpus(institutional_config=str(c1), public_config=str(c2),
+                         figures_dir=str(tmp_path / "figs"))
+
+
+def test_cross_corpus_ideation_sign_mismatch_raises(tmp_path):
+    import scripts.visualize as viz
+    import yaml
+
+    units = ["1995_2004", "2000_2009"]
+    cats = ["family"]
+    inst_dir = tmp_path / "rmrb"; pub_dir = tmp_path / "ngram"
+    for d, src in ((inst_dir, "renminribao"), (pub_dir, "ngram")):
+        d.mkdir()
+        _make_cross_summary([src], units, cats).drop(columns=["source"]).to_parquet(
+            d / "garg_weat_summary_by_category.parquet"
+        )
+    inst_cfg = tmp_path / "inst.yml"; pub_cfg = tmp_path / "pub.yml"
+    _write_profile(inst_cfg, data_source="renminribao", results_dir=inst_dir, log_dir=tmp_path / "logs")
+    _write_profile(pub_cfg, data_source="ngram", results_dir=pub_dir, log_dir=tmp_path / "logs")
+    # Diverge the public profile's ideation_sign (family flipped to +1).
+    pub = yaml.safe_load(pub_cfg.read_text())
+    pub["analysis"]["ideation_sign"]["family"] = 1
+    pub_cfg.write_text(yaml.safe_dump(pub, allow_unicode=True))
+
+    with pytest.raises(ValueError, match="ideation_sign"):
+        viz.cross_corpus(institutional_config=str(inst_cfg), public_config=str(pub_cfg),
+                         figures_dir=str(tmp_path / "figs"))
