@@ -418,6 +418,21 @@ def apply_ideation_sign(df, category_sign, value_cols):
     return df
 
 
+def _decade_start_year(unit_name):
+    """Start year from a longitudinal unit name. Handles decade labels
+    ('1990s' -> 1990, COHA/HistWords) and rolling-window slices
+    ('1940_1949' -> 1940, the ngram / renminribao pipelines). Province and
+    province-year units ('北京', '北京_2020') don't parse to a real year and
+    return None — those route to the provincial RND plots instead."""
+    s = str(unit_name)
+    if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
+        return int(s[:4])
+    try:
+        return int(s.split("_")[0])
+    except (ValueError, IndexError):
+        return None
+
+
 def plot_garg_weat_categories_trend(
     df, figures_dir, logger, embedding_source=None,
     band_cols=("ci_low", "ci_high"), band_tag="", line_col="mean_rnd",
@@ -465,25 +480,7 @@ def plot_garg_weat_categories_trend(
 
     df = df.copy()
 
-    def _parse_decade(unit_name):
-        """Start year from a longitudinal unit name. Handles decade labels
-        ('1990s' -> 1990, COHA/HistWords) and rolling-window slices
-        ('1940_1949' -> 1940, the ngram / renminribao pipelines), matching
-        plot_weat_longitudinal_trend.parse_year. Province and province-year
-        units (e.g. '北京', '北京_2020') don't parse here — those route to the
-        provincial RND plots instead of this trend.
-        """
-        s = str(unit_name)
-        # Decade label: '1990s' -> 1990
-        if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
-            return int(s[:4])
-        # Window slice: '1940_1949' -> 1940 (non-numeric prefixes -> None)
-        try:
-            return int(s.split("_")[0])
-        except (ValueError, IndexError):
-            return None
-
-    df["start_year"] = df["unit_name"].apply(_parse_decade)
+    df["start_year"] = df["unit_name"].apply(_decade_start_year)
     n_parsed = int(df["start_year"].notna().sum())
     if n_parsed == 0:
         logger.warning(
