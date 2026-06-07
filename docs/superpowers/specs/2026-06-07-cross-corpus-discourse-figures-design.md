@@ -47,7 +47,7 @@ Two topics × {absolute, Δ-from-2000} × {bootstrap band, subsample band}.
 - **Δ-from-2000** version: `mean_rnd_t − mean_rnd` at the baseline window
   `1995_2004` (centered on 2000). Every line passes through 0 at 2000.
 
-Filenames (dated by `get_figure_path`, `YYYYMMDD_` prefix):
+Filenames (undated, matching the sibling `plot_garg_weat_categories_trend`):
 
 ```
 fig_crosscorpus_family__bootstrap.pdf
@@ -125,8 +125,8 @@ def plot_cross_corpus_category_trend(
 - Draws one line per (category, source): color from palette by category,
   linestyle/marker by source; shaded band via `fill_between`.
 - Builds two legends (category colors, source linestyles).
-- Writes `{fig_stem}{__source-tag?}{__band_tag}.pdf` via `get_figure_path`
-  (dated). Empty / all-NaN guards mirror the existing function (refuse blank
+- Writes `{fig_stem}{_rel2000?}{__band_tag}.pdf` (undated, like the sibling
+  trend plot). Empty / all-NaN guards mirror the existing function (refuse blank
   PDFs, log loudly).
 
 ### 2. `cross_corpus(...)` — new Fire entry point in `visualize.py`
@@ -190,5 +190,5 @@ Mirrors `garg_weat_zh.slurm` structure:
   categories, a handful of windows incl. `1995_2004`) to confirm: 8 PDFs
   written, Δ lines pass through 0 at baseline, missing-baseline path logs+skips,
   empty/all-NaN guards fire.
-- On cluster: run the slurm script; confirm 8 dated PDFs land in
+- On cluster: run the slurm script; confirm 8 PDFs land in
   `figures_garg_weat_cross_corpus_zh` and CJK glyphs render (font registered).
