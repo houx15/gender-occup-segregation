@@ -23,4 +23,4 @@ def test_decade_start_year_parses_windows_and_decades():
     assert _decade_start_year("1940_1949") == 1940
     assert _decade_start_year("1990s") == 1990
     assert _decade_start_year("北京") is None
-    assert _decade_start_year("北京_2020") == 0 or _decade_start_year("北京_2020") is None
+    assert _decade_start_year("北京_2020") is None
