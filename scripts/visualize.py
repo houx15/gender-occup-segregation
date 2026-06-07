@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -567,6 +568,180 @@ def plot_garg_weat_categories_trend(
     plt.savefig(out_path, format="pdf", bbox_inches="tight")
     plt.close()
     logger.info(f"Saved Garg-WEAT categories figure: {out_path}")
+
+
+# Category colours/markers shared with plot_garg_weat_categories_trend.
+_CROSS_CATEGORY_PALETTE = {
+    "leadership": "#1f4e79",
+    "family":     "#c0392b",
+    "science":    "#2e7d32",
+}
+_CROSS_CATEGORY_MARKERS = {"leadership": "o", "family": "s", "science": "^"}
+# Per-source line styling: institutional solid/filled, public dashed/open.
+_CROSS_STYLE_CYCLE = [
+    {"linestyle": "-",  "fillstyle": "full"},
+    {"linestyle": "--", "fillstyle": "none"},
+    {"linestyle": ":",  "fillstyle": "full"},
+]
+
+
+def plot_cross_corpus_category_trend(
+    df, figures_dir, logger, *,
+    categories,
+    source_labels,
+    source_styles=None,
+    band_cols=("ci_low", "ci_high"),
+    band_tag="bootstrap",
+    band_label=None,
+    line_col="mean_rnd",
+    category_sign=None,
+    normalize_to=None,
+    fig_stem="fig_crosscorpus",
+    ylabel=None,
+):
+    """Overlay one or more categories across two corpora on one axis.
+
+    Encoding: colour = category, linestyle/marker-fill = source. With
+    ``normalize_to`` set, each (source, category) series is re-expressed as
+    ``line_col`` minus its value at that baseline unit (a *difference*, not a
+    ratio — RND crosses zero), and the band is shifted by the same constant.
+    A series missing the baseline is logged at ERROR and skipped (no silent
+    neighbour substitution). Empty / no-category / nothing-plotted cases log
+    and refuse to write a blank PDF, mirroring plot_garg_weat_categories_trend.
+    """
+    figures_dir = Path(figures_dir)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    rel_tag = "_rel2000" if normalize_to else ""
+    tag = f"__{band_tag}" if band_tag else ""
+    out_path = figures_dir / f"{fig_stem}{rel_tag}{tag}.pdf"
+
+    if df is None or df.empty:
+        logger.warning(
+            f"plot_cross_corpus_category_trend: empty DataFrame; skip {out_path}"
+        )
+        return
+
+    df = df[df["category"].isin(categories)].copy()
+    if df.empty:
+        logger.warning(
+            "plot_cross_corpus_category_trend: no rows for "
+            f"categories={categories}; skip {out_path}"
+        )
+        return
+
+    low_col, high_col = band_cols
+    df = apply_ideation_sign(df, category_sign, [line_col, low_col, high_col])
+    df["start_year"] = df["unit_name"].apply(_decade_start_year)
+    df = df.dropna(subset=["start_year"]).sort_values("start_year")
+    if df.empty:
+        logger.warning(
+            "plot_cross_corpus_category_trend: no unit_name parsed to a year; skip "
+            f"{out_path}"
+        )
+        return
+
+    reversed_cats = (
+        [c for c, s in category_sign.items() if s < 0] if category_sign else []
+    )
+    source_styles = source_styles or {}
+    default_cycle = plt.rcParams["axes.prop_cycle"].by_key().get("color", [])
+    sources = sorted(df["source"].unique())
+
+    def _style_for(source, idx):
+        return source_styles.get(source, _CROSS_STYLE_CYCLE[idx % len(_CROSS_STYLE_CYCLE)])
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+    plotted = 0
+    for s_i, source in enumerate(sources):
+        sstyle = _style_for(source, s_i)
+        sdf = df[df["source"] == source]
+        for c_i, cat in enumerate(categories):
+            g = sdf[sdf["category"] == cat].sort_values("start_year")
+            if g.empty:
+                continue
+            color = _CROSS_CATEGORY_PALETTE.get(cat) or default_cycle[c_i % len(default_cycle)]
+            marker = _CROSS_CATEGORY_MARKERS.get(cat, "o")
+            y = g[line_col]
+            lo = g[low_col] if low_col in g.columns else None
+            hi = g[high_col] if high_col in g.columns else None
+            if normalize_to is not None:
+                base = g.loc[g["unit_name"] == normalize_to, line_col]
+                if base.empty or pd.isna(base.iloc[0]):
+                    logger.error(
+                        "plot_cross_corpus_category_trend: baseline "
+                        f"'{normalize_to}' missing for source={source} "
+                        f"category={cat}; skipping that line."
+                    )
+                    continue
+                b = base.iloc[0]
+                y = y - b
+                lo = None if lo is None else lo - b
+                hi = None if hi is None else hi - b
+            ax.plot(
+                g["start_year"], y, marker=marker, color=color,
+                linestyle=sstyle["linestyle"], fillstyle=sstyle.get("fillstyle", "full"),
+                linewidth=1.8,
+            )
+            if lo is not None and hi is not None:
+                ax.fill_between(g["start_year"], lo, hi, color=color, alpha=0.12)
+            plotted += 1
+
+    if plotted == 0:
+        logger.error(
+            "plot_cross_corpus_category_trend: nothing plotted (all baselines "
+            f"missing or empty); refusing blank figure {out_path}."
+        )
+        plt.close()
+        return
+
+    ax.axhline(0, color="lightgrey", linestyle="--", linewidth=1)
+    ax.set_xlabel("Decade")
+    if ylabel is not None:
+        ax.set_ylabel(ylabel)
+    elif normalize_to is not None:
+        ax.set_ylabel(f"Δ oriented RND vs {normalize_to}\n(0 = {normalize_to} baseline)")
+    elif reversed_cats:
+        ax.set_ylabel("Gender ideation (oriented RND)\nhigher = less traditional")
+    else:
+        ax.set_ylabel("Mean RND\nlarger = more female-leaning")
+
+    cat_handles = [
+        Line2D(
+            [0], [0],
+            color=_CROSS_CATEGORY_PALETTE.get(c, default_cycle[i % len(default_cycle)]),
+            marker=_CROSS_CATEGORY_MARKERS.get(c, "o"), linestyle="-",
+            label=c.title() + (" (rev.)" if c in reversed_cats else ""),
+        )
+        for i, c in enumerate(categories)
+    ]
+    src_handles = [
+        Line2D(
+            [0], [0], color="grey", linestyle=_style_for(s, i)["linestyle"],
+            label=source_labels.get(s, s),
+        )
+        for i, s in enumerate(sources)
+    ]
+    leg1 = ax.legend(handles=cat_handles, title="Category", loc="upper left", framealpha=0.85)
+    ax.add_artist(leg1)
+    ax.legend(handles=src_handles, title="Discourse source", loc="upper right", framealpha=0.85)
+
+    band_note = f"  [{band_label}]" if band_label else ""
+    rel_note = f"  (Δ vs {normalize_to})" if normalize_to else ""
+    topic = " + ".join(c.title() for c in categories)
+    ax.set_title(f"{topic} — institutional vs public discourse{rel_note}{band_note}")
+    if normalize_to is None:
+        fig.text(
+            0.5, -0.02,
+            "Absolute RND levels are not directly comparable across corpora "
+            "(embedding-geometry artifact); read direction and shape, not the gap.",
+            ha="center", fontsize=8, color="grey",
+        )
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(out_path, format="pdf", bbox_inches="tight")
+    plt.close()
+    logger.info(f"Saved cross-corpus figure: {out_path}")
 
 
 # =============================================================================
