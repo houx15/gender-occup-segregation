@@ -2976,5 +2976,83 @@ def main(config="config/config.yml", mode=None):
     logger.info("=" * 80)
 
 
+def cross_corpus(
+    institutional_config="config/profiles/garg_weat_renminribao.yml",
+    public_config="config/profiles/garg_weat_china_ngram.yml",
+    figures_dir=None,
+    baseline_unit="1995_2004",
+):
+    """Overlay institutional (People's Daily) vs public (china_ngram) RND
+    category trends.
+
+    Loads each profile's ``garg_weat_summary_by_category.parquet``, tags rows
+    with ``source`` (= the profile's data_source), and writes 8 figures:
+    {family, work&science} × {absolute, Δ-vs-baseline} × {bootstrap, subsample}.
+
+    Args:
+        institutional_config: profile for the 制度话语 corpus (People's Daily).
+        public_config: profile for the 公众话语 corpus (china_ngram).
+        figures_dir: output dir; defaults to a sibling of the institutional
+            results_dir, ``figures_garg_weat_cross_corpus_zh``.
+        baseline_unit: window the Δ figures index to (default ``1995_2004``).
+    """
+    inst = load_config(institutional_config)
+    pub = load_config(public_config)
+    logger = setup_logging(Path(inst["paths"]["log_dir"]), "visualize_cross_corpus.log")
+    logger.info("=" * 80)
+    logger.info("Cross-corpus discourse figures: %s vs %s",
+                inst["data_source"], pub["data_source"])
+    sns.set_style("whitegrid")
+    _configure_fonts(inst)  # both profiles are zh; register the CJK font once
+
+    frames = []
+    for cfg in (inst, pub):
+        parquet = Path(cfg["paths"]["results_dir"]) / "garg_weat_summary_by_category.parquet"
+        if not parquet.exists():
+            raise FileNotFoundError(
+                f"cross_corpus: summary parquet not found: {parquet}. Run "
+                "analyze_category_bias for this corpus first."
+            )
+        d = pd.read_parquet(parquet)
+        d["source"] = cfg["data_source"]
+        logger.info("Loaded %s: %d rows (source=%s)", parquet, len(d), cfg["data_source"])
+        frames.append(d)
+    df = pd.concat(frames, ignore_index=True)
+
+    source_labels = {
+        cfg["data_source"]: DATA_SOURCE_LABELS.get(cfg["data_source"], cfg["data_source"])
+        for cfg in (inst, pub)
+    }
+    source_styles = {
+        inst["data_source"]: {"linestyle": "-",  "fillstyle": "full"},
+        pub["data_source"]:  {"linestyle": "--", "fillstyle": "none"},
+    }
+    category_sign = inst.get("analysis", {}).get("ideation_sign")
+
+    if figures_dir is None:
+        figures_dir = Path(inst["paths"]["results_dir"]).parent / "figures_garg_weat_cross_corpus_zh"
+    figures_dir = Path(figures_dir)
+
+    topics = [
+        (["family"], "fig_crosscorpus_family"),
+        (["leadership", "science"], "fig_crosscorpus_work_science"),
+    ]
+    bands = [
+        (("ci_low", "ci_high"), "bootstrap", "bootstrap CI (Garg, 68%)"),
+        (("sub_low", "sub_high"), "subsample", "80% word-subsample band"),
+    ]
+    for cats, stem in topics:
+        for bcols, btag, blabel in bands:
+            for norm in (None, baseline_unit):
+                plot_cross_corpus_category_trend(
+                    df, figures_dir, logger,
+                    categories=cats, source_labels=source_labels,
+                    source_styles=source_styles, band_cols=bcols,
+                    band_tag=btag, band_label=blabel, line_col="mean_rnd",
+                    category_sign=category_sign, normalize_to=norm, fig_stem=stem,
+                )
+    logger.info("cross_corpus: wrote figures under %s", figures_dir)
+
+
 if __name__ == "__main__":
-    fire.Fire({"main": main, "composite": main_composite})
+    fire.Fire({"main": main, "composite": main_composite, "cross_corpus": cross_corpus})
