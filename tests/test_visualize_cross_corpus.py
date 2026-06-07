@@ -120,3 +120,27 @@ def test_cross_corpus_empty_df_writes_nothing(tmp_path):
         categories=["family"], source_labels={},
     )
     assert _pdfs(tmp_path) == []
+
+
+def test_cross_corpus_all_nan_writes_nothing(tmp_path, caplog):
+    import numpy as np
+    from scripts.visualize import plot_cross_corpus_category_trend
+
+    df = _make_cross_summary(
+        sources=["renminribao", "ngram"],
+        units=["1990_1999", "1995_2004", "2000_2009"],
+        categories=["family"],
+    )
+    df["mean_rnd"] = np.nan  # every value NaN -> must refuse a blank figure
+
+    with caplog.at_level(logging.ERROR):
+        plot_cross_corpus_category_trend(
+            df, tmp_path, logging.getLogger("test"),
+            categories=["family"],
+            source_labels={"renminribao": "People's Daily", "ngram": "Google Ngram"},
+            band_cols=("ci_low", "ci_high"), band_tag="bootstrap",
+            category_sign={"family": -1}, normalize_to=None,
+            fig_stem="fig_crosscorpus_family",
+        )
+    assert _pdfs(tmp_path) == []
+    assert any("NaN" in r.message for r in caplog.records)

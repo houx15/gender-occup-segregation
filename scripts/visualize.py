@@ -641,6 +641,13 @@ def plot_cross_corpus_category_trend(
         )
         return
 
+    if line_col in df.columns and df[line_col].isna().all():
+        logger.error(
+            f"plot_cross_corpus_category_trend: every {line_col} is NaN — refusing "
+            f"to write a blank figure (would have written {out_path})."
+        )
+        return
+
     reversed_cats = (
         [c for c, s in category_sign.items() if s < 0] if category_sign else []
     )
@@ -2523,7 +2530,6 @@ def plot_survey_embedding_scatter(weat_df, survey_csv_path, figures_dir, logger,
 
         # Build legend: period colors + dataset markers
         # Period color legend
-        from matplotlib.lines import Line2D
         period_handles = [
             Line2D([0], [0], marker="o", color="w",
                    markerfacecolor=period_colors[i], markersize=8,
