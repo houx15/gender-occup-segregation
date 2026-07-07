@@ -69,3 +69,25 @@ def test_long_table_consistent_set_mean_deviation_sign():
     # family sign flip: d rnd 0.2 -> signed -0.2
     d90 = df[(df.category == "family") & (df.year == 1990)].iloc[0]
     assert d90["signed_rnd"] == pytest.approx(-0.2)
+
+
+def test_summary_contribution_sums_to_delta_of_mean():
+    long_df = build_long_table(_rnd_long_fixture(), {"science": 1, "family": -1}, _Log())
+    summ = build_summary_table(long_df, _Log())
+    sci = summ[summ.category == "science"]
+    # consistent set is {a, b}; 'c' dropped upstream
+    assert set(sci.occupation) == {"a", "b"}
+    # per-word: a delta = 0.0-(-0.4)=0.4, b delta = 0.5-0.1=0.4; N=2 -> contrib 0.2 each
+    a = sci[sci.occupation == "a"].iloc[0]
+    assert a["delta"] == pytest.approx(0.4)
+    assert a["contribution"] == pytest.approx(0.2)
+    # Σ contribution == Δ cat_mean_signed = 0.25 - (-0.15) = 0.4
+    assert sci["contribution"].sum() == pytest.approx(0.4)
+
+
+def test_summary_slope_is_ols():
+    long_df = build_long_table(_rnd_long_fixture(), {"science": 1, "family": -1}, _Log())
+    summ = build_summary_table(long_df, _Log())
+    # a: years [1990,2000,2010], signed [-0.4,-0.2,0.0] -> slope 0.02 / yr
+    a_slope = summ[(summ.category == "science") & (summ.occupation == "a")]["slope"].iloc[0]
+    assert a_slope == pytest.approx(0.02)

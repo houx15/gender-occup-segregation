@@ -101,5 +101,56 @@ def build_long_table(
     )
 
 
-def build_summary_table(long_df, logger):  # implemented in Task 2
-    raise NotImplementedError
+def _ols_slope(x: np.ndarray, y: np.ndarray) -> float:
+    """Least-squares slope of y on x; NaN if fewer than 2 distinct x."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if x.size < 2 or np.unique(x).size < 2:
+        return float("nan")
+    xm, ym = x.mean(), y.mean()
+    denom = float(((x - xm) ** 2).sum())
+    if denom == 0.0:
+        return float("nan")
+    return float(((x - xm) * (y - ym)).sum() / denom)
+
+
+def build_summary_table(long_df: pd.DataFrame, logger) -> pd.DataFrame:
+    """Per (category, word): endpoint delta, contribution to Δmean, OLS slope.
+
+    long_df is consistent-set only (from build_long_table), so every word is in
+    vocab at both endpoints. Endpoints are per category (min/max year);
+    contribution = delta / N with N = consistent-set size, so Σ contribution
+    equals Δ cat_mean_signed exactly.
+    """
+    rows = []
+    for cat, g in long_df.groupby("category"):
+        years = sorted(g["year"].unique())
+        first_year, last_year = years[0], years[-1]
+        at_first = g[g["year"] == first_year].set_index("occupation")["signed_rnd"]
+        at_last = g[g["year"] == last_year].set_index("occupation")["signed_rnd"]
+        n = g["occupation"].nunique()
+        for occ, gg in g.groupby("occupation"):
+            s_first = float(at_first[occ])
+            s_last = float(at_last[occ])
+            delta = s_last - s_first
+            contribution = (delta / n) if n else float("nan")
+            slope = _ols_slope(
+                gg["year"].to_numpy(dtype=float),
+                gg["signed_rnd"].to_numpy(dtype=float),
+            )
+            rows.append({
+                "category": cat, "occupation": occ,
+                "first_year": int(first_year), "last_year": int(last_year),
+                "signed_first": s_first, "signed_last": s_last,
+                "delta": delta, "contribution": contribution, "slope": slope,
+            })
+    summary = pd.DataFrame(rows)
+    summary["_absc"] = summary["contribution"].abs()
+    summary = (
+        summary.sort_values(
+            ["category", "_absc"], ascending=[True, False], na_position="last"
+        )
+        .drop(columns="_absc")
+        .reset_index(drop=True)
+    )
+    return summary
