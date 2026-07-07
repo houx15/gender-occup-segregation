@@ -141,6 +141,16 @@ for CONFIG in "${CONFIGS[@]}"; do
     echo "  ok: $SUMMARY_PATH"
     echo "  fig (bootstrap): $FIG_BOOT"
     echo "  fig (subsample): $FIG_SUB"
+
+    # Word-level ideation drivers (secondary, NON-FATAL). Runs only here — after
+    # the primary figures are validated and status recorded — so a driver bug
+    # never regresses the main deliverable. Do not touch STATUSES here.
+    if python -m scripts.analyze_word_drivers --config="$CONFIG" \
+        && python -m scripts.visualize_word_drivers --config="$CONFIG"; then
+        echo "  word_drivers: ok ($RESULTS_DIR/word_drivers_*.{parquet,csv})"
+    else
+        echo "  WARN: word_drivers step failed (primary figures unaffected)"
+    fi
 done
 
 echo ""

@@ -108,6 +108,14 @@ for CONFIG in "${CONFIGS[@]}"; do
     fi
     echo "  ok: $SUMMARY_PATH  ($NPDF figure(s) under $FIG_DIR)"
     STATUSES+=("ok")
+
+    # Word-level ideation drivers (secondary, NON-FATAL). See garg_weat_all_sources.slurm.
+    if python -m scripts.analyze_word_drivers --config="$CONFIG" \
+        && python -m scripts.visualize_word_drivers --config="$CONFIG"; then
+        echo "  word_drivers: ok ($RESULTS_DIR/word_drivers_*.{parquet,csv})"
+    else
+        echo "  WARN: word_drivers step failed (primary figures unaffected)"
+    fi
 done
 
 echo ""
