@@ -47,7 +47,7 @@ def test_slice_start_year_formats():
     assert _slice_start_year("1990s") == 1990
     assert _slice_start_year("1940_1949") == 1940
     assert _slice_start_year("北京") is None
-    assert _slice_start_year("北京_2020") == 2020  # parses leading int; fine
+    assert _slice_start_year("北京_2020") is None  # province-year: dropped (mirrors visualize._decade_start_year)
 
 
 def test_long_table_cat_mean_and_deviation_and_sign():

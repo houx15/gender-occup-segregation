@@ -36,10 +36,10 @@ def _slice_start_year(unit_name) -> Optional[int]:
     s = str(unit_name)
     if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
         return int(s[:4])
-    for part in s.split("_"):
-        if part.isdigit():
-            return int(part)
-    return None
+    try:
+        return int(s.split("_")[0])
+    except (ValueError, IndexError):
+        return None
 
 
 def _consistent_words_per_category(df: pd.DataFrame) -> Dict[str, set]:
