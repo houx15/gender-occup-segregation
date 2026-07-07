@@ -125,3 +125,38 @@ def test_main_errors_without_input(tmp_path, monkeypatch):
     monkeypatch.setattr(awd, "setup_logging", lambda *_a, **_k: _Log())
     with pytest.raises(FileNotFoundError):
         awd.main(config="ignored.yml")
+
+
+def test_empty_when_no_longitudinal_units():
+    # all-provincial unit names -> everything dropped -> empty tables, no crash
+    prov = pd.DataFrame([
+        {"unit_name": "北京", "category": "science", "occupation": "a",
+         "rnd": 0.1, "in_vocab": True},
+        {"unit_name": "上海", "category": "science", "occupation": "a",
+         "rnd": 0.2, "in_vocab": True},
+    ])
+    long_df = build_long_table(prov, {"science": 1}, _Log())
+    assert long_df.empty
+    assert list(long_df.columns) == [
+        "category", "year", "unit_name", "occupation",
+        "rnd", "signed_rnd", "cat_mean_signed", "deviation",
+    ]
+    summ = build_summary_table(long_df, _Log())
+    assert summ.empty
+    assert "contribution" in summ.columns
+
+
+def test_main_raises_valueerror_on_missing_columns(tmp_path, monkeypatch):
+    import scripts.analyze_word_drivers as awd
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+    # missing 'in_vocab' column
+    pd.DataFrame([{"unit_name": "1990s", "category": "science",
+                   "occupation": "a", "rnd": 0.1}]).to_parquet(
+        results_dir / "garg_weat_rnd_long.parquet", index=False)
+    cfg = {"paths": {"results_dir": str(results_dir), "log_dir": str(tmp_path)},
+           "analysis": {}}
+    monkeypatch.setattr(awd, "load_config", lambda _p: cfg)
+    monkeypatch.setattr(awd, "setup_logging", lambda *_a, **_k: _Log())
+    with pytest.raises(ValueError):
+        awd.main(config="ignored.yml")

@@ -76,6 +76,12 @@ def build_long_table(
             f"unit_name (provincial units are out of scope)"
         )
     df = df[df["year"].notna()].copy()
+    if df.empty:
+        logger.info("  word_drivers: no longitudinal in-vocab rows — nothing to do")
+        return pd.DataFrame(columns=[
+            "category", "year", "unit_name", "occupation",
+            "rnd", "signed_rnd", "cat_mean_signed", "deviation",
+        ])
     df["year"] = df["year"].astype(int)
     df["signed_rnd"] = df["rnd"] * df["category"].map(
         lambda c: ideation_sign.get(c, 1)
@@ -86,6 +92,12 @@ def build_long_table(
         lambda r: r["occupation"] in keep.get(r["category"], set()), axis=1
     )
     df = df[mask].copy()
+    if df.empty:
+        logger.info("  word_drivers: consistent set empty for all categories — nothing to do")
+        return pd.DataFrame(columns=[
+            "category", "year", "unit_name", "occupation",
+            "rnd", "signed_rnd", "cat_mean_signed", "deviation",
+        ])
 
     df["cat_mean_signed"] = df.groupby(["category", "year"])["signed_rnd"].transform(
         "mean"
@@ -122,6 +134,11 @@ def build_summary_table(long_df: pd.DataFrame, logger) -> pd.DataFrame:
     contribution = delta / N with N = consistent-set size, so Σ contribution
     equals Δ cat_mean_signed exactly.
     """
+    if long_df.empty:
+        return pd.DataFrame(columns=[
+            "category", "occupation", "first_year", "last_year",
+            "signed_first", "signed_last", "delta", "contribution", "slope",
+        ])
     rows = []
     for cat, g in long_df.groupby("category"):
         years = sorted(g["year"].unique())
@@ -133,7 +150,7 @@ def build_summary_table(long_df: pd.DataFrame, logger) -> pd.DataFrame:
             s_first = float(at_first[occ])
             s_last = float(at_last[occ])
             delta = s_last - s_first
-            contribution = (delta / n) if n else float("nan")
+            contribution = delta / n
             slope = _ols_slope(
                 gg["year"].to_numpy(dtype=float),
                 gg["signed_rnd"].to_numpy(dtype=float),

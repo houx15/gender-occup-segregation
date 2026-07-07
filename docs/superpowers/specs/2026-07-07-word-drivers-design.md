@@ -135,7 +135,9 @@ Reads the two tables; reuses `visualize.py` helpers (`_configure_fonts`,
 - All figures draw from the consistent-set words in the tables (bars/slope/
   trajectory cap to `top_n` by |contribution| or |delta|; heatmap shows all
   consistent-set words in the dimension).
-- File extension follows existing figure convention (PDF).
+- File extension follows existing figure convention (PDF). Filenames are
+  undated (written directly, not via `get_figure_path`), matching the undated
+  `fig2_garg_weat_categories__*` family this feature sits beside.
 
 ## Wiring
 

@@ -16,6 +16,7 @@ from pathlib import Path
 
 os.environ.setdefault("MPLBACKEND", "Agg")
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -26,8 +27,8 @@ from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
 from scripts.visualize import _configure_fonts
 
-_NEG = "#c0392b"   # male-leaning / negative change
-_POS = "#2c7fb8"   # female-leaning / positive change
+_NEG = "#c0392b"   # negative signed value / contribution (toward more-traditional)
+_POS = "#2c7fb8"   # positive signed value / contribution (toward less-traditional)
 
 
 def _top_n(cfg: dict) -> int:
@@ -35,9 +36,7 @@ def _top_n(cfg: dict) -> int:
 
 
 def plot_contribution(summary_df, category, figures_dir, top_n, logger):
-    sub = summary_df[summary_df["category"] == category].dropna(
-        subset=["contribution"]
-    ).copy()
+    sub = summary_df[summary_df["category"] == category].copy()
     if sub.empty:
         logger.warning(f"  contribution[{category}]: no words — skipped")
         return
@@ -62,7 +61,7 @@ def plot_contribution(summary_df, category, figures_dir, top_n, logger):
 
 
 def plot_slope(summary_df, category, figures_dir, top_n, logger):
-    sub = summary_df[summary_df["category"] == category].dropna(subset=["delta"]).copy()
+    sub = summary_df[summary_df["category"] == category].copy()
     if sub.empty:
         logger.warning(f"  slope[{category}]: no words — skipped")
         return
@@ -133,10 +132,10 @@ def plot_trajectory(long_df, summary_df, category, figures_dir, top_n, logger):
     for _, g in sub.groupby("occupation"):
         g = g.sort_values("year")
         ax.plot(g["year"], g["signed_rnd"], color="#cccccc", lw=0.7, zorder=1)
-    movers = summary_df[summary_df["category"] == category].dropna(subset=["delta"]).copy()
+    movers = summary_df[summary_df["category"] == category].copy()
     movers["_absd"] = movers["delta"].abs()
     movers = movers.sort_values("_absd", ascending=False).head(top_n)
-    cmap = plt.get_cmap("tab10")
+    cmap = matplotlib.colormaps["tab10"]
     for i, occ in enumerate(movers["occupation"]):
         g = sub[sub["occupation"] == occ].sort_values("year")
         ax.plot(g["year"], g["signed_rnd"], color=cmap(i % 10), lw=1.8, zorder=3, label=str(occ))
