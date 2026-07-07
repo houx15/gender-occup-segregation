@@ -58,61 +58,63 @@ invoked per-config inside the existing garg_weat slurm loops.
 CLI: `python -m scripts.analyze_word_drivers --config=<profile>.yml`
 
 Reads `results_dir/garg_weat_rnd_long.parquet` and config
-`analysis.ideation_sign` (+ `analysis.consistent_occupations`). Writes to
-`results_dir` (both parquet **and** CSV):
+`analysis.ideation_sign`. Writes to `results_dir` (both parquet **and** CSV):
 
 **Preprocessing**
 1. Keep `in_vocab == True` rows.
-2. `year = _decade_start_year(unit_name)` (reused from `visualize.py`; handles
-   `1990s` and `1940_1949`). Drop rows where `year is None` (provincial units)
-   with an INFO log — those corpora are out of scope.
-3. `signed_rnd = rnd * ideation_sign[category]` (reuse
-   `visualize.apply_ideation_sign`). All lenses operate on `signed_rnd` so
-   direction matches the plotted trend.
+2. `year = _slice_start_year(unit_name)` (mirrors `visualize._decade_start_year`;
+   handles `1990s` and `1940_1949`). Drop rows where `year is None` (provincial
+   units) with an INFO log — those corpora are out of scope.
+3. `signed_rnd = rnd * ideation_sign[category]` (default sign 1). All lenses
+   operate on `signed_rnd` so direction matches the plotted trend.
+4. **Restrict to the per-category global consistent set** — words in-vocab in
+   ALL retained slices of the category. This is not optional and is *not* keyed
+   off any config flag: it exactly mirrors `category_summary.compute_consistent_set`,
+   which `analyze_category_bias.py` applies **unconditionally** when building the
+   plotted `mean_rnd`. Operating on the same set is what makes `cat_mean_signed`
+   reproduce the published line (and see "Why the consistent set" below).
 
 **(a) `word_drivers_long.{parquet,csv}`** — one row per `(category, year, word)`:
 
 | category | year | unit_name | occupation | rnd | signed_rnd | cat_mean_signed | deviation |
 |---|---|---|---|---|---|---|---|
 
-- `cat_mean_signed` = mean `signed_rnd` over the word set used for that
-  `(category, slice)` — i.e. the plotted line's value.
+- Rows are only for consistent-set words (step 4). `cat_mean_signed` = mean
+  `signed_rnd` over that set for the `(category, year)` — i.e. the plotted
+  line's value. Averaging `signed_rnd` within any `(category, year)` reproduces
+  the figure point exactly.
 - `deviation = signed_rnd − cat_mean_signed` → **lens 3** (who pulls the level
-  male/female that year). Averaging `signed_rnd` within any `(category, year)`
-  reproduces the figure point exactly.
+  male/female that year).
 
 **(b) `word_drivers_summary.{parquet,csv}`** — one row per `(category, word)`:
 
-| category | occupation | first_year | last_year | signed_first | signed_last | delta | contribution | slope | present_both | n_slices |
-|---|---|---|---|---|---|---|---|---|---|---|
+| category | occupation | first_year | last_year | signed_first | signed_last | delta | contribution | slope |
+|---|---|---|---|---|---|---|---|---|
 
+- `first_year` / `last_year` = min/max slice of the category.
 - `delta = signed_last − signed_first` → **lens 2** (raw per-word change).
-- `contribution = delta / N` → **lens 1**; sums to the change in the plotted
-  line over the endpoint-consistent set.
-- `slope` = OLS of `signed_rnd` on `year` over all slices the word appears in —
-  a churn-robust companion column (no figure).
-- Rows ranked within category by `|contribution|` (NaN-contribution words last).
+- `contribution = delta / N`, `N` = size of the consistent set → **lens 1**;
+  `Σ contribution` equals the change in the plotted line exactly.
+- `slope` = OLS of `signed_rnd` on `year` over the category's slices — a
+  companion column (no figure).
+- Rows ranked within category by `|contribution|`.
 
-### Endpoint / churn handling (the one subtlety)
+### Why the consistent set (and why there is no churn handling)
 
-For contributions to sum exactly to Δ(plotted mean), the word set must be
-identical at both endpoints; vocab churn breaks this.
+The plotted `mean_rnd` is built by `category_summary.build_summary` over
+`compute_consistent_set(...)` — words in-vocab in ALL units, per category —
+and `analyze_category_bias.py:155` calls that **unconditionally**. There is no
+`consistent_occupations` toggle in the garg_weat path (that key is only read by
+the separate single-wordlist `analyze_garg.py`, and no garg_weat profile sets
+it). So to reproduce the published line, the word-drivers tables must use the
+same set — always.
 
-- `first_year` / `last_year` are **per category** = min/max slice where that
-  category has ≥1 in-vocab word.
-- **Endpoint-consistent set** = words in-vocab at *both* endpoints.
-  `delta` / `contribution` are computed only for those (`present_both = True`);
-  `N` = size of that set. Then `Σ contribution` = change in the
-  consistent-set mean.
-- Words present in only some slices still appear in the long table and the
-  trajectory figure, but get `present_both = False`, `contribution = NaN`, and
-  are excluded from the decomposition, contribution bars, and slope chart.
-- **`analysis.consistent_occupations` honored**: when `true`, `cat_mean_signed`
-  and the decomposition both restrict to the global consistent set (words
-  in-vocab in *all* slices), matching how the summary/plot is built, so the
-  table's `cat_mean_signed` reproduces the figure. When `false` (default),
-  `cat_mean_signed` is per-slice in-vocab mean and the decomposition uses the
-  two-endpoint set.
+A happy consequence: the consistent set is churn-free by construction (every
+word is in-vocab in every slice), so every word has a well-defined value at both
+endpoints. There is no `present_both` / NaN-contribution bookkeeping — every
+consistent-set word contributes, and `Σ contribution` equals `Δ cat_mean_signed`
+exactly. The word-drivers script recomputes this set itself from the long
+parquet (same units, same rows → same set as `build_summary` used).
 
 ### Component 2 — `scripts/visualize_word_drivers.py` (figures)
 
@@ -130,45 +132,44 @@ Reads the two tables; reuses `visualize.py` helpers (`_configure_fonts`,
 | trajectory small multiples | `word_drivers_trajectory_<cat>` | overview | all words faint, top-N movers bold+labelled, `cat_mean_signed` overlaid |
 
 - `top_n` configurable via `analysis.word_drivers.top_n` (default 20).
-- Bars/slope/trajectory restrict to `present_both` words; heatmap shows all
-  in-vocab words in the dimension.
+- All figures draw from the consistent-set words in the tables (bars/slope/
+  trajectory cap to `top_n` by |contribution| or |delta|; heatmap shows all
+  consistent-set words in the dimension).
 - File extension follows existing figure convention (PDF).
 
 ## Wiring
 
 Add to **both** `slurm/garg_weat_all_sources.slurm` and
-`slurm/garg_weat_zh.slurm`, immediately after the existing
-`visualize main` block succeeds for a config (so primary figures are already
-safe). **Non-fatal**: a driver failure logs a WARN and a distinct status, then
-`continue`s — it never regresses the primary deliverable.
+`slurm/garg_weat_zh.slurm`, at the **ok-tail** of each config iteration — after
+the primary figures are validated and `STATUSES+=("ok")` is recorded.
+**Non-fatal**: a driver failure logs a WARN and lets the loop advance; it must
+NOT append to any status array or `continue` (that would desync the per-config
+arrays).
 
 ```bash
-if ! python -m scripts.analyze_word_drivers --config="$CONFIG"; then
-    echo "  WARN: analyze_word_drivers failed (primary figures unaffected)"
-    STATUSES+=("word_drivers_analyze_warn"); continue
-fi
-if ! python -m scripts.visualize_word_drivers --config="$CONFIG"; then
-    echo "  WARN: visualize_word_drivers failed (primary figures unaffected)"
-    STATUSES+=("word_drivers_visualize_warn"); continue
+if python -m scripts.analyze_word_drivers --config="$CONFIG" \
+    && python -m scripts.visualize_word_drivers --config="$CONFIG"; then
+    echo "  word_drivers: ok ($RESULTS_DIR/word_drivers_*.{parquet,csv})"
+else
+    echo "  WARN: word_drivers step failed (primary figures unaffected)"
 fi
 ```
 
-(Exact placement adapts to each loop's status-array style; the two scripts are
-also runnable standalone for ad-hoc single-corpus inspection.)
+The two scripts are also runnable standalone for ad-hoc single-corpus inspection.
 
 ## Testing — `tests/test_analyze_word_drivers.py`
 
-On a small synthetic `garg_weat_rnd_long`-shaped fixture:
+On a small synthetic `garg_weat_rnd_long`-shaped fixture (include a churning
+word — in-vocab in only some slices — to exercise the consistent-set filter):
 
 1. `mean(signed_rnd)` within `(category, year)` equals `cat_mean_signed`.
-2. `Σ contribution` over `present_both` words equals
-   `cat_mean_signed(last) − cat_mean_signed(first)` on the consistent set.
+2. `Σ contribution` within a category equals `cat_mean_signed(last) −
+   cat_mean_signed(first)` (holds exactly on the churn-free consistent set).
 3. `ideation_sign` flips `family` (sign −1 applied to `signed_rnd`).
-4. Endpoint churn: a word OOV at an endpoint gets `present_both=False`,
-   `contribution=NaN`, and is excluded from the decomposition sum.
+4. The churning word is excluded from BOTH tables (not in the consistent set);
+   the consistent-set mean at each slice ignores it.
 5. `deviation = signed_rnd − cat_mean_signed`.
-6. `consistent_occupations=True` restricts `cat_mean_signed` to the global
-   consistent set.
+6. `_slice_start_year` drops province / province-year units (returns None).
 
 Visualization is smoke-tested (figures written, no exception) following the
 pattern in existing `tests/test_visualize_*` files.
