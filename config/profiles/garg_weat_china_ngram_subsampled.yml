@@ -3,6 +3,12 @@
 # Appendix A). For each (ngram, year, match_count) row, scale by
 # min(1, per_year_token_cap / year_total[year]) and emit
 # floor(match_count * scale) + Bernoulli(frac) copies via a seeded RNG.
+# Storage is COMPACT (Kozlowski et al. 2019 style): the builder writes one
+# "ngram<TAB>count" line per unique ngram per slice (count = Σ_year n_emit),
+# and train_embeddings expands it to `count` sentences at read time. This keeps
+# on-disk size at type-size (~presence corpus) instead of expanding the repeats
+# to disk — the fix for the 85G/6.7e9-line blow-up. word2vec sees identical
+# input either way.
 # Replaces the 2026-06-02 garg_weat_china_ngram_weighted.yml, which used a
 # methods-wrong per-row min(match_count, cap) (deleted).
 language: "zh"
@@ -41,7 +47,7 @@ time_slices:
 
 embedding:
   vector_size: 300
-  window: 4
+  window: 5        # match Kozlowski et al. 2019 (5-gram pseudo-sentences)
   min_count: 50
   sg: 1
   negative: 15

@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+import gzip
 import logging
 from pathlib import Path
 
 import pytest
 
-from scripts.data_prep.build_corpora_ngram import process_ngram_file, resolve_specific_slice
+from scripts.data_prep.build_corpora_ngram import (
+    accumulate_year_total,
+    build_corpora,
+    corpus_signature,
+    process_ngram_file,
+    resolve_specific_slice,
+)
+from scripts.data_prep.ngram_totalcounts import load_totalcounts
 
 logger = logging.getLogger("test")
 
@@ -43,6 +51,18 @@ def _read_corpus(corpora_dir: Path, slice_name: str) -> list[str]:
     out: list[str] = []
     for p in sorted(slice_dir.glob("corpus_*.txt")):
         out.extend(line for line in p.read_text(encoding="utf-8").splitlines() if line)
+    return out
+
+
+def _read_compact(corpora_dir: Path, slice_name: str) -> list[tuple[str, int]]:
+    """Parse a per_year_capped COMPACT corpus into (ngram, count) pairs.
+
+    Capped mode stores one line per unique ngram per slice as ``ngram<TAB>count``
+    (count = Σ_year n_emit) instead of ``count`` repeated physical lines."""
+    out: list[tuple[str, int]] = []
+    for line in _read_corpus(corpora_dir, slice_name):
+        ngram, _, count = line.partition("\t")
+        out.append((ngram, int(count)))
     return out
 
 
@@ -121,7 +141,8 @@ class TestResolveSpecificSlice:
 
 class TestPerYearCapped:
     def test_pass_through_when_year_total_below_cap(self, tmp_path):
-        # year_total = 5e7 (below cap 1e8) → scale = 1.0 → emit exactly match_count copies.
+        # year_total = 5e7 (below cap 1e8) → scale = 1.0 → count = match_count.
+        # Stored COMPACT: one line "ngram<TAB>7", not 7 physical lines.
         f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
             _line(NGRAM, 1942, match_count=7),
         ])
@@ -131,11 +152,10 @@ class TestPerYearCapped:
             "rng_seed": 42,
         })
         process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1942: 50_000_000})
-        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
-        assert lines == [NGRAM_CLEAN] * 7
+        assert _read_compact(Path(cfg["paths"]["corpora_dir"]), "1940_1949") == [(NGRAM_CLEAN, 7)]
 
     def test_scale_down_when_year_total_above_cap_is_deterministic(self, tmp_path):
-        # year_total = 1e9, cap = 1e8 → scale = 0.1. match_count = 100 → expected = 10 (integer; no Bernoulli).
+        # year_total = 1e9, cap = 1e8 → scale = 0.1. match_count = 100 → count = 10 (integer; no Bernoulli).
         f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
             _line(NGRAM, 1942, match_count=100),
         ])
@@ -145,14 +165,29 @@ class TestPerYearCapped:
             "rng_seed": 42,
         })
         process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1942: 1_000_000_000})
-        lines = _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
-        assert lines == [NGRAM_CLEAN] * 10
+        assert _read_compact(Path(cfg["paths"]["corpora_dir"]), "1940_1949") == [(NGRAM_CLEAN, 10)]
+
+    def test_capped_sums_n_emit_across_years_within_slice(self, tmp_path):
+        # One v3 line carries multiple year cells for the same ngram; two of them
+        # fall inside (1940,1949), both pass-through (year_total < cap → scale 1.0).
+        # Compact stores ONE line with the summed count (5 + 3 = 8).
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            f"{NGRAM}\t1942,5,1\t1948,3,1",
+        ])
+        cfg = _config(tmp_path, corpus={
+            "weight_mode": "per_year_capped",
+            "per_year_token_cap": 100_000_000,
+            "rng_seed": 42,
+        })
+        process_ngram_file(f, [(1940, 1949)], cfg, logger,
+                           year_total={1942: 50_000_000, 1948: 50_000_000})
+        assert _read_compact(Path(cfg["paths"]["corpora_dir"]), "1940_1949") == [(NGRAM_CLEAN, 8)]
 
     def test_bernoulli_fractional_part_is_unbiased(self, tmp_path):
-        # match_count=15, scale=0.1 → expected = 1.5 → n_emit ∈ {1, 2} per trial.
+        # match_count=15, scale=0.1 → expected = 1.5 → count ∈ {1, 2} per trial.
         # Across 200 seeds, empirical mean should land within 3σ of 1.5.
         # Var(Bernoulli(0.5)) = 0.25; SE over 200 trials ≈ sqrt(0.25/200) ≈ 0.0354. 3σ ≈ 0.106.
-        n_emits = []
+        counts = []
         for seed in range(200):
             sub = tmp_path / f"trial_{seed}"
             sub.mkdir()
@@ -165,11 +200,13 @@ class TestPerYearCapped:
                 "rng_seed": seed,
             })
             process_ngram_file(f, [(1940, 1949)], cfg, logger, year_total={1942: 1_000_000_000})
-            n_emits.append(len(_read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949")))
-        mean = sum(n_emits) / len(n_emits)
+            compact = _read_compact(Path(cfg["paths"]["corpora_dir"]), "1940_1949")
+            assert len(compact) == 1                # always a single compact line
+            counts.append(compact[0][1])
+        mean = sum(counts) / len(counts)
         assert 1.39 < mean < 1.61, f"Bernoulli looks biased: mean={mean:.3f} over 200 trials"
         # Also confirm both outcomes occur — guards against a stuck RNG.
-        assert set(n_emits) == {1, 2}
+        assert set(counts) == {1, 2}
 
     def test_missing_year_in_totalcounts_raises_key_error(self, tmp_path):
         f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
@@ -218,3 +255,196 @@ class TestPerYearCapped:
         cfg = _config(tmp_path)  # default → presence
         process_ngram_file(f, [(1940, 1949)], cfg, logger)  # no year_total kwarg
         assert _read_corpus(Path(cfg["paths"]["corpora_dir"]), "1940_1949") == [NGRAM_CLEAN]
+
+
+def _build_config(tmp_path: Path, **corpus) -> dict:
+    """Full config for build_corpora (needs time_slices + decompressed/raw paths)."""
+    c = {"min_count_threshold": 1}
+    c.update(corpus)
+    return {
+        "time_slices": {
+            "start_year": 1940, "end_year": 1949,
+            "window_size": 10, "step_size": 10,  # → single slice (1940, 1949)
+        },
+        "corpus": c,
+        "paths": {
+            "corpora_dir": str(tmp_path / "corpora"),
+            "decompressed_dir": str(tmp_path / "decomp"),
+            "raw_ngram_dir": str(tmp_path / "raw"),
+        },
+    }
+
+
+def _stage_shard(decomp_dir: Path, name: str, lines: list[str]) -> str:
+    """Drop a plain-text shard into decompressed_dir; return its file_name."""
+    decomp_dir.mkdir(parents=True, exist_ok=True)
+    _make_ngram_file(decomp_dir, name, lines)
+    return name
+
+
+def _make_gz_shard(raw_dir: Path, name: str, lines: list[str]) -> Path:
+    """Write a gzipped ngram shard into raw_ngram_dir (what build_corpora globs)."""
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    p = raw_dir / name
+    with gzip.open(p, "wt", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    return p
+
+
+class TestDataDerivedTotalcounts:
+    """The denominator must come from the data (Σ kept match_count per year),
+    not the shipped totalcounts-5 which under-counts and let the cap blow past
+    10·cap by ~6.7×."""
+
+    def test_accumulate_sums_match_count_per_year_over_kept_ngrams(self, tmp_path):
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=5),
+            _line(NGRAM, 1942, match_count=3),     # same year → sums
+            _line(NGRAM, 1948, match_count=200),
+            "abc def\t1942,9999,1",                # non-Chinese → clean_ngram drops it
+        ])
+        yt: dict = {}
+        accumulate_year_total(f, min_count=1, year_total=yt)
+        assert yt == {1942: 8, 1948: 200}
+
+    def test_accumulate_applies_min_count(self, tmp_path):
+        f = _make_ngram_file(tmp_path, "5-00000-of-00105", [
+            _line(NGRAM, 1942, match_count=5),
+            _line(NGRAM, 1943, match_count=1),
+        ])
+        yt: dict = {}
+        accumulate_year_total(f, min_count=5, year_total=yt)
+        assert yt == {1942: 5}                      # 1943 mc=1 < 5 dropped
+
+    def test_build_corpora_derives_totalcounts_and_cap_bites(self, tmp_path):
+        # Regression for the 6.7× over-emission bug. With the data-derived
+        # denominator, a year emits min(Σ_kept, cap), not the full match_count.
+        cfg = _build_config(
+            tmp_path, weight_mode="per_year_capped",
+            per_year_token_cap=10, rng_seed=42,
+        )
+        raw = Path(cfg["paths"]["raw_ngram_dir"])
+        _make_gz_shard(raw, "5-00000-of-00105.gz", [
+            _line(NGRAM, 1942, match_count=100),
+        ])
+        build_corpora(cfg, logger)                  # no file_name → globs raw shards
+        corpora_dir = Path(cfg["paths"]["corpora_dir"])
+        # year_total[1942]=100, scale=10/100=0.1, expected=10 → exactly the cap.
+        # Stored compact: one line "ngram<TAB>10".
+        assert _read_compact(corpora_dir, "1940_1949") == [(NGRAM_CLEAN, 10)]
+        # Derived totalcounts cached with the TRUE per-year sum (100, not ~15).
+        derived = raw / "totalcounts-5.derived"
+        assert derived.exists()
+        assert load_totalcounts(derived)[1942] == 100
+
+
+class TestShardResume:
+    """build_corpora must reuse finished shards and rebuild unfinished ones,
+    instead of blindly appending (the duplication bug)."""
+
+    SHARD = "5-00000-of-00105"
+    SLICE = "1940_1949"
+    INDEX = "00000"
+
+    def test_finished_shard_is_reused_not_duplicated_on_rerun(self, tmp_path):
+        cfg = _build_config(tmp_path)
+        decomp = Path(cfg["paths"]["decompressed_dir"])
+        _stage_shard(decomp, self.SHARD, [_line(NGRAM, 1942, match_count=5)])
+
+        # First build → one line + a completion marker.
+        build_corpora(cfg, logger, file_name=self.SHARD)
+        corpora_dir = Path(cfg["paths"]["corpora_dir"])
+        assert _read_corpus(corpora_dir, self.SLICE) == [NGRAM_CLEAN]
+        marker = corpora_dir / self.SLICE / f".corpus_{self.INDEX}.done"
+        assert marker.exists()
+
+        # Second build of the same shard → reused, NOT appended (no duplication).
+        build_corpora(cfg, logger, file_name=self.SHARD)
+        assert _read_corpus(corpora_dir, self.SLICE) == [NGRAM_CLEAN]
+
+    def test_unverified_partial_corpus_is_deleted_and_regenerated(self, tmp_path):
+        cfg = _build_config(tmp_path)
+        corpora_dir = Path(cfg["paths"]["corpora_dir"])
+        # Simulate a crashed run: a corpus file exists but no marker.
+        (corpora_dir / self.SLICE).mkdir(parents=True)
+        (corpora_dir / self.SLICE / f"corpus_{self.INDEX}.txt").write_text(
+            "STALE 残留 数据\n", encoding="utf-8"
+        )
+        decomp = Path(cfg["paths"]["decompressed_dir"])
+        _stage_shard(decomp, self.SHARD, [_line(NGRAM, 1942, match_count=5)])
+
+        build_corpora(cfg, logger, file_name=self.SHARD)
+        # Stale line gone, not appended after it.
+        assert _read_corpus(corpora_dir, self.SLICE) == [NGRAM_CLEAN]
+
+    def test_marker_from_different_config_is_not_trusted(self, tmp_path):
+        # A marker written under presence mode must NOT cause reuse after
+        # switching to per_year_capped — the corpus content would differ.
+        presence_cfg = _build_config(tmp_path)
+        raw = Path(presence_cfg["paths"]["raw_ngram_dir"])
+        _make_gz_shard(raw, "5-00000-of-00105.gz", [_line(NGRAM, 1942, match_count=3)])
+        build_corpora(presence_cfg, logger)            # glob mode
+        corpora_dir = Path(presence_cfg["paths"]["corpora_dir"])
+        assert _read_corpus(corpora_dir, self.SLICE) == [NGRAM_CLEAN]  # dedup → 1 line
+
+        # Switch to per_year_capped. Derived year_total[1942]=3, cap huge →
+        # scale 1.0 → emit match_count (3) copies.
+        capped_cfg = _build_config(
+            tmp_path,
+            weight_mode="per_year_capped",
+            per_year_token_cap=100_000_000,
+            rng_seed=42,
+        )
+        build_corpora(capped_cfg, logger)
+        # If the stale presence marker had been trusted, we'd still see the bare
+        # presence line. Capped rebuild → compact "ngram<TAB>3".
+        assert _read_compact(corpora_dir, self.SLICE) == [(NGRAM_CLEAN, 3)]
+
+    def test_done_slice_reused_while_other_slice_rebuilt_same_shard(self, tmp_path):
+        # Two slices; one already finished for this shard (valid marker + corpus),
+        # the other pending. The done slice must be left untouched (reused), the
+        # pending one built from the shard.
+        cfg = _build_config(tmp_path)
+        cfg["time_slices"]["end_year"] = 1959  # → (1940,1949) and (1950,1959)
+        corpora_dir = Path(cfg["paths"]["corpora_dir"])
+        sig = corpus_signature(cfg)
+
+        # Pre-existing GOOD build for 1940_1949: corpus + trusted marker.
+        done_dir = corpora_dir / "1940_1949"
+        done_dir.mkdir(parents=True)
+        (done_dir / f"corpus_{self.INDEX}.txt").write_text(
+            "保留 内容 不变\n", encoding="utf-8"
+        )
+        (done_dir / f".corpus_{self.INDEX}.done").write_text(sig, encoding="utf-8")
+
+        decomp = Path(cfg["paths"]["decompressed_dir"])
+        _stage_shard(decomp, self.SHARD, [
+            _line(NGRAM, 1942, match_count=5),   # falls in the DONE slice
+            _line(NGRAM, 1955, match_count=5),   # falls in the PENDING slice
+        ])
+
+        build_corpora(cfg, logger, file_name=self.SHARD)
+
+        # Done slice untouched (its 1942 line from the shard was never processed).
+        assert _read_corpus(corpora_dir, "1940_1949") == ["保留 内容 不变"]
+        # Pending slice built from the shard's 1955 entry.
+        assert _read_corpus(corpora_dir, "1950_1959") == [NGRAM_CLEAN]
+
+
+class TestCorpusSignatureFormat:
+    """The signature must encode the on-disk FORMAT so a marker written by the
+    old EXPANDED capped build (repeated bare-ngram lines) is not trusted by the
+    new COMPACT build — otherwise an 85G expanded slice would be silently reused
+    instead of rebuilt as ngram<TAB>count."""
+
+    def test_capped_signature_tags_compact_format(self, tmp_path):
+        cfg = _build_config(
+            tmp_path, weight_mode="per_year_capped",
+            per_year_token_cap=100_000_000, rng_seed=42,
+        )
+        assert "fmt=compact" in corpus_signature(cfg)
+
+    def test_presence_signature_has_no_format_tag(self, tmp_path):
+        # Presence corpora were never expanded; their format is unchanged.
+        cfg = _build_config(tmp_path)  # presence
+        assert "fmt=" not in corpus_signature(cfg)

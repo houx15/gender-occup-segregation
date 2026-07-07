@@ -13,6 +13,8 @@ Usage:
     python -m scripts.train_embeddings --config=config/config.yml --retrain
 """
 
+from __future__ import annotations
+
 import gc
 import glob
 import json
@@ -21,46 +23,78 @@ from pathlib import Path
 from typing import Iterator, List
 
 import fire
-from gensim.models import Word2Vec
-from gensim.models.callbacks import CallbackAny2Vec
 
 from scripts.common.config_loader import load_config, get_analysis_unit, get_model_name
 from scripts.common.logging_utils import setup_logging
 
-
-class EpochLogger(CallbackAny2Vec):
-    """Callback to log training progress."""
-    def __init__(self, logger, unit_name):
-        self.epoch = 0
-        self.logger = logger
-        self.unit_name = unit_name
-
-    def on_epoch_end(self, model):
-        self.epoch += 1
-        self.logger.info(f"  {self.unit_name} - Completed epoch {self.epoch}")
+# gensim is imported lazily inside train_model — it pulls in scipy/BLAS at
+# import time, which we don't want (or need) for the pure-Python CorpusIterator,
+# unit discovery, or their tests.
 
 
 class CorpusIterator:
-    """Iterator for reading corpus files from a unit directory."""
-    def __init__(self, corpora_dir: str, unit_name: str):
+    """Iterator for reading corpus files from a unit directory.
+
+    With ``expand_counts=True`` each line is treated as ``ngram<TAB>count`` and
+    yielded ``count`` times — the per_year_capped subsampled corpus is stored
+    COMPACT (one line per unique ngram per slice) so disk stays at type-size
+    while word2vec still trains on ``count`` copies (Kozlowski et al. 2019). A
+    line with no TAB count column counts as one copy. With the default
+    ``expand_counts=False`` each line is one sentence (presence corpora, plain
+    sentence corpora), unchanged.
+    """
+    def __init__(self, corpora_dir: str, unit_name: str, expand_counts: bool = False):
         unit_dir = Path(corpora_dir) / unit_name
         self.corpus_files = sorted(glob.glob(str(unit_dir / "corpus_*")))
+        self.expand_counts = expand_counts
 
     def __iter__(self) -> Iterator[List[str]]:
         for corpus_file in self.corpus_files:
             with open(corpus_file, "r", encoding="utf-8", buffering=8 * 1024 * 1024) as f:
-                for line in f:
-                    tokens = line.strip().split()
-                    if tokens:
-                        yield tokens
+                if self.expand_counts:
+                    for line in f:
+                        line = line.rstrip("\n")
+                        if not line:
+                            continue
+                        ngram, _, count = line.partition("\t")
+                        tokens = ngram.split()
+                        if not tokens:
+                            continue
+                        n = int(count) if count else 1
+                        for _ in range(n):
+                            yield tokens
+                else:
+                    for line in f:
+                        tokens = line.strip().split()
+                        if tokens:
+                            yield tokens
 
 
-def train_model(unit_name: str, config: dict, logger) -> Word2Vec:
+def train_model(unit_name: str, config: dict, logger) -> "Word2Vec":
     """Train a Word2Vec model for a single unit (time slice or province)."""
+    from gensim.models import Word2Vec
+    from gensim.models.callbacks import CallbackAny2Vec
+
+    class EpochLogger(CallbackAny2Vec):
+        """Callback to log training progress."""
+        def __init__(self, logger, unit_name):
+            self.epoch = 0
+            self.logger = logger
+            self.unit_name = unit_name
+
+        def on_epoch_end(self, model):
+            self.epoch += 1
+            self.logger.info(f"  {self.unit_name} - Completed epoch {self.epoch}")
+
     logger.info(f"\nTraining model for {unit_name}...")
     emb_config = config["embedding"]
 
-    corpus = CorpusIterator(config["paths"]["corpora_dir"], unit_name)
+    # per_year_capped corpora are stored compact (ngram<TAB>count); expand at
+    # read time so word2vec sees the repeated sentences. Any other corpus is
+    # one-sentence-per-line.
+    expand_counts = config.get("corpus", {}).get("weight_mode") == "per_year_capped"
+    corpus = CorpusIterator(config["paths"]["corpora_dir"], unit_name,
+                            expand_counts=expand_counts)
 
     workers = min(multiprocessing.cpu_count() - 1, emb_config.get("workers", 16))
     epoch_logger = EpochLogger(logger, unit_name)

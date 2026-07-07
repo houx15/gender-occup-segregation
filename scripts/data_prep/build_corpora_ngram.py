@@ -94,15 +94,136 @@ def parse_ngram_line_v3(line: str):
 VALID_WEIGHT_MODES = {"presence", "per_year_capped"}
 
 
+def corpus_signature(config) -> str:
+    """A string fingerprint of the corpus params that determine slice content.
+
+    Stored inside each shard's ``.done`` marker so a marker is trusted only
+    when the *current* config would produce the same corpus. Switching
+    weight_mode (e.g. presence → per_year_capped) or changing the cap/seed
+    invalidates old markers, forcing a rebuild rather than silent reuse of
+    stale data.
+    """
+    c = config['corpus']
+    weight_mode = c.get('weight_mode', 'presence')
+    parts = [f"weight_mode={weight_mode}", f"min_count={c['min_count_threshold']}"]
+    if weight_mode == "per_year_capped":
+        parts.append(f"cap={int(c.get('per_year_token_cap', 1_000_000_000))}")
+        parts.append(f"rng_seed={int(c.get('rng_seed', 0))}")
+        # year_total now comes from data-derived totalcounts, not the shipped
+        # totalcounts-5. Tag the signature so any marker written under the old
+        # (under-capped) denominator is distrusted → forces a clean rebuild.
+        parts.append("ytsrc=derived")
+        # Storage is now COMPACT (ngram<TAB>count) rather than expanded (one
+        # physical line per emitted copy). Tag it so a marker from the old
+        # expanded build is distrusted → the 85G slice is rebuilt, not reused.
+        parts.append("fmt=compact")
+    return ";".join(parts)
+
+
+def _shard_marker(corpora_dir: Path, slice_name: str, file_index: str) -> Path:
+    """Completion sentinel for one shard's contribution to one slice.
+
+    Leading dot keeps it out of the ``corpus_*`` / ``corpus_*.txt`` globs used
+    by train_embeddings.py and dataset_stats.py.
+    """
+    return corpora_dir / slice_name / f".corpus_{file_index}.done"
+
+
+def shard_file_index(shard_path: Path) -> str:
+    """Derive the shard index used in ``corpus_{index}.txt`` from a shard name.
+
+    Mirrors process_ngram_file: ``5-00042-of-00105[.gz]`` → ``"00042"``.
+    """
+    return shard_path.name.split("-")[1]
+
+
+DERIVED_TOTALCOUNTS_NAME = "totalcounts-5.derived"
+
+
+def accumulate_year_total(file_path, min_count, year_total):
+    """Sum kept-ngram ``match_count`` per year from one decompressed shard.
+
+    Uses the SAME keep filter as emission — ``parse_ngram_line_v3`` (which applies
+    ``clean_ngram``: ≥2 Chinese tokens) then ``match_count >= min_count`` — so the
+    per-year totals are a *self-consistent* denominator for the cap: with
+    ``scale = min(1, cap/year_total)`` the emitted lines for a year become
+    ``min(Σ_kept match_count, cap)``. Mutates and returns ``year_total``.
+    """
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        for line in f:
+            for _ngram, year, match_count in parse_ngram_line_v3(line):
+                if match_count < min_count:
+                    continue
+                year_total[year] = year_total.get(year, 0) + match_count
+    return year_total
+
+
+def build_data_totalcounts(config, logger):
+    """Compute per-year kept-match totals across ALL shards and cache them.
+
+    The shipped ``totalcounts-5`` undercounts relative to what we emit — its
+    per-year values sit far below ``Σ match_count`` of the kept 5-grams, so
+    ``scale = cap / year_total ≈ 1`` and the cap never bites (a 10-year slice
+    blew past ``10·cap`` by ~6.7×). We instead derive the denominator from the
+    data itself and cache it as ``totalcounts-5.derived`` (one tab-separated line
+    of ``year,count`` cells, readable by ``load_totalcounts``). Computed once;
+    reused by every per-slice build.
+    """
+    raw_ngram_dir = Path(config['paths']['raw_ngram_dir'])
+    decompressed_dir = Path(config['paths']['decompressed_dir'])
+    min_count = config['corpus']['min_count_threshold']
+    os.makedirs(decompressed_dir, exist_ok=True)
+
+    shards = sorted(raw_ngram_dir.glob("5-*-of-00105.gz"))
+    if not shards:
+        raise FileNotFoundError(
+            f"No 5-*-of-00105.gz shards in {raw_ngram_dir}; cannot derive totalcounts"
+        )
+    logger.info(f"Deriving per-year totalcounts from {len(shards)} shards (one-time)...")
+    year_total: dict = {}
+    for gz in shards:
+        ngram_file = decompressed_dir / gz.stem
+        ok, msg = decompress_file(gz, ngram_file, logger)
+        if not ok:
+            raise RuntimeError(f"totalcounts derive failed on {gz.name}: {msg}")
+        accumulate_year_total(ngram_file, min_count, year_total)
+        os.remove(ngram_file)
+
+    derived = raw_ngram_dir / DERIVED_TOTALCOUNTS_NAME
+    cells = "\t".join(f"{y},{c}" for y, c in sorted(year_total.items()))
+    tmp = derived.with_name(derived.name + ".tmp")
+    tmp.write_text(cells + "\n", encoding="utf-8")
+    tmp.replace(derived)  # atomic — a concurrent reader never sees a partial file
+    logger.info(f"Wrote {derived} ({len(year_total)} years)")
+    return year_total
+
+
+def load_data_totalcounts(config, logger):
+    """Load the derived per-year totals, computing+caching them if absent."""
+    derived = Path(config['paths']['raw_ngram_dir']) / DERIVED_TOTALCOUNTS_NAME
+    if derived.exists():
+        year_total = load_totalcounts(derived)
+        logger.info(
+            f"Loaded derived totalcounts ({len(year_total)} years) from {derived}"
+        )
+        return year_total
+    return build_data_totalcounts(config, logger)
+
+
 def process_ngram_file(file_path, time_slices, config, logger, year_total=None):
     """Process a single ngram file and write to time-slice corpus files.
 
     Dispatches on ``config['corpus']['weight_mode']`` (default ``"presence"``):
-      - ``"presence"``: dedup-per-slice via set (one line per unique ngram per slice).
+      - ``"presence"``: dedup-per-slice via set (one bare-ngram line per unique
+        ngram per slice).
       - ``"per_year_capped"``: HistWords-style (Hamilton et al. 2016, Appendix A).
         For each (ngram, year, match_count) row, scale = min(1, cap / year_total[year]);
         n_emit = floor(match_count * scale) + Bernoulli(frac(match_count * scale)).
         Requires ``year_total: dict[int, int]`` mapping year → total match_count.
+        Output is COMPACT: one ``ngram<TAB>count`` line per unique ngram per slice
+        (count = Σ_year n_emit), NOT ``count`` repeated lines — so disk stays at
+        type-size. train_embeddings' CorpusIterator(expand_counts=True) re-expands
+        each line to ``count`` sentences at read time.
     """
     corpus_cfg = config['corpus']
     min_count = corpus_cfg['min_count_threshold']
@@ -135,7 +256,7 @@ def process_ngram_file(file_path, time_slices, config, logger, year_total=None):
     logger.info(f"Processing {file_path.name} (weight_mode={weight_mode})...")
     lines_processed = 0
     lines_emitted = defaultdict(int)
-    file_index = file_path.name.split("-")[1]
+    file_index = shard_file_index(file_path)
     write_buffer: dict = defaultdict(set) if weight_mode == "presence" else defaultdict(list)
     largest_buffer = 10000
 
@@ -154,10 +275,26 @@ def process_ngram_file(file_path, time_slices, config, logger, year_total=None):
             entries = parse_ngram_line_v3(line)
             if not entries:
                 continue
-            for ngram_text, year, match_count in entries:
-                if match_count < min_count:
-                    continue
-                if weight_mode == "per_year_capped":
+            if weight_mode == "presence":
+                for ngram_text, year, match_count in entries:
+                    if match_count < min_count:
+                        continue
+                    for start_year, end_year in time_slices:
+                        if start_year <= year <= end_year:
+                            slice_name = f"{start_year}_{end_year}"
+                            write_buffer[slice_name].add(ngram_text)
+                            lines_emitted[slice_name] += 1
+                            if len(write_buffer[slice_name]) > largest_buffer:
+                                _flush(slice_name)
+            else:  # per_year_capped — COMPACT: one "ngram<TAB>count" line per
+                   # unique ngram per slice (count = Σ_year n_emit). Storing the
+                   # count instead of `count` repeated lines keeps disk at
+                   # type-size; train_embeddings expands it at read time.
+                ngram_text = entries[0][0]  # v3: one ngram per line, all entries share it
+                slice_count: dict = defaultdict(int)
+                for _ng, year, match_count in entries:
+                    if match_count < min_count:
+                        continue
                     if year not in year_total:
                         raise KeyError(
                             f"Year {year} missing from totalcounts-5 (raw_ngram_dir/totalcounts-5)"
@@ -173,17 +310,12 @@ def process_ngram_file(file_path, time_slices, config, logger, year_total=None):
                     n_emit = n_floor + (1 if rng.random() < frac else 0)
                     if n_emit <= 0:
                         continue
-                matched_slices = set()
-                for start_year, end_year in time_slices:
-                    if start_year <= year <= end_year:
-                        matched_slices.add(f"{start_year}_{end_year}")
-                for slice_name in matched_slices:
-                    if weight_mode == "presence":
-                        write_buffer[slice_name].add(ngram_text)
-                        lines_emitted[slice_name] += 1
-                    else:  # per_year_capped
-                        write_buffer[slice_name].extend([ngram_text] * n_emit)
-                        lines_emitted[slice_name] += n_emit
+                    for start_year, end_year in time_slices:
+                        if start_year <= year <= end_year:
+                            slice_count[f"{start_year}_{end_year}"] += n_emit
+                for slice_name, cnt in slice_count.items():
+                    write_buffer[slice_name].append(f"{ngram_text}\t{cnt}")
+                    lines_emitted[slice_name] += cnt
                     if len(write_buffer[slice_name]) > largest_buffer:
                         _flush(slice_name)
             if lines_processed % 1000000 == 0:
@@ -241,13 +373,13 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
 
     decompressed_dir = Path(config['paths']['decompressed_dir'])
     raw_ngram_dir = Path(config['paths']['raw_ngram_dir'])
+    corpora_dir = Path(config['paths']['corpora_dir'])
+    signature = corpus_signature(config)
     decompress = True
 
     year_total = None
     if config['corpus'].get('weight_mode') == 'per_year_capped':
-        totalcounts_path = raw_ngram_dir / 'totalcounts-5'
-        year_total = load_totalcounts(totalcounts_path)
-        logger.info(f"Loaded totalcounts-5 ({len(year_total)} years)")
+        year_total = load_data_totalcounts(config, logger)
 
     # Ensure decompression target dir exists — without this, decompress_file's
     # open(output_path, 'wb') raises FileNotFoundError on the first run of a
@@ -262,7 +394,31 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
 
     logger.info(f"Found {len(ngram_zips)} n-gram files to process")
 
+    all_slices = [f"{s}_{e}" for (s, e) in time_slices]
+
     for single_zip in ngram_zips:
+        file_index = shard_file_index(single_zip)
+
+        # Per-shard resume: a slice is "done" for this shard only when its
+        # marker exists AND was written under the current corpus_signature.
+        # Slices already done are reused; the rest are (re)built. A corpus file
+        # without a trusted marker is unverified (partial crash, or stale config)
+        # and gets deleted before rebuild so we never append onto old data.
+        pending = [
+            sl for sl in all_slices
+            if not (
+                _shard_marker(corpora_dir, sl, file_index).exists()
+                and _shard_marker(corpora_dir, sl, file_index)
+                    .read_text(encoding="utf-8").strip() == signature
+            )
+        ]
+        if not pending:
+            logger.info(
+                f"Shard {file_index}: complete for all {len(all_slices)} "
+                f"active slice(s); reusing existing corpora"
+            )
+            continue
+
         if decompress:
             ngram_file = decompressed_dir / single_zip.stem
             ok, msg = decompress_file(single_zip, ngram_file, logger)
@@ -274,7 +430,29 @@ def build_corpora(config, logger, specific_slice=None, file_name=None):
                 continue
         else:
             ngram_file = single_zip
-        process_ngram_file(ngram_file, time_slices, config, logger, year_total=year_total)
+
+        # Drop any unverified/partial output for pending slices so the rebuild
+        # writes clean files instead of appending onto leftovers.
+        for sl in pending:
+            partial = corpora_dir / sl / f"corpus_{file_index}.txt"
+            if partial.exists():
+                logger.info(
+                    f"Shard {file_index} slice {sl}: removing unverified corpus "
+                    f"file before rebuild"
+                )
+                partial.unlink()
+
+        pending_slices = [(s, e) for (s, e) in time_slices if f"{s}_{e}" in pending]
+        process_ngram_file(ngram_file, pending_slices, config, logger, year_total=year_total)
+
+        # Mark each rebuilt slice done (after a clean pass). Written even when a
+        # slice received zero lines from this shard, so we don't reprocess it.
+        for sl in pending:
+            os.makedirs(corpora_dir / sl, exist_ok=True)
+            _shard_marker(corpora_dir, sl, file_index).write_text(
+                signature, encoding="utf-8"
+            )
+
         if decompress:
             os.remove(ngram_file)
 
