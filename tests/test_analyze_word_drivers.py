@@ -91,3 +91,37 @@ def test_summary_slope_is_ols():
     # a: years [1990,2000,2010], signed [-0.4,-0.2,0.0] -> slope 0.02 / yr
     a_slope = summ[(summ.category == "science") & (summ.occupation == "a")]["slope"].iloc[0]
     assert a_slope == pytest.approx(0.02)
+
+
+def test_main_writes_four_files(tmp_path, monkeypatch):
+    import scripts.analyze_word_drivers as awd
+
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+    _rnd_long_fixture().to_parquet(results_dir / "garg_weat_rnd_long.parquet", index=False)
+
+    cfg = {
+        "paths": {"results_dir": str(results_dir), "log_dir": str(tmp_path / "logs")},
+        "analysis": {"ideation_sign": {"science": 1, "family": -1}},
+    }
+    monkeypatch.setattr(awd, "load_config", lambda _p: cfg)
+    monkeypatch.setattr(awd, "setup_logging", lambda *_a, **_k: _Log())
+
+    awd.main(config="ignored.yml")
+
+    for name in ("word_drivers_long", "word_drivers_summary"):
+        assert (results_dir / f"{name}.parquet").exists()
+        assert (results_dir / f"{name}.csv").exists()
+    long_df = pd.read_parquet(results_dir / "word_drivers_long.parquet")
+    assert {"signed_rnd", "cat_mean_signed", "deviation"} <= set(long_df.columns)
+
+
+def test_main_errors_without_input(tmp_path, monkeypatch):
+    import scripts.analyze_word_drivers as awd
+
+    cfg = {"paths": {"results_dir": str(tmp_path), "log_dir": str(tmp_path)},
+           "analysis": {}}
+    monkeypatch.setattr(awd, "load_config", lambda _p: cfg)
+    monkeypatch.setattr(awd, "setup_logging", lambda *_a, **_k: _Log())
+    with pytest.raises(FileNotFoundError):
+        awd.main(config="ignored.yml")

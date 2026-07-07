@@ -154,3 +154,46 @@ def build_summary_table(long_df: pd.DataFrame, logger) -> pd.DataFrame:
         .reset_index(drop=True)
     )
     return summary
+
+
+def main(config: str = "config/config.yml") -> None:
+    """Read garg_weat_rnd_long.parquet, write the two driver tables (parquet+csv)."""
+    cfg = load_config(config)
+    logger = setup_logging(
+        Path(cfg["paths"]["log_dir"]), "analyze_word_drivers.log"
+    )
+    results_dir = Path(cfg["paths"]["results_dir"])
+    long_path = results_dir / "garg_weat_rnd_long.parquet"
+    if not long_path.exists():
+        raise FileNotFoundError(
+            f"analyze_word_drivers: {long_path} not found. Run "
+            f"analyze_category_bias (analysis.metrics must include 'rnd') first."
+        )
+    rnd_long = pd.read_parquet(long_path)
+    required = {"unit_name", "category", "occupation", "rnd", "in_vocab"}
+    missing = required - set(rnd_long.columns)
+    if missing:
+        raise ValueError(f"{long_path} missing columns: {sorted(missing)}")
+
+    ideation_sign = cfg.get("analysis", {}).get("ideation_sign", {})
+    logger.info(
+        f"word_drivers: {len(rnd_long)} rnd rows; ideation_sign={ideation_sign}"
+    )
+
+    long_df = build_long_table(rnd_long, ideation_sign, logger)
+    summary_df = build_summary_table(long_df, logger)
+
+    results_dir.mkdir(parents=True, exist_ok=True)
+    for name, frame in [
+        ("word_drivers_long", long_df),
+        ("word_drivers_summary", summary_df),
+    ]:
+        frame.to_parquet(results_dir / f"{name}.parquet", index=False)
+        frame.to_csv(results_dir / f"{name}.csv", index=False)
+        logger.info(
+            f"Saved: {results_dir / name}.parquet / .csv ({len(frame)} rows)"
+        )
+
+
+if __name__ == "__main__":
+    fire.Fire(main)
