@@ -9,6 +9,7 @@ Usage:
 """
 
 import json
+import warnings
 from datetime import datetime
 from pathlib import Path
 
@@ -26,23 +27,55 @@ from scripts.common.config_loader import load_config, get_analysis_unit, get_wor
 from scripts.common.logging_utils import setup_logging
 
 
-_DEFAULT_CJK_FONT_PATH = "/usr/share/fonts/google-droid/DroidSansFallback.ttf"
+# Candidate CJK font files, tried in order. The Slurm cluster ships the Droid
+# fallback; the macOS entries let figures render Chinese when generated locally.
+# A config `fonts.cjk_path` (str or list) is tried before any of these.
+_DEFAULT_CJK_FONT_PATHS = [
+    "/usr/share/fonts/google-droid/DroidSansFallback.ttf",
+    "/usr/share/fonts/truetype/droid/DroidSansFallback.ttf",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    "/System/Library/Fonts/PingFang.ttc",
+    "/System/Library/Fonts/STHeiti Medium.ttc",
+    "/System/Library/Fonts/Songti.ttc",
+]
 
 
 def _configure_fonts(config: dict) -> None:
-    """Register language-appropriate fonts with matplotlib."""
+    """Register language-appropriate fonts with matplotlib.
+
+    For ``language: zh`` this tries each candidate CJK font (config's
+    ``fonts.cjk_path`` first, then platform defaults) and registers the first
+    one that loads. If none is found, it warns instead of failing silently so
+    a missing font surfaces as tofu-with-a-reason rather than a mystery.
+    """
     language = config["language"]
     if language != "zh":
         return  # matplotlib defaults are fine for English
 
-    cjk_path = config.get("fonts", {}).get("cjk_path", _DEFAULT_CJK_FONT_PATH)
-    try:
-        _fm.fontManager.addfont(cjk_path)
-        family = _fm.FontProperties(fname=cjk_path).get_name()
+    configured = config.get("fonts", {}).get("cjk_path")
+    if isinstance(configured, str):
+        configured = [configured]
+    candidates = list(configured or []) + _DEFAULT_CJK_FONT_PATHS
+
+    for cjk_path in candidates:
+        if not Path(cjk_path).exists():
+            continue
+        try:
+            _fm.fontManager.addfont(cjk_path)
+            family = _fm.FontProperties(fname=cjk_path).get_name()
+        except (FileNotFoundError, RuntimeError):
+            continue
         plt.rcParams["font.sans-serif"] = [family] + plt.rcParams["font.sans-serif"]
         plt.rcParams["axes.unicode_minus"] = False
-    except FileNotFoundError:
-        pass
+        return
+
+    warnings.warn(
+        "No CJK font found for language=zh; Chinese labels will render as "
+        f"missing glyphs. Set fonts.cjk_path in the config. Tried: {candidates}",
+        stacklevel=2,
+    )
 
 
 LABELS = {

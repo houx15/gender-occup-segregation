@@ -35,6 +35,11 @@ def _top_n(cfg: dict) -> int:
     return int(cfg.get("analysis", {}).get("word_drivers", {}).get("top_n", 20))
 
 
+def _trajectory_top_n(cfg: dict) -> int:
+    """Movers highlighted in the trajectory figure (kept small to stay legible)."""
+    return int(cfg.get("analysis", {}).get("word_drivers", {}).get("trajectory_top_n", 5))
+
+
 def plot_contribution(summary_df, category, figures_dir, top_n, logger):
     sub = summary_df[summary_df["category"] == category].copy()
     if sub.empty:
@@ -183,14 +188,18 @@ def main(config: str = "config/config.yml") -> None:
     long_df = pd.read_parquet(long_path)
     summary_df = pd.read_parquet(summ_path)
     top_n = _top_n(cfg)
+    traj_top_n = _trajectory_top_n(cfg)
 
     categories = sorted(long_df["category"].unique())
-    logger.info(f"word_drivers figures: categories={categories}, top_n={top_n}")
+    logger.info(
+        f"word_drivers figures: categories={categories}, "
+        f"top_n={top_n}, trajectory_top_n={traj_top_n}"
+    )
     for cat in categories:
         plot_contribution(summary_df, cat, figures_dir, top_n, logger)
         plot_slope(summary_df, cat, figures_dir, top_n, logger)
         plot_heatmap(long_df, summary_df, cat, figures_dir, logger)
-        plot_trajectory(long_df, summary_df, cat, figures_dir, top_n, logger)
+        plot_trajectory(long_df, summary_df, cat, figures_dir, traj_top_n, logger)
 
 
 if __name__ == "__main__":
