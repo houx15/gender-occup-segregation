@@ -27,10 +27,18 @@ from scripts.common.config_loader import load_config, get_analysis_unit, get_wor
 from scripts.common.logging_utils import setup_logging
 
 
-# Candidate CJK font files, tried in order. The Slurm cluster ships the Droid
-# fallback; the macOS entries let figures render Chinese when generated locally.
-# A config `fonts.cjk_path` (str or list) is tried before any of these.
+# Repo-bundled CJK font: the ONLY path guaranteed present everywhere (cluster,
+# CI, macOS). This removes any dependency on system-installed fonts, which is
+# what previously left Chinese labels as blank "tofu" on the Slurm nodes.
+_BUNDLED_CJK_FONT = str(
+    Path(__file__).resolve().parents[1] / "assets" / "fonts" / "NotoSansCJKsc-Regular.otf"
+)
+
+# Candidate CJK font files, tried in order. The bundled font comes first; the
+# system paths remain as fallbacks if the bundle is ever missing. A config
+# `fonts.cjk_path` (str or list) is tried before any of these.
 _DEFAULT_CJK_FONT_PATHS = [
+    _BUNDLED_CJK_FONT,
     "/usr/share/fonts/google-droid/DroidSansFallback.ttf",
     "/usr/share/fonts/truetype/droid/DroidSansFallback.ttf",
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
