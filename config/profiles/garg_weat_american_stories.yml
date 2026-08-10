@@ -1,0 +1,67 @@
+# Garg-WEAT per-(state, year) gender ideation on American Stories (1900-1960).
+# State via LCCN -> LoC US Newspaper Directory. Units are state-year
+# (e.g. 'california_1940'); per-year US choropleths + trend.
+language: "en"
+data_source: "american_stories"
+analysis_mode: "garg_weat"
+embedding_source: "american_stories"
+_arm: "american_stories"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_data_dir: "/scratch/network/yh6580/gender-occup/data/american_state/american_stories/raw"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/american_state/american_stories/corpora"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/american_state/american_stories/models"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/american_state/american_stories/results_garg_weat"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs/american_stories"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures/american_stories_garg_weat"
+
+us_states:
+  shapefile: "data/shapefiles/us_states.shp"
+  min_documents: 500
+  years: [1900, 1910, 1920, 1930, 1940, 1950, 1960]
+
+wordlists:
+  dir: "wordlists/en/garg_weat"
+  gender_words_file: "gender_words.json"
+  categories:
+    leadership: "cleaned_leadership.txt"
+    family: "cleaned_family.txt"
+    science: "cleaned_science.txt"
+
+corpus:
+  tokenizer: "nltk_en"
+  stopwords: "en_default"
+  lowercase: true
+  min_words: 5
+  dedup:
+    enabled: true
+    method: "shingle"
+    shingle_k: 8
+    scope: "within_year"
+
+embedding:
+  vector_size: 300
+  window: 5
+  min_count: 20
+  sg: 1
+  negative: 10
+  workers: 8
+  epochs: 10
+  seed: 42
+  model_name_template: "model_{unit_name}.kv"
+
+analysis:
+  metrics: [rnd, cohens_d]
+  seed: 42
+  ideation_sign:
+    leadership: 1
+    science: 1
+    family: -1
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95

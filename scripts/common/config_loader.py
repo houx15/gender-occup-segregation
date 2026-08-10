@@ -19,6 +19,8 @@ DATA_SOURCE_LANGUAGE_COMPAT = {
     "weibo":       {"zh"},
     "newspaper":   {"zh"},
     "coha":        {"en"},
+    "american_stories": {"en"},
+    "dlnews":            {"en"},
 }
 
 # Valid data sources and their default analysis units
@@ -28,6 +30,8 @@ DATA_SOURCE_DEFAULTS = {
     "weibo": "provincial",
     "newspaper": "provincial",
     "coha": "longitudinal",
+    "american_stories": "provincial",
+    "dlnews": "provincial",
 }
 
 VALID_ANALYSIS_MODES = {"prestige", "weat", "garg", "garg_weat"}
@@ -161,6 +165,8 @@ _CORPUS_DEFAULTS = {
     ("zh", "newspaper"):   ("jieba",      "zh_newspaper",   False),
     ("en", "ngram"):       ("whitespace", None,             True),
     ("en", "coha"):        ("whitespace", None,             True),
+    ("en", "american_stories"): ("nltk_en", "en_default", True),
+    ("en", "dlnews"):           ("nltk_en", "en_default", True),
 }
 
 
