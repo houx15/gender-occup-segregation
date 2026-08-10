@@ -27,6 +27,26 @@ def test_shingle_dedup_catches_near_duplicate_wire_copy():
     assert d.is_duplicate(far) is False   # unrelated -> kept
 
 
+def test_shingle_dedup_records_bands_even_when_flagged_duplicate():
+    # Regression test: a drift chain doc1 -> doc2 (near-dup of doc1) ->
+    # doc3 (near-dup of doc2, drifted from doc1) must have doc3 caught
+    # because doc2's LSH bands are recorded even though doc2 itself was
+    # reported as a duplicate ("records the text either way").
+    d = Deduper(method="shingle", shingle_k=4, n_perm=64, bands=16)
+    doc1 = ("washington the senate approved a sweeping new farm bill on tuesday "
+            "sending the measure to the house for final consideration before "
+            "the end of next month")
+    doc2 = ("washington the senate approved a sweeping new farm bill on wednesday "
+            "sending the measure to the house for final consideration before "
+            "the end of next month")  # single-token edit of doc1 (tuesday -> wednesday)
+    doc3 = ("washington the senate approved a sweeping new farm bill on wednesday "
+            "sending the measure to the house for final review before "
+            "the end of next month")  # single-token edit of doc2 (consideration -> review)
+    assert d.is_duplicate(doc1) is False
+    assert d.is_duplicate(doc2) is True
+    assert d.is_duplicate(doc3) is True
+
+
 def test_reset_clears_state():
     d = Deduper(method="exact")
     a = "same story"

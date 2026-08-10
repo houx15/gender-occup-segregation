@@ -48,7 +48,6 @@ class Deduper:
         self.bands = bands
         self.rows_per_band = n_perm // bands
         # deterministic (a, b) permutation coefficients
-        rng = _stable_hash(f"seed:{seed}")
         self._ab = []
         for i in range(n_perm):
             a = (_stable_hash(f"a:{seed}:{i}") % (_MERSENNE - 1)) + 1
@@ -94,13 +93,14 @@ class Deduper:
             return False
 
         # shingle: LSH banding — a collision in any band => candidate duplicate.
+        # Bands are recorded unconditionally (even for docs flagged as
+        # duplicates) so drift chains are caught: doc C near-duplicating doc
+        # B, which itself near-duplicated doc A, must still match against B's
+        # bands even though B was itself reported as a duplicate.
         sig = self._minhash(text)
         keys = self._band_keys(sig)
-        for k in keys:
-            if k in self._lsh_buckets and self._lsh_buckets[k]:
-                # any prior doc shares a band -> treat as near-duplicate
-                return True
+        is_dup = any(k in self._lsh_buckets and self._lsh_buckets[k] for k in keys)
         for k in keys:
             self._lsh_buckets.setdefault(k, set()).add(self._next_id)
         self._next_id += 1
-        return False
+        return is_dup
