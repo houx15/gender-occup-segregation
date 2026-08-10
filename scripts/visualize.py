@@ -1066,6 +1066,77 @@ def _match_province_in_shapefile(dim_data, china):
     return matched
 
 
+def _state_year_parse(unit_name):
+    """'new_york_1940' -> ('New York', 1940). Returns None if it doesn't parse."""
+    from scripts.data_prep.us_state_mapper import normalize_state
+    s = str(unit_name)
+    head, _, tail = s.rpartition("_")
+    if not head or not tail.isdigit():
+        return None
+    state = normalize_state(head.replace("_", " "))
+    if state is None:
+        return None
+    return state, int(tail)
+
+
+def _match_state_in_shapefile(dim_data, states_gdf):
+    """Merge per-state values onto a US states shapefile on its name column."""
+    match_col = "NAME"
+    for col in ["NAME", "name", "STATE_NAME", "STUSPS"]:
+        if col in states_gdf.columns:
+            match_col = col
+            break
+    return states_gdf.merge(dim_data, left_on=match_col, right_on="state", how="left")
+
+
+def plot_us_choropleth(summary_df, figures_dir, logger, config):
+    """Per-year US choropleths of oriented gender-ideation RND by state.
+
+    summary_df: rows with columns category, unit_name, mean_rnd (from
+    garg_weat_summary_by_category.parquet). Orientation applies
+    analysis.ideation_sign so higher = less traditional across categories.
+    Skips gracefully if geopandas / the shapefile is unavailable.
+    """
+    try:
+        import geopandas as gpd
+    except ImportError:
+        logger.info("  Skipping US choropleth (geopandas not installed)")
+        return
+    shp = Path(config.get("us_states", {}).get("shapefile", "data/shapefiles/us_states.shp"))
+    if not shp.exists():
+        logger.info(f"  Skipping US choropleth (no shapefile at {shp})")
+        return
+    states_gdf = gpd.read_file(shp)
+    # Continental view: drop AK/HI/territories for legibility (still computed).
+    states_gdf = states_gdf[~states_gdf["NAME"].isin(
+        ["Alaska", "Hawaii", "Puerto Rico"])]
+
+    signs = config.get("analysis", {}).get("ideation_sign", {})
+    df = summary_df.copy()
+    parsed = df["unit_name"].apply(_state_year_parse)
+    df = df[parsed.notna()].copy()
+    if df.empty:
+        logger.info("  Skipping US choropleth (no state_year units parsed)")
+        return
+    df["state"] = [p[0] for p in parsed[parsed.notna()]]
+    df["year"] = [p[1] for p in parsed[parsed.notna()]]
+    df["oriented_rnd"] = df.apply(
+        lambda r: r["mean_rnd"] * signs.get(r["category"], 1), axis=1)
+
+    # Average orientation across categories -> one ideation value per state-year.
+    agg = (df.groupby(["state", "year"])["oriented_rnd"].mean().reset_index())
+    vmax = float(agg["oriented_rnd"].abs().max()) or 1.0
+    from matplotlib.colors import TwoSlopeNorm
+    norm = TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
+    for year in sorted(agg["year"].unique()):
+        year_data = agg[agg["year"] == year][["state", "oriented_rnd"]]
+        merged = _match_state_in_shapefile(year_data, states_gdf)
+        _plot_single_choropleth(
+            merged, f"US gender ideation by state — {year}",
+            f"us_gender_ideation_{year}.pdf", figures_dir, logger,
+            value_col="oriented_rnd", norm=norm, cmap="RdBu_r")
+
+
 def _plot_single_choropleth(merged, title, filename, figures_dir, logger,
                             value_col="cohens_d", norm=None, cmap="RdBu_r"):
     """Render and save a single choropleth map with province name labels.
@@ -2854,6 +2925,23 @@ def main(config="config/config.yml", mode=None):
         if summary_path.exists():
             df = pd.read_parquet(summary_path)
             logger.info(f"Loaded {summary_path}: {len(df)} rows")
+
+            # US arms (american_stories / dlnews) use state_year units, not
+            # China province_year units, so intercept BEFORE
+            # _garg_weat_unit_kind classifies them (it would otherwise read
+            # e.g. "california_1940" as a China province_year and route into
+            # the China-shapefile / survey-correlation code below, which is
+            # wrong for US data). Render the US choropleth and stop.
+            ds = config_data.get("data_source")
+            if ds in ("american_stories", "dlnews"):
+                plot_us_choropleth(df, figures_dir, logger, config_data)
+                logger.info("US arm: wrote per-year state choropleth(s); "
+                            "skipping province/longitudinal dispatch")
+                logger.info("=" * 80)
+                logger.info("Visualization completed!")
+                logger.info("=" * 80)
+                return
+
             embedding_source = config_data.get("embedding_source")
             # Per-category orientation onto a gender-ideation axis (e.g.
             # family reversed): config analysis.ideation_sign maps
