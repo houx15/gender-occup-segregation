@@ -22,10 +22,11 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import fire
 
@@ -61,22 +62,26 @@ def main(config: str = "config/config.yml", dry_run: bool = False) -> None:
             bf.write(f'"{src}" "{dst}"\n')
         batch_file = bf.name
 
-    cmd = ["globus", "transfer", "--batch", batch_file,
-           d["source_endpoint"], d["dest_endpoint"], "--label", "3dlnews2-us-arm"]
-    logger.info(f"Prepared {len(pairs)} transfer pairs; batch file: {batch_file}")
-    if dry_run:
-        logger.info("dry_run: " + " ".join(cmd))
-        return
-    logger.info("Submitting Globus transfer (requires prior `globus login`)...")
-    out = subprocess.run(cmd, capture_output=True, text=True)
-    logger.info(out.stdout.strip())
-    if out.returncode != 0:
-        logger.error(out.stderr.strip())
-        logger.error("If OAuth cannot run here, run the batch manually:\n  "
-                     + " ".join(cmd))
-        raise SystemExit(out.returncode)
-    task_id = out.stdout.strip().split()[-1]
-    subprocess.run(["globus", "task", "wait", task_id], check=False)
+    try:
+        cmd = ["globus", "transfer", "--batch", batch_file,
+               d["source_endpoint"], d["dest_endpoint"], "--label", "3dlnews2-us-arm"]
+        logger.info(f"Prepared {len(pairs)} transfer pairs; batch file: {batch_file}")
+        if dry_run:
+            logger.info("dry_run: " + " ".join(cmd))
+            return
+        logger.info("Submitting Globus transfer (requires prior `globus login`)...")
+        out = subprocess.run(cmd, capture_output=True, text=True)
+        logger.info(out.stdout.strip())
+        if out.returncode != 0:
+            logger.error(out.stderr.strip())
+            logger.error("If OAuth cannot run here, run the batch manually:\n  "
+                         + " ".join(cmd))
+            raise SystemExit(out.returncode)
+        task_id = out.stdout.strip().split()[-1]
+        subprocess.run(["globus", "task", "wait", task_id], check=False)
+    finally:
+        if os.path.exists(batch_file):
+            os.remove(batch_file)
 
 
 if __name__ == "__main__":

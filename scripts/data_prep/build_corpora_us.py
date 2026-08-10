@@ -55,7 +55,7 @@ class UnitCorpusWriter:
         self.bytes_written = 0
 
     def write(self, words):
-        if not words or len(words) < 5:
+        if not words:
             return
         line = " ".join(words) + "\n"
         if self.bytes_written + len(line) > self.max_bytes:
@@ -123,12 +123,18 @@ def iter_records(arm: str, raw_dir: str, year: int,
         raise ValueError(f"unknown arm: {arm!r}")
 
 
-def build_corpus(config: dict, logger, arm: str, max_files: Optional[int] = None) -> Dict[str, int]:
+def build_corpus(config: dict, logger, arm: str) -> Dict[str, int]:
     raw_dir = config["paths"]["raw_data_dir"]
     corpora_dir = config["paths"]["corpora_dir"]
     years = config["us_states"]["years"]
     min_docs = int(config["us_states"].get("min_documents", 500))
     dcfg = config.get("corpus", {}).get("dedup", {"enabled": False})
+    _scope = dcfg.get("scope", "within_year")
+    if dcfg.get("enabled") and _scope != "within_year":
+        raise ValueError(
+            f"build_corpora_us only supports dedup scope 'within_year', got {_scope!r}. "
+            "Within-year-across-states scoping is structural (fresh Deduper per year)."
+        )
 
     lccn_table = None
     if arm == "american_stories":
@@ -189,13 +195,12 @@ def write_coverage_report(coverage: Dict[str, int], min_docs: int, path: str) ->
             f.write(f"{unit},{state},{year},{coverage[unit]},{kept}\n")
 
 
-def main(config: str = "config/config.yml", arm: Optional[str] = None,
-         max_files: Optional[int] = None) -> None:
+def main(config: str = "config/config.yml", arm: Optional[str] = None) -> None:
     cfg = load_config(config)
     logger = setup_logging(Path(cfg["paths"]["log_dir"]), "build_corpora_us.log")
     arm = arm or cfg.get("_arm") or cfg.get("embedding_source")
     logger.info(f"Building US corpora: arm={arm}")
-    build_corpus(cfg, logger, arm=arm, max_files=max_files)
+    build_corpus(cfg, logger, arm=arm)
 
 
 if __name__ == "__main__":

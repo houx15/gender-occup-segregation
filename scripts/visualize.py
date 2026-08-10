@@ -1126,8 +1126,7 @@ def plot_us_choropleth(summary_df, figures_dir, logger, config):
     # Average orientation across categories -> one ideation value per state-year.
     agg = (df.groupby(["state", "year"])["oriented_rnd"].mean().reset_index())
     vmax = float(agg["oriented_rnd"].abs().max()) or 1.0
-    from matplotlib.colors import TwoSlopeNorm
-    norm = TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
+    norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
     for year in sorted(agg["year"].unique()):
         year_data = agg[agg["year"] == year][["state", "oriented_rnd"]]
         merged = _match_state_in_shapefile(year_data, states_gdf)
@@ -2947,7 +2946,6 @@ def main(config="config/config.yml", mode=None):
             # family reversed): config analysis.ideation_sign maps
             # category -> +1/-1. Absent -> raw RND, no flip.
             category_sign = config_data.get("analysis", {}).get("ideation_sign")
-            ds = config_data.get("data_source")
             kind = (
                 _garg_weat_unit_kind(df["unit_name"]) if not df.empty
                 else "longitudinal"
