@@ -67,8 +67,13 @@ analysis:
     ci: 0.95
 
 dlnews:
-  source_endpoint: "REPLACE_WITH_3DLNEWS2_COLLECTION_UUID"
+  # 3DLNews2 "no-HTML" collection (~7 GB), from the wm-newslab/3DLNews2 README.
+  source_endpoint: "e524969c-7dff-474c-899c-efddf8d15b83"
+  # Your Princeton Globus collection UUID (find it in app.globus.org → Collections →
+  # search "Princeton" for the system whose filesystem dest_root lives on).
   dest_endpoint: "REPLACE_WITH_PRINCETON_ENDPOINT_UUID"
-  source_root: "/REPLACE/preprocessed_state"
+  source_root: "/Google/1-Newspapers/preprocessed_state"
+  # dest_root as the dest Globus collection sees it (may differ from the shell
+  # path if the collection is rooted at a mount prefix — verify in the file manager).
   dest_root: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/raw"
-  # states: optional allow-list; default = all 50 + DC
+  # states: optional allow-list of 2-letter USPS codes; default = all 51 (50 + DC)

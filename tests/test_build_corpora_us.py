@@ -46,6 +46,24 @@ def test_dlnews_records_route_by_inline_state(tmp_path):
     assert states == ["New York", "New York"]  # NY normalized; Freedonia dropped
 
 
+def test_dlnews_state_from_usps_filename_is_authoritative(tmp_path):
+    # 3DLNews2 partitions files by USPS code; the filename is authoritative even
+    # when a record has no inline location (or a different one).
+    raw = tmp_path / "raw"; raw.mkdir(parents=True)
+    rows = [
+        {"content": "the senate approved the farm policy reform bill today",
+         "is_news_article": True, "title": "a"},  # no location field at all
+        {"content": "governor signed the education funding measure this morning",
+         "location": {"state": "California"}, "is_news_article": True, "title": "b"},
+    ]
+    with gzip.open(raw / "preprocessed_google_newspaper_NY_2000.jsonl.gz", "wt",
+                   encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    recs = list(b.iter_records("dlnews", str(raw), 2000))
+    assert [r["state"] for r in recs] == ["New York", "New York"]  # filename wins
+
+
 def test_build_corpus_writes_units_and_drops_below_threshold(tmp_path):
     cfg = _cfg(tmp_path, "dlnews", min_docs=2)
     raw = Path(cfg["paths"]["raw_data_dir"]); raw.mkdir(parents=True)

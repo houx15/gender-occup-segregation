@@ -21,6 +21,7 @@ import glob
 import gzip
 import json
 import os
+import re
 from pathlib import Path
 from typing import Dict, Iterator, Optional
 
@@ -31,6 +32,10 @@ from scripts.common.logging_utils import setup_logging
 from scripts.common.preprocessing import preprocess
 from scripts.data_prep import us_state_mapper as usm
 from scripts.data_prep.dedup import Deduper
+
+# 3DLNews2 filename -> authoritative 2-letter USPS state code, e.g.
+# "preprocessed_google_newspaper_NY_2000.jsonl.gz" -> "NY".
+_DLNEWS_STATE_RE = re.compile(r"_([A-Z]{2})_\d{4}\.jsonl(?:\.gz)?$")
 
 
 class UnitCorpusWriter:
@@ -84,6 +89,12 @@ def iter_records(arm: str, raw_dir: str, year: int,
         files = sorted(glob.glob(pattern)) or sorted(
             glob.glob(os.path.join(raw_dir, f"*_{year}.jsonl")))
         for fp in files:
+            # 3DLNews2 partitions files by 2-letter USPS code
+            # (preprocessed_google_newspaper_{USPS}_{YEAR}.jsonl.gz), so the
+            # filename is the authoritative publisher state. Fall back to an
+            # inline location.state only if the filename doesn't carry a code.
+            m = _DLNEWS_STATE_RE.search(os.path.basename(fp))
+            file_state = usm.normalize_state(m.group(1)) if m else None
             with _open_maybe_gzip(fp) as f:
                 for line in f:
                     line = line.strip()
@@ -95,8 +106,10 @@ def iter_records(arm: str, raw_dir: str, year: int,
                         continue
                     if not r.get("is_news_article", True):
                         continue
-                    loc = r.get("location") or {}
-                    state = usm.normalize_state(loc.get("state") or "")
+                    state = file_state
+                    if state is None:
+                        loc = r.get("location") or {}
+                        state = usm.normalize_state(loc.get("state") or "")
                     text = r.get("content") or ""
                     if state and text:
                         yield {"text": text, "state": state, "title": r.get("title", "")}

@@ -6,12 +6,18 @@
 Globus transfer is free for individual researchers; Princeton runs a managed
 endpoint (dest).
 
+3DLNews2 lays its newspaper slices out under
+``preprocessed_state/{USPS}/preprocessed_google_newspaper_{USPS}_{YEAR}.jsonl.gz``
+with 2-LETTER USPS state codes (AK, WY, ...), so transfer paths use those codes,
+not full state names. The per-article publisher state used for corpus routing
+still comes from ``location.state`` inside each record (handled in build_corpora_us).
+
 Config (dlnews block):
-  source_endpoint: <3DLNews2 collection UUID>
+  source_endpoint: <3DLNews2 collection UUID>  (no-HTML set: e524969c-7dff-474c-899c-efddf8d15b83)
   dest_endpoint:   <Princeton endpoint UUID>
-  source_root:     /.../preprocessed_state
+  source_root:     /Google/1-Newspapers/preprocessed_state
   dest_root:       <raw_data_dir on the dest endpoint's namespace>
-  states:          optional; default = all 50 states + DC
+  states:          optional 2-letter USPS codes; default = all 51 (50 states + DC)
 
 Fallback if OAuth can't run headless: this prints the equivalent
 `globus transfer --batch` command; run it manually, then proceed to the builder.
@@ -52,7 +58,9 @@ def main(config: str = "config/config.yml", dry_run: bool = False) -> None:
     cfg = load_config(config)
     logger = setup_logging(Path(cfg["paths"]["log_dir"]), "download_dlnews.log")
     d = cfg["dlnews"]
-    states = d.get("states") or list(usm._STATE_NAME_TO_USPS.keys())
+    # 3DLNews2 names its dirs/files by 2-letter USPS code, so the default state
+    # list is the USPS codes (values), not the full names (keys).
+    states = d.get("states") or list(usm._STATE_NAME_TO_USPS.values())
     years = cfg["us_states"]["years"]
     pairs = build_transfer_batch(d["source_root"], d["dest_root"], years, states)
 
