@@ -32,14 +32,21 @@ def _download_year(year: int, out_path: str, logger) -> int:
         trust_remote_code=True,
     )
     n = 0
-    with open(out_path, "w", encoding="utf-8") as f:
-        for split in ds:
-            for row in ds[split]:
-                rec = {k: row.get(k, "") for k in _KEEP}
-                if not rec.get("article"):
-                    continue
-                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-                n += 1
+    try:
+        with open(out_path, "w", encoding="utf-8") as f:
+            for split in ds:
+                for row in ds[split]:
+                    rec = {k: row.get(k, "") for k in _KEEP}
+                    if not rec.get("article"):
+                        continue
+                    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                    n += 1
+    except Exception:
+        # Don't leave a truncated file — a non-empty partial would be silently
+        # skipped by main()'s idempotency check on the next run.
+        if os.path.exists(out_path):
+            os.remove(out_path)
+        raise
     logger.info(f"  {year}: wrote {n} articles -> {out_path}")
     return n
 
