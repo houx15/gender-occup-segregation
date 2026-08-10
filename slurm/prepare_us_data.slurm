@@ -20,13 +20,9 @@ set -u
 
 CONFIG="${1:?pass a config profile}"
 ARM=$(python3 -c "import yaml;print(yaml.safe_load(open('$CONFIG'))['_arm'])")
-BASE=$(python3 -c "import yaml;print(yaml.safe_load(open('$CONFIG'))['paths']['base_dir'])")
 
-# Keep the HuggingFace download cache on scratch, NOT in $HOME (small quota).
-# American Stories is pulled via `datasets`, which caches raw files under
-# HF_HOME; without this it fills the home directory. Harmless for the dlnews arm.
-export HF_HOME="$BASE/.cache/huggingface"
-mkdir -p "$HF_HOME"
+# NOTE: HuggingFace cache (HF_HOME) is expected to already point at scratch in
+# the environment; American Stories is pulled via `datasets` and caches there.
 
 # Shapefile (once; harmless if it already exists)
 python -m scripts.data_prep.fetch_us_shapefile || echo "WARN: shapefile fetch failed"
