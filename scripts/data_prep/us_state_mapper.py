@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import fire
@@ -123,7 +124,7 @@ def _fetch_loc_directory_records() -> List[dict]:
 def build(config: str = "config/config.yml") -> None:
     """Fetch the LoC directory and write the LCCN->state table to raw_data_dir."""
     cfg = load_config(config)
-    logger = setup_logging(cfg["paths"]["log_dir"], "us_state_mapper.log")
+    logger = setup_logging(Path(cfg["paths"]["log_dir"]), "us_state_mapper.log")
     out = f"{cfg['paths']['raw_data_dir']}/lccn_state_table.json"
     logger.info("Fetching LoC US Newspaper Directory records...")
     records = _fetch_loc_directory_records()
