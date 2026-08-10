@@ -22,6 +22,7 @@ import gzip
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 from typing import Dict, Iterator, Optional
 
@@ -136,7 +137,7 @@ def iter_records(arm: str, raw_dir: str, year: int,
         raise ValueError(f"unknown arm: {arm!r}")
 
 
-def build_corpus(config: dict, logger, arm: str) -> Dict[str, int]:
+def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[str, int]:
     raw_dir = config["paths"]["raw_data_dir"]
     corpora_dir = config["paths"]["corpora_dir"]
     years = config["us_states"]["years"]
@@ -148,6 +149,7 @@ def build_corpus(config: dict, logger, arm: str) -> Dict[str, int]:
             f"build_corpora_us only supports dedup scope 'within_year', got {_scope!r}. "
             "Within-year-across-states scoping is structural (fresh Deduper per year)."
         )
+    os.makedirs(corpora_dir, exist_ok=True)
 
     lccn_table = None
     if arm == "american_stories":
@@ -156,12 +158,27 @@ def build_corpus(config: dict, logger, arm: str) -> Dict[str, int]:
         logger.info(f"Loaded LCCN->state table: {len(lccn_table)} entries")
 
     coverage: Dict[str, int] = {}
-    writers: Dict[str, UnitCorpusWriter] = {}
     for year in years:
+        # Idempotency: a per-(arm, year) marker means this year's corpora are
+        # already built — skip it unless rebuild=True. Lets a re-run of the
+        # prepare job resume where it left off instead of re-appending data.
+        marker = Path(corpora_dir) / f".build_done_{arm}_{year}"
+        if marker.exists() and not rebuild:
+            logger.info(f"year={year}: already built (marker present); skipping "
+                        "(pass --rebuild to redo)")
+            continue
+        # Before (re)building a year, remove any prior {state}_{year} dirs so we
+        # never append a second copy onto an earlier run (UnitCorpusWriter rolls
+        # to a fresh file rather than overwriting).
+        for d in glob.glob(os.path.join(corpora_dir, f"*_{year}")):
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+
         deduper = Deduper(
             method=dcfg.get("method", "shingle"),
             shingle_k=int(dcfg.get("shingle_k", 8)),
         ) if dcfg.get("enabled") else None
+        writers: Dict[str, UnitCorpusWriter] = {}
         n_seen = n_dup = 0
         for rec in iter_records(arm, raw_dir, year, lccn_table):
             n_seen += 1
@@ -183,10 +200,13 @@ def build_corpus(config: dict, logger, arm: str) -> Dict[str, int]:
                 writers[unit] = UnitCorpusWriter(unit, corpora_dir)
             writers[unit].write(tokens)
             coverage[unit] = coverage.get(unit, 0) + 1
-        logger.info(f"year={year}: seen={n_seen}, wire-dups dropped={n_dup}")
-    for w in writers.values():
-        w.close()
+        for w in writers.values():
+            w.close()
+        marker.write_text("")  # mark the year done for idempotent re-runs
+        logger.info(f"year={year}: seen={n_seen}, wire-dups dropped={n_dup}, "
+                    f"units={len(writers)}")
 
+    # (writers are closed per-year inside the loop above)
     kept = {u: n for u, n in coverage.items() if n >= min_docs}
     dropped = {u: n for u, n in coverage.items() if n < min_docs}
     if dropped:
@@ -208,12 +228,13 @@ def write_coverage_report(coverage: Dict[str, int], min_docs: int, path: str) ->
             f.write(f"{unit},{state},{year},{coverage[unit]},{kept}\n")
 
 
-def main(config: str = "config/config.yml", arm: Optional[str] = None) -> None:
+def main(config: str = "config/config.yml", arm: Optional[str] = None,
+         rebuild: bool = False) -> None:
     cfg = load_config(config)
     logger = setup_logging(Path(cfg["paths"]["log_dir"]), "build_corpora_us.log")
     arm = arm or cfg.get("_arm") or cfg.get("embedding_source")
-    logger.info(f"Building US corpora: arm={arm}")
-    build_corpus(cfg, logger, arm=arm)
+    logger.info(f"Building US corpora: arm={arm} (rebuild={rebuild})")
+    build_corpus(cfg, logger, arm=arm, rebuild=rebuild)
 
 
 if __name__ == "__main__":

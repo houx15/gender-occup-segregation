@@ -71,8 +71,13 @@ def main(config: str = "config/config.yml", dry_run: bool = False) -> None:
         batch_file = bf.name
 
     try:
+        # --sync-level checksum makes re-runs idempotent: Globus skips files
+        # already present at the dest with a matching checksum, so an interrupted
+        # transfer resumes instead of re-copying everything.
         cmd = ["globus", "transfer", "--batch", batch_file,
-               d["source_endpoint"], d["dest_endpoint"], "--label", "3dlnews2-us-arm"]
+               d["source_endpoint"], d["dest_endpoint"],
+               "--label", "3dlnews2-us-arm",
+               "--sync-level", d.get("sync_level", "checksum")]
         logger.info(f"Prepared {len(pairs)} transfer pairs; batch file: {batch_file}")
         if dry_run:
             logger.info("dry_run: " + " ".join(cmd))

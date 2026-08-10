@@ -87,6 +87,39 @@ def test_build_corpus_writes_units_and_drops_below_threshold(tmp_path):
     assert (Path(cfg["paths"]["corpora_dir"]) / "new_york_1940").exists()
 
 
+def test_build_corpus_skips_already_built_year(tmp_path):
+    # Re-running build must not re-append (duplicate) an already-built year; the
+    # per-(arm, year) marker makes it idempotent unless rebuild=True.
+    import logging
+    cfg = _cfg(tmp_path, "dlnews", min_docs=1)
+    raw = Path(cfg["paths"]["raw_data_dir"]); raw.mkdir(parents=True)
+    rows = [
+        {"content": "the senate approved the farm policy reform bill today",
+         "is_news_article": True, "title": "a"},
+        {"content": "governor signed the education funding measure this morning",
+         "is_news_article": True, "title": "b"},
+    ]
+    with gzip.open(raw / "preprocessed_google_newspaper_NY_1940.jsonl.gz", "wt",
+                   encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    log = logging.getLogger("t")
+    cov1 = b.build_corpus(cfg, log, arm="dlnews")
+    assert cov1["new_york_1940"] == 2
+    unit_dir = Path(cfg["paths"]["corpora_dir"]) / "new_york_1940"
+    lines_before = sum(len(p.read_text().splitlines()) for p in unit_dir.glob("corpus_*"))
+
+    cov2 = b.build_corpus(cfg, log, arm="dlnews")  # marker present -> skipped
+    assert cov2 == {}  # nothing recounted
+    lines_after = sum(len(p.read_text().splitlines()) for p in unit_dir.glob("corpus_*"))
+    assert lines_after == lines_before  # no duplicate append
+
+    cov3 = b.build_corpus(cfg, log, arm="dlnews", rebuild=True)  # forced redo
+    assert cov3["new_york_1940"] == 2
+    lines_rebuilt = sum(len(p.read_text().splitlines()) for p in unit_dir.glob("corpus_*"))
+    assert lines_rebuilt == lines_before  # rebuilt clean, not doubled
+
+
 def test_dedup_collapses_wire_copy_within_year(tmp_path):
     cfg = _cfg(tmp_path, "dlnews", min_docs=1, dedup_method="exact")
     raw = Path(cfg["paths"]["raw_data_dir"]); raw.mkdir(parents=True)
