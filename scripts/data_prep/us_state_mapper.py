@@ -92,55 +92,77 @@ def load_lccn_state_table(path: str) -> Dict[str, str]:
         return json.load(f)
 
 
-def _fetch_loc_directory_records(retries: int = 4) -> List[dict]:
-    """Fetch LCCN->state records: [{lccn, state}, ...] from Chronicling America.
+_LOC_NEWSPAPERS_TXT = "https://www.loc.gov/chroniclingamerica/newspapers.txt"
 
-    Uses https://chroniclingamerica.loc.gov/newspapers.json — a single,
-    well-formed listing of every digitized title with its ``lccn`` and ``state``.
-    American Stories is derived from Chronicling America scans, so this covers
-    exactly the titles the article ids reference, and it avoids the flaky,
-    truncation-prone pagination of the loc.gov directory collection API.
 
-    Network step — run where the node has internet. Kept out of the pure-logic
-    functions above so they stay unit-testable without network.
+def _parse_newspapers_txt(text: str) -> List[dict]:
+    """Parse the Chronicling America bulk title list into [{lccn, state}, ...].
+
+    Pipe-delimited, verified header (2026-08-11):
+        Newspapers|LCCN|OCLC|ISSN|State|County|City|Geo Location|...
+    LCCN is column index 1, State is column index 4. The header line and any
+    row with fewer than 5 columns are skipped.
     """
-    import time
-
-    import requests
-
-    url = "https://chroniclingamerica.loc.gov/newspapers.json"
-    last_err: "Exception | None" = None
-    for attempt in range(1, retries + 1):
-        try:
-            resp = requests.get(url, timeout=180)
-            resp.raise_for_status()
-            data = resp.json()
-            break
-        except (requests.RequestException, ValueError) as e:
-            last_err = e
-            if attempt == retries:
-                raise
-            time.sleep(2 * attempt)  # simple backoff on transient/truncated responses
-    else:  # pragma: no cover - loop always breaks or raises
-        raise last_err  # type: ignore[misc]
-
     records: List[dict] = []
-    for n in data.get("newspapers", []):
-        lccn = (n.get("lccn") or "").strip()
-        state = (n.get("state") or "").strip()
+    for line in text.splitlines():
+        if not line or line.startswith("Newspapers|"):
+            continue
+        cols = line.split("|")
+        if len(cols) < 5:
+            continue
+        lccn = cols[1].strip()
+        state = cols[4].strip()
         if lccn and state:
             records.append({"lccn": lccn, "state": state})
     return records
 
 
+def _fetch_loc_directory_records(retries: int = 4) -> List[dict]:
+    """Fetch LCCN->state records from Chronicling America's bulk title list.
+
+    Downloads the single pipe-delimited file at ``_LOC_NEWSPAPERS_TXT`` (one
+    request for every digitized title) and parses it via ``_parse_newspapers_txt``.
+    American Stories is derived from Chronicling America scans, so this covers
+    exactly the titles the article ids reference; one flat file avoids the
+    paginated, truncation-prone JSON API.
+
+    Network step — run where the node has internet. The pure parser is factored
+    out so it stays unit-testable without network.
+    """
+    import time
+
+    import requests
+
+    last_err: "Exception | None" = None
+    for attempt in range(1, retries + 1):
+        try:
+            resp = requests.get(_LOC_NEWSPAPERS_TXT, timeout=180)
+            resp.raise_for_status()
+            return _parse_newspapers_txt(resp.text)
+        except requests.RequestException as e:
+            last_err = e
+            if attempt == retries:
+                raise
+            time.sleep(2 * attempt)  # backoff on transient failures
+    raise last_err  # pragma: no cover - loop returns or raises
+
+
 def build(config: str = "config/config.yml") -> None:
-    """Fetch the LoC directory and write the LCCN->state table to raw_data_dir."""
+    """Fetch Chronicling America titles and write the LCCN->state table."""
     cfg = load_config(config)
     logger = setup_logging(Path(cfg["paths"]["log_dir"]), "us_state_mapper.log")
-    out = f"{cfg['paths']['raw_data_dir']}/lccn_state_table.json"
-    logger.info("Fetching Chronicling America newspapers.json (LCCN->state)...")
+    raw_dir = Path(cfg["paths"]["raw_data_dir"])
+    raw_dir.mkdir(parents=True, exist_ok=True)  # ensure raw dir exists before save
+    out = str(raw_dir / "lccn_state_table.json")
+    logger.info(f"Fetching Chronicling America title list: {_LOC_NEWSPAPERS_TXT}")
     records = _fetch_loc_directory_records()
     logger.info(f"Fetched {len(records)} title records")
+    if not records:
+        raise RuntimeError(
+            "No LCCN->state records parsed from the Chronicling America title "
+            "list — the file format may have changed. Check "
+            f"{_LOC_NEWSPAPERS_TXT}"
+        )
     table = build_lccn_state_table(records)
     save_lccn_state_table(table, out)
     logger.info(f"Wrote {len(table)} LCCN->state entries to {out}")

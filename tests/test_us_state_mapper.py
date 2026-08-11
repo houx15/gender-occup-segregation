@@ -38,6 +38,26 @@ def test_build_and_resolve_state_table():
     assert m.resolve_state("sn99999999", table) is None
 
 
+def test_parse_newspapers_txt():
+    # Real Chronicling America bulk-list format, verified against the live file
+    # 2026-08-11: Newspapers|LCCN|OCLC|ISSN|State|County|City|...
+    text = (
+        "Newspapers|LCCN|OCLC|ISSN|State|County|City|Geo|Browse|N|First|Last|Essay|Lang|Eth\n"
+        "The Abbeville Banner (Abbeville, S.C.) 1847-1869|sn85026945|12795764|2373-1370|"
+        "South Carolina|Abbeville|Abbeville|34.18,-82.38|url|254|1847|1869|True|English|\n"
+        "Some Paper|sn84020000|123|456|CA|LA|LA|0,0|url|1|x|y|False|English|\n"
+        "malformed row with too few columns\n"
+    )
+    recs = m._parse_newspapers_txt(text)
+    assert {"lccn": "sn85026945", "state": "South Carolina"} in recs
+    assert {"lccn": "sn84020000", "state": "CA"} in recs
+    assert len(recs) == 2  # header + malformed line skipped
+
+    table = m.build_lccn_state_table(recs)
+    assert table["sn85026945"] == "South Carolina"
+    assert table["sn84020000"] == "California"  # USPS "CA" normalized to canonical
+
+
 def test_table_roundtrip(tmp_path):
     table = {"sn83030214": "New York"}
     p = tmp_path / "lccn_state.json"
