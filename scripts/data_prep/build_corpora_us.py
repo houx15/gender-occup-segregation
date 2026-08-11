@@ -84,8 +84,18 @@ def _open_maybe_gzip(path: str):
 
 
 def iter_records(arm: str, raw_dir: str, year: int,
-                 lccn_table: Optional[Dict[str, str]] = None) -> Iterator[dict]:
-    """Yield {'text','state','title'} for one arm+year. Unknown/absent state dropped."""
+                 lccn_table: Optional[Dict[str, str]] = None,
+                 stats: Optional[Dict[str, int]] = None) -> Iterator[dict]:
+    """Yield {'text','state','title'} for one arm+year. Unknown/absent state dropped.
+
+    If ``stats`` is passed, it is mutated with drop-reason counts so the caller
+    can log the state-resolution rate (read vs kept) — the yielded stream only
+    contains kept records, so the drops are invisible without this.
+    """
+    def _bump(key: str) -> None:
+        if stats is not None:
+            stats[key] = stats.get(key, 0) + 1
+
     if arm == "dlnews":
         pattern = os.path.join(raw_dir, f"*_{year}.jsonl.gz")
         files = sorted(glob.glob(pattern)) or sorted(
@@ -106,7 +116,9 @@ def iter_records(arm: str, raw_dir: str, year: int,
                         r = json.loads(line)
                     except json.JSONDecodeError:
                         continue
+                    _bump("read")
                     if not r.get("is_news_article", True):
+                        _bump("dropped_not_news")
                         continue
                     state = file_state
                     if state is None:
@@ -114,7 +126,10 @@ def iter_records(arm: str, raw_dir: str, year: int,
                         state = usm.normalize_state(loc.get("state") or "")
                     text = r.get("content") or ""
                     if state and text:
+                        _bump("kept")
                         yield {"text": text, "state": state, "title": r.get("title", "")}
+                    else:
+                        _bump("dropped_no_state")
     elif arm == "american_stories":
         if lccn_table is None:
             lccn_table = {}
@@ -129,11 +144,19 @@ def iter_records(arm: str, raw_dir: str, year: int,
                         r = json.loads(line)
                     except json.JSONDecodeError:
                         continue
+                    _bump("read")
                     lccn = usm.lccn_from_article_id(r.get("article_id", ""))
                     state = usm.resolve_state(lccn, lccn_table) if lccn else None
                     text = r.get("article") or ""
+                    if not lccn:
+                        _bump("dropped_no_lccn")
+                    elif state is None:
+                        _bump("dropped_unresolved_lccn")
                     if state and text:
+                        _bump("kept")
                         yield {"text": text, "state": state, "title": r.get("headline", "")}
+                    elif state and not text:
+                        _bump("dropped_empty_text")
     else:
         raise ValueError(f"unknown arm: {arm!r}")
 
@@ -181,7 +204,8 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
         ) if dcfg.get("enabled") else None
         writers: Dict[str, UnitCorpusWriter] = {}
         n_seen = n_dup = 0
-        for rec in iter_records(arm, raw_dir, year, lccn_table):
+        stats: Dict[str, int] = {}
+        for rec in iter_records(arm, raw_dir, year, lccn_table, stats=stats):
             n_seen += 1
             if deduper is not None and deduper.is_duplicate(rec["text"]):
                 n_dup += 1
@@ -206,6 +230,16 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
         marker.write_text("")  # mark the year done for idempotent re-runs
         logger.info(f"year={year}: seen={n_seen}, wire-dups dropped={n_dup}, "
                     f"units={len(writers)}")
+        # State-resolution report: the yielded stream hides dropped records, so
+        # surface them here. A low kept-rate for american_stories usually means
+        # the LCCN regex / LoC table is off, not that the OCR is un-mappable.
+        read = stats.get("read", 0)
+        kept = stats.get("kept", 0)
+        pct = (100.0 * kept / read) if read else 0.0
+        drops = {k: v for k, v in sorted(stats.items())
+                 if k.startswith("dropped_") and v}
+        logger.info(f"year={year}: state-resolution read={read} kept={kept} "
+                    f"({pct:.1f}%) drops={drops}")
 
     # (writers are closed per-year inside the loop above)
     kept = {u: n for u, n in coverage.items() if n >= min_docs}

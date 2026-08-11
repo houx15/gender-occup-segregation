@@ -46,6 +46,29 @@ def test_dlnews_records_route_by_inline_state(tmp_path):
     assert states == ["New York", "New York"]  # NY normalized; Freedonia dropped
 
 
+def test_american_stories_stats_report_resolution_drops(tmp_path):
+    # stats mutates with drop reasons so the caller can log the resolution rate.
+    raw = tmp_path / "raw"; raw.mkdir(parents=True)
+    rows = [
+        {"article_id": "sn83030214_1940-01-02_p1_a1", "article": "he leads the town"},   # kept
+        {"article_id": "sn99999999_1940-01-02_p1_a2", "article": "unknown lccn here"},   # unresolved
+        {"article_id": "no-lccn-at-all", "article": "no id text"},                       # no lccn
+        {"article_id": "sn83030214_1940-01-02_p1_a3", "article": ""},                    # empty text
+    ]
+    with open(raw / "american_stories_1940.jsonl", "w", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    table = {"sn83030214": "New York"}
+    stats: dict = {}
+    recs = list(b.iter_records("american_stories", str(raw), 1940, table, stats=stats))
+    assert [r["state"] for r in recs] == ["New York"]
+    assert stats["read"] == 4
+    assert stats["kept"] == 1
+    assert stats["dropped_unresolved_lccn"] == 1
+    assert stats["dropped_no_lccn"] == 1
+    assert stats["dropped_empty_text"] == 1
+
+
 def test_dlnews_state_from_usps_filename_is_authoritative(tmp_path):
     # 3DLNews2 partitions files by USPS code; the filename is authoritative even
     # when a record has no inline location (or a different one).
