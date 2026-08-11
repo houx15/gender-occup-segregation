@@ -65,10 +65,14 @@ pip install --upgrade pip
 pip install -r requirements.txt
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 
-# Download NLTK data needed for English pipeline
+# Download NLTK data needed for the English pipeline. Fetch BOTH punkt (NLTK
+# <3.9) and punkt_tab (NLTK >=3.9): requirements pins nltk>=3.8.0 unbounded, so
+# the resolved version may want either. Into $HOME/nltk_data so a network-less
+# compute node reads it from shared home. (Verified command, matches the
+# bilingual-refactor plan.)
 echo ""
-echo "Step 3b: Downloading NLTK data (punkt_tab, stopwords)..."
-python3 -c "import nltk; nltk.download('punkt_tab', quiet=True); nltk.download('stopwords', quiet=True)"
+echo "Step 3b: Downloading NLTK data (punkt, punkt_tab, stopwords)..."
+python3 -m nltk.downloader -d "${NLTK_DATA:-$HOME/nltk_data}" punkt punkt_tab stopwords
 echo -e "${GREEN}✓ NLTK data downloaded${NC}"
 
 # Step 4: Create config file

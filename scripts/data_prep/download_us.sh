@@ -30,6 +30,15 @@ fi
 echo "==== fetching US states shapefile ===="
 python -m scripts.data_prep.fetch_us_shapefile || echo "WARN: shapefile fetch failed (retry later)"
 
+# NLTK data for the English tokenizer/stopwords — a NETWORK step, so do it here
+# on the login node into $HOME/nltk_data (shared home), where the network-less
+# compute node reads it at build time. Fetch BOTH punkt (NLTK <3.9) and
+# punkt_tab (NLTK >=3.9): requirements pin nltk>=3.8.0 unbounded, so either may
+# be the one the resolved version needs.
+echo "==== ensuring NLTK data (punkt, punkt_tab, stopwords) ===="
+python -m nltk.downloader -d "${NLTK_DATA:-$HOME/nltk_data}" punkt punkt_tab stopwords \
+    || echo "WARN: NLTK data download failed (retry later)"
+
 for CONFIG in "${CONFIGS[@]}"; do
     if [ ! -f "$CONFIG" ]; then
         echo "ERROR: config not found: $CONFIG" >&2
