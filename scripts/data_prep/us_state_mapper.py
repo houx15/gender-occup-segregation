@@ -92,32 +92,44 @@ def load_lccn_state_table(path: str) -> Dict[str, str]:
         return json.load(f)
 
 
-def _fetch_loc_directory_records() -> List[dict]:
-    """Fetch LoC US Newspaper Directory records: [{lccn, state}, ...].
+def _fetch_loc_directory_records(retries: int = 4) -> List[dict]:
+    """Fetch LCCN->state records: [{lccn, state}, ...] from Chronicling America.
 
-    Paginates the loc.gov directory JSON API. Network step — run where the node
-    has internet. Kept out of the pure-logic functions above so they stay
-    unit-testable without network.
+    Uses https://chroniclingamerica.loc.gov/newspapers.json — a single,
+    well-formed listing of every digitized title with its ``lccn`` and ``state``.
+    American Stories is derived from Chronicling America scans, so this covers
+    exactly the titles the article ids reference, and it avoids the flaky,
+    truncation-prone pagination of the loc.gov directory collection API.
+
+    Network step — run where the node has internet. Kept out of the pure-logic
+    functions above so they stay unit-testable without network.
     """
+    import time
+
     import requests
 
-    records: List[dict] = []
-    base = "https://www.loc.gov/collections/directory-of-us-newspapers-in-american-libraries/"
-    page = 1
-    while True:
-        resp = requests.get(base, params={"fo": "json", "c": 500, "sp": page}, timeout=60)
-        resp.raise_for_status()
-        results = resp.json().get("results", [])
-        if not results:
+    url = "https://chroniclingamerica.loc.gov/newspapers.json"
+    last_err: "Exception | None" = None
+    for attempt in range(1, retries + 1):
+        try:
+            resp = requests.get(url, timeout=180)
+            resp.raise_for_status()
+            data = resp.json()
             break
-        for r in results:
-            lccn = r.get("number_lccn", [None])
-            lccn = lccn[0] if isinstance(lccn, list) else lccn
-            loc = r.get("location_state", [None])
-            loc = loc[0] if isinstance(loc, list) else loc
-            if lccn and loc:
-                records.append({"lccn": lccn, "state": loc})
-        page += 1
+        except (requests.RequestException, ValueError) as e:
+            last_err = e
+            if attempt == retries:
+                raise
+            time.sleep(2 * attempt)  # simple backoff on transient/truncated responses
+    else:  # pragma: no cover - loop always breaks or raises
+        raise last_err  # type: ignore[misc]
+
+    records: List[dict] = []
+    for n in data.get("newspapers", []):
+        lccn = (n.get("lccn") or "").strip()
+        state = (n.get("state") or "").strip()
+        if lccn and state:
+            records.append({"lccn": lccn, "state": state})
     return records
 
 
@@ -126,8 +138,9 @@ def build(config: str = "config/config.yml") -> None:
     cfg = load_config(config)
     logger = setup_logging(Path(cfg["paths"]["log_dir"]), "us_state_mapper.log")
     out = f"{cfg['paths']['raw_data_dir']}/lccn_state_table.json"
-    logger.info("Fetching LoC US Newspaper Directory records...")
+    logger.info("Fetching Chronicling America newspapers.json (LCCN->state)...")
     records = _fetch_loc_directory_records()
+    logger.info(f"Fetched {len(records)} title records")
     table = build_lccn_state_table(records)
     save_lccn_state_table(table, out)
     logger.info(f"Wrote {len(table)} LCCN->state entries to {out}")
