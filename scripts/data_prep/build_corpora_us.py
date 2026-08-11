@@ -35,7 +35,8 @@ from scripts.data_prep import us_state_mapper as usm
 from scripts.data_prep.dedup import Deduper
 
 # 3DLNews2 filename -> authoritative 2-letter USPS state code, e.g.
-# "preprocessed_google_newspaper_NY_2000.jsonl.gz" -> "NY".
+# "preprocessed_newspaper_articles_NY_2000.jsonl.gz" -> "NY". (Prefix-agnostic:
+# matches the trailing _{USPS}_{YEAR}.jsonl(.gz) regardless of the name prefix.)
 _DLNEWS_STATE_RE = re.compile(r"_([A-Z]{2})_\d{4}\.jsonl(?:\.gz)?$")
 
 
@@ -91,7 +92,7 @@ def iter_records(arm: str, raw_dir: str, year: int,
             glob.glob(os.path.join(raw_dir, f"*_{year}.jsonl")))
         for fp in files:
             # 3DLNews2 partitions files by 2-letter USPS code
-            # (preprocessed_google_newspaper_{USPS}_{YEAR}.jsonl.gz), so the
+            # (preprocessed_newspaper_articles_{USPS}_{YEAR}.jsonl.gz), so the
             # filename is the authoritative publisher state. Fall back to an
             # inline location.state only if the filename doesn't carry a code.
             m = _DLNEWS_STATE_RE.search(os.path.basename(fp))

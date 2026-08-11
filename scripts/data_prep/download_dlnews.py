@@ -7,10 +7,12 @@ Globus transfer is free for individual researchers; Princeton runs a managed
 endpoint (dest).
 
 3DLNews2 lays its newspaper slices out under
-``preprocessed_state/{USPS}/preprocessed_google_newspaper_{USPS}_{YEAR}.jsonl.gz``
+``1-Google/1-Newspaper/preprocessed_state/{USPS}/preprocessed_newspaper_articles_{USPS}_{YEAR}.jsonl.gz``
 with 2-LETTER USPS state codes (AK, WY, ...), so transfer paths use those codes,
-not full state names. The per-article publisher state used for corpus routing
-still comes from ``location.state`` inside each record (handled in build_corpora_us).
+not full state names. (Both the folder layout and the filename differ from the
+repo README's diagram — verified against the live collection 2026-08-11.) The
+publisher state for corpus routing comes from the filename USPS code
+(authoritative), handled in build_corpora_us.
 
 Config (dlnews block):
   source_endpoint: <3DLNews2 collection UUID>  (no-HTML set: e524969c-7dff-474c-899c-efddf8d15b83)
@@ -47,7 +49,7 @@ def build_transfer_batch(source_root: str, dest_root: str, years: List[int],
     pairs: List[Tuple[str, str]] = []
     for state in states:
         for year in years:
-            fname = f"preprocessed_google_newspaper_{state}_{year}.jsonl.gz"
+            fname = f"preprocessed_newspaper_articles_{state}_{year}.jsonl.gz"
             src = f"{source_root}/{state}/{fname}"
             dst = f"{dest_root}/{fname}"
             pairs.append((src, dst))
