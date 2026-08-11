@@ -72,7 +72,7 @@ dlnews:
   # Globus Connect Personal endpoint on Adroit (yh6580). GCP must be running
   # during the transfer, and /scratch/network/yh6580 must be in ~/.globusonline/lta/config-paths.
   dest_endpoint: "4b37405c-9517-11f1-8269-02ce27bde401"
-  source_root: "/Google/1-Newspapers/preprocessed_state"
+  source_root: "/1-Google/1-Newspaper/preprocessed_state"
   # dest_root as the dest Globus collection sees it (may differ from the shell
   # path if the collection is rooted at a mount prefix — verify in the file manager).
   dest_root: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/raw"
