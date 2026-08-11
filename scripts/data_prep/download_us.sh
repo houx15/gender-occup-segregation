@@ -41,7 +41,10 @@ for CONFIG in "${CONFIGS[@]}"; do
 
     if [ "$ARM" = "american_stories" ]; then
         python -m scripts.data_prep.us_state_mapper build --config="$CONFIG" || exit 1
-        python -m scripts.data_prep.download_american_stories --config="$CONFIG" || exit 1
+        # Download only the raw tarballs (light, network). The heavy article
+        # extraction + state matching happens OFFLINE in build_corpora_us on a
+        # compute node, so it never trips the login node's time/memory limits.
+        python -m scripts.data_prep.prefetch_american_stories --config="$CONFIG" || exit 1
     elif [ "$ARM" = "dlnews" ]; then
         python -m scripts.data_prep.download_dlnews --config="$CONFIG" || exit 1
     else

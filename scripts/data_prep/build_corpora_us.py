@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Build per-(state, year) English corpora for the US arms.
 
-Arm 'american_stories': raw article JSONL; state via LCCN -> LoC table.
-Arm 'dlnews' (3DLNews2): preprocessed_google_newspaper_{STATE}_{YEAR}.jsonl.gz;
-state via inline ``location.state``.
+Arm 'american_stories': parses the raw ``faro_{year}.tar.gz`` archives directly
+(prefetched on a login node; no intermediate JSONL), matching each article's
+LCCN -> state via the LoC table and dropping unmatched articles. Falls back to
+pre-extracted ``american_stories_{year}*.jsonl`` if no tarball is present.
+Arm 'dlnews' (3DLNews2): preprocessed_newspaper_articles_{USPS}_{YEAR}.jsonl.gz;
+state via the filename USPS code (authoritative), inline ``location.state`` fallback.
 
 Each unit is written to corpora_dir/{state}_{year}/corpus_%06d, so training
 and analysis discover units with no changes. Wire-copy dedup runs within-year
@@ -133,30 +136,86 @@ def iter_records(arm: str, raw_dir: str, year: int,
     elif arm == "american_stories":
         if lccn_table is None:
             lccn_table = {}
-        pattern = os.path.join(raw_dir, f"american_stories_{year}*.jsonl")
-        for fp in sorted(glob.glob(pattern)):
-            with _open_maybe_gzip(fp) as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        r = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-                    _bump("read")
-                    lccn = usm.lccn_from_article_id(r.get("article_id", ""))
-                    state = usm.resolve_state(lccn, lccn_table) if lccn else None
-                    text = r.get("article") or ""
-                    if not lccn:
-                        _bump("dropped_no_lccn")
-                    elif state is None:
-                        _bump("dropped_unresolved_lccn")
-                    if state and text:
-                        _bump("kept")
-                        yield {"text": text, "state": state, "title": r.get("headline", "")}
-                    elif state and not text:
-                        _bump("dropped_empty_text")
+
+        def _resolve_article(article_id: str, headline: str, text: str):
+            """Shared state-resolution + drop accounting for one article."""
+            _bump("read")
+            lccn = usm.lccn_from_article_id(article_id or "")
+            state = usm.resolve_state(lccn, lccn_table) if lccn else None
+            if not lccn:
+                _bump("dropped_no_lccn")
+            elif state is None:
+                _bump("dropped_unresolved_lccn")
+            if state and text:
+                _bump("kept")
+                return {"text": text, "state": state, "title": headline or ""}
+            if state and not text:
+                _bump("dropped_empty_text")
+            return None
+
+        tars = sorted(glob.glob(os.path.join(raw_dir, f"faro_{year}.tar.gz")))
+        if tars:
+            # Parse the raw American Stories tarballs directly — no giant
+            # intermediate JSONL on scratch. Mirrors the HF builder's
+            # associated-article logic (AmericanStories.py::_generate_examples):
+            # each archive member is one scan's JSON; article_id =
+            # full_article_id + "_" + scan_id, and scan_id (the member's
+            # basename sans .json) embeds the LCCN we resolve to a state.
+            import tarfile
+            for tp in tars:
+                with tarfile.open(tp, "r:gz") as tar:
+                    for member in tar:
+                        if not member.isfile() or not member.name.endswith(".json"):
+                            continue
+                        if not member.name.startswith(f"faro_{year}"):
+                            continue
+                        fobj = tar.extractfile(member)
+                        if fobj is None:
+                            continue
+                        try:
+                            data = json.loads(fobj.read().decode("utf-8"))
+                        except Exception:
+                            _bump("dropped_bad_json")
+                            tar.members = []  # keep memory flat on huge archives
+                            continue
+                        if "lccn" not in data:
+                            _bump("dropped_no_lccn_meta")
+                            tar.members = []
+                            continue
+                        scan_id = member.name.split("/")[-1].split(".")[0]
+                        for article in data.get("full articles", []):
+                            rec = _resolve_article(
+                                f"{article.get('full_article_id')}_{scan_id}",
+                                article.get("headline", ""),
+                                article.get("article") or "",
+                            )
+                            if rec is not None:
+                                yield rec
+                        # TarFile caches every seen member in tar.members; on a
+                        # multi-million-member archive that grows unbounded.
+                        # Clearing it each iteration keeps sequential reads flat.
+                        tar.members = []
+        else:
+            # Fallback: pre-extracted JSONL (download_american_stories on a
+            # network-capable node), for setups that don't use the tar path.
+            pattern = os.path.join(raw_dir, f"american_stories_{year}*.jsonl")
+            for fp in sorted(glob.glob(pattern)):
+                with _open_maybe_gzip(fp) as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            r = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        rec = _resolve_article(
+                            r.get("article_id", ""),
+                            r.get("headline", ""),
+                            r.get("article") or "",
+                        )
+                        if rec is not None:
+                            yield rec
     else:
         raise ValueError(f"unknown arm: {arm!r}")
 

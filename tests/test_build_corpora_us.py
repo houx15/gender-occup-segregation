@@ -46,6 +46,54 @@ def test_dlnews_records_route_by_inline_state(tmp_path):
     assert states == ["New York", "New York"]  # NY normalized; Freedonia dropped
 
 
+def test_american_stories_reads_tarball_matches_state_and_drops(tmp_path):
+    # Parse raw faro_{year}.tar.gz directly (the login node only downloads tars;
+    # extraction + state matching happen here). article_id is rebuilt exactly as
+    # the HF builder does: full_article_id + "_" + scan_id, where scan_id is the
+    # member basename and embeds the LCCN (verified real format from the card:
+    # "1_1870-01-01_p1_sn82014899_...").
+    import io
+    import tarfile
+
+    raw = tmp_path / "raw"; raw.mkdir(parents=True)
+    scans = {
+        # member basename -> scan JSON. First member's LCCN resolves; second's
+        # LCCN is not in the table (its articles must be dropped).
+        "faro_1940/1940-01-02_p1_sn83030214_00211105483_1940010201_0773.json": {
+            "lccn": {"title": "The Example Times"},
+            "full articles": [
+                {"full_article_id": 1, "headline": "H1", "byline": "",
+                 "article": "he leads the council meeting on the new policy"},
+                {"full_article_id": 2, "headline": "H2", "byline": "",
+                 "article": "she chairs the science board this spring"},
+            ],
+        },
+        "faro_1940/1940-03-05_p2_sn99999999_00211105483_1940030502_0773.json": {
+            "lccn": {"title": "Unknown Gazette"},
+            "full articles": [
+                {"full_article_id": 1, "headline": "X", "byline": "",
+                 "article": "content whose lccn is not in the table"},
+            ],
+        },
+    }
+    tar_path = raw / "faro_1940.tar.gz"
+    with tarfile.open(tar_path, "w:gz") as tar:
+        for name, obj in scans.items():
+            payload = json.dumps(obj).encode("utf-8")
+            info = tarfile.TarInfo(name)
+            info.size = len(payload)
+            tar.addfile(info, io.BytesIO(payload))
+
+    table = {"sn83030214": "New York"}  # sn99999999 deliberately absent
+    stats: dict = {}
+    recs = list(b.iter_records("american_stories", str(raw), 1940, table, stats=stats))
+    assert [r["state"] for r in recs] == ["New York", "New York"]  # both resolved articles
+    assert [r["title"] for r in recs] == ["H1", "H2"]
+    assert stats["read"] == 3           # 2 resolved + 1 unresolved
+    assert stats["kept"] == 2
+    assert stats["dropped_unresolved_lccn"] == 1
+
+
 def test_american_stories_stats_report_resolution_drops(tmp_path):
     # stats mutates with drop reasons so the caller can log the resolution rate.
     raw = tmp_path / "raw"; raw.mkdir(parents=True)
