@@ -147,21 +147,38 @@ def _fetch_loc_directory_records(retries: int = 4) -> List[dict]:
     raise last_err  # pragma: no cover - loop returns or raises
 
 
-def build(config: str = "config/config.yml") -> None:
-    """Fetch Chronicling America titles and write the LCCN->state table."""
+def build(config: str = "config/config.yml", titles_file: Optional[str] = None) -> None:
+    """Build the LCCN->state table from Chronicling America's title list.
+
+    Source precedence:
+      1. --titles_file (CLI), or config us_states.loc_titles_file: a LOCAL copy
+         of the pipe-delimited title list (download it in a browser and place it
+         on the server — loc.gov blocks programmatic user-agents).
+      2. otherwise, fetch _LOC_NEWSPAPERS_TXT over the network.
+    """
     cfg = load_config(config)
     logger = setup_logging(Path(cfg["paths"]["log_dir"]), "us_state_mapper.log")
     raw_dir = Path(cfg["paths"]["raw_data_dir"])
     raw_dir.mkdir(parents=True, exist_ok=True)  # ensure raw dir exists before save
     out = str(raw_dir / "lccn_state_table.json")
-    logger.info(f"Fetching Chronicling America title list: {_LOC_NEWSPAPERS_TXT}")
-    records = _fetch_loc_directory_records()
-    logger.info(f"Fetched {len(records)} title records")
+
+    local = titles_file or cfg.get("us_states", {}).get("loc_titles_file")
+    if local:
+        p = Path(local)
+        if not p.exists():
+            raise FileNotFoundError(f"loc_titles_file not found: {p}")
+        logger.info(f"Reading local Chronicling America title list: {p}")
+        records = _parse_newspapers_txt(p.read_text(encoding="utf-8", errors="replace"))
+    else:
+        logger.info(f"Fetching Chronicling America title list: {_LOC_NEWSPAPERS_TXT}")
+        records = _fetch_loc_directory_records()
+
+    logger.info(f"Parsed {len(records)} title records")
     if not records:
         raise RuntimeError(
-            "No LCCN->state records parsed from the Chronicling America title "
-            "list — the file format may have changed. Check "
-            f"{_LOC_NEWSPAPERS_TXT}"
+            "No LCCN->state records parsed. If reading a local file, check it is "
+            "the pipe-delimited list with header 'Newspapers|LCCN|OCLC|ISSN|State|...' "
+            f"(LCCN col 2, State col 5). Source: {local or _LOC_NEWSPAPERS_TXT}"
         )
     table = build_lccn_state_table(records)
     save_lccn_state_table(table, out)

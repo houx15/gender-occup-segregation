@@ -20,6 +20,10 @@ us_states:
   shapefile: "data/shapefiles/us_states.shp"
   min_documents: 500
   years: [1900, 1910, 1920, 1930, 1940, 1950, 1960]
+  # Local copy of Chronicling America's pipe-delimited title list (LCCN->state).
+  # loc.gov blocks programmatic user-agents, so download it in a browser and
+  # place it on the server; us_state_mapper reads this instead of the network.
+  loc_titles_file: "/scratch/network/yh6580/gender-occup/data/american_state/american_loc_newspapers.txt"
 
 wordlists:
   dir: "wordlists/en/garg_weat"
