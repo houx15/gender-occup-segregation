@@ -126,6 +126,12 @@ elif [ "$DATA_SOURCE" = "coha" ]; then
         echo "Step 1: Downloading COHA archives..."
         python -m scripts.data_prep.download_coha --config="$CONFIG"
     fi
+elif [ "$DATA_SOURCE" = "american_stories" ] || [ "$DATA_SOURCE" = "dlnews" ]; then
+    # US arms are fetched separately on an internet node (american_stories via
+    # HuggingFace, dlnews via Globus) because compute nodes have no network.
+    # This pipeline runs the offline stages (build/train/analyze) over raw data
+    # already on disk. Use slurm/prepare_us_data.slurm for the network step.
+    echo "Step 1: SKIP download ($DATA_SOURCE fetched separately on an internet node)"
 else
     echo "Step 1: SKIP download (not applicable for $DATA_SOURCE)"
 fi
@@ -155,6 +161,7 @@ else
         weibo)       python -m scripts.data_prep.build_corpora_weibo --config="$CONFIG" ;;
         newspaper)   python -m scripts.data_prep.build_corpora_newspaper --config="$CONFIG" ;;
         coha)        python -m scripts.data_prep.build_corpora_coha --config="$CONFIG" ;;
+        american_stories|dlnews) python -m scripts.data_prep.build_corpora_us --config="$CONFIG" ;;
         *)           echo "Unknown data_source: $DATA_SOURCE"; exit 1 ;;
     esac
 fi
@@ -191,6 +198,10 @@ elif [ "$ANALYSIS_MODE" = "garg" ]; then
     if [ -f "$RESULTS_DIR/garg_average_bias_by_decade.parquet" ]; then
         HAS_RESULTS=true
     fi
+elif [ "$ANALYSIS_MODE" = "garg_weat" ]; then
+    if [ -f "$RESULTS_DIR/garg_weat_summary_by_category.parquet" ]; then
+        HAS_RESULTS=true
+    fi
 fi
 
 if [ "$HAS_RESULTS" = true ] && [ "$FORCE_ANALYZE" = false ]; then
@@ -200,8 +211,9 @@ else
     case $ANALYSIS_MODE in
         prestige) python -m scripts.analyze_prestige --config="$CONFIG" ;;
         weat)     python -m scripts.analyze_weat --config="$CONFIG" ;;
-        garg)     python -m scripts.analyze_garg --config="$CONFIG" ;;
-        *)        echo "Unknown analysis_mode: $ANALYSIS_MODE"; exit 1 ;;
+        garg)      python -m scripts.analyze_garg --config="$CONFIG" ;;
+        garg_weat) python -m scripts.analyze_category_bias --config="$CONFIG" ;;
+        *)         echo "Unknown analysis_mode: $ANALYSIS_MODE"; exit 1 ;;
     esac
 fi
 echo ""
