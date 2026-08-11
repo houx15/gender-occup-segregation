@@ -303,12 +303,23 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
     # (writers are closed per-year inside the loop above)
     kept = {u: n for u, n in coverage.items() if n >= min_docs}
     dropped = {u: n for u, n in coverage.items() if n < min_docs}
-    if dropped:
-        logger.warning(f"{len(dropped)} units below min_documents={min_docs} "
-                       f"(kept out of training): {sorted(dropped)}")
+    # Write the coverage report BEFORE pruning so it records every unit's true
+    # doc count (kept=0 rows document what was excluded and why).
     report_path = os.path.join(config["paths"]["results_dir"], f"coverage_{arm}.csv")
     os.makedirs(config["paths"]["results_dir"], exist_ok=True)
     write_coverage_report(coverage, min_docs, report_path)
+    # Enforce min_documents: physically remove sub-threshold unit dirs so the
+    # generic trainer never discovers them. Otherwise a sparse {state}_{year}
+    # (too few tokens to reach embedding.min_count) makes Word2Vec raise
+    # "you must first build vocabulary" and aborts the batch. Only units built
+    # THIS run are in `coverage`, so marker-skipped years are untouched.
+    if dropped:
+        for unit in dropped:
+            d = os.path.join(corpora_dir, unit)
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+        logger.warning(f"Pruned {len(dropped)} units below min_documents={min_docs} "
+                       f"(kept out of training): {sorted(dropped)}")
     logger.info(f"Coverage report -> {report_path}. Trainable units: {len(kept)}")
     return coverage
 

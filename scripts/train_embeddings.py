@@ -70,8 +70,14 @@ class CorpusIterator:
                             yield tokens
 
 
-def train_model(unit_name: str, config: dict, logger) -> "Word2Vec":
-    """Train a Word2Vec model for a single unit (time slice or province)."""
+def train_model(unit_name: str, config: dict, logger) -> "Word2Vec | None":
+    """Train a Word2Vec model for a single unit (time slice or province).
+
+    Returns ``None`` (instead of crashing) when the unit has too little text to
+    form a vocabulary at ``min_count`` — e.g. a sparse {state}_{year}. gensim's
+    one-shot constructor would raise "you must first build vocabulary" mid-run
+    and abort the whole batch; we build vocab first, check it, and skip.
+    """
     from gensim.models import Word2Vec
     from gensim.models.callbacks import CallbackAny2Vec
 
@@ -103,8 +109,9 @@ def train_model(unit_name: str, config: dict, logger) -> "Word2Vec":
                 f"min_count={emb_config['min_count']}, sg={emb_config['sg']}, "
                 f"epochs={emb_config['epochs']}, workers={workers}")
 
+    # Build the vocabulary first so we can detect (and skip) units too sparse to
+    # train, rather than let gensim raise mid-run and abort the whole batch.
     model = Word2Vec(
-        sentences=corpus,
         vector_size=emb_config["vector_size"],
         window=emb_config["window"],
         min_count=emb_config["min_count"],
@@ -113,6 +120,20 @@ def train_model(unit_name: str, config: dict, logger) -> "Word2Vec":
         workers=workers,
         epochs=emb_config["epochs"],
         seed=emb_config.get("seed", 42),
+        compute_loss=True,
+    )
+    model.build_vocab(corpus)
+    if len(model.wv) == 0:
+        logger.warning(
+            f"  {unit_name}: empty vocabulary — no token reaches "
+            f"min_count={emb_config['min_count']}; skipping (too little data)"
+        )
+        return None
+
+    model.train(
+        corpus,
+        total_examples=model.corpus_count,
+        epochs=emb_config["epochs"],
         compute_loss=True,
         callbacks=[epoch_logger],
     )
@@ -211,6 +232,8 @@ def train_all(config: dict, logger, specific_unit=None, group=None, retrain=Fals
                 pass
 
         model = train_model(unit_name, config, logger)
+        if model is None:
+            continue  # too sparse to train; already warned. Next unit.
         save_model(model, unit_name, config, logger, **extra_meta)
 
         del model

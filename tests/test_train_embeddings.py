@@ -75,3 +75,48 @@ class TestPlainMode:
         })
         it = CorpusIterator(str(tmp_path), "1940_1949")
         assert list(it) == [["first", "文件"], ["second", "文件"]]
+
+
+class TestTrainModelSparseUnit:
+    """train_model returns None for a unit too sparse to build a vocab, instead
+    of letting gensim raise 'you must first build vocabulary' and abort the
+    whole batch (a sparse {state}_{year} in the US arms)."""
+
+    def _cfg(self, tmp_path, min_count):
+        return {
+            "paths": {
+                "corpora_dir": str(tmp_path / "corpora"),
+                "models_dir": str(tmp_path / "models"),
+                "log_dir": str(tmp_path / "logs"),
+            },
+            "embedding": {
+                "vector_size": 20, "window": 2, "min_count": min_count,
+                "sg": 1, "negative": 5, "workers": 1, "epochs": 1, "seed": 42,
+            },
+            "corpus": {},
+        }
+
+    def test_returns_none_when_vocab_empty(self, tmp_path):
+        import logging
+        import pytest
+        from scripts import train_embeddings as te
+        pytest.importorskip("gensim")
+        unit = tmp_path / "corpora" / "alabama_1996"
+        unit.mkdir(parents=True)
+        # A handful of unique tokens: none reaches min_count=20 -> empty vocab.
+        (unit / "corpus_000000").write_text("the senate met today here\n", encoding="utf-8")
+        cfg = self._cfg(tmp_path, min_count=20)
+        assert te.train_model("alabama_1996", cfg, logging.getLogger("t")) is None
+
+    def test_trains_when_vocab_nonempty(self, tmp_path):
+        import logging
+        import pytest
+        from scripts import train_embeddings as te
+        pytest.importorskip("gensim")
+        unit = tmp_path / "corpora" / "newyork_1996"
+        unit.mkdir(parents=True)
+        (unit / "corpus_000000").write_text("alpha beta gamma delta\n" * 5, encoding="utf-8")
+        cfg = self._cfg(tmp_path, min_count=2)
+        m = te.train_model("newyork_1996", cfg, logging.getLogger("t"))
+        assert m is not None
+        assert len(m.wv) > 0
