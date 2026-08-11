@@ -24,12 +24,20 @@ _KEEP = ("article_id", "newspaper_name", "date", "headline", "byline", "article"
 
 
 def _download_year(year: int, out_path: str, logger) -> int:
+    import inspect
+
     from datasets import load_dataset
+
+    # `trust_remote_code` is only a load_dataset() parameter on datasets>=2.16.
+    # Older versions run the dataset script without it AND reject the kwarg
+    # (it gets forwarded to the builder config). Pass it only if supported.
+    kwargs = {"year_list": [str(year)]}
+    if "trust_remote_code" in inspect.signature(load_dataset).parameters:
+        kwargs["trust_remote_code"] = True
     ds = load_dataset(
         "dell-research-harvard/AmericanStories",
         "subset_years",
-        year_list=[str(year)],
-        trust_remote_code=True,
+        **kwargs,
     )
     n = 0
     try:
