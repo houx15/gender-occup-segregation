@@ -57,6 +57,12 @@ analysis:
   #   rnd      = Garg relative norm distance
   #   cohens_d = single-list Cohen's d (mean cosine projection onto gender axis)
   metrics: [rnd, cohens_d]
+  # Analysis window on the slice START year — drops 1940_1949 and 1945_1954.
+  # Their corpora and models stay on disk (time_slices still starts at 1940);
+  # they are only excluded from the analysis, so the consistent-word set is no
+  # longer pinned to the two thinnest wartime slices. Widen back to
+  # [1940, 2020] to restore them; no rebuild or retrain needed either way.
+  decade_range: [1950, 2020]
   seed: 42
   # Single gender-ideation axis, higher = less traditional. Leadership/science
   # female-leaning is progressive (+1); family female-leaning is traditional,

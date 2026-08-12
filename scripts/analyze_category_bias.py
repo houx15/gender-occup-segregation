@@ -25,7 +25,7 @@ from scripts.common.category_summary import (
     load_categories, compute_consistent_set, build_summary,
 )
 from scripts.analyze_garg import (
-    discover_models, load_model_for_unit, decade_to_census_year, load_gender_words,
+    discover_models, load_model_for_unit, load_gender_words,
 )
 from scripts.analyze_garg_weat import rnd_values
 from scripts.analyze_cohens_d_singlelist import projection_values
@@ -57,6 +57,24 @@ def _resolve_metrics(config_data: dict, override: Optional[List[str]]) -> List[s
     return list(metrics)
 
 
+def _unit_start_year(unit_name: str) -> Optional[int]:
+    """Start year of a unit label, or None if it carries no year.
+
+    Handles both longitudinal label shapes: decade labels ('1990s' -> 1990,
+    COHA/HistWords) and rolling-window slices ('1940_1949' -> 1940, the ngram
+    and renminribao arms). Provincial units ('北京', '北京_2020') return None.
+    Same parse as visualize._decade_start_year, so a decade_range clip and the
+    plotted x-axis agree on what a unit's year is.
+    """
+    s = str(unit_name)
+    if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
+        return int(s[:4])
+    try:
+        return int(s.split("_")[0])
+    except (ValueError, IndexError):
+        return None
+
+
 def _filter_models(models, unit, decade_range, logger):
     if unit:
         models = [(p, n) for p, n in models if n.startswith(str(unit))]
@@ -69,10 +87,10 @@ def _filter_models(models, unit, decade_range, logger):
             )
         kept = []
         for path, unit_name in models:
-            year = decade_to_census_year(unit_name)
+            year = _unit_start_year(unit_name)
             if year is None:
                 logger.warning(
-                    f"  decade_range filter: cannot parse decade from "
+                    f"  decade_range filter: no start year in "
                     f"unit_name {unit_name!r}; keeping it"
                 )
                 kept.append((path, unit_name))

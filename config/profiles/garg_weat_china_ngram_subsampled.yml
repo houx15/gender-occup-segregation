@@ -70,6 +70,10 @@ corpus:
 
 analysis:
   metrics: [rnd, cohens_d]
+  # Analysis window on the slice START year — drops 1940_1949 and 1945_1954.
+  # Models stay on disk; widen back to [1940, 2020] to restore them.
+  # See garg_weat_renminribao.yml.
+  decade_range: [1950, 2020]
   seed: 42
   ideation_sign:
     leadership: 1

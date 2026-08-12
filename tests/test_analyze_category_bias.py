@@ -161,3 +161,55 @@ def test_missing_metrics_key_raises(tmp_path, monkeypatch):
     import pytest
     with pytest.raises((ValueError, KeyError)):
         acb.main(config=str(cfg))
+
+
+# ---------------------------------------------------------------------------
+# analysis.decade_range clip
+# ---------------------------------------------------------------------------
+
+def _units(models):
+    return [u for _, u in models]
+
+
+def test_decade_range_drops_rolling_window_slices():
+    """The Chinese longitudinal arms label units '1940_1949', not '1940s'.
+    decade_range must clip on the slice START year — this is what lets
+    [1950, 2020] drop 1940_1949 and 1945_1954 from the zh profiles."""
+    import logging
+    import scripts.analyze_category_bias as acb
+
+    # What build_corpora.generate_time_slices(1940, 2020, window=10, step=5)
+    # emits: starts every 5 years through 2020, last window clipped.
+    slices = [f"{y}_{min(y + 9, 2020)}" for y in range(1940, 2021, 5)]
+    models = [(f"/m/renminribao_{s}.model", s) for s in slices]
+    assert len(models) == 17
+
+    kept = _units(acb._filter_models(models, None, [1950, 2020],
+                                     logging.getLogger("t")))
+    assert "1940_1949" not in kept
+    assert "1945_1954" not in kept
+    assert len(kept) == 15
+    assert kept[0] == "1950_1959" and kept[-1] == "2020_2020"
+
+
+def test_decade_range_still_clips_decade_labels():
+    """COHA / HistWords '1990s' labels keep their existing behavior."""
+    import logging
+    import scripts.analyze_category_bias as acb
+
+    models = [("/m/a", "1810s"), ("/m/b", "1990s"), ("/m/c", "2000s")]
+    kept = _units(acb._filter_models(models, None, [1990, 1990],
+                                     logging.getLogger("t")))
+    assert kept == ["1990s"]
+
+
+def test_decade_range_keeps_yearless_provincial_units():
+    """Provincial units carry no year; a window must not silently empty a
+    provincial run."""
+    import logging
+    import scripts.analyze_category_bias as acb
+
+    models = [("/m/bj", "北京"), ("/m/sh", "上海_2020"), ("/m/x", "1990s")]
+    kept = _units(acb._filter_models(models, None, [1950, 2020],
+                                     logging.getLogger("t")))
+    assert kept == ["北京", "上海_2020", "1990s"]

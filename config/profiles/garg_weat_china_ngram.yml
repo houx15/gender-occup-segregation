@@ -60,6 +60,10 @@ analysis:
   #   rnd      = Garg relative norm distance
   #   cohens_d = single-list Cohen's d (mean cosine projection onto gender axis)
   metrics: [rnd, cohens_d]
+  # Analysis window on the slice START year — drops 1940_1949 and 1945_1954.
+  # Kept in step with garg_weat_renminribao.yml so the cross-corpus figures
+  # compare the same slices on both corpora.
+  decade_range: [1950, 2020]
   seed: 42
   ideation_sign:
     leadership: 1
