@@ -31,6 +31,11 @@ nltk>=3.8.0
 # Statistics
 scipy>=1.10.0
 
+# Choropleth maps (US state arm + China provincial arm). geopandas pulls in
+# GDAL/Fiona/Shapely — on a conda env prefer `conda install -c conda-forge
+# geopandas`, which resolves the native libs reliably; pip alone often can't.
+geopandas>=0.13.0
+
 # Testing
 pytest>=7.4.0
 

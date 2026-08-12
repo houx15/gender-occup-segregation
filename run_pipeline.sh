@@ -168,15 +168,15 @@ fi
 echo ""
 
 # ── Step 3: Train embeddings ──────────────────────────────────────
-# Count both .model and .kv files
-N_MODELS=$(( $(count_files "$MODELS_DIR" "*.model") + $(count_files "$MODELS_DIR" "*.kv") ))
-
 if [ "$IS_PRETRAINED" = true ]; then
     echo "Step 3: SKIP training (pretrained embedding format=$EMBEDDING_FORMAT)"
-elif [ "$N_MODELS" -gt 0 ] && [ "$FORCE_TRAIN" = false ]; then
-    echo "Step 3: SKIP training ($N_MODELS .model files found)"
 else
-    echo "Step 3: Training embeddings..."
+    # Always invoke the trainer: train_embeddings is per-unit idempotent (it
+    # skips units whose model already exists and trains the rest). Do NOT gate
+    # this on "some models exist" — a multi-unit arm (e.g. 78 {state}_{year}
+    # units) left partially trained by an earlier run must resume, not be
+    # declared done because 7 models happen to be on disk.
+    echo "Step 3: Training embeddings (existing per-unit models are skipped)..."
     RETRAIN_FLAG=""
     if [ "$FORCE_TRAIN" = true ]; then RETRAIN_FLAG="--retrain"; fi
     python -m scripts.train_embeddings --config="$CONFIG" $RETRAIN_FLAG
