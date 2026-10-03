@@ -20,8 +20,9 @@ set -u
 
 CONFIGS=("$@")
 if [ "${#CONFIGS[@]}" -eq 0 ]; then
+    # American Stories is parked (pass its profile explicitly to fetch it).
+    # One dlnews profile downloads every collection (newspaper AND TV).
     CONFIGS=(
-        "config/profiles/garg_weat_american_stories.yml"
         "config/profiles/garg_weat_dlnews.yml"
     )
 fi

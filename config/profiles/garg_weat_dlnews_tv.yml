@@ -1,6 +1,6 @@
-# Garg-WEAT per-(state, year) gender ideation on 3DLNews2 — NEWSPAPER media only
-# (Google + Twitter platforms). Sibling profile garg_weat_dlnews_tv.yml builds
-# TV from the same raw download into separate corpora/models/results.
+# Garg-WEAT per-(state, year) gender ideation on 3DLNews2 — TV media only
+# (Google + Twitter platforms). Sibling of garg_weat_dlnews.yml (newspaper):
+# same raw download, separate corpora/models/results.
 # State from the filename USPS code. Units are state-year (e.g. 'california_2010').
 language: "en"
 data_source: "dlnews"
@@ -11,11 +11,11 @@ _arm: "dlnews"
 paths:
   base_dir: "/scratch/network/yh6580/gender-occup"
   raw_data_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/raw"
-  corpora_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper/corpora"
-  models_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper/models"
-  results_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper/results_garg_weat"
-  log_dir: "/scratch/network/yh6580/gender-occup/logs/dlnews_newspaper"
-  figures_dir: "/scratch/network/yh6580/gender-occup/figures/dlnews_newspaper_garg_weat"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/tv/corpora"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/tv/models"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/tv/results_garg_weat"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs/dlnews_tv"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures/dlnews_tv_garg_weat"
 
 us_states:
   shapefile: "data/shapefiles/us_states.shp"
@@ -82,12 +82,12 @@ dlnews:
   # Only google_newspaper is verified live (2026-08-11); the others follow the
   # same numbering pattern and are checked with `globus ls` before transfer —
   # if one fails, run `globus ls <source_endpoint>:/` and fix the path here
-  # (and in garg_weat_dlnews_tv.yml). Radio/Broadcast: add 2-Radio / 4-Broadcast.
+  # (and in garg_weat_dlnews.yml). Radio/Broadcast: add 2-Radio / 4-Broadcast.
   collections:
     google_newspaper: "/1-Google/1-Newspaper/preprocessed_state"
     google_tv: "/1-Google/3-TV/preprocessed_state"
     twitter_newspaper: "/2-Twitter/1-Newspaper/preprocessed_state"
     twitter_tv: "/2-Twitter/3-TV/preprocessed_state"
   # BUILD set: which downloaded collections feed THIS profile's corpus.
-  corpus_collections: [google_newspaper, twitter_newspaper]
+  corpus_collections: [google_tv, twitter_tv]
   # states: optional 2-letter USPS allow-list for the download; default = whole dirs

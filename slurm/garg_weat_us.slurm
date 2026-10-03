@@ -15,8 +15,8 @@ conda activate llm
 set -u
 
 DEFAULT_CONFIGS=(
-    "config/profiles/garg_weat_american_stories.yml"
     "config/profiles/garg_weat_dlnews.yml"
+    "config/profiles/garg_weat_dlnews_tv.yml"
 )
 if [ "$#" -gt 0 ]; then CONFIGS=("$@"); else CONFIGS=("${DEFAULT_CONFIGS[@]}"); fi
 

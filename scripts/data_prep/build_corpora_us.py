@@ -5,8 +5,10 @@ Arm 'american_stories': parses the raw ``faro_{year}.tar.gz`` archives directly
 (prefetched on a login node; no intermediate JSONL), matching each article's
 LCCN -> state via the LoC table and dropping unmatched articles. Falls back to
 pre-extracted ``american_stories_{year}*.jsonl`` if no tarball is present.
-Arm 'dlnews' (3DLNews2): preprocessed_newspaper_articles_{USPS}_{YEAR}.jsonl.gz;
-state via the filename USPS code (authoritative), inline ``location.state`` fallback.
+Arm 'dlnews' (3DLNews2): reads raw_data_dir/{collection}/**/*_{YEAR}.jsonl.gz for
+each collection in ``dlnews.corpus_collections`` (e.g. google_newspaper vs
+google_tv), so media types can be built into separate corpora; state via the
+filename USPS code (authoritative), inline ``location.state`` fallback.
 
 Each unit is written to corpora_dir/{state}_{year}/corpus_%06d, so training
 and analysis discover units with no changes. Wire-copy dedup runs within-year
@@ -27,7 +29,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, Iterator, Optional
+from typing import Dict, Iterator, List, Optional
 
 import fire
 
@@ -86,10 +88,31 @@ def _open_maybe_gzip(path: str):
     return open(path, "r", encoding="utf-8", errors="ignore")
 
 
+def _dlnews_files(raw_dir: str, year: int, collections: Optional[List[str]]) -> List[str]:
+    """Year files for the given collections (raw_dir/{name}/**), or flat raw_dir if None."""
+    roots = [raw_dir] if collections is None else [
+        os.path.join(raw_dir, name) for name in collections]
+    files: List[str] = []
+    for root in roots:
+        if not os.path.isdir(root):
+            raise FileNotFoundError(f"3DLNews2 collection dir not found: {root} "
+                                    "(download it or fix dlnews.corpus_collections)")
+        for ext in (".jsonl.gz", ".jsonl"):
+            found = glob.glob(os.path.join(root, "**", f"*_{year}{ext}"), recursive=True)
+            if found:
+                files.extend(sorted(found))
+                break
+    return files
+
+
 def iter_records(arm: str, raw_dir: str, year: int,
                  lccn_table: Optional[Dict[str, str]] = None,
-                 stats: Optional[Dict[str, int]] = None) -> Iterator[dict]:
+                 stats: Optional[Dict[str, int]] = None,
+                 collections: Optional[List[str]] = None) -> Iterator[dict]:
     """Yield {'text','state','title'} for one arm+year. Unknown/absent state dropped.
+
+    For 'dlnews', ``collections`` names the raw_data_dir subdirs to read
+    (one per platform x media type); None reads raw_dir itself.
 
     If ``stats`` is passed, it is mutated with drop-reason counts so the caller
     can log the state-resolution rate (read vs kept) — the yielded stream only
@@ -100,10 +123,7 @@ def iter_records(arm: str, raw_dir: str, year: int,
             stats[key] = stats.get(key, 0) + 1
 
     if arm == "dlnews":
-        pattern = os.path.join(raw_dir, f"*_{year}.jsonl.gz")
-        files = sorted(glob.glob(pattern)) or sorted(
-            glob.glob(os.path.join(raw_dir, f"*_{year}.jsonl")))
-        for fp in files:
+        for fp in _dlnews_files(raw_dir, year, collections):
             # 3DLNews2 partitions files by 2-letter USPS code
             # (preprocessed_newspaper_articles_{USPS}_{YEAR}.jsonl.gz), so the
             # filename is the authoritative publisher state. Fall back to an
@@ -234,6 +254,14 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
         )
     os.makedirs(corpora_dir, exist_ok=True)
 
+    collections = None
+    if arm == "dlnews":
+        collections = (config.get("dlnews") or {}).get("corpus_collections")
+        if not collections:
+            raise ValueError("dlnews needs dlnews.corpus_collections (which raw "
+                             "subdirs, e.g. [google_newspaper], feed this corpus)")
+        logger.info(f"dlnews corpus collections: {collections}")
+
     lccn_table = None
     if arm == "american_stories":
         table_path = os.path.join(raw_dir, "lccn_state_table.json")
@@ -264,7 +292,8 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
         writers: Dict[str, UnitCorpusWriter] = {}
         n_seen = n_dup = 0
         stats: Dict[str, int] = {}
-        for rec in iter_records(arm, raw_dir, year, lccn_table, stats=stats):
+        for rec in iter_records(arm, raw_dir, year, lccn_table, stats=stats,
+                                collections=collections):
             n_seen += 1
             if deduper is not None and deduper.is_duplicate(rec["text"]):
                 n_dup += 1

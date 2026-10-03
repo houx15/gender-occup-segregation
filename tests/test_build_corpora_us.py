@@ -23,8 +23,16 @@ def _cfg(tmp_path, arm, min_docs=2, dedup_method="exact"):
                       "shingle_k": 4, "scope": "within_year"},
         },
         "us_states": {"years": [1940], "min_documents": min_docs},
+        "dlnews": {"corpus_collections": ["google_newspaper"]},
         "_arm": arm,
     }
+
+
+def _dlnews_raw(cfg, collection="google_newspaper", usps="NY"):
+    """Raw dir laid out as the downloader writes it: raw/{collection}/{USPS}/."""
+    d = Path(cfg["paths"]["raw_data_dir"]) / collection / usps
+    d.mkdir(parents=True)
+    return d
 
 
 def test_dlnews_records_route_by_inline_state(tmp_path):
@@ -137,7 +145,7 @@ def test_dlnews_state_from_usps_filename_is_authoritative(tmp_path):
 
 def test_build_corpus_writes_units_and_drops_below_threshold(tmp_path):
     cfg = _cfg(tmp_path, "dlnews", min_docs=2)
-    raw = Path(cfg["paths"]["raw_data_dir"]); raw.mkdir(parents=True)
+    raw = _dlnews_raw(cfg)
     rows = [
         {"content": "the senate approved the farm policy reform bill today",
          "location": {"state": "New York"}, "is_news_article": True, "title": "a"},
@@ -163,7 +171,7 @@ def test_build_corpus_skips_already_built_year(tmp_path):
     # per-(arm, year) marker makes it idempotent unless rebuild=True.
     import logging
     cfg = _cfg(tmp_path, "dlnews", min_docs=1)
-    raw = Path(cfg["paths"]["raw_data_dir"]); raw.mkdir(parents=True)
+    raw = _dlnews_raw(cfg)
     rows = [
         {"content": "the senate approved the farm policy reform bill today",
          "is_news_article": True, "title": "a"},
@@ -193,7 +201,7 @@ def test_build_corpus_skips_already_built_year(tmp_path):
 
 def test_dedup_collapses_wire_copy_within_year(tmp_path):
     cfg = _cfg(tmp_path, "dlnews", min_docs=1, dedup_method="exact")
-    raw = Path(cfg["paths"]["raw_data_dir"]); raw.mkdir(parents=True)
+    raw = _dlnews_raw(cfg)
     wire = "the senate approved a sweeping farm bill on tuesday afternoon"
     rows = [
         {"content": wire, "location": {"state": "New York"}, "is_news_article": True, "title": "w"},
@@ -207,3 +215,44 @@ def test_dedup_collapses_wire_copy_within_year(tmp_path):
     coverage = b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
     total = sum(coverage.values())
     assert total == 1  # identical wire story counted once across states
+
+
+def _write_rows(path, rows):
+    with gzip.open(path, "wt", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+
+
+def test_dlnews_collections_are_read_separately(tmp_path):
+    # Newspaper and TV sit in separate raw subdirs; a corpus reads only the
+    # collections it names, so the two media types can be analysed apart.
+    raw = tmp_path / "raw"
+    (raw / "google_newspaper" / "NY").mkdir(parents=True)
+    (raw / "google_tv" / "NY").mkdir(parents=True)
+    _write_rows(raw / "google_newspaper" / "NY" / "preprocessed_newspaper_articles_NY_2000.jsonl.gz",
+                [{"content": "newspaper story text here", "title": "paper"}])
+    _write_rows(raw / "google_tv" / "NY" / "preprocessed_tv_articles_NY_2000.jsonl.gz",
+                [{"content": "tv story text here", "title": "tv"}])
+    paper = [r["title"] for r in b.iter_records("dlnews", str(raw), 2000,
+                                                 collections=["google_newspaper"])]
+    tv = [r["title"] for r in b.iter_records("dlnews", str(raw), 2000,
+                                              collections=["google_tv"])]
+    both = [r["title"] for r in b.iter_records("dlnews", str(raw), 2000,
+                                                collections=["google_newspaper", "google_tv"])]
+    assert paper == ["paper"]
+    assert tv == ["tv"]
+    assert sorted(both) == ["paper", "tv"]
+
+
+def test_dlnews_missing_collection_dir_raises(tmp_path):
+    raw = tmp_path / "raw"; raw.mkdir()
+    with pytest.raises(FileNotFoundError):
+        list(b.iter_records("dlnews", str(raw), 2000, collections=["google_tv"]))
+
+
+def test_build_corpus_requires_corpus_collections_for_dlnews(tmp_path):
+    import logging
+    cfg = _cfg(tmp_path, "dlnews")
+    del cfg["dlnews"]
+    with pytest.raises(ValueError, match="corpus_collections"):
+        b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
