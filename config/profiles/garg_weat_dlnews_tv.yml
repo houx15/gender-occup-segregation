@@ -1,5 +1,5 @@
 # Garg-WEAT per-(state, year) gender ideation on 3DLNews2 — TV media only
-# (Google + Twitter platforms). Sibling of garg_weat_dlnews.yml (newspaper):
+# (Google platform only; Twitter downloaded but skipped). Sibling of garg_weat_dlnews.yml (newspaper):
 # same raw download, separate corpora/models/results.
 # State from the filename USPS code. Units are state-year (e.g. 'california_2010').
 language: "en"
@@ -89,5 +89,6 @@ dlnews:
     twitter_newspaper: "/2-Twitter/1-Newspaper/preprocessed_state"
     twitter_tv: "/2-Twitter/3-TV/preprocessed_state"
   # BUILD set: which downloaded collections feed THIS profile's corpus.
-  corpus_collections: [google_tv, twitter_tv]
+  # Twitter collections are downloaded but skipped for now (Google only).
+  corpus_collections: [google_tv]
   # states: optional 2-letter USPS allow-list for the download; default = whole dirs
