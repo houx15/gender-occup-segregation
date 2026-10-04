@@ -31,3 +31,18 @@ def test_extract_body_attached_spouse_characteristics():
                         attached={"INCWAGE": ["spouse"]})
     assert body["variables"]["INCWAGE"] == {"attachedCharacteristics": ["spouse"]}
     assert body["variables"]["AGE"] == {"caseSelections": {"general": ["025", "026"]}}
+
+
+def test_extract_body_atus_samples_and_time_use_variables():
+    body = extract_body(years=[2005, 2024], variables=["SEX", "STATEFIP"], case_selections={},
+                        description="atus", sample_template="at{year}",
+                        time_use_variables=["BLS_HHACT", "BLS_CAREHH"],
+                        sample_members={"includeNonRespondents": False})
+    assert body["samples"] == {"at2005": {}, "at2024": {}}
+    assert body["timeUseVariables"] == {"BLS_HHACT": {}, "BLS_CAREHH": {}}
+    assert body["sampleMembers"] == {"includeNonRespondents": False}
+
+
+def test_extract_body_usa_default_has_no_time_use_block():
+    body = extract_body(years=[2005], variables=["SEX"], case_selections={}, description="x")
+    assert "timeUseVariables" not in body and "sampleMembers" not in body

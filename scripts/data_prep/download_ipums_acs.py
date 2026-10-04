@@ -4,6 +4,8 @@
 config/ipums_acs.yml: employed persons, occupation x sex x state (occupation side).
 config/ipums_acs_family.yml: adults 25-54 with children, marital status,
 employment, hours and own + spouse earnings (family side).
+config/ipums_atus.yml: ATUS respondents' daily minutes of housework and
+childcare by sex and state (collection: atus).
 
 Source for census female shares by occupation (national and state, every
 year), replacing Garg's file, which stops at 2015 and is national only.
@@ -32,7 +34,6 @@ import requests
 import yaml
 
 API = "https://api.ipums.org/extracts"
-PARAMS = {"collection": "usa", "version": 2}
 KEY_FILE = Path.home() / ".config" / "ipums" / "api_key"
 
 
@@ -46,9 +47,14 @@ def read_api_key(env: Mapping[str, str] = os.environ, key_file: Path = KEY_FILE)
 
 def extract_body(years: List[int], variables: List[str],
                  case_selections: Dict[str, List[str]], description: str,
-                 attached: Optional[Dict[str, List[str]]] = None) -> dict:
+                 attached: Optional[Dict[str, List[str]]] = None,
+                 sample_template: str = "us{year}a",
+                 time_use_variables: Optional[List[str]] = None,
+                 sample_members: Optional[dict] = None) -> dict:
     """IPUMS API v2 request body. ``attached`` adds household members'
-    values, e.g. {"INCWAGE": ["spouse"]} -> INCWAGE_SP."""
+    values, e.g. {"INCWAGE": ["spouse"]} -> INCWAGE_SP. ``sample_template``
+    names samples per collection (USA 'us{year}a', ATUS 'at{year}');
+    ``time_use_variables`` / ``sample_members`` are ATUS-only."""
     attached = attached or {}
 
     def _spec(v):
@@ -59,13 +65,18 @@ def extract_body(years: List[int], variables: List[str],
             spec["attachedCharacteristics"] = attached[v]
         return spec
 
-    return {
+    body = {
         "description": description,
         "dataStructure": {"rectangular": {"on": "P"}},
         "dataFormat": "csv",
-        "samples": {f"us{y}a": {} for y in years},
+        "samples": {sample_template.format(year=y): {} for y in years},
         "variables": {v: _spec(v) for v in variables},
     }
+    if time_use_variables:
+        body["timeUseVariables"] = {t: {} for t in time_use_variables}
+    if sample_members is not None:
+        body["sampleMembers"] = sample_members
+    return body
 
 
 def _download(url: str, dest: Path, headers: dict) -> None:
@@ -84,6 +95,7 @@ def _download(url: str, dest: Path, headers: dict) -> None:
 
 def main(config: str = "config/ipums_acs.yml", poll_seconds: int = 60) -> None:
     cfg = yaml.safe_load(open(config))
+    params = {"collection": cfg.get("collection", "usa"), "version": 2}
     out = Path(cfg["out_dir"])
     out.mkdir(parents=True, exist_ok=True)
     headers = {"Authorization": read_api_key(), "Content-Type": "application/json"}
@@ -94,8 +106,10 @@ def main(config: str = "config/ipums_acs.yml", poll_seconds: int = 60) -> None:
         print(f"Resuming extract {number}")
     else:
         body = extract_body(cfg["years"], cfg["variables"], cfg.get("case_selections", {}),
-                            cfg["description"], cfg.get("attached"))
-        r = requests.post(API, params=PARAMS, headers=headers, json=body, timeout=120)
+                            cfg["description"], cfg.get("attached"),
+                            cfg.get("sample_template", "us{year}a"),
+                            cfg.get("time_use_variables"), cfg.get("sample_members"))
+        r = requests.post(API, params=params, headers=headers, json=body, timeout=120)
         if r.status_code >= 400:
             raise SystemExit(f"Extract submission failed ({r.status_code}): {r.text}")
         number = r.json()["number"]
@@ -103,7 +117,7 @@ def main(config: str = "config/ipums_acs.yml", poll_seconds: int = 60) -> None:
         print(f"Submitted extract {number}")
 
     while True:
-        info = requests.get(f"{API}/{number}", params=PARAMS, headers=headers, timeout=120).json()
+        info = requests.get(f"{API}/{number}", params=params, headers=headers, timeout=120).json()
         status = info.get("status")
         print(f"  {time.strftime('%H:%M:%S')} status={status}", flush=True)
         if status == "completed":
