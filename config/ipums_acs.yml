@@ -1,0 +1,11 @@
+# IPUMS USA ACS extract for census female shares by occupation
+# (scripts/data_prep/download_ipums_acs.py; network step on the login node).
+# Employed persons only; OCC2010 = IPUMS-harmonized 2010 Census occupation
+# codes, consistent across 2005-2024. PERWT = person weight.
+description: "gender-occup: employed persons, OCC2010 x SEX x STATEFIP, ACS 2005-2024"
+out_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs"
+years: [2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014,
+        2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+variables: [YEAR, STATEFIP, SEX, AGE, EMPSTAT, OCC2010, PERWT]
+case_selections:
+  EMPSTAT: ["1"]   # employed

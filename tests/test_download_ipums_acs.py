@@ -1,0 +1,25 @@
+import pytest
+
+from scripts.data_prep.download_ipums_acs import extract_body, read_api_key
+
+
+def test_extract_body_samples_variables_and_case_selection():
+    body = extract_body(years=[2005, 2024], variables=["YEAR", "SEX", "EMPSTAT", "OCC2010"],
+                        case_selections={"EMPSTAT": ["1"]}, description="test")
+    assert body["samples"] == {"us2005a": {}, "us2024a": {}}
+    assert body["variables"]["EMPSTAT"] == {"caseSelections": {"general": ["1"]}}
+    assert body["variables"]["OCC2010"] == {}
+    assert body["dataFormat"] == "csv"
+    assert body["dataStructure"] == {"rectangular": {"on": "P"}}
+
+
+def test_read_api_key_prefers_env(tmp_path):
+    f = tmp_path / "api_key"
+    f.write_text("from-file\n")
+    assert read_api_key({"IPUMS_API_KEY": "from-env"}, f) == "from-env"
+    assert read_api_key({}, f) == "from-file"
+
+
+def test_read_api_key_missing_is_an_error(tmp_path):
+    with pytest.raises(SystemExit, match="IPUMS_API_KEY"):
+        read_api_key({}, tmp_path / "nope")
