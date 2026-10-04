@@ -13,8 +13,11 @@ filename USPS code (authoritative), inline ``location.state`` fallback.
 Each unit is written to corpora_dir/{state}_{year}/corpus_%06d, so training
 and analysis discover units with no changes. With ``us_states.year_bins: N``,
 consecutive years are pooled into N-year bins aligned to the first configured
-year, and each unit is labelled by its bin's start year (``ohio_2000`` =
-2000..2004) so downstream state_year parsing is unchanged. Wire-copy dedup runs
+year; adding ``us_states.year_step: S`` (S < N) makes overlapping rolling
+windows instead (10 years every 5: 2005-2014, 2010-2019, ...; each article
+goes into every window containing its year). Units are labelled by the window
+start year (``ohio_2000``) so downstream state_year parsing is unchanged
+(scripts/common/periods.py). Wire-copy dedup runs
 within each unit's time slice (year or bin) across states. A coverage report records per-unit doc counts and
 which units clear us_states.min_documents.
 
@@ -32,12 +35,13 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional
 
 import fire
 
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
+from scripts.common.periods import year_windows
 from scripts.common.preprocessing import preprocess
 from scripts.data_prep import us_state_mapper as usm
 from scripts.data_prep.dedup import Deduper
@@ -243,27 +247,15 @@ def iter_records(arm: str, raw_dir: str, year: int,
         raise ValueError(f"unknown arm: {arm!r}")
 
 
-def year_periods(years: List[int], bin_width: Optional[int]) -> List[Tuple[int, List[int]]]:
-    """(label, years) per unit time slice: one per year, or N-year bins from min(years)."""
-    years = sorted(years)
-    if not bin_width:
-        return [(y, [y]) for y in years]
-    periods: Dict[int, List[int]] = {}
-    for y in years:
-        start = years[0] + (y - years[0]) // bin_width * bin_width
-        periods.setdefault(start, []).append(y)
-    return sorted(periods.items())
-
-
-def _check_bin_width(corpora_dir: str, bin_width: Optional[int]) -> None:
-    """Pin corpora_dir to one year_bins setting; refuse to mix widths."""
+def _check_windows(corpora_dir: str, width: Optional[int], step: Optional[int]) -> None:
+    """Pin corpora_dir to one time-window setting; refuse to mix them."""
     stamp = Path(corpora_dir) / ".year_bins"
-    current = str(bin_width or 1)
+    current = str(width or 1) if not step or step == width else f"{width}/{step}"
     if stamp.exists() and stamp.read_text().strip() != current:
         raise ValueError(
-            f"{corpora_dir} was built with year_bins={stamp.read_text().strip()}, "
-            f"config now says {current}. Use a fresh corpora_dir (or delete this one) "
-            "so units of different widths are never mixed.")
+            f"{corpora_dir} was built with year windows {stamp.read_text().strip()}, "
+            f"config now says {current} (year_bins[/year_step]). Use a fresh "
+            "corpora_dir (or delete this one) so units of different windows are never mixed.")
     stamp.write_text(current)
 
 
@@ -271,7 +263,8 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
     raw_dir = config["paths"]["raw_data_dir"]
     corpora_dir = config["paths"]["corpora_dir"]
     bin_width = config["us_states"].get("year_bins")
-    periods = year_periods(config["us_states"]["years"], bin_width)
+    step = config["us_states"].get("year_step")
+    periods = year_windows(config["us_states"]["years"], bin_width, step)
     min_docs = int(config["us_states"].get("min_documents", 500))
     dcfg = config.get("corpus", {}).get("dedup", {"enabled": False})
     _scope = dcfg.get("scope", "within_year")
@@ -281,9 +274,9 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
             "Within-year-across-states scoping is structural (fresh Deduper per year)."
         )
     os.makedirs(corpora_dir, exist_ok=True)
-    _check_bin_width(corpora_dir, bin_width)
+    _check_windows(corpora_dir, bin_width, step)
     if bin_width:
-        logger.info("year bins: " + ", ".join(
+        logger.info("year windows: " + ", ".join(
             f"{label}={ys[0]}-{ys[-1]}" for label, ys in periods))
 
     collections = None

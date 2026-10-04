@@ -18,17 +18,21 @@
 #      and by state-period.
 #   sbatch slurm/check_dlnews.slurm
 #   sbatch slurm/check_dlnews.slurm "weaver|weavers,pilot|pilots"
+#   sbatch slurm/check_dlnews.slurm "coach|coaches" config/profiles/garg_weat_dlnews_w10.yml
 module load anaconda3/2023.3
 conda activate llm
 set -eu
 
-CONFIG="config/profiles/garg_weat_dlnews.yml"
+CONFIG="${2:-config/profiles/garg_weat_dlnews.yml}"
 WORDS="${1:-weaver|weavers,carpenter|carpenters,painter|painters,secretary|secretaries,supervisor|supervisors,operator|operators,driver|drivers,coach|coaches,judge|judges,executive|executives}"
 
 echo "== 1. word senses"
 python -m scripts.diagnose_word_senses --config="$CONFIG" --words="$WORDS" --n_units=4 --topn=12
 echo "== 2. ACS shares"
-python -m scripts.data_prep.build_occupation_shares --config=config/ipums_acs.yml
+# same time windows as the text units in $CONFIG
+WIDTH=$(python -c "import yaml; print(yaml.safe_load(open('$CONFIG'))['us_states']['year_bins'])")
+STEP=$(python -c "import yaml; u=yaml.safe_load(open('$CONFIG'))['us_states']; print(u.get('year_step') or u['year_bins'])")
+python -m scripts.data_prep.build_occupation_shares --config=config/ipums_acs.yml --width="$WIDTH" --step="$STEP"
 echo "== 3. census check"
 python -m scripts.check_occupation_census --config="$CONFIG"
 echo "DONE check_dlnews"

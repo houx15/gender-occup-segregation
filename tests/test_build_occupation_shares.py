@@ -79,3 +79,17 @@ def test_ddi_labels_reads_value_labels(tmp_path):
         '<catgry><catValu>11</catValu><labl>District of Columbia</labl></catgry></var>'
         '</dataDscr></codeBook>')
     assert ddi_labels(xml, "STATEFIP") == {6: "California", 11: "District of Columbia"}
+
+
+def test_rolling_windows_count_a_year_in_every_window(tmp_path):
+    from scripts.data_prep.build_occupation_shares import state_labor_indicators
+    p = tmp_path / "x.csv.gz"
+    _write_extract(p)
+    agg = aggregate_extract(p)
+    mapping = pd.DataFrame({"word": ["teacher"], "occ2010": ["2310"]})
+    nat, _ = word_female_shares(agg, mapping, period_start=2005, width=10, step=5,
+                                last_year=2014)
+    # 2010 teachers fall in the 2005-2014 window; 2010-2019 is not full -> dropped
+    assert set(nat["period"]) == {2005}
+    lab = state_labor_indicators(agg, period_start=2005, width=2, step=1, last_year=2006)
+    assert set(lab["period"]) == {2005}  # windows 2005-06 only (2006-07 not full)

@@ -1,7 +1,8 @@
-# Garg-WEAT per-(state, year) gender ideation on 3DLNews2 — NEWSPAPER media only
-# (Google platform only; Twitter downloaded but skipped). Sibling profile garg_weat_dlnews_tv.yml builds
-# TV from the same raw download into separate corpora/models/results.
-# State from the filename USPS code. Units are state-year (e.g. 'california_2010').
+# Garg-WEAT per-(state, window) gender ideation on 3DLNews2 — Google newspaper
+# articles, 10-year rolling windows every 5 years (2005-2014, 2010-2019,
+# 2015-2024), the same design as the Google Ngram slices. Sibling of
+# garg_weat_dlnews.yml (5-year bins): same raw data, separate corpora/models/results.
+# State from the filename USPS code. Units: state_windowstart (e.g. 'ohio_2005').
 language: "en"
 data_source: "dlnews"
 analysis_mode: "garg_weat"
@@ -11,21 +12,22 @@ _arm: "dlnews"
 paths:
   base_dir: "/scratch/network/yh6580/gender-occup"
   raw_data_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/raw"
-  corpora_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper/corpora"
-  models_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper/models"
-  results_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper/results_garg_weat"
-  log_dir: "/scratch/network/yh6580/gender-occup/logs/dlnews_newspaper"
-  figures_dir: "/scratch/network/yh6580/gender-occup/figures/dlnews_newspaper_garg_weat"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper_w10/corpora"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper_w10/models"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper_w10/results_garg_weat"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs/dlnews_newspaper_w10"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures/dlnews_newspaper_w10_garg_weat"
 
 us_states:
   shapefile: "data/shapefiles/us_states.shp"
   min_documents: 500
   # all years (Google queries 1996–2024, Twitter 2006–2024; empty years yield no units)
   years: [1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
-  # Pool years into 5-year bins (1995-99, 2000-04, ..., 2020-24): single
-  # state-years are too thin for word2vec. Units are labelled by bin start
-  # (ohio_2000 = 2000-2004). Changing this requires a fresh corpora_dir.
-  year_bins: 5
+  # 10-year windows starting every 5 years (scripts/common/periods.py); only
+  # full windows are kept. Units are labelled by window start (ohio_2005 =
+  # 2005-2014). Changing this requires a fresh corpora_dir.
+  year_bins: 10
+  year_step: 5
   # Trend + per-state change are measured from this period on (balanced panel
   # of states present in every period); 2005-09 is the first with 46+ states.
   trend_start: 2005
@@ -76,7 +78,7 @@ analysis:
     family_sphere: -1
     household: -1
   # Analyze only 2005-09 .. 2020-24: earlier periods cover too few states.
-  decade_range: [2005, 2020]
+  decade_range: [2005, 2015]
   # Small state-period models miss many words, so instead of requiring every
   # word in every unit (consistent set), use words in vocab in >= 50% of the
   # analyzed units and estimate each unit's level with word fixed effects.
@@ -94,7 +96,7 @@ analysis:
 # extract; scripts/check_occupation_census.py). shares_dir holds the outputs of
 # scripts.data_prep.build_occupation_shares (config/ipums_acs.yml).
 census_check:
-  shares_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs/shares_5y_step5"
+  shares_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs/shares_10y_step5"
 
 dlnews:
   # 3DLNews2 "no-HTML" collection (~7 GB total, all platforms/media/years).
