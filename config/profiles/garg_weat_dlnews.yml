@@ -30,10 +30,12 @@ us_states:
 wordlists:
   dir: "wordlists/en/garg_weat"
   gender_words_file: "gender_words.json"
+  # dlnews_cleaned_* = candidates pruned to words in vocab in every newspaper
+  # state-period model (slurm/wordlists_dlnews.slurm). COHA keeps cleaned_*.
   categories:
-    leadership: "cleaned_leadership.txt"
-    family: "cleaned_family.txt"
-    science: "cleaned_science.txt"
+    leadership: "dlnews_cleaned_leadership.txt"
+    family: "dlnews_cleaned_family.txt"
+    science: "dlnews_cleaned_science.txt"
 
 corpus:
   tokenizer: "nltk_en"
