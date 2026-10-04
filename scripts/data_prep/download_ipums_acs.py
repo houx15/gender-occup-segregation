@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Request and download an IPUMS USA ACS extract (employed persons, occupation x sex x state).
+"""Request and download an IPUMS USA ACS extract defined by a small YAML config.
+
+config/ipums_acs.yml: employed persons, occupation x sex x state (occupation side).
+config/ipums_acs_family.yml: adults 25-54 with children, marital status,
+employment, hours and own + spouse earnings (family side).
 
 Source for census female shares by occupation (national and state, every
 year), replacing Garg's file, which stops at 2015 and is national only.
@@ -8,6 +12,7 @@ NETWORK STEP — run on the Adroit login node (compute nodes have no internet),
 inside tmux since IPUMS can take a while to build the extract:
   tmux new -s ipums
   python -m scripts.data_prep.download_ipums_acs --config=config/ipums_acs.yml
+  python -m scripts.data_prep.download_ipums_acs --config=config/ipums_acs_family.yml
 
 Resumable: the submitted extract number is saved to <out_dir>/extract.json and
 re-used on re-runs (no duplicate submissions); finished files are not
@@ -20,7 +25,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Dict, List, Mapping
+from typing import Dict, List, Mapping, Optional
 
 import fire
 import requests
@@ -40,14 +45,26 @@ def read_api_key(env: Mapping[str, str] = os.environ, key_file: Path = KEY_FILE)
 
 
 def extract_body(years: List[int], variables: List[str],
-                 case_selections: Dict[str, List[str]], description: str) -> dict:
+                 case_selections: Dict[str, List[str]], description: str,
+                 attached: Optional[Dict[str, List[str]]] = None) -> dict:
+    """IPUMS API v2 request body. ``attached`` adds household members'
+    values, e.g. {"INCWAGE": ["spouse"]} -> INCWAGE_SP."""
+    attached = attached or {}
+
+    def _spec(v):
+        spec = {}
+        if v in case_selections:
+            spec["caseSelections"] = {"general": case_selections[v]}
+        if v in attached:
+            spec["attachedCharacteristics"] = attached[v]
+        return spec
+
     return {
         "description": description,
         "dataStructure": {"rectangular": {"on": "P"}},
         "dataFormat": "csv",
         "samples": {f"us{y}a": {} for y in years},
-        "variables": {v: ({"caseSelections": {"general": case_selections[v]}}
-                          if v in case_selections else {}) for v in variables},
+        "variables": {v: _spec(v) for v in variables},
     }
 
 
@@ -77,7 +94,7 @@ def main(config: str = "config/ipums_acs.yml", poll_seconds: int = 60) -> None:
         print(f"Resuming extract {number}")
     else:
         body = extract_body(cfg["years"], cfg["variables"], cfg.get("case_selections", {}),
-                            cfg["description"])
+                            cfg["description"], cfg.get("attached"))
         r = requests.post(API, params=PARAMS, headers=headers, json=body, timeout=120)
         if r.status_code >= 400:
             raise SystemExit(f"Extract submission failed ({r.status_code}): {r.text}")

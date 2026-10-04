@@ -1,0 +1,134 @@
+word,occ2010,match,note
+accountant,0800,broad,Accountants and auditors
+actuary,1200,exact,
+administrator,0100;0230;0350,multi,"administrative services, education, and health services managers"
+architect,1300,exact,
+artist,2600,exact,
+athlete,2720,broad,code also includes coaches and umpires
+attendant,9050;9350;9360;9415;4530,multi,"generic word: flight, parking, service-station, transport, lodging attendants"
+attorney,2100,broad,code also includes judges
+auctioneer,4965,broad,"sales and related workers, all other"
+auditor,0800,broad,Accountants and auditors
+author,2850,exact,
+babysitter,4600,broad,childcare workers
+bailiff,3800,broad,includes correctional officers and jailers
+banker,0120;0910,multi,financial managers; credit counselors and loan officers
+bartender,4040,exact,
+biologist,1610,exact,
+blacksmith,8220,broad,miscellaneous metal workers
+bookkeeper,5120,exact,
+broker,4820;4920,multi,securities / financial and real-estate brokers
+cabinetmaker,8500,exact,
+caregiver,4610;3600,multi,"personal care aides; nursing, psychiatric and home health aides"
+carpenter,6230,exact,
+cashier,4720,exact,
+chef,4000,exact,
+chemist,1720,exact,
+chiropractor,3000,exact,
+clergy,2040,exact,
+clerk,5860;5220,multi,"office clerks, general; court, municipal and license clerks"
+coach,2720,broad,code also includes athletes and umpires
+constable,3850,broad,police officers
+conservationist,1640,exact,
+consultant,0710,broad,management analysts
+contractor,0220;6200,multi,construction managers; first-line supervisors of construction trades
+cosmetologist,4510,exact,
+counselor,2000,exact,
+custodian,4220,exact,
+dancer,2740,exact,
+dentist,3010,exact,
+designer,2630,exact,
+detective,3820;3910,multi,police detectives; private detectives
+dietitian,3030,exact,
+dispatcher,5520,exact,
+doctor,3060,broad,physicians and surgeons
+driver,9130;9140;9120,multi,"truck, taxi and bus drivers"
+economist,1800,exact,
+editor,2830,exact,
+electrician,6355,exact,
+engineer,1320;1340;1350;1360;1400;1410;1420;1430;1440;1450;1460;1520;1530,multi,all engineering codes
+entertainer,2760,exact,
+entrepreneur,,none,"self-employment, not an occupation"
+executive,0010,broad,code also includes legislators
+farmer,0205,broad,includes ranchers and agricultural managers
+firefighter,3740,exact,
+gardener,4250,broad,grounds maintenance workers
+geologist,1740,broad,environmental scientists and geoscientists
+hairdresser,4510,exact,
+housekeeper,4230,exact,
+hygienist,3310,exact,
+inspector,6660;8740;9410;3750,multi,"generic word: construction, production, transportation, fire inspectors"
+instructor,2340;2200,multi,other teachers and instructors; postsecondary teachers
+janitor,4220,exact,
+jeweler,8750,exact,
+journalist,2810,exact,
+judge,2100,broad,code also includes lawyers
+laborer,6260;9620,multi,construction laborers; freight and material movers
+landscaper,4250,broad,grounds maintenance workers
+lawyer,2100,broad,code also includes judges
+librarian,2430,exact,
+logger,6130,exact,
+lumberjack,6130,exact,
+machinist,8030,exact,
+manager,0020;0430,multi,generic word: general and operations managers; miscellaneous managers
+mathematician,1240,broad,miscellaneous mathematical science occupations
+mechanic,7200;7210;7140;7220,multi,"automotive, diesel, aircraft and heavy-vehicle mechanics"
+midwife,3258,broad,nurse practitioners and nurse midwives
+millwright,7360,exact,
+miner,6840;6800;6940,multi,mining machine operators; extraction workers
+musician,2750,exact,
+nanny,4600,broad,childcare workers
+nurse,3255,exact,registered nurses
+nutritionist,3030,exact,
+operator,,none,generic word with no single occupation
+optometrist,3040,exact,
+osteopath,3060,broad,physicians and surgeons
+painter,6420,exact,census trade (painters and paperhangers); in news mostly the artist sense
+paralegal,2145,exact,
+paramedic,3400,exact,
+pastor,2040,broad,clergy
+pediatrician,3060,broad,physicians and surgeons
+pharmacist,3050,exact,
+photographer,2910,exact,
+physician,3060,exact,
+physicist,1700,exact,
+plasterer,6460,exact,
+plumber,6440,exact,
+police,3850;3710,multi,police officers; their first-line supervisors
+postmaster,0430,broad,miscellaneous managers incl. postmasters
+professor,2200,exact,postsecondary teachers
+programmer,1010;1020,multi,computer programmers; software developers
+proprietor,,none,"ownership, not an occupation"
+prosecutor,2100,broad,lawyers and judges
+psychiatrist,3060,broad,physicians and surgeons
+psychologist,1820,exact,
+rancher,0205,broad,"farmers, ranchers and agricultural managers"
+realtor,4920,exact,
+receptionist,5400,exact,
+reporter,2810,exact,
+roofer,6515,exact,
+sailor,9300,broad,"sailors, marine oilers and ship engineers"
+salesperson,4760,exact,retail salespersons
+scientist,1005;1610;1650;1700;1720;1740;1760,multi,natural and computer scientists
+secretary,5700,exact,in news mostly the political office
+sheriff,3850,broad,police officers
+shoemaker,8330,exact,
+soldier,9820;9830,multi,enlisted military personnel
+statistician,1240,broad,miscellaneous mathematical science occupations
+stylist,4510,exact,
+supervisor,,none,generic: first-line supervisors span many codes; in news mostly the elected office
+surgeon,3060,broad,physicians and surgeons
+surveyor,1310,exact,
+tailor,8350,exact,
+teacher,2300;2310;2320;2330,multi,preschool to secondary and special-education teachers
+technician,1550;1910;1920;3300;3320,multi,"generic word: engineering, science, lab and diagnostic technicians"
+teller,5160,exact,
+therapist,3150;3160;3200;3210;3220;3245,multi,"occupational, physical, radiation, recreational, respiratory, other therapists"
+toolmaker,8130,exact,
+trooper,3850,broad,police officers
+trucker,9130,exact,
+tutor,2340,broad,other teachers and instructors
+upholsterer,8450,exact,
+veterinarian,3250,exact,
+welder,8140,exact,
+writer,2850;2840,multi,writers and authors; technical writers

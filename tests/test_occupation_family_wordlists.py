@@ -33,3 +33,18 @@ def test_no_list_word_is_a_gender_anchor():
     for name in ("candidates_occupation.txt", "candidates_household.txt", "family_sphere.txt"):
         forms = {f for line in open(WL / name) for f in line.strip().split("|") if f}
         assert not forms & anchors, name
+
+
+def test_occ2010_mapping_covers_candidates_with_valid_codes():
+    with open(WL / "occupation_occ2010.csv", encoding="utf-8") as f:
+        mapping = {r["word"]: r for r in csv.DictReader(f)}
+    with open(WL / "occ2010_codes.csv", encoding="utf-8") as f:
+        valid = {int(r["occ2010"]) for r in csv.DictReader(f)}
+    included = [r["word"] for r in _grounding() if r["include"] == "1"]
+    assert set(mapping) == set(included)
+    for word, r in mapping.items():
+        assert r["match"] in ("exact", "broad", "multi", "none"), word
+        codes = [int(c) for c in r["occ2010"].split(";") if c]
+        assert (r["match"] == "none") == (not codes), word
+        assert set(codes) <= valid, f"{word}: unknown codes {set(codes) - valid}"
+        assert r["match"] != "multi" or len(codes) > 1, word

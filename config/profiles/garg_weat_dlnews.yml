@@ -90,11 +90,11 @@ analysis:
     n_rounds: 100
     ci: 0.95
 
-# Descriptive check of occupation scores against census female shares
-# (scripts/check_occupation_census.py; Garg's file covers 1850-2015).
+# Descriptive check of occupation scores against ACS census data (IPUMS
+# extract; scripts/check_occupation_census.py). shares_dir holds the outputs of
+# scripts.data_prep.build_occupation_shares (config/ipums_acs.yml).
 census_check:
-  grounding_file: "wordlists/en/occupation_family/occupation_grounding.csv"
-  female_share_file: "wordlists/en/garg/occupation_percentages_gender.csv"
+  shares_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs"
 
 dlnews:
   # 3DLNews2 "no-HTML" collection (~7 GB total, all platforms/media/years).

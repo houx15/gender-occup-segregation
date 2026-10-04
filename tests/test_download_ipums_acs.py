@@ -23,3 +23,11 @@ def test_read_api_key_prefers_env(tmp_path):
 def test_read_api_key_missing_is_an_error(tmp_path):
     with pytest.raises(SystemExit, match="IPUMS_API_KEY"):
         read_api_key({}, tmp_path / "nope")
+
+
+def test_extract_body_attached_spouse_characteristics():
+    body = extract_body(years=[2005], variables=["SEX", "INCWAGE", "AGE"],
+                        case_selections={"AGE": ["025", "026"]}, description="f",
+                        attached={"INCWAGE": ["spouse"]})
+    assert body["variables"]["INCWAGE"] == {"attachedCharacteristics": ["spouse"]}
+    assert body["variables"]["AGE"] == {"caseSelections": {"general": ["025", "026"]}}

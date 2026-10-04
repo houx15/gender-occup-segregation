@@ -50,3 +50,32 @@ def test_word_female_shares_by_period_national_and_state(tmp_path):
     assert s.loc[("nurse", 6, 2005), "female_share"] == pytest.approx(40 / 60)
     assert s.loc[("firefighter", 48, 2005), "female_share"] == pytest.approx(0.1)
     assert s.loc[("nurse", 6, 2005), "weighted_n"] == 60
+
+
+def test_state_labor_indicators_duncan_and_female_share():
+    from scripts.data_prep.build_occupation_shares import state_labor_indicators
+    agg = pd.DataFrame([
+        # state 1: fully segregated (women only in A, men only in B)
+        {"YEAR": 2005, "STATEFIP": 1, "OCC2010": 100, "female": 50, "total": 50},
+        {"YEAR": 2005, "STATEFIP": 1, "OCC2010": 200, "female": 0, "total": 50},
+        # state 2: identical distributions -> D = 0
+        {"YEAR": 2006, "STATEFIP": 2, "OCC2010": 100, "female": 20, "total": 40},
+        {"YEAR": 2006, "STATEFIP": 2, "OCC2010": 200, "female": 30, "total": 60},
+        {"YEAR": 2005, "STATEFIP": 2, "OCC2010": 9920, "female": 99, "total": 99},  # not an occupation
+    ])
+    out = state_labor_indicators(agg, period_start=2005, width=5).set_index("STATEFIP")
+    assert out.loc[1, "duncan"] == pytest.approx(1.0)
+    assert out.loc[2, "duncan"] == pytest.approx(0.0)
+    assert out.loc[2, "female_emp_share"] == pytest.approx(0.5)
+    assert (out["period"] == 2005).all()
+
+
+def test_ddi_labels_reads_value_labels(tmp_path):
+    from scripts.data_prep.build_occupation_shares import ddi_labels
+    xml = tmp_path / "x.xml"
+    xml.write_text(
+        '<codeBook xmlns="ddi:codebook:2_5"><dataDscr>'
+        '<var name="STATEFIP"><catgry><catValu>06</catValu><labl>California</labl></catgry>'
+        '<catgry><catValu>11</catValu><labl>District of Columbia</labl></catgry></var>'
+        '</dataDscr></codeBook>')
+    assert ddi_labels(xml, "STATEFIP") == {6: "California", 11: "District of Columbia"}
