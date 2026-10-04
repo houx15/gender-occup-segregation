@@ -11,8 +11,11 @@ google_tv), so media types can be built into separate corpora; state via the
 filename USPS code (authoritative), inline ``location.state`` fallback.
 
 Each unit is written to corpora_dir/{state}_{year}/corpus_%06d, so training
-and analysis discover units with no changes. Wire-copy dedup runs within-year
-across states by default. A coverage report records per-unit doc counts and
+and analysis discover units with no changes. With ``us_states.year_bins: N``,
+consecutive years are pooled into N-year bins aligned to the first configured
+year, and each unit is labelled by its bin's start year (``ohio_2000`` =
+2000..2004) so downstream state_year parsing is unchanged. Wire-copy dedup runs
+within each unit's time slice (year or bin) across states. A coverage report records per-unit doc counts and
 which units clear us_states.min_documents.
 
 Usage:
@@ -29,7 +32,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional
+from typing import Dict, Iterator, List, Optional, Tuple
 
 import fire
 
@@ -240,10 +243,35 @@ def iter_records(arm: str, raw_dir: str, year: int,
         raise ValueError(f"unknown arm: {arm!r}")
 
 
+def year_periods(years: List[int], bin_width: Optional[int]) -> List[Tuple[int, List[int]]]:
+    """(label, years) per unit time slice: one per year, or N-year bins from min(years)."""
+    years = sorted(years)
+    if not bin_width:
+        return [(y, [y]) for y in years]
+    periods: Dict[int, List[int]] = {}
+    for y in years:
+        start = years[0] + (y - years[0]) // bin_width * bin_width
+        periods.setdefault(start, []).append(y)
+    return sorted(periods.items())
+
+
+def _check_bin_width(corpora_dir: str, bin_width: Optional[int]) -> None:
+    """Pin corpora_dir to one year_bins setting; refuse to mix widths."""
+    stamp = Path(corpora_dir) / ".year_bins"
+    current = str(bin_width or 1)
+    if stamp.exists() and stamp.read_text().strip() != current:
+        raise ValueError(
+            f"{corpora_dir} was built with year_bins={stamp.read_text().strip()}, "
+            f"config now says {current}. Use a fresh corpora_dir (or delete this one) "
+            "so units of different widths are never mixed.")
+    stamp.write_text(current)
+
+
 def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[str, int]:
     raw_dir = config["paths"]["raw_data_dir"]
     corpora_dir = config["paths"]["corpora_dir"]
-    years = config["us_states"]["years"]
+    bin_width = config["us_states"].get("year_bins")
+    periods = year_periods(config["us_states"]["years"], bin_width)
     min_docs = int(config["us_states"].get("min_documents", 500))
     dcfg = config.get("corpus", {}).get("dedup", {"enabled": False})
     _scope = dcfg.get("scope", "within_year")
@@ -253,6 +281,10 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
             "Within-year-across-states scoping is structural (fresh Deduper per year)."
         )
     os.makedirs(corpora_dir, exist_ok=True)
+    _check_bin_width(corpora_dir, bin_width)
+    if bin_width:
+        logger.info("year bins: " + ", ".join(
+            f"{label}={ys[0]}-{ys[-1]}" for label, ys in periods))
 
     collections = None
     if arm == "dlnews":
@@ -269,7 +301,8 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
         logger.info(f"Loaded LCCN->state table: {len(lccn_table)} entries")
 
     coverage: Dict[str, int] = {}
-    for year in years:
+    for year, period_years in periods:
+        # `year` is the unit label (the bin's start year when year_bins is set).
         # Idempotency: a per-(arm, year) marker means this year's corpora are
         # already built — skip it unless rebuild=True. Lets a re-run of the
         # prepare job resume where it left off instead of re-appending data.
@@ -292,8 +325,10 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
         writers: Dict[str, UnitCorpusWriter] = {}
         n_seen = n_dup = 0
         stats: Dict[str, int] = {}
-        for rec in iter_records(arm, raw_dir, year, lccn_table, stats=stats,
-                                collections=collections):
+        records = (rec for y in period_years
+                   for rec in iter_records(arm, raw_dir, y, lccn_table, stats=stats,
+                                           collections=collections))
+        for rec in records:
             n_seen += 1
             if deduper is not None and deduper.is_duplicate(rec["text"]):
                 n_dup += 1

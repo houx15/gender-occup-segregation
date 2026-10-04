@@ -256,3 +256,43 @@ def test_build_corpus_requires_corpus_collections_for_dlnews(tmp_path):
     del cfg["dlnews"]
     with pytest.raises(ValueError, match="corpus_collections"):
         b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
+
+
+def test_year_periods_default_one_year_per_unit():
+    assert b.year_periods([2000, 2001], None) == [(2000, [2000]), (2001, [2001])]
+
+
+def test_year_periods_bins_aligned_to_first_year():
+    # Bins start at the first configured year; a short final bin is kept.
+    assert b.year_periods(list(range(1995, 2007)), 5) == [
+        (1995, [1995, 1996, 1997, 1998, 1999]),
+        (2000, [2000, 2001, 2002, 2003, 2004]),
+        (2005, [2005, 2006]),
+    ]
+
+
+def test_build_corpus_pools_years_into_bins(tmp_path):
+    import logging
+    cfg = _cfg(tmp_path, "dlnews", min_docs=1)
+    cfg["us_states"].update({"years": [1940, 1941], "year_bins": 2})
+    raw = _dlnews_raw(cfg)
+    _write_rows(raw / "preprocessed_newspaper_articles_NY_1940.jsonl.gz",
+                [{"content": "the senate approved the farm policy reform bill today"}])
+    _write_rows(raw / "preprocessed_newspaper_articles_NY_1941.jsonl.gz",
+                [{"content": "governor signed the education funding measure this morning"}])
+    coverage = b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
+    assert coverage == {"new_york_1940": 2}  # one unit labelled by bin start
+    assert not (Path(cfg["paths"]["corpora_dir"]) / "new_york_1941").exists()
+
+
+def test_build_corpus_refuses_to_mix_bin_widths(tmp_path):
+    # Switching year_bins on an existing corpora_dir would leave stale units of
+    # the old width next to the new ones; fail instead of mixing them.
+    import logging
+    cfg = _cfg(tmp_path, "dlnews", min_docs=1)
+    _write_rows(_dlnews_raw(cfg) / "preprocessed_newspaper_articles_NY_1940.jsonl.gz",
+                [{"content": "the senate approved the farm policy reform bill today"}])
+    b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
+    cfg["us_states"]["year_bins"] = 5
+    with pytest.raises(ValueError, match="year_bins"):
+        b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
