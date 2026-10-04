@@ -1,0 +1,10 @@
+home
+parents
+children
+family
+cousins
+marriage
+wedding
+relatives
+household
+kitchen

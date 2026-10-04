@@ -1136,6 +1136,146 @@ def plot_us_choropleth(summary_df, figures_dir, logger, config):
             value_col="oriented_rnd", norm=norm, cmap="RdBu_r")
 
 
+def us_period_label(period, bin_width):
+    """2005, 5 -> '2005–09'; no bins -> '2005'."""
+    if not bin_width or bin_width == 1:
+        return str(period)
+    return f"{period}–{(period + bin_width - 1) % 100:02d}"
+
+
+def us_trend_frame(summary_df, signs):
+    """Per (category, state, period) oriented score with its CI band.
+
+    Applies analysis.ideation_sign (higher = less traditional); a flipped band
+    is re-ordered so lo <= hi.
+    """
+    df = summary_df.copy()
+    parsed = df["unit_name"].apply(_state_year_parse)
+    df = df[parsed.notna()].copy()
+    df["state"] = [p[0] for p in parsed[parsed.notna()]]
+    df["period"] = [p[1] for p in parsed[parsed.notna()]]
+    sign = df["category"].map(lambda c: signs.get(c, 1)).astype(float)
+    a, b = df["mean_ci_low"] * sign, df["mean_ci_high"] * sign
+    return pd.DataFrame({
+        "category": df["category"], "state": df["state"], "period": df["period"],
+        "value": df["mean_rnd"] * sign,
+        "lo": np.minimum(a, b), "hi": np.maximum(a, b),
+    }).dropna(subset=["value"]).reset_index(drop=True)
+
+
+def us_national_trend(frame, start):
+    """Unweighted mean across states per (category, period) from ``start`` on,
+    on a balanced panel (states present in every period), with a 95% CI over
+    states — so the line can't move just because states enter the sample."""
+    rows = []
+    for cat, g in frame[frame["period"] >= start].groupby("category"):
+        periods = sorted(g["period"].unique())
+        per_state = g.groupby("state")["period"].nunique()
+        balanced = per_state[per_state == len(periods)].index
+        g = g[g["state"].isin(balanced)]
+        for period, p in g.groupby("period"):
+            n = len(p)
+            m = p["value"].mean()
+            half = 1.959964 * p["value"].std(ddof=1) / np.sqrt(n) if n > 1 else np.nan
+            rows.append({"category": cat, "period": period, "mean": m,
+                         "ci_low": m - half, "ci_high": m + half, "n_states": n})
+    return pd.DataFrame(rows)
+
+
+def us_state_change(frame, start, end, unit_ci):
+    """Per (category, state) change from period ``start`` to ``end`` with a 95% CI.
+
+    Each unit's band is a ``unit_ci`` bootstrap interval (analysis.bootstrap.ci),
+    converted to an SE and combined as independent: SE = sqrt(se_s^2 + se_e^2).
+    States missing either period are dropped.
+    """
+    from scipy.stats import norm
+    present = set(frame["period"])
+    for p in (start, end):
+        if p not in present:
+            raise ValueError(f"period {p} has no units (available: {sorted(present)})")
+    z_unit = norm.ppf(0.5 + unit_ci / 2)
+    f = frame.assign(se=(frame["hi"] - frame["lo"]) / 2 / z_unit)
+    s = f[f["period"] == start].set_index(["category", "state"])
+    e = f[f["period"] == end].set_index(["category", "state"])
+    both = s.join(e, lsuffix="_start", rsuffix="_end", how="inner")
+    change = both["value_end"] - both["value_start"]
+    half = 1.959964 * np.hypot(both["se_start"], both["se_end"])
+    out = pd.DataFrame({
+        "value_start": both["value_start"], "value_end": both["value_end"],
+        "change": change, "ci_low": change - half, "ci_high": change + half,
+    }).reset_index()
+    out["significant"] = (out["ci_low"] > 0) | (out["ci_high"] < 0)
+    return out.sort_values(["category", "change"]).reset_index(drop=True)
+
+
+def plot_us_trend(summary_df, figures_dir, results_dir, logger, config):
+    """National trend + per-state change of oriented gender ideation (US arms).
+
+    Window: us_states.trend_start (default: first period) to the last period.
+    Writes us_national_trend.csv / us_state_change.csv to results_dir.
+    """
+    us = config.get("us_states", {})
+    bin_width = us.get("year_bins")
+    signs = config.get("analysis", {}).get("ideation_sign", {})
+    unit_ci = float(config.get("analysis", {}).get("bootstrap", {}).get("ci", 0.68))
+    frame = us_trend_frame(summary_df, signs)
+    if frame.empty:
+        logger.info("  Skipping US trend (no state_year units parsed)")
+        return
+    start = int(us.get("trend_start", frame["period"].min()))
+    end = int(frame["period"].max())
+    label = lambda p: us_period_label(p, bin_width)  # noqa: E731
+
+    nat = us_national_trend(frame, start)
+    change = us_state_change(frame, start, end, unit_ci)
+    results_dir = Path(results_dir)
+    nat.to_csv(results_dir / "us_national_trend.csv", index=False)
+    change.to_csv(results_dir / "us_state_change.csv", index=False)
+    flipped = [c for c, s in signs.items() if s == -1]
+    ylab = "Oriented RND (higher = less traditional)"
+    note = f" — {', '.join(flipped)} reversed" if flipped else ""
+
+    cats = sorted(nat["category"].unique())
+    fig, axes = plt.subplots(1, len(cats), figsize=(4.2 * len(cats), 3.8), squeeze=False)
+    for ax, cat in zip(axes[0], cats):
+        g = nat[nat["category"] == cat].sort_values("period")
+        ax.fill_between(g["period"], g["ci_low"], g["ci_high"], alpha=0.25)
+        ax.plot(g["period"], g["mean"], marker="o")
+        ax.axhline(0, color="grey", lw=0.6, ls="--")
+        ax.set_xticks(g["period"], [label(p) for p in g["period"]], rotation=45, ha="right")
+        ax.set_title(f"{cat} (n={int(g['n_states'].iloc[0])} states)")
+    axes[0][0].set_ylabel(ylab)
+    fig.suptitle(f"US national gender ideation, balanced state panel{note}")
+    plt.tight_layout()
+    path = get_figure_path("us_ideation_trend.pdf", figures_dir)
+    plt.savefig(path, format="pdf")
+    plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+    ccats = sorted(change["category"].unique())
+    n_rows = max(change.groupby("category").size().max(), 1)
+    fig, axes = plt.subplots(1, len(ccats), figsize=(4.2 * len(ccats), 0.18 * n_rows + 1.5),
+                             squeeze=False)
+    for ax, cat in zip(axes[0], ccats):
+        g = change[change["category"] == cat].sort_values("change")
+        y = np.arange(len(g))
+        colors = np.where(g["significant"], "C3", "C7")
+        ax.errorbar(g["change"], y, xerr=[g["change"] - g["ci_low"], g["ci_high"] - g["change"]],
+                    fmt="none", ecolor=colors, elinewidth=0.8)
+        ax.scatter(g["change"], y, c=colors, s=12, zorder=3)
+        ax.axvline(0, color="grey", lw=0.6, ls="--")
+        ax.set_yticks(y, g["state"], fontsize=6)
+        ax.set_title(f"{cat}: {int(g['significant'].sum())}/{len(g)} significant")
+    axes[0][0].set_xlabel(f"Change {label(start)} → {label(end)} (95% CI)")
+    fig.suptitle(f"Change in gender ideation by state{note}")
+    plt.tight_layout()
+    path = get_figure_path(f"us_ideation_change_{start}_{end}.pdf", figures_dir)
+    plt.savefig(path, format="pdf")
+    plt.close()
+    logger.info(f"  Saved: {path.name}")
+
+
 def _plot_single_choropleth(merged, title, filename, figures_dir, logger,
                             value_col="cohens_d", norm=None, cmap="RdBu_r"):
     """Render and save a single choropleth map with province name labels.
@@ -2934,7 +3074,8 @@ def main(config="config/config.yml", mode=None):
             ds = config_data.get("data_source")
             if ds in ("american_stories", "dlnews"):
                 plot_us_choropleth(df, figures_dir, logger, config_data)
-                logger.info("US arm: wrote per-year state choropleth(s); "
+                plot_us_trend(df, figures_dir, results_dir, logger, config_data)
+                logger.info("US arm: wrote per-period state choropleths + trend; "
                             "skipping province/longitudinal dispatch")
                 logger.info("=" * 80)
                 logger.info("Visualization completed!")

@@ -26,6 +26,9 @@ us_states:
   # state-years are too thin for word2vec. Units are labelled by bin start
   # (ohio_2000 = 2000-2004). Changing this requires a fresh corpora_dir.
   year_bins: 5
+  # Trend + per-state change are measured from this period on (balanced panel
+  # of states present in every period); 2005-09 is the first with 46+ states.
+  trend_start: 2005
 
 wordlists:
   dir: "wordlists/en/garg_weat"
@@ -36,6 +39,9 @@ wordlists:
     leadership: "dlnews_cleaned_leadership.txt"
     family: "dlnews_cleaned_family.txt"
     science: "dlnews_cleaned_science.txt"
+    # Common, gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6
+    # family list + household, kitchen (same as weat_formal domestic_work).
+    family_sphere: "family_sphere.txt"
 
 corpus:
   tokenizer: "nltk_en"
@@ -66,6 +72,7 @@ analysis:
     leadership: 1
     science: 1
     family: -1
+    family_sphere: -1
   bootstrap:
     n_iter: 5000
     ci: 0.68
