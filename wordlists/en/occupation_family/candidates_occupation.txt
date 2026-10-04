@@ -129,6 +129,5 @@ trucker|truckers
 tutor|tutors
 upholsterer|upholsterers
 veterinarian|veterinarians
-weaver|weavers
 welder|welders
 writer|writers

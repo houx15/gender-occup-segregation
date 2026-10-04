@@ -164,6 +164,42 @@ crafts) is almost certainly the surname Weaver; *carpenter* and *painter*
 may carry surname / artist senses too. Check their per-word RND and likely
 exclude weaver.
 
+## 2026-10-04 — Census check and word-sense check
+
+**Framing (PI).** Comparing scores with census / survey female shares is a
+descriptive *check* of how our measure lines up with real occupational
+composition, not a validation.
+
+**Census check** (`scripts/check_occupation_census.py`, job 3391412). Per
+period: occupation RND (mean over the state-period units that have it) vs the
+census female share from Garg's file (period mean; 2020-24 uses 2015).
+39 of the 56 used occupations have a Garg census counterpart.
+
+| Period  | n  | Pearson r | Pearson r (logit share) | Spearman r |
+|---------|---:|----:|----:|----:|
+| 2005-09 | 39 | 0.57 | 0.51 | 0.54 |
+| 2010-14 | 39 | 0.60 | 0.55 | 0.55 |
+| 2015-19 | 39 | 0.66 | 0.61 | 0.60 |
+| 2020-24 | 39 | 0.67 | 0.62 | 0.64 |
+
+**Word-sense check** (`scripts/diagnose_word_senses.py`; nearest neighbours in
+the 4 largest models: CA 2010/2015/2020, TX 2020):
+
+| word | neighbours | reading |
+|------|------------|---------|
+| weaver | personal names in 4/4 (hubbell, burton, wiggins, ...) | surname |
+| carpenter | unions / trades in CA 2010, 2020; names in CA 2015, TX 2020 | mixed |
+| painter | artist, sculptor, watercolor | fine artist, not the census trade it is mapped to |
+| secretary | treasurer, Mattis, Pompeo, cabinet | political office |
+| supervisor | county board, Antonovich, "supes" (CA); job sense in TX | mostly elected office |
+| operator | owner, company, operations | business operator |
+| driver | vehicle, swerved, seatbelt, Camry | motorist in crash reports |
+| coach / judge / executive | coaching, players / court, magistrate / CEO, president | job sense |
+
+**Decision.** Drop *weaver* (`include = 0` in the grounding table, with this
+evidence). Pending PI decision: carpenter, painter, secretary, supervisor,
+operator, driver.
+
 ---
 
 ## Open questions

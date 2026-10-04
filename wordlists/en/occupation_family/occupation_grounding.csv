@@ -130,7 +130,7 @@ trucker,truckers,1,Driver/sales workers and truck drivers,,
 tutor,tutors,1,Tutors,,
 upholsterer,upholsterers,1,Upholsterers,upholsterer,
 veterinarian,veterinarians,1,Veterinarians,veterinarian,
-weaver,weavers,1,"Textile winding, twisting, and drawing out machine setters, operators, and tenders",weaver,
+weaver,,0,"Textile winding, twisting, and drawing out machine setters, operators, and tenders",weaver,surname Weaver: nearest neighbours are personal names in 4/4 largest models (job 3391412)
 welder,welders,1,"Welding, soldering, and brazing workers",welder,
 writer,writers,1,Writers and authors,,
 actor,,0,Actors,,gendered pair (actor/actress)
