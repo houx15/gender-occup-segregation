@@ -131,7 +131,38 @@ balanced panel `a[u]` is exactly the plain mean used before. CIs resample
 words and refit. Per-word coverage is written to
 `<results_dir>/word_coverage.csv`. (`scripts/common/fixed_effects.py`)
 
-**Evidence.** _Pending — job to be filled in below._
+**Evidence** (job 3391395, commit 3023aef; 197 newspaper models 2005-2024):
+
+| Category      | words used (cov. >= 0.5) | before (every-unit rule) | adjacent-period corr. | states w/ significant change 2005-09 -> 2020-24 |
+|---------------|---------------:|-----:|-----:|--------:|
+| occupation    | 56 / 134 | 10 | 0.22 | 21 / 46 |
+| family_sphere | 10 / 10  | 4  | 0.29 | 5 / 46  |
+| household     | 6 / 20   | 0  | -0.02 | 9 / 37 |
+
+- Occupation words used: attorney coach driver editor executive judge manager
+  police secretary writer teacher reporter artist author doctor lawyer
+  professor prosecutor administrator sheriff athlete soldier farmer
+  firefighter pastor engineer nurse instructor clerk detective photographer
+  operator supervisor journalist musician physician contractor chef scientist
+  trooper consultant counselor carpenter architect designer dancer technician
+  weaver inspector mechanic therapist entrepreneur surgeon veterinarian
+  painter paramedic.
+- Just below the bar (coverage): biologist 0.50, miner 0.50, librarian 0.49,
+  dispatcher 0.49, sailor 0.43, dentist 0.42, broker 0.42, caregiver 0.38,
+  realtor 0.38.
+- Household words used: groceries, cooking, cleaning, dishes, gardening,
+  laundry (care words — parenting 0.37, daycare 0.32, childcare 0.26 — miss).
+- National trend (balanced panel of 46 states, oriented RND): occupation
+  rises steadily, -0.0122 -> -0.0091 -> -0.0067 -> -0.0043 (occupations
+  remain male-leaning but less so); family_sphere stays female-leaning
+  (about -0.009 to -0.012), no clear trend; household is noisy.
+- TV arm: occupation 21 words, family_sphere 4, household 0 — confirms TV is
+  too thin for these lists.
+
+**Follow-ups flagged.** *weaver* (coverage 0.69 vs ~0.05 for comparable
+crafts) is almost certainly the surname Weaver; *carpenter* and *painter*
+may carry surname / artist senses too. Check their per-word RND and likely
+exclude weaver.
 
 ---
 
