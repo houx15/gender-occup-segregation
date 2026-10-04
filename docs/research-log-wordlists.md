@@ -201,6 +201,22 @@ evidence). Keep carpenter, painter, secretary, supervisor, operator and driver
 (PI: words with adequate coverage stay; their mixed senses are documented
 here and in the grounding notes).
 
+## 2026-10-04 — Rerun without weaver (current results)
+
+Jobs 3391418 (analysis) + 3391419 (checks), commit fd2cd9d.
+
+- Occupation: 55 / 133 words used (coverage >= 0.5 of 197 units); 38 have a
+  census share.
+- Census check: Pearson r = 0.57 (2005-09), 0.61, 0.66, 0.68 (2020-24);
+  Spearman 0.55 -> 0.65. Female end: nurse, therapist, teacher; male end:
+  mechanic, engineer, soldier, firefighter. Clear outlier: *secretary*
+  (~95% female in the census, RND <= 0) — consistent with its political-office
+  sense in news. Doctor / physician sit above their census share.
+- National occupation trend (46-state balanced panel): -0.0122 -> -0.0091 ->
+  -0.0066 -> -0.0042 — occupations stay male-leaning but steadily less so.
+- State change 2005-09 -> 2020-24: 34 / 46 states move toward
+  female-leaning; 21 / 46 significant.
+
 ---
 
 ## Open questions
