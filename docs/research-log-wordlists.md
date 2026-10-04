@@ -217,6 +217,65 @@ Jobs 3391418 (analysis) + 3391419 (checks), commit fd2cd9d.
 - State change 2005-09 -> 2020-24: 34 / 46 states move toward
   female-leaning; 21 / 46 significant.
 
+## 2026-10-04 — Census check from the source: ACS microdata (IPUMS)
+
+**Why.** Garg's female-share file ends in 2015 (the 2020-24 check used 2015
+shares) and is national only. We now use the IPUMS USA ACS 1-year samples
+2005-2024 directly (extract 1: employed persons; OCC2010, SEX, STATEFIP,
+PERWT; `config/ipums_acs.yml`).
+
+**Word -> occupation codes.** `occupation_occ2010.csv` maps each candidate to
+OCC2010 codes, checked against the extract's codebook: 70 exact, 35 broad
+(code wider than the word, e.g. judge -> "lawyers, and judges"), 24 multi
+(e.g. engineer -> 13 engineering codes), 4 none (entrepreneur, operator,
+proprietor, supervisor).
+
+**Design (PI).** Compare at the state-period level, like Garg compares by
+decade: our occupation gender norm per state-period (word fixed-effects score)
+vs a survey-based norm for the same state-period: (a) matched female share =
+equal-weight mean female share of our used occupations; (b) Duncan
+occupational segregation index over all occupations; (c) women's share of
+employment.
+
+**Evidence** (job 3391503, commit f21f419):
+
+National, by occupation (52 of 55 used occupations have ACS shares):
+
+| Period  | Pearson r | Pearson r (logit) | Spearman r |
+|---------|----:|----:|----:|
+| 2005-09 | 0.70 | 0.66 | 0.69 |
+| 2010-14 | 0.72 | 0.68 | 0.77 |
+| 2015-19 | 0.76 | 0.72 | 0.77 |
+| 2020-24 | 0.78 | 0.74 | 0.77 |
+
+Stronger than with Garg's file (0.57-0.68): more occupations matched and
+period-specific shares.
+
+Over time (national means across the 46-51 states):
+
+| Period  | our score | matched female share | Duncan | female emp. share |
+|---------|------:|------:|------:|------:|
+| 2005-09 | -0.0122 | 0.385 | 0.528 | 0.471 |
+| 2010-14 | -0.0085 | 0.392 | 0.521 | 0.476 |
+| 2015-19 | -0.0068 | 0.403 | 0.506 | 0.475 |
+| 2020-24 | -0.0049 | 0.416 | 0.489 | 0.475 |
+
+Our score moves toward female-leaning as women's share in these occupations
+rises and segregation falls — same direction every period.
+
+Across states (197 state-periods): no meaningful relationship. Pooled r with
+matched share 0.17, Duncan 0.02, female employment share -0.04; within-period
+|r| <= 0.22 with signs flipping; change 2005->2020 |r| <= 0.15. The survey
+measures barely differ across states (matched share SD 1.4-1.7 pp; female
+employment share SD 1.4 pp), while our state scores are noisy (adjacent-period
+stability ~0.2).
+
+**Reading.** The embedding measure tracks occupational gender composition
+across occupations and over time, but its cross-state differences do not
+track cross-state differences in composition. Either the state signal is
+mostly estimation noise, or local news norms and local labor-market
+composition genuinely diverge — not separable yet.
+
 ---
 
 ## Open questions
