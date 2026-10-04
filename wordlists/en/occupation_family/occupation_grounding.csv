@@ -1,183 +1,183 @@
-word,include,census_2018_title,garg_word,note
-accountant,1,Accountants and auditors,accountant,
-actuary,1,Actuaries,,
-administrator,1,Administrative services managers,administrator,
-architect,1,"Architects, except landscape and naval",architect,
-artist,1,Artists and related workers,artist,
-athlete,1,Athletes and sports competitors,athlete,
-attendant,1,Flight attendants / nursing and personal care attendants,attendant,
-attorney,1,Lawyers,,
-auctioneer,1,"Sales and related workers, all other",auctioneer,
-auditor,1,Accountants and auditors,,
-author,1,Writers and authors,author,
-babysitter,1,Childcare workers,,
-bailiff,1,Bailiffs,bailiff,
-banker,1,Financial managers,,
-bartender,1,Bartenders,bartender,
-biologist,1,Biological scientists,,
-blacksmith,1,"Metal workers and plastic workers, all other",blacksmith,
-bookkeeper,1,"Bookkeeping, accounting, and auditing clerks",,
-broker,1,"Securities, commodities, and financial services sales agents",broker,
-cabinetmaker,1,Cabinetmakers and bench carpenters,cabinetmaker,
-caregiver,1,Personal care aides,,
-carpenter,1,Carpenters,carpenter,
-cashier,1,Cashiers,cashier,
-chef,1,Chefs and head cooks,,
-chemist,1,Chemists and materials scientists,chemist,
-chiropractor,1,Chiropractors,chiropractor,
-clergy,1,Clergy,clergy,
-clerk,1,"Office clerks, general",clerk,
-coach,1,Coaches and scouts,,
-constable,1,Police officers,constable,
-conservationist,1,Conservation scientists and foresters,conservationist,
-consultant,1,Management analysts,,
-contractor,1,Construction managers,,
-cosmetologist,1,"Hairdressers, hairstylists, and cosmetologists",,
-counselor,1,Counselors,,
-custodian,1,Janitors and building cleaners,,
-dancer,1,Dancers and choreographers,dancer,
-dentist,1,Dentists,dentist,
-designer,1,Designers,designer,
-detective,1,Detectives and criminal investigators,,
-dietitian,1,Dietitians and nutritionists,dietitian,
-dispatcher,1,Dispatchers,,
-doctor,1,Physicians,doctor,
-driver,1,Driver/sales workers and truck drivers,driver,
-economist,1,Economists,economist,
-editor,1,Editors,,
-electrician,1,Electricians,electrician,
-engineer,1,Engineers,engineer,
-entertainer,1,"Entertainers and performers, sports and related workers, all other",entertainer,
-entrepreneur,1,Chief executives (self-employed),,
-executive,1,Chief executives,,
-farmer,1,"Farmers, ranchers, and other agricultural managers",farmer,
-firefighter,1,Firefighters,fireperson,Garg's artificial neutral form replaced by the real word
-gardener,1,Grounds maintenance workers,gardener,
-geologist,1,Geoscientists and hydrologists,geologist,
-hairdresser,1,"Hairdressers, hairstylists, and cosmetologists",,
-housekeeper,1,Maids and housekeeping cleaners,housekeeper,
-hygienist,1,Dental hygienists,,
-inspector,1,Inspectors (various),inspector,
-instructor,1,Postsecondary teachers / other instructors,instructor,
-janitor,1,Janitors and building cleaners,janitor,
-jeweler,1,"Jewelers and precious stone and metal workers",jeweler,
-journalist,1,"News analysts, reporters, and journalists",newsperson,Garg's artificial neutral form replaced by the real word
-judge,1,"Judges, magistrates, and other judicial workers",judge,also a verb; noun dominates in news
-laborer,1,Construction laborers,laborer,
-landscaper,1,Grounds maintenance workers,,
-lawyer,1,Lawyers,lawyer,
-librarian,1,Librarians and media collections specialists,librarian,
-logger,1,Logging workers,,
-lumberjack,1,Logging workers,lumberjack,
-machinist,1,Machinists,machinist,
-manager,1,"Managers, all other",manager,
-mathematician,1,Mathematicians,mathematician,
-mechanic,1,Automotive service technicians and mechanics,mechanic,
-midwife,1,Nurse midwives,midwife,
-millwright,1,Millwrights,millwright,
-miner,1,Mining machine operators,,
-musician,1,Musicians and singers,musician,
-nanny,1,Childcare workers,,
-nurse,1,Registered nurses,nurse,
-nutritionist,1,Dietitians and nutritionists,nutritionist,
-operator,1,Machine operators (various),operator,generic; kept for Garg comparability
-optometrist,1,Optometrists,optometrist,
-osteopath,1,Physicians,osteopath,
-painter,1,Painters and paperhangers,painter,also artist sense
-paralegal,1,Paralegals and legal assistants,,
-paramedic,1,Emergency medical technicians and paramedics,,
-pastor,1,Clergy,,
-pediatrician,1,Physicians,,
-pharmacist,1,Pharmacists,pharmacist,
-photographer,1,Photographers,photographer,
-physician,1,Physicians,physician,
-physicist,1,Physicists and astronomers,physicist,
-plasterer,1,Plasterers and stucco masons,plasterer,
-plumber,1,"Plumbers, pipefitters, and steamfitters",plumber,
-police,1,Police officers,police,collective noun
-postmaster,1,Postmasters and mail superintendents,postmaster,
-professor,1,Postsecondary teachers,professor,
-programmer,1,Computer programmers,,
-proprietor,1,Owners / proprietors (various),proprietor,
-prosecutor,1,Lawyers,,
-psychiatrist,1,Physicians,,
-psychologist,1,Psychologists,psychologist,
-rancher,1,"Farmers, ranchers, and other agricultural managers",,
-realtor,1,Real estate brokers and sales agents,,
-receptionist,1,Receptionists and information clerks,,
-reporter,1,"News analysts, reporters, and journalists",,
-roofer,1,Roofers,,
-sailor,1,Sailors and marine oilers,sailor,
-salesperson,1,Retail salespersons,salesperson,
-scientist,1,"Life, physical, and social scientists, all other",scientist,
-secretary,1,Secretaries and administrative assistants,secretary,political title sense (Secretary of State) is common in news
-sheriff,1,Police officers,sheriff,
-shoemaker,1,"Shoe and leather workers",shoemaker,
-soldier,1,Military enlisted personnel,soldier,
-statistician,1,Statisticians,statistician,
-stylist,1,"Hairdressers, hairstylists, and cosmetologists",,
-supervisor,1,First-line supervisors (various),supervisor,also elected county supervisor
-surgeon,1,Surgeons,surgeon,
-surveyor,1,Surveyors,surveyor,
-tailor,1,"Tailors, dressmakers, and sewers",tailor,
-teacher,1,Elementary and middle school teachers,teacher,
-technician,1,Technicians (various),technician,
-teller,1,Tellers,bankteller,Garg's compound replaced by the real word
-therapist,1,Therapists (various),therapist,
-toolmaker,1,Tool and die makers,toolmaker,
-trooper,1,Police officers,,
-trucker,1,Driver/sales workers and truck drivers,,
-tutor,1,Tutors,,
-upholsterer,1,Upholsterers,upholsterer,
-veterinarian,1,Veterinarians,veterinarian,
-weaver,1,"Textile winding, twisting, and drawing out machine setters, operators, and tenders",weaver,
-welder,1,"Welding, soldering, and brazing workers",welder,
-writer,1,Writers and authors,,
-actor,0,Actors,,gendered pair (actor/actress)
-aide,0,,,generic
-assistant,0,,,generic
-baker,0,Bakers,baker,common surname
-bookbinder,0,,bookbinder,obsolete
-boilermaker,0,,boilermaker,rare; sports-team sense
-bootblack,0,,bootblack,obsolete
-butcher,0,Butchers,,common surname
-clerical,0,,clerical,not an occupation
-collector,0,,collector,generic (tax / art / debt collector)
-compositor,0,,compositor,obsolete
-conductor,0,,conductor,ambiguous (electrical / music / train)
-cook,0,,cook,common surname and verb
-craftsperson,0,,craftsperson,artificial neutral form not used in text
-deputy,0,,,generic title
-developer,0,,,ambiguous (real-estate / software)
-dishwasher,0,,,appliance sense
-doorkeeper,0,,doorkeeper,obsolete
-draftsperson,0,,draftsperson,artificial neutral form not used in text
-eletrotyper,0,,eletrotyper,obsolete (and misspelled in Garg)
-guard,0,,guard,ambiguous (National Guard / point guard)
-huckster,0,,huckster,obsolete
-mailperson,0,,mailperson,artificial neutral form not used in text
-maid,0,,,female-marked word
-mason,0,,mason,common surname
-milliner,0,,milliner,obsolete
-minister,0,,,political sense
-molder,0,,molder,obsolete
-officer,0,,,generic title
-official,0,,official,not an occupation
-paperhanger,0,,paperhanger,obsolete
-peddler,0,,peddler,obsolete
-pilot,0,,pilot,ambiguous (pilot program / TV pilot)
-porter,0,,porter,common surname
-priest,0,,,sex-restricted role
-researcher,0,,,generic
-retired,0,,retired,not an occupation
-sales,0,,sales,not an occupation
-server,0,,,ambiguous (computer server)
-setter,0,,setter,not an occupation word in modern text
-smith,0,,smith,common surname
-stereotyper,0,,stereotyper,obsolete
-student,0,,student,not an occupation
-teamster,0,,teamster,union-name sense
-tradesperson,0,,tradesperson,artificial neutral form not used in text
-typesetter,0,,typesetter,obsolete
-unemployed,0,,unemployed,not an occupation
-waiter,0,,waitstaff,gendered pair (waiter/waitress)
+word,plural,include,census_2018_title,garg_word,note
+accountant,accountants,1,Accountants and auditors,accountant,
+actuary,actuaries,1,Actuaries,,
+administrator,administrators,1,Administrative services managers,administrator,
+architect,architects,1,"Architects, except landscape and naval",architect,
+artist,artists,1,Artists and related workers,artist,
+athlete,athletes,1,Athletes and sports competitors,athlete,
+attendant,attendants,1,Flight attendants / nursing and personal care attendants,attendant,
+attorney,attorneys,1,Lawyers,,
+auctioneer,auctioneers,1,"Sales and related workers, all other",auctioneer,
+auditor,auditors,1,Accountants and auditors,,
+author,authors,1,Writers and authors,author,
+babysitter,babysitters,1,Childcare workers,,
+bailiff,bailiffs,1,Bailiffs,bailiff,
+banker,bankers,1,Financial managers,,
+bartender,bartenders,1,Bartenders,bartender,
+biologist,biologists,1,Biological scientists,,
+blacksmith,blacksmiths,1,"Metal workers and plastic workers, all other",blacksmith,
+bookkeeper,bookkeepers,1,"Bookkeeping, accounting, and auditing clerks",,
+broker,brokers,1,"Securities, commodities, and financial services sales agents",broker,
+cabinetmaker,cabinetmakers,1,Cabinetmakers and bench carpenters,cabinetmaker,
+caregiver,caregivers,1,Personal care aides,,
+carpenter,carpenters,1,Carpenters,carpenter,
+cashier,cashiers,1,Cashiers,cashier,
+chef,chefs,1,Chefs and head cooks,,
+chemist,chemists,1,Chemists and materials scientists,chemist,
+chiropractor,chiropractors,1,Chiropractors,chiropractor,
+clergy,,1,Clergy,clergy,
+clerk,clerks,1,"Office clerks, general",clerk,
+coach,coaches,1,Coaches and scouts,,
+constable,constables,1,Police officers,constable,
+conservationist,conservationists,1,Conservation scientists and foresters,conservationist,
+consultant,consultants,1,Management analysts,,
+contractor,contractors,1,Construction managers,,
+cosmetologist,cosmetologists,1,"Hairdressers, hairstylists, and cosmetologists",,
+counselor,counselors,1,Counselors,,
+custodian,custodians,1,Janitors and building cleaners,,
+dancer,dancers,1,Dancers and choreographers,dancer,
+dentist,dentists,1,Dentists,dentist,
+designer,designers,1,Designers,designer,
+detective,detectives,1,Detectives and criminal investigators,,
+dietitian,dietitians,1,Dietitians and nutritionists,dietitian,
+dispatcher,dispatchers,1,Dispatchers,,
+doctor,doctors,1,Physicians,doctor,
+driver,drivers,1,Driver/sales workers and truck drivers,driver,
+economist,economists,1,Economists,economist,
+editor,editors,1,Editors,,
+electrician,electricians,1,Electricians,electrician,
+engineer,engineers,1,Engineers,engineer,
+entertainer,entertainers,1,"Entertainers and performers, sports and related workers, all other",entertainer,
+entrepreneur,entrepreneurs,1,Chief executives (self-employed),,
+executive,executives,1,Chief executives,,
+farmer,farmers,1,"Farmers, ranchers, and other agricultural managers",farmer,
+firefighter,firefighters,1,Firefighters,fireperson,Garg's artificial neutral form replaced by the real word
+gardener,gardeners,1,Grounds maintenance workers,gardener,
+geologist,geologists,1,Geoscientists and hydrologists,geologist,
+hairdresser,hairdressers,1,"Hairdressers, hairstylists, and cosmetologists",,
+housekeeper,housekeepers,1,Maids and housekeeping cleaners,housekeeper,
+hygienist,hygienists,1,Dental hygienists,,
+inspector,inspectors,1,Inspectors (various),inspector,
+instructor,instructors,1,Postsecondary teachers / other instructors,instructor,
+janitor,janitors,1,Janitors and building cleaners,janitor,
+jeweler,jewelers,1,Jewelers and precious stone and metal workers,jeweler,
+journalist,journalists,1,"News analysts, reporters, and journalists",newsperson,Garg's artificial neutral form replaced by the real word
+judge,judges,1,"Judges, magistrates, and other judicial workers",judge,also a verb; noun dominates in news
+laborer,laborers,1,Construction laborers,laborer,
+landscaper,landscapers,1,Grounds maintenance workers,,
+lawyer,lawyers,1,Lawyers,lawyer,
+librarian,librarians,1,Librarians and media collections specialists,librarian,
+logger,loggers,1,Logging workers,,
+lumberjack,lumberjacks,1,Logging workers,lumberjack,
+machinist,machinists,1,Machinists,machinist,
+manager,managers,1,"Managers, all other",manager,
+mathematician,mathematicians,1,Mathematicians,mathematician,
+mechanic,mechanics,1,Automotive service technicians and mechanics,mechanic,
+midwife,midwifes,1,Nurse midwives,midwife,
+millwright,millwrights,1,Millwrights,millwright,
+miner,miners,1,Mining machine operators,,
+musician,musicians,1,Musicians and singers,musician,
+nanny,nannies,1,Childcare workers,,
+nurse,nurses,1,Registered nurses,nurse,
+nutritionist,nutritionists,1,Dietitians and nutritionists,nutritionist,
+operator,operators,1,Machine operators (various),operator,generic; kept for Garg comparability
+optometrist,optometrists,1,Optometrists,optometrist,
+osteopath,osteopaths,1,Physicians,osteopath,
+painter,painters,1,Painters and paperhangers,painter,also artist sense
+paralegal,paralegals,1,Paralegals and legal assistants,,
+paramedic,paramedics,1,Emergency medical technicians and paramedics,,
+pastor,pastors,1,Clergy,,
+pediatrician,pediatricians,1,Physicians,,
+pharmacist,pharmacists,1,Pharmacists,pharmacist,
+photographer,photographers,1,Photographers,photographer,
+physician,physicians,1,Physicians,physician,
+physicist,physicists,1,Physicists and astronomers,physicist,
+plasterer,plasterers,1,Plasterers and stucco masons,plasterer,
+plumber,plumbers,1,"Plumbers, pipefitters, and steamfitters",plumber,
+police,,1,Police officers,police,collective noun
+postmaster,postmasters,1,Postmasters and mail superintendents,postmaster,
+professor,professors,1,Postsecondary teachers,professor,
+programmer,programmers,1,Computer programmers,,
+proprietor,proprietors,1,Owners / proprietors (various),proprietor,
+prosecutor,prosecutors,1,Lawyers,,
+psychiatrist,psychiatrists,1,Physicians,,
+psychologist,psychologists,1,Psychologists,psychologist,
+rancher,ranchers,1,"Farmers, ranchers, and other agricultural managers",,
+realtor,realtors,1,Real estate brokers and sales agents,,
+receptionist,receptionists,1,Receptionists and information clerks,,
+reporter,reporters,1,"News analysts, reporters, and journalists",,
+roofer,roofers,1,Roofers,,
+sailor,sailors,1,Sailors and marine oilers,sailor,
+salesperson,salespeople,1,Retail salespersons,salesperson,
+scientist,scientists,1,"Life, physical, and social scientists, all other",scientist,
+secretary,secretaries,1,Secretaries and administrative assistants,secretary,political title sense (Secretary of State) is common in news
+sheriff,sheriffs,1,Police officers,sheriff,
+shoemaker,shoemakers,1,Shoe and leather workers,shoemaker,
+soldier,soldiers,1,Military enlisted personnel,soldier,
+statistician,statisticians,1,Statisticians,statistician,
+stylist,stylists,1,"Hairdressers, hairstylists, and cosmetologists",,
+supervisor,supervisors,1,First-line supervisors (various),supervisor,also elected county supervisor
+surgeon,surgeons,1,Surgeons,surgeon,
+surveyor,surveyors,1,Surveyors,surveyor,
+tailor,tailors,1,"Tailors, dressmakers, and sewers",tailor,
+teacher,teachers,1,Elementary and middle school teachers,teacher,
+technician,technicians,1,Technicians (various),technician,
+teller,tellers,1,Tellers,bankteller,Garg's compound replaced by the real word
+therapist,therapists,1,Therapists (various),therapist,
+toolmaker,toolmakers,1,Tool and die makers,toolmaker,
+trooper,troopers,1,Police officers,,
+trucker,truckers,1,Driver/sales workers and truck drivers,,
+tutor,tutors,1,Tutors,,
+upholsterer,upholsterers,1,Upholsterers,upholsterer,
+veterinarian,veterinarians,1,Veterinarians,veterinarian,
+weaver,weavers,1,"Textile winding, twisting, and drawing out machine setters, operators, and tenders",weaver,
+welder,welders,1,"Welding, soldering, and brazing workers",welder,
+writer,writers,1,Writers and authors,,
+actor,,0,Actors,,gendered pair (actor/actress)
+aide,,0,,,generic
+assistant,,0,,,generic
+baker,,0,Bakers,baker,common surname
+bookbinder,,0,,bookbinder,obsolete
+boilermaker,,0,,boilermaker,rare; sports-team sense
+bootblack,,0,,bootblack,obsolete
+butcher,,0,Butchers,,common surname
+clerical,,0,,clerical,not an occupation
+collector,,0,,collector,generic (tax / art / debt collector)
+compositor,,0,,compositor,obsolete
+conductor,,0,,conductor,ambiguous (electrical / music / train)
+cook,,0,,cook,common surname and verb
+craftsperson,,0,,craftsperson,artificial neutral form not used in text
+deputy,,0,,,generic title
+developer,,0,,,ambiguous (real-estate / software)
+dishwasher,,0,,,appliance sense
+doorkeeper,,0,,doorkeeper,obsolete
+draftsperson,,0,,draftsperson,artificial neutral form not used in text
+eletrotyper,,0,,eletrotyper,obsolete (and misspelled in Garg)
+guard,,0,,guard,ambiguous (National Guard / point guard)
+huckster,,0,,huckster,obsolete
+mailperson,,0,,mailperson,artificial neutral form not used in text
+maid,,0,,,female-marked word
+mason,,0,,mason,common surname
+milliner,,0,,milliner,obsolete
+minister,,0,,,political sense
+molder,,0,,molder,obsolete
+officer,,0,,,generic title
+official,,0,,official,not an occupation
+paperhanger,,0,,paperhanger,obsolete
+peddler,,0,,peddler,obsolete
+pilot,,0,,pilot,ambiguous (pilot program / TV pilot)
+porter,,0,,porter,common surname
+priest,,0,,,sex-restricted role
+researcher,,0,,,generic
+retired,,0,,retired,not an occupation
+sales,,0,,sales,not an occupation
+server,,0,,,ambiguous (computer server)
+setter,,0,,setter,not an occupation word in modern text
+smith,,0,,smith,common surname
+stereotyper,,0,,stereotyper,obsolete
+student,,0,,student,not an occupation
+teamster,,0,,teamster,union-name sense
+tradesperson,,0,,tradesperson,artificial neutral form not used in text
+typesetter,,0,,typesetter,obsolete
+unemployed,,0,,unemployed,not an occupation
+waiter,,0,,waitstaff,gendered pair (waiter/waitress)

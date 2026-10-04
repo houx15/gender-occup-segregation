@@ -22,6 +22,28 @@ def l2_normalize(v: np.ndarray) -> np.ndarray:
     return v / n
 
 
+def entry_label(entry: str) -> str:
+    """Display label of a wordlist entry: its first form ('nurse|nurses' -> 'nurse')."""
+    return entry.split("|")[0].strip()
+
+
+def entry_vector(model, entry: str) -> Optional[np.ndarray]:
+    """Unit-norm vector for a wordlist entry, or None if no form is in vocab.
+
+    An entry is one word or '|'-separated surface forms of one concept
+    ('nurse|nurses'). Each in-vocab form is L2-normalized, the forms are
+    averaged, and the mean is re-normalized — so an entry counts as in vocab
+    when ANY of its forms is, which matters for small corpora where the
+    plural is often the frequent form.
+    """
+    vecs = [l2_normalize(np.asarray(model[f], dtype=float))
+            for f in (x.strip() for x in entry.split("|"))
+            if f and f in model.key_to_index]
+    if not vecs:
+        return None
+    return l2_normalize(np.mean(vecs, axis=0))
+
+
 def relative_norm_distance(
     v_w: np.ndarray, c_male: np.ndarray, c_female: np.ndarray
 ) -> float:

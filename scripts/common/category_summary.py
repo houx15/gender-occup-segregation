@@ -206,6 +206,14 @@ def build_summary(
                 "n_consistent": len(consistent),
             })
 
+    return finalize_summary(rows, legacy_rnd_aliases, logger)
+
+
+def finalize_summary(rows: List[dict], legacy_rnd_aliases: bool, logger) -> pd.DataFrame:
+    """Rows -> summary frame, plus legacy RND column aliases and an all-NaN check.
+
+    Shared by build_summary (consistent set) and fixed_effects.build_fe_summary.
+    """
     summary_df = pd.DataFrame(rows)
 
     if legacy_rnd_aliases and not summary_df.empty:

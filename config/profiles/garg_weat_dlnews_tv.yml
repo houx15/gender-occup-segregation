@@ -32,18 +32,19 @@ us_states:
 
 wordlists:
   # Occupation (primary) + family. occupation_grounding.csv documents every
-  # candidate: 2018 Census occupation title, Garg (2018) source word, and the
-  # reason for each exclusion. dlnews_cleaned_* = candidates kept by
-  # slurm/wordlists_dlnews.slurm (in vocab in every analyzed newspaper unit).
+  # occupation candidate: plural form, 2018 Census occupation title, Garg (2018)
+  # source word, and the reason for each exclusion. Entries 'a|b' pool surface
+  # forms (vector = mean of in-vocab forms). Word selection happens in the
+  # analyzer (analysis.word_set below); see docs/research-log-wordlists.md.
   dir: "wordlists/en/occupation_family"
   gender_words_file: "gender_words.json"
   categories:
-    occupation: "dlnews_cleaned_occupation.txt"
+    occupation: "candidates_occupation.txt"
     # Common gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6
-    # family list + household, kitchen. Fixed list (not pruned).
+    # family list + household, kitchen (with plural/singular forms).
     family_sphere: "family_sphere.txt"
-    # Unpaid household work / care, from ATUS activity categories; pruned.
-    household: "dlnews_cleaned_household.txt"
+    # Unpaid household work / care, from ATUS activity categories.
+    household: "candidates_household.txt"
 
 corpus:
   tokenizer: "nltk_en"
@@ -74,9 +75,13 @@ analysis:
     occupation: 1
     family_sphere: -1
     household: -1
-  # Analyze only 2005-09 .. 2020-24: earlier periods cover too few states and
-  # their thin models would veto words from the consistent set.
+  # Analyze only 2005-09 .. 2020-24: earlier periods cover too few states.
   decade_range: [2005, 2020]
+  # Small state-period models miss many words, so instead of requiring every
+  # word in every unit (consistent set), use words in vocab in >= 50% of the
+  # analyzed units and estimate each unit's level with word fixed effects.
+  word_set: "fixed_effects"
+  min_word_coverage: 0.5
   bootstrap:
     n_iter: 5000
     ci: 0.68

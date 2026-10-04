@@ -25,7 +25,9 @@ import pandas as pd
 import fire
 
 from scripts.common.config_loader import load_config
-from scripts.common.metrics import relative_norm_distance, l2_normalize
+from scripts.common.metrics import (
+    entry_label, entry_vector, l2_normalize, relative_norm_distance,
+)
 # Re-export shared helpers so existing imports/tests keep working.
 from scripts.common.category_summary import (  # noqa: F401
     load_categories, compute_consistent_set,
@@ -66,17 +68,19 @@ def rnd_values(
     for cat_name, words in categories.items():
         n_in = 0
         for w in words:
-            if w in model.key_to_index:
-                vec = l2_normalize(model[w])
+            vec = entry_vector(model, w)
+            if vec is not None:
                 rows.append({
-                    "unit_name": unit_name, "category": cat_name, "occupation": w,
+                    "unit_name": unit_name, "category": cat_name,
+                    "occupation": entry_label(w),
                     "value": float(relative_norm_distance(vec, c_male, c_female)),
                     "in_vocab": True,
                 })
                 n_in += 1
             else:
                 rows.append({
-                    "unit_name": unit_name, "category": cat_name, "occupation": w,
+                    "unit_name": unit_name, "category": cat_name,
+                    "occupation": entry_label(w),
                     "value": np.nan, "in_vocab": False,
                 })
         logger.info(f"    {cat_name}: {n_in}/{len(words)} in vocab")

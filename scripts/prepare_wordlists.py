@@ -160,7 +160,9 @@ def probe_coverage(
             for cat, words in categories.items():
                 n_in = 0
                 for w in words:
-                    if w in vocab:
+                    # '|' entries ('nurse|nurses') count if ANY form is in
+                    # vocab — same rule as metrics.entry_vector.
+                    if any(f.strip() in vocab for f in w.split("|")):
                         in_vocab_counts[(cat, w)] += 1
                         n_in += 1
                 logger.info(

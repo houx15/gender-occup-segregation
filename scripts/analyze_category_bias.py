@@ -24,6 +24,9 @@ from scripts.common.logging_utils import setup_logging
 from scripts.common.category_summary import (
     load_categories, compute_consistent_set, build_summary,
 )
+from scripts.common.fixed_effects import (
+    build_fe_summary, coverage_word_sets, word_coverage_table,
+)
 from scripts.analyze_garg import (
     discover_models, load_model_for_unit, load_gender_words,
 )
@@ -133,6 +136,15 @@ def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = N
     logger.info(f"Found {len(models)} models")
 
     analysis_cfg = config_data.get("analysis", {})
+    word_set = analysis_cfg.get("word_set", "consistent")
+    if word_set not in ("consistent", "fixed_effects"):
+        raise ValueError(f"analysis.word_set must be 'consistent' or 'fixed_effects', got {word_set!r}")
+    min_cov = analysis_cfg.get("min_word_coverage")
+    if word_set == "fixed_effects" and min_cov is None:
+        raise ValueError("analysis.word_set: fixed_effects needs analysis.min_word_coverage "
+                         "(share of analyzed units a word must be in vocab for, e.g. 0.5)")
+    logger.info(f"Word set: {word_set}"
+                + (f" (min_word_coverage={min_cov})" if word_set == "fixed_effects" else ""))
     boot = analysis_cfg.get("bootstrap", {})
     sub = analysis_cfg.get("subsample", {})
     seed = int(analysis_cfg.get("seed", 42))
@@ -174,9 +186,19 @@ def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = N
             logger.error(f"[{m}] No units produced results — skipping outputs")
             continue
         long_combined = pd.concat(frames, ignore_index=True)
-        consistent = compute_consistent_set(long_combined, categories, units, logger)
-        summary = build_summary(
-            long_combined, units, consistent, logger,
+        if word_set == "fixed_effects":
+            word_sets = coverage_word_sets(long_combined, units, float(min_cov))
+            for cat, ws in word_sets.items():
+                logger.info(f"[{m}] coverage-set {cat}: {len(ws)}/{len(categories[cat])} "
+                            f"words in vocab in >= {min_cov} of {len(units)} units")
+            word_coverage_table(long_combined, units, word_sets).to_csv(
+                results_dir / "word_coverage.csv", index=False)
+            summarize = build_fe_summary
+        else:
+            word_sets = compute_consistent_set(long_combined, categories, units, logger)
+            summarize = build_summary
+        summary = summarize(
+            long_combined, units, word_sets, logger,
             value_col="value",
             boot_n_iter=int(boot.get("n_iter", 5000)),
             boot_ci=float(boot.get("ci", 0.68)),

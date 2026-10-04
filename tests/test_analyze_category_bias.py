@@ -226,3 +226,47 @@ def test_decade_range_clips_state_year_units():
     kept = _units(acb._filter_models(models, None, [2005, 2020],
                                      logging.getLogger("t")))
     assert kept == ["ohio_2005", "new_york_2020"]
+
+
+def _fe_config(tmp_path, analysis_extra):
+    cfg_path = _write_config(tmp_path, ["rnd"])
+    cfg = yaml.safe_load(cfg_path.read_text())
+    cfg["analysis"].update(analysis_extra)
+    cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+    return cfg_path, cfg
+
+
+def test_fixed_effects_word_set_keeps_partially_covered_words(tmp_path, monkeypatch):
+    cfg_path, cfg = _fe_config(tmp_path, {"word_set": "fixed_effects",
+                                          "min_word_coverage": 0.5,
+                                          "bootstrap": {"n_iter": 50},
+                                          "subsample": {"n_rounds": 20}})
+    kvs = _kvs()
+    del kvs["2000s"]._v["cleaning"]  # consistent set would drop 'cleaning'
+    kvs["2000s"].key_to_index = {w: i for i, w in enumerate(kvs["2000s"]._v)}
+    _touch(Path(cfg["paths"]["models_dir"]), list(kvs))
+    import scripts.analyze_garg as ag
+    monkeypatch.setattr(ag, "load_model", _loader(kvs))
+    import scripts.analyze_category_bias as acb
+    acb.main(config=str(cfg_path))
+
+    rdir = Path(cfg["paths"]["results_dir"])
+    s = pd.read_parquet(rdir / "garg_weat_summary_by_category.parquet")
+    fam = s[s.category == "family"].set_index("unit_name")
+    assert (fam["n_consistent"] == 2).all()           # both words used
+    assert fam.loc["1990s", "n_occupations"] == 2
+    assert fam.loc["2000s", "n_occupations"] == 1
+    cov = pd.read_csv(rdir / "word_coverage.csv").set_index("occupation")
+    assert cov.loc["cleaning", "coverage"] == 0.5 and bool(cov.loc["cleaning", "used"])
+
+
+def test_fixed_effects_requires_min_word_coverage(tmp_path, monkeypatch):
+    import pytest
+    cfg_path, cfg = _fe_config(tmp_path, {"word_set": "fixed_effects"})
+    kvs = _kvs()
+    _touch(Path(cfg["paths"]["models_dir"]), list(kvs))
+    import scripts.analyze_garg as ag
+    monkeypatch.setattr(ag, "load_model", _loader(kvs))
+    import scripts.analyze_category_bias as acb
+    with pytest.raises(ValueError, match="min_word_coverage"):
+        acb.main(config=str(cfg_path))

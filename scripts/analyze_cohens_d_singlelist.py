@@ -18,7 +18,7 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from scripts.common.metrics import l2_normalize
+from scripts.common.metrics import entry_label, entry_vector
 from scripts.common.embedding_utils import construct_semantic_axis, compute_projection
 
 
@@ -55,17 +55,19 @@ def projection_values(
     for cat_name, words in categories.items():
         n_in = 0
         for w in words:
-            if w in model.key_to_index:
-                vec = l2_normalize(model[w])
+            vec = entry_vector(model, w)
+            if vec is not None:
                 projection, _cosine = compute_projection(vec, axis)
                 rows.append({
-                    "unit_name": unit_name, "category": cat_name, "occupation": w,
+                    "unit_name": unit_name, "category": cat_name,
+                    "occupation": entry_label(w),
                     "value": float(projection), "in_vocab": True,
                 })
                 n_in += 1
             else:
                 rows.append({
-                    "unit_name": unit_name, "category": cat_name, "occupation": w,
+                    "unit_name": unit_name, "category": cat_name,
+                    "occupation": entry_label(w),
                     "value": np.nan, "in_vocab": False,
                 })
         logger.info(f"    {cat_name}: {n_in}/{len(words)} in vocab")
