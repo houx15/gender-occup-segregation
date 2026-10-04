@@ -95,6 +95,9 @@ analysis:
 # scripts.data_prep.build_occupation_shares (config/ipums_acs.yml).
 census_check:
   shares_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs/shares_5y_step5"
+  # family behaviour (ACS) and attitudes (Project Implicit) for the same windows
+  family_file: "/scratch/network/yh6580/gender-occup/data/ipums_acs_family/family_measures_5y_step5.csv"
+  attitude_file: "/scratch/network/yh6580/gender-occup/data/project_implicit/attitude_measures_5y_step5.csv"
 
 dlnews:
   # 3DLNews2 "no-HTML" collection (~7 GB total, all platforms/media/years).
