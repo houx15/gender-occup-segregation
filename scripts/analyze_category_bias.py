@@ -62,13 +62,17 @@ def _unit_start_year(unit_name: str) -> Optional[int]:
 
     Handles both longitudinal label shapes: decade labels ('1990s' -> 1990,
     COHA/HistWords) and rolling-window slices ('1940_1949' -> 1940, the ngram
-    and renminribao arms). Provincial units ('北京', '北京_2020') return None.
-    Same parse as visualize._decade_start_year, so a decade_range clip and the
-    plotted x-axis agree on what a unit's year is.
+    and renminribao arms), plus US state-period units ('ohio_2005' -> 2005,
+    trailing year after an ASCII state name). Provincial units ('北京',
+    '北京_2020') return None, so a window never empties a provincial run.
     """
     s = str(unit_name)
     if len(s) == 5 and s.endswith("s") and s[:4].isdigit():
         return int(s[:4])
+    head, _, tail = s.rpartition("_")
+    if head and head.isascii() and head.replace("_", "").isalpha() \
+            and tail.isdigit() and len(tail) == 4:
+        return int(tail)
     try:
         return int(s.split("_")[0])
     except (ValueError, IndexError):

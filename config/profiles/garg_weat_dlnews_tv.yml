@@ -31,17 +31,19 @@ us_states:
   trend_start: 2005
 
 wordlists:
-  dir: "wordlists/en/garg_weat"
+  # Occupation (primary) + family. occupation_grounding.csv documents every
+  # candidate: 2018 Census occupation title, Garg (2018) source word, and the
+  # reason for each exclusion. dlnews_cleaned_* = candidates kept by
+  # slurm/wordlists_dlnews.slurm (in vocab in every analyzed newspaper unit).
+  dir: "wordlists/en/occupation_family"
   gender_words_file: "gender_words.json"
-  # dlnews_cleaned_* = candidates pruned to words in vocab in every newspaper
-  # state-period model (slurm/wordlists_dlnews.slurm). COHA keeps cleaned_*.
   categories:
-    leadership: "dlnews_cleaned_leadership.txt"
-    family: "dlnews_cleaned_family.txt"
-    science: "dlnews_cleaned_science.txt"
-    # Common, gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6
-    # family list + household, kitchen (same as weat_formal domestic_work).
+    occupation: "dlnews_cleaned_occupation.txt"
+    # Common gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6
+    # family list + household, kitchen. Fixed list (not pruned).
     family_sphere: "family_sphere.txt"
+    # Unpaid household work / care, from ATUS activity categories; pruned.
+    household: "dlnews_cleaned_household.txt"
 
 corpus:
   tokenizer: "nltk_en"
@@ -69,10 +71,12 @@ analysis:
   metrics: [rnd, cohens_d]
   seed: 42
   ideation_sign:
-    leadership: 1
-    science: 1
-    family: -1
+    occupation: 1
     family_sphere: -1
+    household: -1
+  # Analyze only 2005-09 .. 2020-24: earlier periods cover too few states and
+  # their thin models would veto words from the consistent set.
+  decade_range: [2005, 2020]
   bootstrap:
     n_iter: 5000
     ci: 0.68

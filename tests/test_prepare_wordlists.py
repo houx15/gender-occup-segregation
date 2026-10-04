@@ -92,3 +92,24 @@ def test_prune_exact_threshold_kept():
         categories, {("leadership", "edge"): 0.8}, threshold=0.8
     )
     assert kept["leadership"] == ["edge"]
+
+
+def test_probe_coverage_respects_decade_range_on_state_year_units(monkeypatch):
+    """Coverage is pooled only over the analyzer's window (same clip), so thin
+    out-of-window units don't veto words."""
+    import logging
+    from types import SimpleNamespace
+    import scripts.prepare_wordlists as pw
+
+    cfg = {"embedding_source": "dlnews", "analysis": {"decade_range": [2005, 2020]}}
+    monkeypatch.setattr(pw, "load_config", lambda p: cfg)
+    monkeypatch.setattr(pw, "discover_models", lambda c: [
+        ("/m/a", "ohio_2000"), ("/m/b", "ohio_2005"), ("/m/c", "utah_2020")])
+    vocab = {"ohio_2000": {}, "ohio_2005": {"nurse": 0}, "utah_2020": {"nurse": 0}}
+    monkeypatch.setattr(pw, "load_model_for_unit",
+                        lambda path, c: SimpleNamespace(key_to_index=vocab[
+                            {"/m/a": "ohio_2000", "/m/b": "ohio_2005", "/m/c": "utah_2020"}[path]]))
+    coverage, n = pw.probe_coverage(["x.yml"], {"occupation": ["nurse"]},
+                                    logging.getLogger("t"))
+    assert n == 2
+    assert coverage[("occupation", "nurse")] == 1.0

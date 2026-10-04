@@ -23,9 +23,10 @@ The raw ``candidates_*.txt`` files are NEVER modified. Outputs:
     and disposition (kept / dropped_dup / dropped_oov), for manual review
     before running the full pipeline.
 
-Reuses discover_models + load_model_for_unit + decade_to_census_year from
-analyze_garg so model discovery and format dispatch (gensim_kv vs histwords)
-stay identical to the real analyzer.
+Reuses discover_models + load_model_for_unit from analyze_garg and the
+analyzer's decade_range clip (analyze_category_bias._filter_models), so model
+discovery, format dispatch and the unit window stay identical to the real
+analyzer.
 
 Usage (on the cluster, where the embeddings live):
     python -m scripts.prepare_wordlists \
@@ -43,10 +44,11 @@ from typing import Dict, List, Tuple
 import pandas as pd
 import fire
 
+from scripts.analyze_category_bias import _filter_models
 from scripts.common.config_loader import load_config
 from scripts.common.logging_utils import setup_logging
 from scripts.analyze_garg import (
-    discover_models, load_model_for_unit, decade_to_census_year,
+    discover_models, load_model_for_unit,
 )
 
 
@@ -145,21 +147,10 @@ def probe_coverage(
         source = cfg.get("embedding_source", "unknown")
         models = discover_models(cfg)
 
-        # Mirror analyze_garg_weat's decade_range clip so we probe inside the
-        # same comparable window the analyzer will use.
-        decade_range = cfg.get("analysis", {}).get("decade_range")
-        if decade_range:
-            start, end = int(decade_range[0]), int(decade_range[1])
-            kept = []
-            for path, unit in models:
-                year = decade_to_census_year(unit)
-                if year is None or start <= year <= end:
-                    kept.append((path, unit))
-            logger.info(
-                f"[{source}] decade_range [{start}, {end}]: "
-                f"{len(models)} -> {len(kept)} models"
-            )
-            models = kept
+        # Same window clip as the analyzer (analysis.decade_range), so coverage
+        # is pooled over exactly the units that will be analyzed.
+        models = _filter_models(models, None, cfg.get("analysis", {}).get("decade_range"),
+                                logger)
 
         logger.info(f"[{source}] probing {len(models)} models")
         for model_path, unit_name in models:

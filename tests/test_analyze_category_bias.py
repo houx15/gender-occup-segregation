@@ -213,3 +213,16 @@ def test_decade_range_keeps_yearless_provincial_units():
     kept = _units(acb._filter_models(models, None, [1950, 2020],
                                      logging.getLogger("t")))
     assert kept == ["北京", "上海_2020", "1990s"]
+
+
+def test_decade_range_clips_state_year_units():
+    """US {state}_{period} units clip on their trailing year, so a window can
+    drop the thin early periods (and they stop shrinking the consistent set)."""
+    import logging
+    import scripts.analyze_category_bias as acb
+
+    models = [("/m/a", "ohio_2000"), ("/m/b", "ohio_2005"),
+              ("/m/c", "new_york_2020"), ("/m/d", "district_of_columbia_1995")]
+    kept = _units(acb._filter_models(models, None, [2005, 2020],
+                                     logging.getLogger("t")))
+    assert kept == ["ohio_2005", "new_york_2020"]
