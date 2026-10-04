@@ -197,8 +197,9 @@ the 4 largest models: CA 2010/2015/2020, TX 2020):
 | coach / judge / executive | coaching, players / court, magistrate / CEO, president | job sense |
 
 **Decision.** Drop *weaver* (`include = 0` in the grounding table, with this
-evidence). Pending PI decision: carpenter, painter, secretary, supervisor,
-operator, driver.
+evidence). Keep carpenter, painter, secretary, supervisor, operator and driver
+(PI: words with adequate coverage stay; their mixed senses are documented
+here and in the grounding notes).
 
 ---
 
