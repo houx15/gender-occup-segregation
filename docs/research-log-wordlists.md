@@ -276,6 +276,53 @@ track cross-state differences in composition. Either the state signal is
 mostly estimation noise, or local news norms and local labor-market
 composition genuinely diverge — not separable yet.
 
+## 2026-10-04 — More benchmarks: family behaviour (ACS) and attitudes (Project Implicit)
+
+**Why.** ACS only records behaviour; no housework time, no opinions. Combined
+benchmark set per state-window:
+
+- objective, occupation: matched female share, Duncan index, female
+  employment share (ACS extract 1);
+- objective, family: motherhood employment gap, motherhood hours gap, married
+  women not in the labor force, wife's share of couple earnings, wife earns
+  more, gender employment gap (ACS extract 2, adults 25-54, PERWT);
+- objective, housework: ATUS (pending — the account needs a separate IPUMS
+  ATUS registration);
+- subjective: Project Implicit Gender-Career IAT 2005-2024 (2.1M US
+  respondents with state): implicit D score and explicit career-family
+  stereotype, raw and sex-balanced. Volunteers, not a probability sample.
+
+All ACS measures use person weights (PERWT) summed over the window's years, so
+they are state-representative; replicate weights (SEs) are not used yet.
+
+**Evidence** (5-year units, job 3391526, commit a4ab042; balanced panel of 46
+states):
+
+| Period | ours occupation | ours family_sphere (raw) | IAT (sex-bal.) | explicit (sex-bal.) | motherhood emp. gap | wife earnings share |
+|--------|------:|------:|------:|------:|------:|------:|
+| 2005-09 | -0.0122 | 0.0090 | 0.369 | 1.56 | 0.134 | 0.359 |
+| 2010-14 | -0.0091 | 0.0113 | 0.374 | 1.64 | 0.113 | 0.366 |
+| 2015-19 | -0.0066 | 0.0118 | 0.341 | 1.05 | 0.106 | 0.366 |
+| 2020-24 | -0.0042 | 0.0093 | 0.316 | 0.82 | 0.109 | 0.380 |
+
+Nationally, every benchmark moves the less-traditional way from 2005-09 to
+2020-24, as does our occupation score; family_sphere stays female-leaning
+with no clear trend.
+
+Across states, occupation score vs attitudes, within each window:
+
+| | 2005-09 | 2010-14 | 2015-19 | 2020-24 | change |
+|---|---:|---:|---:|---:|---:|
+| IAT (sex-balanced) | -0.26 | -0.38 | -0.43 | +0.33 | 0.10 |
+| explicit (sex-balanced) | -0.11 | -0.22 | -0.42 | +0.08 | 0.04 |
+
+Negative = states whose news treats occupations as less male have weaker
+career-male stereotypes (the expected direction) in three of four windows,
+reversing in 2020-24. All other ours x benchmark pairs (family behaviour,
+occupational composition) are |r| <= 0.3 with unstable signs; the one
+notable change correlation is family_sphere vs IAT (0.44, n = 46) — one of
+~40 pairs tested, so treat as exploratory.
+
 ---
 
 ## Open questions
