@@ -9,3 +9,9 @@ years: [2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014,
 variables: [YEAR, STATEFIP, SEX, AGE, EMPSTAT, OCC2010, PERWT]
 case_selections:
   EMPSTAT: ["1"]   # employed
+
+# build_occupation_shares (offline, Slurm): word -> OCC2010 codes, and periods
+# matching the dlnews state-period units (5-year bins from 2005).
+occupation_mapping: "wordlists/en/occupation_family/occupation_occ2010.csv"
+period_start: 2005
+period_width: 5
