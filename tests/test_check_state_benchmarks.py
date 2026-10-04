@@ -57,3 +57,14 @@ def test_benchmark_table_joins_sources_on_unit_name():
     assert t.loc["ohio_2005", "married_women_nilf"] == pytest.approx(0.2)
     assert t.loc["ohio_2005", "iat_sex_balanced"] == pytest.approx(0.35)
     assert t.loc["ohio_2005", "period"] == 2005
+
+
+def test_agreement_r_flips_to_common_traditional_direction():
+    from scripts.check_state_benchmarks import TRADITIONAL_SIGN, add_agreement
+    c = pd.DataFrame({"ours": ["ours_occupation", "ours_occupation", "ours_family_sphere"],
+                      "survey": ["iat_sex_balanced", "matched_female_share", "iat_sex_balanced"],
+                      "pearson_r": [-0.4, 0.3, 0.2]})
+    a = add_agreement(c)
+    # occupation (higher = less traditional) vs IAT (higher = more traditional): -0.4 agrees
+    assert list(a["agreement_r"]) == pytest.approx([0.4, 0.3, 0.2])
+    assert TRADITIONAL_SIGN["duncan"] == 1 and TRADITIONAL_SIGN["ours_occupation"] == -1

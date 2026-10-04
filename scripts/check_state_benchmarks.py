@@ -13,7 +13,8 @@ and survey benchmarks for the same state and window:
 
 Correlations (Pearson, Spearman) of every ours x benchmark pair: pooled over all
 units, across states within each window, and across states for the change from
-the first to the last window. Plus a national trend table (means over a
+the first to the last window. ``agreement_r`` re-signs Pearson r via
+TRADITIONAL_SIGN so that > 0 always means the two agree. Plus a national trend table (means over a
 balanced panel of states).
 
 Config (census_check block): shares_dir, family_file, attitude_file (each for
@@ -44,6 +45,17 @@ OCCUPATION = ["matched_female_share", "duncan", "female_emp_share"]
 FAMILY = ["motherhood_emp_gap", "motherhood_hours_gap", "married_women_nilf",
           "wife_earnings_share", "wife_earns_more", "gender_emp_gap"]
 ATTITUDE = ["iat_sex_balanced", "explicit_sex_balanced", "iat_mean", "explicit_mean"]
+
+# +1 if a higher value means MORE traditional gender norms, -1 if less.
+# ours_*: raw mean RND (> 0 = closer to women); female-leaning occupations are
+# less traditional, female-leaning family / household words more traditional.
+TRADITIONAL_SIGN = {
+    "ours_occupation": -1, "ours_family_sphere": 1, "ours_household": 1,
+    "matched_female_share": -1, "duncan": 1, "female_emp_share": -1,
+    "motherhood_emp_gap": 1, "motherhood_hours_gap": 1, "married_women_nilf": 1,
+    "wife_earnings_share": -1, "wife_earns_more": -1, "gender_emp_gap": 1,
+    "iat_sex_balanced": 1, "explicit_sex_balanced": 1, "iat_mean": 1, "explicit_mean": 1,
+}
 
 
 def with_unit_name(d: pd.DataFrame) -> pd.DataFrame:
@@ -96,6 +108,13 @@ def correlate(t: pd.DataFrame, ours_cols: List[str], survey_cols: List[str]) -> 
     return pd.DataFrame(rows)
 
 
+def add_agreement(corr: pd.DataFrame) -> pd.DataFrame:
+    """agreement_r: pearson_r re-signed so that > 0 = ours and survey agree
+    (both point to more, or both to less, traditional norms)."""
+    sign = (corr["ours"].map(TRADITIONAL_SIGN) * corr["survey"].map(TRADITIONAL_SIGN))
+    return corr.assign(agreement_r=corr["pearson_r"] * sign)
+
+
 def national_trend(t: pd.DataFrame, cols: List[str]) -> pd.DataFrame:
     periods = t["period"].nunique()
     full = t.groupby("state")["period"].nunique()
@@ -129,7 +148,7 @@ def main(config: str) -> None:
 
     t = benchmark_table(our_scores(summary).merge(occ, on="unit_name", how="left"), sources)
     ours_cols = [c for c in t.columns if c.startswith("ours_")]
-    corr = correlate(t, ours_cols, survey_cols)
+    corr = add_agreement(correlate(t, ours_cols, survey_cols))
     trend = national_trend(t, ours_cols + survey_cols)
     t.to_csv(results / "state_benchmark_table.csv", index=False)
     corr.to_csv(results / "state_benchmark_correlations.csv", index=False)
@@ -139,10 +158,9 @@ def main(config: str) -> None:
     print(f"== {config}: {len(t)} units, benchmarks: {survey_cols}")
     print("\nNational trend (balanced states):")
     print(trend.round(4).to_string(index=False))
-    pooled = corr[corr["scope"].isin(["pooled"]) | corr["scope"].str.startswith("change")]
-    print("\nCorrelations (pooled and change):")
-    print(pooled.pivot_table(index=["ours", "survey"], columns="scope",
-                             values="pearson_r").round(2).to_string())
+    print("\nAgreement correlations (> 0 = ours and survey agree on more/less traditional):")
+    print(corr.pivot_table(index=["ours", "survey"], columns="scope",
+                           values="agreement_r").round(2).to_string())
 
 
 if __name__ == "__main__":
