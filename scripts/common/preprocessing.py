@@ -184,9 +184,13 @@ def preprocess(
     lowercase: bool,
     min_words: int,
     cleaner_opts: dict | None = None,
+    keep_words: frozenset | None = None,
 ) -> list[str] | None:
     """
     Clean → tokenize → filter stopwords → length-check.
+
+    ``keep_words`` are exempt from stopword removal (e.g. gender pronouns,
+    which NLTK lists as stopwords, for the state-tagged arm). Default: none.
 
     Returns the filtered token list, or None when the document should be
     dropped (too short, or empty after cleaning).
@@ -203,6 +207,8 @@ def preprocess(
 
     if stopwords_key:
         sw = get_stopwords(stopwords_key)
+        if keep_words:
+            sw = sw - keep_words
         # `t and t.strip()` guards against jieba emitting whitespace tokens on raw input
         tokens = [t for t in tokens if t and t.strip() and t not in sw]
 

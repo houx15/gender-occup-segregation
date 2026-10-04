@@ -260,3 +260,14 @@ def test_preprocess_stopwords_removed():
     )
     # "the" and "and" are English stopwords; after removal doc is empty
     assert result is None or len(result) == 0
+
+
+def test_keep_words_survive_stopword_removal():
+    from scripts.common.preprocessing import preprocess
+    text = "she said that he was the nurse on duty today"
+    kw = dict(language="en", tokenizer="nltk_en", stopwords_key="en_default",
+              lowercase=True, min_words=1)
+    default = preprocess(text, **kw)
+    kept = preprocess(text, keep_words=frozenset({"she", "he"}), **kw)
+    assert "she" not in default and "he" not in default   # unchanged default behaviour
+    assert kept[:1] == ["she"] and "he" in kept and "that" not in kept

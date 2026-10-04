@@ -323,6 +323,28 @@ occupational composition) are |r| <= 0.3 with unstable signs; the one
 notable change correlation is family_sphere vs IAT (0.44, n = 46) — one of
 ~40 pairs tested, so treat as exploratory.
 
+## 2026-10-04 — Approach A (shared model per period, state-tagged anchors) set up
+
+**Why.** Per-state models train on ~1.5M tokens (median 5-year unit) vs
+billions for Google Ngram; state scores are dominated by estimation noise
+(adjacent-period stability ~0.2 vs ~0.97 for ACS state measures). Approach A
+keeps the data but pools it: one model per 5-year period over all states
+(~110M tokens), where only the 40 gender anchors are tagged by state
+('she__ohio'). List words learn from all text; each state contributes its own
+gender centroids. Separate arm: `garg_weat_dlnews_tagged.yml`,
+`slurm/tagged_dlnews.slurm`, `scripts/analyze_state_tagged.py`. In parallel:
+10-year windows every 5 years for the per-state arm (`_w10.yml`).
+
+**Finding while building it: pronouns were never in the English corpora.**
+NLTK's English stopword list (our `en_default`) contains he, him, his,
+himself, she, her, hers, herself, so every English corpus built with
+`en_default` (3DLNews2 per-state arms; likely COHA-trained and others) dropped
+8 of the 40 gender anchors; gender centroids came from the remaining 32 nouns
+(man, woman, father, mother, ...). Approach A exempts the anchors from
+stopword removal (`preprocess(..., keep_words=...)`) because pronouns are what
+keep small states' tagged anchors frequent. Existing arms left unchanged
+pending a PI decision.
+
 ---
 
 ## Open questions

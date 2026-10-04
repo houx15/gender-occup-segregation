@@ -108,33 +108,13 @@ def _filter_models(models, unit, decade_range, logger):
     return models
 
 
-def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = None) -> None:
-    logger = setup_logging(Path(config_data["paths"]["log_dir"]), "analyze_category_bias.log")
-    metrics = _resolve_metrics(config_data, metrics)
-    logger.info("=" * 80)
-    logger.info(f"Single-wordlist bias analysis — metrics={metrics}")
-    logger.info("=" * 80)
-
-    wl_dir = get_wordlist_dir(config_data)
-    wl_cfg = config_data.get("wordlists", {})
-    gender_words = load_gender_words(
-        wl_dir / wl_cfg.get("gender_words_file", "gender_words.json"), logger
-    )
-    categories = load_categories(config_data, logger)
-
-    models = discover_models(config_data)
-    decade_range = config_data.get("analysis", {}).get("decade_range")
-    models = _filter_models(models, unit, decade_range, logger)
-    if not models:
-        logger.error(
-            f"No models found in {config_data['paths']['models_dir']}"
-            + (f" matching unit prefix '{unit}'" if unit else "")
-            + (f" within decade_range {decade_range}" if decade_range else "")
-            + " — nothing written"
-        )
-        return
-    logger.info(f"Found {len(models)} models")
-
+def summarize_and_write(collected: Dict[str, Tuple[List[pd.DataFrame], List[str]]],
+                        metrics: List[str], categories: Dict[str, List[str]],
+                        config_data: dict, logger) -> None:
+    """Per metric: combine per-unit long frames, choose the word set (consistent
+    or fixed_effects), build the per-(unit, category) summary and write the
+    long + summary parquets (and word_coverage.csv). Shared with
+    analyze_state_tagged, whose units come from one model per period."""
     analysis_cfg = config_data.get("analysis", {})
     word_set = analysis_cfg.get("word_set", "consistent")
     if word_set not in ("consistent", "fixed_effects"):
@@ -157,24 +137,6 @@ def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = N
             sub.get("ci", 0.95), seed,
         )
     )
-
-    # metric -> (frames_list, units_list); both lists are appended in the loop.
-    collected: Dict[str, Tuple[List[pd.DataFrame], List[str]]] = {
-        m: ([], []) for m in metrics
-    }
-    for model_path, unit_name in models:
-        model = load_model_for_unit(model_path, config_data)  # loaded ONCE
-        try:
-            logger.info(f"  {unit_name}: vocab_size={len(model.key_to_index)}")
-        except Exception as e:  # noqa: BLE001
-            logger.warning(f"  {unit_name}: could not introspect vocab ({e!r})")
-        for m in metrics:
-            producer = METRIC_SPECS[m][0]
-            long_df = producer(model, unit_name, categories, gender_words, logger)
-            if long_df is None:
-                continue
-            collected[m][0].append(long_df)
-            collected[m][1].append(unit_name)
 
     results_dir = Path(config_data["paths"]["results_dir"])
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -215,6 +177,55 @@ def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = N
         summary.to_parquet(summary_path, index=False)
         logger.info(f"[{m}] Saved: {long_path}")
         logger.info(f"[{m}] Saved: {summary_path}")
+
+
+
+def run(config_data: dict, metrics: Optional[List[str]], unit: Optional[str] = None) -> None:
+    logger = setup_logging(Path(config_data["paths"]["log_dir"]), "analyze_category_bias.log")
+    metrics = _resolve_metrics(config_data, metrics)
+    logger.info("=" * 80)
+    logger.info(f"Single-wordlist bias analysis — metrics={metrics}")
+    logger.info("=" * 80)
+
+    wl_dir = get_wordlist_dir(config_data)
+    wl_cfg = config_data.get("wordlists", {})
+    gender_words = load_gender_words(
+        wl_dir / wl_cfg.get("gender_words_file", "gender_words.json"), logger
+    )
+    categories = load_categories(config_data, logger)
+
+    models = discover_models(config_data)
+    decade_range = config_data.get("analysis", {}).get("decade_range")
+    models = _filter_models(models, unit, decade_range, logger)
+    if not models:
+        logger.error(
+            f"No models found in {config_data['paths']['models_dir']}"
+            + (f" matching unit prefix '{unit}'" if unit else "")
+            + (f" within decade_range {decade_range}" if decade_range else "")
+            + " — nothing written"
+        )
+        return
+    logger.info(f"Found {len(models)} models")
+
+    # metric -> (frames_list, units_list); both lists are appended in the loop.
+    collected: Dict[str, Tuple[List[pd.DataFrame], List[str]]] = {
+        m: ([], []) for m in metrics
+    }
+    for model_path, unit_name in models:
+        model = load_model_for_unit(model_path, config_data)  # loaded ONCE
+        try:
+            logger.info(f"  {unit_name}: vocab_size={len(model.key_to_index)}")
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"  {unit_name}: could not introspect vocab ({e!r})")
+        for m in metrics:
+            producer = METRIC_SPECS[m][0]
+            long_df = producer(model, unit_name, categories, gender_words, logger)
+            if long_df is None:
+                continue
+            collected[m][0].append(long_df)
+            collected[m][1].append(unit_name)
+
+    summarize_and_write(collected, metrics, categories, config_data, logger)
 
     logger.info("=" * 80)
     logger.info("Single-wordlist bias analysis completed!")

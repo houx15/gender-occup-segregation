@@ -295,3 +295,31 @@ def test_build_corpus_rolling_windows_put_an_article_in_each_overlapping_window(
     coverage = b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
     # windows 1940-41 and 1941-42 both contain 1941
     assert coverage == {"new_york_1940": 1, "new_york_1941": 1}
+
+
+def test_tag_gender_tokens_only_tags_anchors():
+    toks = ["she", "is", "a", "nurse", "and", "he", "teaches"]
+    assert b.tag_gender_tokens(toks, {"she", "he"}, "ohio") == [
+        "she__ohio", "is", "a", "nurse", "and", "he__ohio", "teaches"]
+
+
+def test_build_corpus_tagged_mode_pools_states_into_one_period_unit(tmp_path):
+    import json
+    import logging
+    cfg = _cfg(tmp_path, "dlnews", min_docs=1)
+    wl = tmp_path / "wl"; wl.mkdir()
+    (wl / "gender_words.json").write_text(json.dumps({"male": ["he"], "female": ["she"]}))
+    cfg["wordlists"] = {"dir": str(wl), "gender_words_file": "gender_words.json"}
+    cfg["us_states"]["tag_gender_by_state"] = True
+    raw = Path(cfg["paths"]["raw_data_dir"]) / "google_newspaper"
+    for usps, text in (("NY", "she said the nurse union approved the contract"),
+                       ("TX", "he said the farm bill passed the senate today")):
+        (raw / usps).mkdir(parents=True)
+        _write_rows(raw / usps / f"preprocessed_newspaper_articles_{usps}_1940.jsonl.gz",
+                    [{"content": text}])
+    coverage = b.build_corpus(cfg, logging.getLogger("t"), arm="dlnews")
+    assert coverage == {"new_york_1940": 1, "texas_1940": 1}   # per-state report kept
+    unit = Path(cfg["paths"]["corpora_dir"]) / "pooled_1940"
+    text = " ".join(p.read_text() for p in unit.glob("corpus_*"))
+    assert "she__new_york" in text and "he__texas" in text and "nurse" in text
+    assert not (Path(cfg["paths"]["corpora_dir"]) / "new_york_1940").exists()

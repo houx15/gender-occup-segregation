@@ -1,0 +1,130 @@
+# Approach A — ONE shared word2vec model per 5-year period over all states'
+# Google newspaper articles, with only the gender anchor words tagged by state
+# ('she__ohio'). List words learn from all of the period's text; each state
+# keeps its own gender centroids (scripts/analyze_state_tagged.py). Separate
+# from the per-state-model arms (garg_weat_dlnews.yml / _w10.yml): own corpora,
+# models and results. Run: sbatch slurm/tagged_dlnews.slurm
+language: "en"
+data_source: "dlnews"
+analysis_mode: "garg_weat"
+embedding_source: "dlnews"
+_arm: "dlnews"
+
+paths:
+  base_dir: "/scratch/network/yh6580/gender-occup"
+  raw_data_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/raw"
+  corpora_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper_tagged/corpora"
+  models_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper_tagged/models"
+  results_dir: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/newspaper_tagged/results_garg_weat"
+  log_dir: "/scratch/network/yh6580/gender-occup/logs/dlnews_newspaper_tagged"
+  figures_dir: "/scratch/network/yh6580/gender-occup/figures/dlnews_newspaper_tagged_garg_weat"
+
+us_states:
+  shapefile: "data/shapefiles/us_states.shp"
+  min_documents: 500
+  # 2005-2024 only: the analysis window (earlier periods cover few states).
+  years: [2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014,
+          2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+  year_bins: 5
+  # Pool all states into one corpus per period; tag gender anchors by state.
+  # Anchors (incl. he/she/his/her, NLTK stopwords) are exempt from stopword removal.
+  tag_gender_by_state: true
+  # Trend + per-state change are measured from this period on (balanced panel
+  # of states present in every period); 2005-09 is the first with 46+ states.
+  trend_start: 2005
+
+wordlists:
+  # Occupation (primary) + family. occupation_grounding.csv documents every
+  # occupation candidate: plural form, 2018 Census occupation title, Garg (2018)
+  # source word, and the reason for each exclusion. Entries 'a|b' pool surface
+  # forms (vector = mean of in-vocab forms). Word selection happens in the
+  # analyzer (analysis.word_set below); see docs/research-log-wordlists.md.
+  dir: "wordlists/en/occupation_family"
+  gender_words_file: "gender_words.json"
+  categories:
+    occupation: "candidates_occupation.txt"
+    # Common gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6
+    # family list + household, kitchen (with plural/singular forms).
+    family_sphere: "family_sphere.txt"
+    # Unpaid household work / care, from ATUS activity categories.
+    household: "candidates_household.txt"
+
+corpus:
+  tokenizer: "nltk_en"
+  stopwords: "en_default"
+  lowercase: true
+  min_words: 5
+  dedup:
+    enabled: true
+    method: "shingle"
+    shingle_k: 8
+    scope: "within_year"
+
+embedding:
+  vector_size: 300
+  window: 5
+  min_count: 20
+  sg: 1
+  negative: 10
+  workers: 16
+  epochs: 10
+  seed: 42
+  model_name_template: "model_{unit_name}.kv"
+
+analysis:
+  metrics: [rnd, cohens_d]
+  seed: 42
+  ideation_sign:
+    occupation: 1
+    family_sphere: -1
+    household: -1
+  # Analyze only 2005-09 .. 2020-24: earlier periods cover too few states.
+  decade_range: [2005, 2020]
+  # Small state-period models miss many words, so instead of requiring every
+  # word in every unit (consistent set), use words in vocab in >= 50% of the
+  # analyzed units and estimate each unit's level with word fixed effects.
+  word_set: "fixed_effects"
+  min_word_coverage: 0.5
+  # a state needs >= this many tagged anchors in vocab on each pole
+  min_tagged_anchors: 3
+  bootstrap:
+    n_iter: 5000
+    ci: 0.68
+  subsample:
+    fraction: 0.8
+    n_rounds: 100
+    ci: 0.95
+
+# Descriptive check of occupation scores against ACS census data (IPUMS
+# extract; scripts/check_occupation_census.py). shares_dir holds the outputs of
+# scripts.data_prep.build_occupation_shares (config/ipums_acs.yml).
+census_check:
+  shares_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs/shares_5y_step5"
+  # family behaviour (ACS) and attitudes (Project Implicit) for the same windows
+  family_file: "/scratch/network/yh6580/gender-occup/data/ipums_acs_family/family_measures_5y_step5.csv"
+  attitude_file: "/scratch/network/yh6580/gender-occup/data/project_implicit/attitude_measures_5y_step5.csv"
+
+dlnews:
+  # 3DLNews2 "no-HTML" collection (~7 GB total, all platforms/media/years).
+  source_endpoint: "e524969c-7dff-474c-899c-efddf8d15b83"
+  # Globus Connect Personal endpoint on Adroit (yh6580). GCP must be running
+  # during the transfer, and /scratch/network/yh6580 must be in ~/.globusonline/lta/config-paths.
+  dest_endpoint: "4b37405c-9517-11f1-8269-02ce27bde401"
+  # dest_root as the dest Globus collection sees it (may differ from the shell
+  # path if the collection is rooted at a mount prefix). Each collection lands in
+  # dest_root/{name}/{USPS}/... (raw_data_dir/{name}).
+  dest_root: "/scratch/network/yh6580/gender-occup/data/american_state/dlnews/raw"
+  # DOWNLOAD set: name -> preprocessed_state dir on the source collection.
+  # Only google_newspaper is verified live (2026-08-11); the others follow the
+  # same numbering pattern and are checked with `globus ls` before transfer —
+  # if one fails, run `globus ls <source_endpoint>:/` and fix the path here
+  # (and in garg_weat_dlnews_tv.yml). Radio/Broadcast: add 2-Radio / 4-Broadcast.
+  collections:
+    google_newspaper: "/1-Google/1-Newspaper/preprocessed_state"
+    google_tv: "/1-Google/3-TV/preprocessed_state"
+    twitter_newspaper: "/2-Twitter/1-Newspaper/preprocessed_state"
+    twitter_tv: "/2-Twitter/3-TV/preprocessed_state"
+  # BUILD set: which downloaded collections feed THIS profile's corpus.
+  # Twitter collections are downloaded but skipped for now (Google only).
+  corpus_collections: [google_newspaper]
+  # states: optional 2-letter USPS allow-list for the download; default = whole dirs

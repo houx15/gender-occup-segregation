@@ -247,6 +247,20 @@ def iter_records(arm: str, raw_dir: str, year: int,
         raise ValueError(f"unknown arm: {arm!r}")
 
 
+def tag_gender_tokens(tokens, anchors, state_slug: str):
+    """Append the state to gender anchor tokens ('she' -> 'she__ohio')."""
+    return [f"{t}__{state_slug}" if t in anchors else t for t in tokens]
+
+
+def _load_anchor_words(config: dict) -> set:
+    import json
+    from scripts.common.config_loader import get_wordlist_dir
+    wl = config.get("wordlists", {})
+    path = Path(get_wordlist_dir(config)) / wl.get("gender_words_file", "gender_words.json")
+    g = json.loads(path.read_text(encoding="utf-8"))
+    return set(g["male"]) | set(g["female"])
+
+
 def _check_windows(corpora_dir: str, width: Optional[int], step: Optional[int]) -> None:
     """Pin corpora_dir to one time-window setting; refuse to mix them."""
     stamp = Path(corpora_dir) / ".year_bins"
@@ -293,6 +307,18 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
         lccn_table = usm.load_lccn_state_table(table_path) if os.path.exists(table_path) else {}
         logger.info(f"Loaded LCCN->state table: {len(lccn_table)} entries")
 
+    # Approach A (shared model per period): every state's articles go into one
+    # pooled_{period} corpus and only the gender anchor words carry the state
+    # ('she__ohio'), so list words learn from all text while each state keeps
+    # its own gender centroids. Coverage is still reported per state-period.
+    # Anchors are exempt from stopword removal: NLTK lists he/she/his/her/him/
+    # himself/hers/herself as stopwords, and the pronouns are what keeps small
+    # states' tagged anchors frequent enough to train.
+    tagged = bool(config["us_states"].get("tag_gender_by_state"))
+    anchors = _load_anchor_words(config) if tagged else set()
+    if tagged:
+        logger.info(f"tag_gender_by_state: {len(anchors)} anchor words tagged by state")
+
     coverage: Dict[str, int] = {}
     for year, period_years in periods:
         # `year` is the unit label (the bin's start year when year_bins is set).
@@ -333,14 +359,21 @@ def build_corpus(config: dict, logger, arm: str, rebuild: bool = False) -> Dict[
                 stopwords_key=config["corpus"].get("stopwords"),
                 lowercase=config["corpus"].get("lowercase", True),
                 min_words=config["corpus"].get("min_words", 5),
+                keep_words=frozenset(anchors) if tagged else None,
             )
             if tokens is None:
                 continue
-            unit = f"{usm.unit_state(rec['state'])}_{year}"
+            slug = usm.unit_state(rec["state"])
+            state_unit = f"{slug}_{year}"
+            if tagged:
+                tokens = tag_gender_tokens(tokens, anchors, slug)
+                unit = f"pooled_{year}"
+            else:
+                unit = state_unit
             if unit not in writers:
                 writers[unit] = UnitCorpusWriter(unit, corpora_dir)
             writers[unit].write(tokens)
-            coverage[unit] = coverage.get(unit, 0) + 1
+            coverage[state_unit] = coverage.get(state_unit, 0) + 1
         for w in writers.values():
             w.close()
         marker.write_text("")  # mark the year done for idempotent re-runs
