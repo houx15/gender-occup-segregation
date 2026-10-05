@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Run the US state-window analysis (plan parts) and write PDFs + tables.
+
+  python -m scripts.us_analysis.run --config=config/profiles/garg_weat_dlnews_w10.yml \
+      --out_dir=/scratch/network/yh6580/gender-occup/results/analysis_w10 --parts=panel,1,2
+
+Parts: panel (canonical datasets), 1 (validation), 2 (maps / heatmap / change),
+2b (explaining differences), 2c (text-survey discrepancy), 3 (case selection).
+Each part writes <out_dir>/partX_summary.md; figures/tables go to
+<out_dir>/main/ and <out_dir>/robustness-*/.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import fire
+import pandas as pd
+
+
+def main(config: str, out_dir: str, parts: str = "panel,1,2,2b,2c,3") -> None:
+    out = Path(out_dir)
+    todo = [p.strip() for p in str(parts).split(",") if p.strip()]
+    data = out / "data"
+    if "panel" in todo or not (data / "state_window_panel.csv").exists():
+        from scripts.us_analysis.panel import build_panel
+        build_panel(config, out_dir)
+    panel = pd.read_csv(data / "state_window_panel.csv")
+    cells = pd.read_csv(data / "occupation_cells.csv")
+    terms = pd.read_csv(data / "family_terms.csv")
+
+    if "1" in todo:
+        from scripts.us_analysis.common import MAIN, ROBUSTNESS
+        from scripts.us_analysis.part1 import run_part1
+        print(run_part1(panel, cells, [MAIN] + ROBUSTNESS, out))
+    if "2" in todo:
+        from scripts.us_analysis.part2 import run_part2
+        print(run_part2(panel, config, out))
+    if "2b" in todo:
+        from scripts.us_analysis.part2b import run_part2b
+        print(run_part2b(panel, config, out))
+    if "2c" in todo:
+        from scripts.us_analysis.part2c import run_part2c
+        print(run_part2c(panel, config, out))
+    if "3" in todo:
+        from scripts.us_analysis.part3 import run_part3
+        print(run_part3(panel, cells, terms, out))
+
+
+if __name__ == "__main__":
+    fire.Fire(main)
