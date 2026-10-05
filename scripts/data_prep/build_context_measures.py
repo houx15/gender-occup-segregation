@@ -171,7 +171,10 @@ def window_means(yearly: pd.DataFrame, cols: List[str], periods: List[int], widt
 def external_measures(sources: Path, periods: List[int], width: int) -> pd.DataFrame:
     """BEA real GDP per capita, CSPP policies / religion, Berry citizen ideology."""
     import zipfile
-    slug = lambda s: unit_state(normalize_state(str(s).strip()))  # noqa: E731
+    def slug(s):
+        """State slug, or None for non-states (BEA regions, territories)."""
+        n = normalize_state(str(s).strip())
+        return unit_state(n) if n else None
 
     def bea(zipname, prefix, line):
         zf = zipfile.ZipFile(sources / zipname)
@@ -192,12 +195,12 @@ def external_measures(sources: Path, periods: List[int], width: int) -> pd.DataF
 
     cspp = pd.read_csv(sources / "correlates2-6.csv", encoding="latin-1",
                        usecols=lambda x: x in ["st", "year"] + list(CSPP_POLICY) + ABORTION_RESTRICTIONS)
-    pol = cspp_yearly(cspp, slug)
+    pol = cspp_yearly(cspp, slug).dropna(subset=["state"])
 
     zf = zipfile.ZipFile(sources / "stateideology_v2018.dta.zip")
     berry = pd.read_stata(zf.open(next(n for n in zf.namelist() if n.endswith(".dta"))))
     berry = pd.DataFrame({"state": berry["statename"].map(slug), "year": berry["year"].astype(int),
-                          "citizen_ideology": berry["citi6016"]})
+                          "citizen_ideology": berry["citi6016"]}).dropna(subset=["state"])
 
     yearly = (econ[["state", "year", "log_real_gdp_pc"]]
               .merge(pol, on=["state", "year"], how="outer")
