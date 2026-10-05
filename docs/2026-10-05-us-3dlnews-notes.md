@@ -245,6 +245,45 @@ common US occupational gender typing rather than anything specific to the
 state; and changes within a state over time do not follow that state's ACS
 changes.
 
+### 5.6 Garg's Figure 2: average bias vs average women's occupation % difference over time
+
+Garg et al. (2018), Fig. 2 design: for each window, blue = average RND over a
+fixed set of occupations (present in every window), green = average
+(women % − men %) in the same occupations from ACS; bands = bootstrap SE over
+occupations; two y axes. `scripts/plot_garg_fig2.py`.
+
+**National** (RND averaged over state models; national ACS shares).
+
+| Window | Occupations | Avg. women bias (RND) | Avg. women occup. % difference (ACS) |
+|---|---:|---:|---:|
+| 2005–14 | 72 | −0.0085 | −18.5 |
+| 2010–19 | 72 | −0.0052 | −16.6 |
+| 2015–24 | 72 | −0.0037 | −14.2 |
+
+![Garg Fig. 2, national, 10-year windows](us_3dlnews_report/figures/11_garg_fig2_national.png)
+
+5-year windows (4 points, 52 occupations): RND −0.0126 → −0.0077 → −0.0062 →
+−0.0047; ACS % difference −24.0 → −22.7 → −20.1 → −17.5.
+
+![Garg Fig. 2, national, 5-year windows](us_3dlnews_report/figures/11_garg_fig2_national_5y.png)
+
+Both lines rise in every window, as in Garg's figure for 1950–1990. The
+bands are wide because the bootstrap resamples *which* occupations are
+averaged; since the same occupations enter every window, the change over time
+is estimated much more precisely than the bands suggest.
+
+**Per state** (each state's own models and its own ACS shares; 49 states with
+all three windows).
+
+![Garg Fig. 2, per state](us_3dlnews_report/figures/12_garg_fig2_states.png)
+
+From 2005–14 to 2015–24: the ACS line rises in 46 of 49 states and our bias
+line in 37; both rise in 34. But the size of the change does not match across
+states (r = −0.06 between a state's change in bias and its change in ACS %
+difference; 5-year windows: −0.04). Most states move in the national
+direction, while their individual paths look noisy (e.g. Hawaii, Utah,
+Missouri go the other way).
+
 ## 6. Interpretation
 
 1. **The measure works where text is plentiful.** Pooling across states, the
