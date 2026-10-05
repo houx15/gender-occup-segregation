@@ -345,6 +345,48 @@ stopword removal (`preprocess(..., keep_words=...)`) because pronouns are what
 keep small states' tagged anchors frequent. Existing arms left unchanged
 pending a PI decision.
 
+## 2026-10-05 — Results: 10-year rolling windows vs approach A vs 5-year bins
+
+Jobs 3391515 / 3391525 (10-year, per-state models), 3391880 (approach A),
+comparison 3393260 (`scripts/compare_arms.py`, commit 438d4c0+).
+
+**Stability of state scores** (correlation of state scores between windows):
+
+| | 5-year bins | 10-year rolling | approach A (5-year) |
+|---|---:|---:|---:|
+| occupation words used | 55 | 75 | 129 |
+| occupation, adjacent windows | 0.23 | 0.54 | 0.01 |
+| family_sphere, adjacent windows | 0.29 | 0.48 | 0.05 |
+| occupation, 2005 vs 2015 (no shared years) | 0.54 | 0.16 | 0.03 |
+| family_sphere, 2005 vs 2015 (no shared years) | 0.17 | 0.21 | 0.02 |
+
+Adjacent 10-year windows share 5 years of text, so their 0.5 stability is
+largely mechanical; on non-overlapping windows the 10-year arm is no more
+stable than the 5-year arm. With ~46 states a correlation's SE is ~0.14, so
+the per-state arms' values (0.16-0.54) are all consistent with a modest true
+reliability; none reaches the ~0.97 of ACS state measures.
+
+**Approach A did not work as built.** Stability ~0 and a flat national
+occupation trend (0.0003 -> 0.0005, where both per-state arms rise
+monotonically). Likely reason: each state's tagged anchors still learn only
+from that state's text, so the estimation noise moved from the list words to
+the gender centroids; rare tagged tokens may also carry frequency artifacts.
+Not pursued further as is (possible variants: shrink state centroids toward
+the national one; national model fine-tuned per state).
+
+**Agreement with benchmarks** (agreement_r, > 0 = agree; mean over windows):
+weak and inconsistent in every arm. 10-year occupation: IAT +0.24, explicit
++0.09, but Duncan -0.24, female employment share -0.17. No ours x benchmark
+pair agrees consistently across arms and scopes.
+
+**National trend** (balanced states): occupation rises monotonically in both
+per-state arms (5-year -0.0122 -> -0.0042; 10-year -0.0092 -> -0.0035), in
+line with every survey benchmark; approach A shows no trend.
+
+**Reading.** With 3DLNews2's volume, the national over-time trend is robust
+and matches the surveys; state-level differences are not reliably measured
+by any of the three designs.
+
 ---
 
 ## Open questions
