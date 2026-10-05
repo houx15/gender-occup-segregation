@@ -1,0 +1,9 @@
+setting,value
+Text,"3DLNews2, Google-platform newspaper articles"
+Unit,"state x 10-year window, step 5 (1995–04, 2000–09, 2005–14, 2010–19, 2015–24)"
+Minimum articles for a state model,500
+Preprocessing,"tokenizer nltk_en, stopwords en_default, lowercase True, min 5 tokens per article"
+De-duplication,"shingle (k=8), within window, across states"
+Model,"word2vec, skip-gram"
+vector_size / window / min_count,300 / 5 / 20
+negative / epochs / seed,10 / 10 / 42
