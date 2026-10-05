@@ -437,3 +437,17 @@ vs childcare share β = 0.11 (both n.s., ≈ 0 with FE); household-work text vs
 housework share β = −0.09, within-state r = −0.20 (p = 0.007, opposite
 direction: household words drift female-ward while women's housework share
 falls). No ATUS measure aligns with the text measures across states.
+
+## 2026-10-05 — Plan gaps closed
+
+- 2.6 policy timing (`main/tables/2_6_policy_timing.csv`): of 10 paid family
+  leave states, only 2 have a window entirely before and one entirely after
+  benefits began → no DID/event study; PFL stays an associational exposure.
+- 3.1-3.2 semantic neighbours of the selected cases (`part3s_summary.md`):
+  e.g. *attendant* shifts from aviation / hijacking (1995–04) to flight +
+  *nurse* (2015–24); *broker* from realty to brokerage firms.
+- Combined Figures 1-6 per the plan's figure structure (`figures_combined/`).
+- Context predictors documented (notes, section 5).
+- Still not collected (needs a source decision): other policy domains
+  (childcare, equal pay, discrimination, reproductive), state GDP per capita,
+  social-conservatism measures beyond presidential vote.

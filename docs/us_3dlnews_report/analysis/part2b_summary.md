@@ -1,5 +1,20 @@
 # Part II-B — explaining state differences
 
+**2.6 Policy timing (paid family leave).** 10 treated states; 2 have both a window entirely before and one entirely after benefits began: too few treated states with a clean before and after window for a DID/event study; paid family leave enters Part II-B as a state-window exposure (share of window years with benefits), interpreted associationally. Other policy domains in the plan (childcare, equal pay, discrimination protections, reproductive policy) are not yet collected.
+
+| state | benefits_start | 1995–04 | 2000–09 | 2005–14 | 2010–19 | 2015–24 | observed_fully_before | observed_fully_after | usable_before_after |
+|---|---|---|---|---|---|---|---|---|---|
+| california | 2004 | during | during | after | after | after | 0 | 3 | False |
+| new_jersey | 2009 | before | during | during | after | after | 1 | 2 | True |
+| rhode_island | 2014 | before | before | during | during | after | 1 | 1 | True |
+| new_york | 2018 | before | before | before | during | during | 3 | 0 | False |
+| washington | 2020 | before | before | before | before | during | 4 | 0 | False |
+| district_of_columbia | 2020 | before | before | before | before | during | 4 | 0 | False |
+| massachusetts | 2021 | before | before | before | before | during | 4 | 0 | False |
+| connecticut | 2022 | before | before | before | before | during | 4 | 0 | False |
+| oregon | 2023 | before | before | before | before | during | 4 | 0 | False |
+| colorado | 2024 | before | before | before | before | during | 4 | 0 | False |
+
 Outcome: text score (higher = more traditional); all variables standardized. Between: state means, OLS (HC1). Within: state + window FE, SE clustered by state; fit column = added R2 over the FE-only model. Associational only.
 
 ### Block fit

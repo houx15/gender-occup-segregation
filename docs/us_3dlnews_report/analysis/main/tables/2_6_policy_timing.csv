@@ -1,0 +1,11 @@
+state,benefits_start,1995–04,2000–09,2005–14,2010–19,2015–24,observed_fully_before,observed_fully_after,usable_before_after
+california,2004,during,during,after,after,after,0,3,False
+new_jersey,2009,before,during,during,after,after,1,2,True
+rhode_island,2014,before,before,during,during,after,1,1,True
+new_york,2018,before,before,before,during,during,3,0,False
+washington,2020,before,before,before,before,during,4,0,False
+district_of_columbia,2020,before,before,before,before,during,4,0,False
+massachusetts,2021,before,before,before,before,during,4,0,False
+connecticut,2022,before,before,before,before,during,4,0,False
+oregon,2023,before,before,before,before,during,4,0,False
+colorado,2024,before,before,before,before,during,4,0,False

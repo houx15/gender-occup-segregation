@@ -462,6 +462,21 @@ Orientation: higher = more traditional; 0 = gender-neutral RND.
 
 # Part II-B — explaining state differences
 
+**2.6 Policy timing (paid family leave).** 10 treated states; 2 have both a window entirely before and one entirely after benefits began: too few treated states with a clean before and after window for a DID/event study; paid family leave enters Part II-B as a state-window exposure (share of window years with benefits), interpreted associationally. Other policy domains in the plan (childcare, equal pay, discrimination protections, reproductive policy) are not yet collected.
+
+| state | benefits_start | 1995–04 | 2000–09 | 2005–14 | 2010–19 | 2015–24 | observed_fully_before | observed_fully_after | usable_before_after |
+|---|---|---|---|---|---|---|---|---|---|
+| california | 2004 | during | during | after | after | after | 0 | 3 | False |
+| new_jersey | 2009 | before | during | during | after | after | 1 | 2 | True |
+| rhode_island | 2014 | before | before | during | during | after | 1 | 1 | True |
+| new_york | 2018 | before | before | before | during | during | 3 | 0 | False |
+| washington | 2020 | before | before | before | before | during | 4 | 0 | False |
+| district_of_columbia | 2020 | before | before | before | before | during | 4 | 0 | False |
+| massachusetts | 2021 | before | before | before | before | during | 4 | 0 | False |
+| connecticut | 2022 | before | before | before | before | during | 4 | 0 | False |
+| oregon | 2023 | before | before | before | before | during | 4 | 0 | False |
+| colorado | 2024 | before | before | before | before | during | 4 | 0 | False |
+
 Outcome: text score (higher = more traditional); all variables standardized. Between: state means, OLS (HC1). Within: state + window FE, SE clustered by state; fit column = added R2 over the FE-only model. Associational only.
 
 ### Block fit
@@ -637,3 +652,255 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | family | state | strongest alignment (I.7) | west_virginia | 0.163 | 95% [-0.13, 0.46] |
 | family | state | strongest alignment (I.7) | new_jersey | 0.188 | 95% [-0.23, 0.60] |
 | family | state | strongest alignment (I.7) | utah | 0.276 | 95% [-0.14, 0.69] |
+
+# Part III (semantics) — nearest neighbours of selected cases
+
+5 largest state models per window; top 15 neighbours each; listed: the 8 neighbours recurring in most states (count in brackets).
+
+**accountant**
+
+- 1995–04: certified (2), banker (2), accounting (2), cpa (1), defender (1), patrice (1), mese (1), rosenberg (1)
+- 2000–09: accounting (4), certified (3), bookkeeper (2), auditor (1), sodemann (1), liabilities (1), machinist (1), securities (1)
+- 2005–14: certified (4), accounting (4), cpa (3), llp (3), bookkeeper (3), audit (2), cfo (2), cpas (1)
+- 2010–19: cpa (5), accounting (4), certified (3), llp (3), bookkeeper (3), lawyers (2), bankers (2), auditor (2)
+- 2015–24: cpa (5), accounting (4), bookkeeper (4), certified (4), auditing (2), lawyers (2), hired (2), paralegal (2)
+
+**attendant**
+
+- 1995–04: flight (3), dispatcher (2), cockpit (2), hijacked (2), bomb (1), flown (1), airlines (1), frantically (1)
+- 2000–09: flight (2), airlines (2), bridesmaids (2), passengers (2), limousine (1), landrum (1), hopped (1), motorist (1)
+- 2005–14: flight (4), bridesmaids (4), airlines (3), matron (3), passengers (3), airline (3), airways (2), jetblue (2)
+- 2010–19: flight (4), passengers (4), airlines (2), luggage (2), escort (1), maids (1), paulus (1), carlie (1)
+- 2015–24: flight (4), passengers (3), nurse (3), airlines (2), disembark (2), takeoff (2), airline (2), mikayla (1)
+
+**attorney**
+
+- 1995–04: prosecutor (5), lawyers (4), lawyer (4), prosecuting (2), plaintiffs (2), prosecuted (2), wrongdoing (2), proceedings (2)
+- 2000–09: lawyer (5), prosecutor (4), prosecuting (4), lawyers (4), prosecuted (4), prosecution (3), counsel (2), judge (2)
+- 2005–14: lawyer (5), prosecutor (5), lawyers (5), prosecuting (5), prosecutors (3), counsel (3), prosecuted (3), prosecution (3)
+- 2010–19: lawyer (5), lawyers (5), prosecutor (5), prosecuting (4), prosecutors (4), prosecution (4), counsel (3), judge (3)
+- 2015–24: lawyer (5), prosecutor (5), lawyers (5), prosecutors (5), counsel (5), judge (4), prosecution (4), prosecuted (4)
+
+**author**
+
+- 1995–04: novels (2), fiction (2), novelist (2), authored (2), styles (1), blog (1), paragraph (1), woodson (1)
+- 2000–09: authored (3), literary (3), nonfiction (3), novelist (3), writings (2), book (2), edited (2), bestselling (1)
+- 2005–14: book (5), books (3), authored (3), scholarly (3), novels (3), bestselling (2), epidemiology (2), novelist (2)
+- 2010–19: book (5), authored (5), nonfiction (4), novelist (4), novels (4), bestselling (3), books (3), scholarly (2)
+- 2015–24: book (5), authored (5), nonfiction (4), bestselling (3), novels (3), novelist (3), books (3), illustrator (2)
+
+**biologist**
+
+- 1995–04: wildlife (3), fisheries (2), scientist (1), conservation (1), mammals (1), burgess (1), ecology (1), birder (1)
+- 2000–09: wildlife (3), ecology (3), species (2), endangered (2), zoology (1), geology (1), giribet (1), specimens (1)
+- 2005–14: wildlife (4), fisheries (4), mammals (3), freshwater (2), species (2), fish (2), skomal (1), mammal (1)
+- 2010–19: wildlife (5), fisheries (5), species (4), mammals (3), freshwater (3), reptiles (2), smallmouth (2), organisms (2)
+- 2015–24: wildlife (5), fisheries (5), species (5), ecologist (2), waterfowl (2), freshwater (2), biodiversity (2), scientists (2)
+
+**broker**
+
+- 1995–04: realty (4), estate (4), transactions (3), investor (2), mortgage (2), transaction (2), buyer (2), realtors (1)
+- 2000–09: estate (5), brokerage (3), securities (3), banker (3), realty (3), lender (2), prudential (2), realtor (2)
+- 2005–14: estate (5), investor (4), brokerage (3), realty (3), coldwell (2), sotheby (2), prudential (2), bankers (2)
+- 2010–19: brokerage (5), estate (5), investor (3), lender (3), real (3), cbre (2), coldwell (2), lenders (2)
+- 2015–24: brokerage (5), estate (5), coldwell (2), lender (2), cbre (2), buyer (2), cushman (2), realty (2)
+
+**chef**
+
+- 1995–04: cuisine (3), cooks (3), sushi (2), salads (2), seafood (2), spicy (2), sandwiches (2), eatery (2)
+- 2000–09: pastry (4), culinary (4), gourmet (4), salads (3), cuisine (3), menu (2), restaurant (2), bistro (2)
+- 2005–14: culinary (5), cuisine (5), pastry (4), restaurant (4), cooks (3), salads (3), sous (2), appetizer (2)
+- 2010–19: culinary (5), cuisine (5), pastry (4), restaurant (4), dishes (4), gourmet (4), kitchen (2), restaurants (2)
+- 2015–24: pastry (5), restaurant (5), culinary (4), cuisine (4), michelin (3), gourmet (3), sous (2), dishes (2)
+
+**cleaning**
+
+- 1995–04: washing (4), installing (2), sink (2), surfaces (2), equipped (2), drain (2), piles (2), maintenance (2)
+- 2000–09: washing (3), cleaned (3), cleaners (2), laundry (2), appliances (2), clean (2), roofing (2), chores (2)
+- 2005–14: cleaned (5), washing (4), clean (3), laundry (3), bedding (3), cleaners (2), gutters (2), cleans (2)
+- 2010–19: clean (5), cleaned (5), washing (5), mowing (5), cleans (2), cleanup (2), gutters (2), utensils (2)
+- 2015–24: sanitizing (5), clean (5), washing (5), disinfecting (4), cleaned (4), sanitize (4), disinfect (3), disinfectant (3)
+
+**clerk**
+
+- 1995–04: treasurer (3), postal (2), danckwart (1), vacancy (1), incumbents (1), bray (1), brooksville (1), registrar (1)
+- 2000–09: magistrate (3), cashier (2), employee (2), assessor (2), grocery (2), bookkeeper (2), typist (1), assessors (1)
+- 2005–14: cashier (4), office (2), assessor (2), bookkeeper (2), employee (2), employees (2), incumbents (1), magistrate (1)
+- 2010–19: assessor (2), office (2), bailiff (2), attorney (2), invoices (2), cashier (2), solicitor (2), jastrzemski (1)
+- 2015–24: bailiff (2), office (2), assessor (2), attorney (2), registrar (2), affidavits (2), offices (2), receptionist (2)
+
+**cousins**
+
+- 1995–04: grandchild (5), niece (5), aunts (4), uncles (4), nieces (4), nephews (4), grandsons (4), aunt (3)
+- 2000–09: aunts (5), uncles (5), nieces (5), nephews (5), niece (5), nephew (5), grandchild (4), brother (3)
+- 2005–14: aunts (5), uncles (5), nieces (5), nephews (5), brother (4), sister (4), nephew (4), aunt (4)
+- 2010–19: aunts (5), uncles (5), nieces (5), brother (5), nephews (5), sister (5), nephew (5), uncle (5)
+- 2015–24: aunts (5), uncles (5), brother (5), nieces (5), nephews (5), nephew (5), sister (5), uncle (5)
+
+**designer**
+
+- 1995–04: designs (3), boutique (3), graphic (2), styles (2), artists (2), accessories (2), popovitch (1), sculptures (1)
+- 2000–09: fashion (3), designs (3), apparel (2), decorating (2), dresses (2), sculptor (2), fashions (2), accessories (2)
+- 2005–14: designs (5), design (4), fashion (4), couture (3), fashions (3), chic (2), fashionable (2), apparel (2)
+- 2010–19: design (5), designs (5), fashion (4), handbags (3), sculptors (3), artists (3), architect (2), couture (2)
+- 2015–24: design (5), designs (5), fashion (4), architects (3), artists (2), architect (2), artist (2), graphic (2)
+
+**dishes**
+
+- 1995–04: mashed (2), baked (2), salads (2), spinach (2), pasta (2), desserts (2), sandwiches (1), onions (1)
+- 2000–09: salads (5), pasta (5), appetizers (3), salad (3), garlic (3), shrimp (2), entrees (2), sauce (2)
+- 2005–14: salads (5), sauces (4), soups (3), dish (3), macaroni (3), menu (3), veal (2), appetizer (2)
+- 2010–19: salads (5), entrees (5), soups (5), dish (3), menu (3), parmesan (3), flavorful (3), dumplings (2)
+- 2015–24: soups (5), entrees (5), dish (4), salads (3), menu (3), cuisine (2), meatballs (2), marinated (2)
+
+**doctor**
+
+- 1995–04: patients (5), physician (4), physicians (4), surgery (3), patient (3), psychiatric (3), chemotherapy (3), cardiac (2)
+- 2000–09: patients (5), physician (4), physicians (4), surgeons (4), surgeon (4), medical (3), surgery (3), surgeries (3)
+- 2005–14: patients (5), physicians (5), surgeon (4), physician (3), surgeons (3), medical (3), anesthesia (3), surgery (3)
+- 2010–19: patients (5), physicians (5), physician (5), surgeon (4), cardiologist (3), neurologist (3), oncologist (3), medical (3)
+- 2015–24: physician (5), patients (5), oncologist (5), physicians (5), patient (5), medical (4), pediatrician (4), neurologist (3)
+
+**executive**
+
+- 1995–04: ceo (4), vice (4), chairman (3), execs (2), exec (2), vhedc (1), shareholders (1), mna (1)
+- 2000–09: ceo (4), director (4), vice (3), shareholders (3), chairman (3), president (3), enron (2), cfo (2)
+- 2005–14: vice (5), director (5), president (5), ceo (4), cfo (4), coo (3), chairman (3), directors (3)
+- 2010–19: ceo (5), director (5), vice (5), president (5), chairman (5), cfo (3), coo (2), directors (2)
+- 2015–24: ceo (5), director (5), chairman (5), directors (5), vice (4), president (3), coo (3), cfo (3)
+
+**family**
+
+- 1995–04: relatives (4), siblings (4), grieving (3), deepest (2), clan (2), parents (2), grandparents (2), knit (2)
+- 2000–09: relatives (4), parents (3), outpouring (3), grieving (3), acquaintances (3), children (3), grieve (2), birthdays (2)
+- 2005–14: parents (5), children (5), relatives (4), friends (3), father (3), mother (3), siblings (3), residents (3)
+- 2010–19: relatives (5), parents (5), children (5), friends (5), mother (4), grandparents (2), siblings (2), father (2)
+- 2015–24: parents (5), relatives (5), friends (5), children (5), mother (4), grandparents (3), neighbors (3), sympathies (3)
+
+**groceries**
+
+- 1995–04: stores (4), hardware (3), store (3), supermarkets (2), convenience (2), deli (2), shoppers (2), shelves (2)
+- 2000–09: store (5), stores (5), supermarkets (4), supermarket (4), doughnuts (3), shopping (2), deliveries (2), deli (2)
+- 2005–14: store (5), stores (5), supermarket (5), supermarkets (4), shopping (4), shoppers (3), deli (3), drugstore (2)
+- 2010–19: store (5), stores (5), supermarket (5), shopping (5), grocer (5), supermarkets (4), deli (4), shoppers (4)
+- 2015–24: store (5), stores (5), shopping (5), grocer (4), supermarket (3), supermarkets (3), shoppers (3), checkout (3)
+
+**home**
+
+- 1995–04: apartments (4), residences (2), cottages (2), residence (2), manor (2), cremation (2), chapel (2), bussing (1)
+- 2000–09: house (3), residences (3), apartments (3), houses (2), residence (2), estates (2), farmhouse (2), cunniff (1)
+- 2005–14: houses (5), house (4), residences (4), residence (4), duplex (3), apartments (3), apartment (2), dwellings (2)
+- 2010–19: houses (5), residences (4), house (3), residence (3), apartment (2), apartments (2), townhouse (2), crematory (2)
+- 2015–24: houses (5), apartment (5), apartments (5), residences (4), residence (3), townhomes (3), duplex (2), units (2)
+
+**household**
+
+- 1995–04: income (3), premium (2), declining (1), profitable (1), reducing (1), sector (1), consumption (1), multifamily (1)
+- 2000–09: incomes (3), income (3), median (3), poorest (2), chores (2), affluent (2), unemployment (1), cragin (1)
+- 2005–14: income (5), capita (4), incomes (3), subsidized (2), premiums (2), vouchers (2), families (2), median (2)
+- 2010–19: incomes (5), income (5), capita (4), median (3), census (3), percent (3), uninsured (2), families (2)
+- 2015–24: income (5), incomes (5), median (4), families (3), renters (3), homes (3), mortgages (2), poorer (2)
+
+**inspector**
+
+- 1995–04: inspections (4), inspection (4), inspect (2), contractors (2), improperly (2), utilities (2), violations (2), inspected (1)
+- 2000–09: inspection (5), inspected (3), inspections (3), inspect (3), violations (3), asbestos (2), dep (2), septic (2)
+- 2005–14: inspections (5), inspection (4), osha (3), inspect (3), compliance (3), inspected (2), dep (2), structurally (2)
+- 2010–19: inspections (5), inspection (5), inspected (5), compliance (2), osha (2), oig (2), violations (2), oepa (1)
+- 2015–24: inspection (5), inspections (5), inspected (5), osha (4), department (4), oig (3), unannounced (2), investigators (2)
+
+**laundry**
+
+- 1995–04: bathrooms (3), portable (2), stove (2), bathroom (2), washing (1), stored (1), spaces (1), equipped (1)
+- 2000–09: refrigerator (3), washing (3), towels (3), dishwasher (3), appliances (2), kitchen (2), toilets (2), cardboard (2)
+- 2005–14: kitchen (4), cleaning (3), bedrooms (3), dryer (3), washing (2), microwave (2), towels (2), bathroom (2)
+- 2010–19: towels (4), washer (3), dryer (3), kitchen (3), washers (3), microwave (3), detergent (2), dryers (2)
+- 2015–24: bathroom (3), bedding (3), kitchen (3), detergent (2), dryer (2), dryers (2), washers (2), utensils (2)
+
+**nurse**
+
+- 1995–04: physicians (5), dental (3), patient (3), psychiatric (2), surgeon (2), therapist (2), cpr (2), hospitals (2)
+- 2000–09: nursing (5), pediatric (4), physicians (4), hospital (3), doctors (2), medical (2), psychiatric (2), maternity (2)
+- 2005–14: nursing (5), physicians (5), patients (5), hospital (5), practitioner (4), doctors (3), pediatric (3), therapists (3)
+- 2010–19: doctors (5), physicians (5), patients (5), practitioner (4), patient (4), nursing (4), icu (4), neonatal (4)
+- 2015–24: doctors (5), patients (5), patient (5), nursing (5), physicians (5), practitioner (4), icu (4), rn (3)
+
+**parents**
+
+- 1995–04: children (3), parenting (3), moms (2), grieving (2), mother (2), foster (2), grandparents (2), principals (2)
+- 2000–09: children (5), mother (4), kids (3), siblings (3), son (3), parental (2), adoptive (2), mom (2)
+- 2005–14: mother (5), children (5), kids (5), mom (4), adoptive (4), child (4), siblings (3), families (3)
+- 2010–19: mother (5), children (5), kids (5), grandparents (5), sibling (5), families (5), adoptive (4), mom (4)
+- 2015–24: mother (5), children (5), kids (5), grandparents (5), families (5), mom (4), adoptive (4), siblings (4)
+
+**pastor**
+
+- 1995–04: rev (5), church (4), baptist (4), episcopal (3), congregation (3), lutheran (3), calvary (3), presbyterian (3)
+- 2000–09: church (5), rev (4), ordained (4), ministers (3), congregation (3), vicar (2), parishes (2), sacrament (2)
+- 2005–14: rev (5), church (5), ordained (4), baptist (3), congregation (3), ame (3), pulpit (2), churches (2)
+- 2010–19: church (5), rev (5), congregation (4), baptist (4), reverend (3), parishioners (3), ordained (3), officiating (2)
+- 2015–24: church (5), rev (5), ordained (4), congregation (4), baptist (3), pentecostal (3), reverend (3), congregations (3)
+
+**physician**
+
+- 1995–04: patients (4), nurses (4), clinical (4), surgeon (3), psychiatric (3), doctors (3), dental (2), psychiatry (2)
+- 2000–09: pediatric (4), patients (3), doctors (3), medicine (3), medical (3), surgeon (3), chiropractic (2), doctor (2)
+- 2005–14: patients (5), medical (5), doctors (4), patient (4), doctor (3), orthopedic (3), obstetrics (2), nurses (2)
+- 2010–19: patients (5), doctors (5), medical (4), cardiology (4), gynecology (3), obstetrics (3), medicine (3), orthopedic (2)
+- 2015–24: doctors (5), patients (5), medical (5), medicine (4), cardiology (4), patient (4), gyn (3), clinicians (3)
+
+**police**
+
+- 1995–04: officers (5), detectives (4), deputies (4), troopers (2), suspects (2), authorities (2), suspect (2), officer (2)
+- 2000–09: officers (5), detectives (5), troopers (3), authorities (3), detective (3), epd (2), deputies (2), patrolman (2)
+- 2005–14: officers (5), detectives (5), troopers (3), authorities (3), deputies (3), officer (3), arrested (3), sheriff (2)
+- 2010–19: officers (5), officer (5), detectives (4), detective (4), deputies (3), patrolman (3), patrol (3), troopers (2)
+- 2015–24: officers (5), officer (4), detectives (4), incident (4), enforcement (3), deputies (3), authorities (3), suspect (3)
+
+**prosecutor**
+
+- 1995–04: prosecution (5), indictment (3), acquitted (3), prosecuted (3), juror (3), racketeering (2), sentencing (2), prosecuting (2)
+- 2000–09: prosecution (5), attorney (3), perjury (3), convict (2), retrial (2), trial (2), attorneys (2), indictments (2)
+- 2005–14: attorney (5), prosecution (5), prosecuting (4), attorneys (3), trial (3), jurors (3), sentencing (3), jury (3)
+- 2010–19: attorney (5), prosecution (5), prosecuting (4), attorneys (4), trial (4), prosecuted (3), jury (3), prosecutorial (2)
+- 2015–24: attorney (5), prosecution (5), attorneys (5), prosecuting (5), judge (3), prosecuted (3), prosecute (3), trial (3)
+
+**relatives**
+
+- 1995–04: friends (4), uncles (4), cousins (4), aunts (3), nieces (3), nephews (2), elian (2), family (2)
+- 2000–09: friends (5), nephews (4), aunts (4), nieces (4), uncles (4), family (3), cousins (3), acquaintances (3)
+- 2005–14: friends (5), aunts (5), family (5), nieces (5), uncles (5), cousins (5), nephews (4), families (2)
+- 2010–19: family (5), friends (5), uncles (5), families (4), cousins (4), aunts (4), grandparents (4), acquaintances (4)
+- 2015–24: friends (5), family (5), aunts (5), families (5), uncles (4), cousins (4), nieces (4), grandparents (3)
+
+**secretary**
+
+- 1995–04: treasurer (5), treasury (2), kissinger (2), senator (2), rumsfeld (2), representative (2), minister (2), cheney (2)
+- 2000–09: treasurer (5), treasury (4), advisor (3), oversees (2), adviser (2), aide (2), solicitor (2), chairman (2)
+- 2005–14: treasurer (5), president (4), vice (3), treasury (3), adviser (3), aide (3), appointee (2), aides (2)
+- 2010–19: treasurer (5), president (5), aides (4), vice (4), kissinger (2), aide (2), adviser (2), pompeo (2)
+- 2015–24: treasurer (5), aides (4), president (3), parliamentarian (2), pompeo (2), karine (2), sens (2), vice (2)
+
+**soldier**
+
+- 1995–04: troops (4), civilians (3), stationed (3), wounded (3), korean (2), korea (2), marines (2), enemy (2)
+- 2000–09: troops (5), iraq (5), marines (4), regiment (4), confederate (3), artillery (3), spc (2), infantry (2)
+- 2005–14: iraq (5), servicemen (5), troops (5), army (5), military (5), marines (4), afghanistan (4), infantry (3)
+- 2010–19: army (5), troops (5), war (4), regiment (4), servicemen (3), military (3), comrades (3), afghanistan (3)
+- 2015–24: war (5), troops (5), army (5), servicemen (4), military (3), iwo (3), battlefields (3), marines (3)
+
+**surgeon**
+
+- 1995–04: physician (3), surgery (3), doctors (3), transplant (2), surgical (2), surgeries (2), cosmetic (2), tumor (2)
+- 2000–09: surgery (5), surgical (5), pediatric (4), orthopedic (3), doctors (3), physician (3), surgeries (3), physicians (2)
+- 2005–14: orthopedic (5), surgery (5), surgical (5), doctors (4), anesthesia (3), pediatric (3), vascular (2), cardiology (2)
+- 2010–19: orthopedic (5), surgery (5), doctors (5), physicians (4), gynecology (3), urology (3), orthopedics (3), cardiology (3)
+- 2015–24: orthopedic (5), surgery (5), neurology (4), orthopedics (4), physicians (4), gynecology (3), urology (3), vascular (3)
+
+**veterinarian**
+
+- 1995–04: veterinary (1), orthopedic (1), neurology (1), rn (1), gillian (1), reproductive (1), zachary (1), stepson (1)
+- 2000–09: veterinary (4), spay (2), neuter (2), equine (2), pediatric (2), animal (2), pediatrician (2), behavioral (2)
+- 2005–14: veterinary (5), animal (4), euthanized (3), spay (2), anesthesia (2), neuter (2), rabies (2), animals (2)
+- 2010–19: veterinary (4), euthanized (4), animals (4), spayed (3), antibiotics (3), animal (3), vaccinations (3), vet (2)
+- 2015–24: veterinary (5), animals (5), animal (4), euthanized (4), vet (3), breeders (2), spayed (2), rabies (2)
