@@ -42,8 +42,9 @@ wordlists:
   gender_words_file: "gender_words.json"
   categories:
     occupation: "candidates_occupation.txt"
-    # Common gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6
-    # family list + household, kitchen (with plural/singular forms).
+    # Gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6 family list,
+    # expanded from 61 brainstormed candidates (candidates_family.txt) to the 19
+    # with coverage >= 0.5 and a family sense; every decision in family_screening.csv.
     family_sphere: "family_sphere.txt"
     # Unpaid household work / care, from ATUS activity categories.
     household: "candidates_household.txt"

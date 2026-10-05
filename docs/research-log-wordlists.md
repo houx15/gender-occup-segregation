@@ -469,3 +469,32 @@ with a more traditional occupation score (β = 0.33, p = 0.04); within states,
 paid family leave goes with a less traditional occupation score (β = −0.15,
 p = 0.049). Both borderline. II-C joint model uses predictors observed in
 >= 80% of state-windows (n = 227); sparse external predictors only in II-B.
+
+## 2026-10-05 — Family list expansion (10 -> 19 entries)
+
+**Why (PI).** The 10-word family_sphere list was too narrow to stand as the
+family-domain measure.
+
+**Method.** Brainstormed 61 gender-neutral candidates
+(`candidates_family.txt`): kin terms, marriage, children and infancy, care,
+home and family events. Gendered kin terms (mother, wife, aunt, ...) are
+excluded because they are, or mirror, the Garg gender anchors. Two screens
+(job 3393510, sense follow-up 3393515; 232 state-window models, 1995–2024):
+
+1. Coverage: in vocab in >= 50% of models (same bar as `min_word_coverage`):
+   43 / 61 pass.
+2. Sense: nearest neighbours in the largest state models
+   (`diagnose_word_senses`). Dropped when the dominant sense is not family:
+   house (Congress), couple ("a couple of"), twins (Minnesota Twins), foster
+   (verb), engagement (civic), domestic (violence), adoption (rules, pets),
+   nursery (plants), spouse (legal code), kitchen (restaurants), anniversary,
+   birthday, reunion (public / alumni celebrations), toys (merchandise),
+   descendants (genealogy), generations (cohorts); and entries off-concept
+   (loved, beloved, dinner, breakfast, meals, homemade, backyard, playground).
+
+**Kept (19).** home, kids, parents, married, family, children, baby,
+grandchildren, marriage, relatives, wedding, cousins, childhood, grandparents,
+siblings, infant, divorce, household, toddler. Kitchen, from the old list, is
+dropped (restaurant sense). Just below the coverage bar: caregiver 0.47,
+homemaker 0.47, newborn 0.44, parenting 0.44, grandkids 0.41, daycare 0.39,
+childcare 0.31. Full table: `wordlists/en/occupation_family/family_screening.csv`.
