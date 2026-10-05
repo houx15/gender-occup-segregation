@@ -14,7 +14,7 @@
 module load anaconda3/2023.3
 conda activate llm
 set -eu
-PARTS="${1:-panel,1,2,2b,2c,3}"
+PARTS="${1:-panel,1,2,2b,2c,3,3s}"
 CONFIG="${2:-config/profiles/garg_weat_dlnews_w10.yml}"
 python -m scripts.us_analysis.run --config="$CONFIG" \
     --out_dir=/scratch/network/yh6580/gender-occup/results/analysis_w10 --parts="$PARTS"
