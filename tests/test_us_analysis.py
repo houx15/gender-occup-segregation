@@ -63,3 +63,36 @@ def test_part2_heatmaps_and_change(tmp_path):
     ch = pd.read_csv(out / "tables" / "2_3_change_occupation_2000_2015.csv")
     assert (ch["change"] < 0).mean() > 0.5     # planted trend toward less traditional
     assert "Change ranking" in md
+
+
+def _panel_with_context(seed=1):
+    rng = np.random.default_rng(seed)
+    p = _panel(seed)
+    for c in ("real_income_pc", "ba_share", "metro_share", "unemployment_rate", "manufacturing_share",
+              "service_share", "women_lfp", "gender_wage_gap", "female_share_managers",
+              "female_share_professionals", "pfl_share", "gop_two_party_share"):
+        p[c] = rng.uniform(0.1, 0.9, len(p))
+    p["real_income_pc"] = rng.uniform(2e4, 6e4, len(p))
+    p["unit_name"] = p["state"] + "_" + p["period"].astype(str)
+    return p
+
+
+def test_part2b_2c_3(tmp_path):
+    from scripts.us_analysis import part2b, part2c, part3
+    panel = _panel_with_context()
+    # Part I first so Part III can read the I.7 slopes
+    part1.run_part1(panel, _cells(), [MAIN], tmp_path)
+    t2b = part2b.run_part2b(panel, "", tmp_path)
+    assert "Block fit" in t2b
+    assert (tmp_path / "main" / "figures" / "2b_predictors_occupation.pdf").exists()
+    t2c = part2c.run_part2c(panel, "", tmp_path)
+    assert (tmp_path / "main" / "tables" / "2c_gaps.csv").exists() and "Model fit" in t2c
+    terms = pd.DataFrame([{"state": f"s{s}", "period": p, "category": "family_sphere",
+                           "term": t, "rnd": np.random.default_rng(s).normal(0.01, 0.01)}
+                          for s in range(5) for p in (2005, 2015) for t in ("home", "family", "kitchen")])
+    cells = pd.concat([_cells(0).assign(period=2005), _cells(0).assign(period=2015)])
+    t3 = part3.run_part3(panel, cells, terms, tmp_path)
+    cases = pd.read_csv(tmp_path / "main" / "tables" / "3_case_selection.csv")
+    assert {"most stable", "largest move toward less traditional",
+            "largest text-survey discrepancy"} <= set(cases["criterion"])
+    assert (tmp_path / "main" / "figures" / "3_3_state_cases_family.pdf").exists()

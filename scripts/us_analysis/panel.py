@@ -46,6 +46,11 @@ def build_panel(config: str, out_dir: str) -> pd.DataFrame:
     cov["tokens"] = [count_tokens(corpora / u) if (corpora / u).is_dir() else float("nan")
                      for u in cov["unit_name"]]
     t = t.merge(cov, on="unit_name", how="left")
+    # state context (Part II-B predictors), if built for these windows
+    ctx_path = cfg.get("census_check", {}).get("context_file")
+    if ctx_path and Path(ctx_path).exists():
+        ctx = pd.read_csv(ctx_path).drop(columns=["STATEFIP"], errors="ignore")
+        t = t.merge(ctx, on=["state", "period"], how="left")
     t = t[(t["period"] >= start) & (t["period"] <= end)].sort_values(["state", "period"])
     t.to_csv(data / "state_window_panel.csv", index=False)
 

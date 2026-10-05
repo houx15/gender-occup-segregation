@@ -102,6 +102,8 @@ census_check:
   # family behaviour (ACS) and attitudes (Project Implicit) for the same windows
   family_file: "/scratch/network/yh6580/gender-occup/data/ipums_acs_family/family_measures_10y_step5.csv"
   attitude_file: "/scratch/network/yh6580/gender-occup/data/project_implicit/attitude_measures_10y_step5.csv"
+  # state context for Part II-B (scripts/data_prep/build_context_measures.py)
+  context_file: "/scratch/network/yh6580/gender-occup/data/ipums_acs_context/context_measures_10y_step5.csv"
 
 dlnews:
   # 3DLNews2 "no-HTML" collection (~7 GB total, all platforms/media/years).
