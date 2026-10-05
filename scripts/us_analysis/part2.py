@@ -52,14 +52,14 @@ def maps(panel: pd.DataFrame, shapefile: Path, out: Path) -> str:
         ncol = 3
         nrow = int(np.ceil((len(periods) + 1) / ncol))
         fig, axes = plt.subplots(nrow, ncol, figsize=(5.2 * ncol, 3.6 * nrow))
-        axes = axes.flat
+        axes = list(axes.flat)
         for ax, p in zip(axes, periods):
             g = states.merge(d[d["period"] == p][["NAME", "y"]], on="NAME", how="left")
             g.plot(column="y", ax=ax, cmap=CMAP, norm=norm, edgecolor="black", linewidth=0.2,
                    missing_kwds={"color": "#dddddd"})
             ax.set_title(window_label(p), fontsize=9)
             ax.set_axis_off()
-        rest = list(axes)[len(periods):]
+        rest = axes[len(periods):]
         for ax in rest:
             ax.set_axis_off()
         sm = plt.cm.ScalarMappable(cmap=CMAP, norm=norm)
