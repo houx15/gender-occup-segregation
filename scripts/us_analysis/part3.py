@@ -170,6 +170,43 @@ def _trajectories(panel: pd.DataFrame, cases: pd.DataFrame, out: Path) -> None:
         save(fig, out / "figures" / f"3_3_state_cases_{dom}.pdf")
 
 
+PROFILE = {
+    "text volume": ["tokens"],
+    "economy": ["log_real_gdp_pc", "ba_share", "metro_share", "unemployment_rate", "manufacturing_share"],
+    "labour-market gender structure": ["women_lfp", "duncan", "gender_wage_gap", "female_share_professionals"],
+    "policy": ["pfl_share", "universal_prek", "abortion_restrictions"],
+    "political & cultural": ["gop_two_party_share", "citizen_ideology"],
+}
+
+
+def state_profiles(panel: pd.DataFrame, cases: pd.DataFrame) -> pd.DataFrame:
+    """Plan 3.3: for each selected state, text and survey trajectory, text volume,
+    economic, labour-market, policy and political context — first vs last window
+    the state is observed in (missing where a source does not cover the window)."""
+    states = sorted({st for c in cases[cases["level"].str.startswith("state")]["case"]
+                     for st in str(c).split(" / ")})
+    rows = []
+    for st in states:
+        g = panel[panel["state"] == st].sort_values("period")
+        if g.empty:
+            continue
+        a, b = g.iloc[0], g.iloc[-1]
+        row = {"state": st, "first_window": window_label(int(a["period"])),
+               "last_window": window_label(int(b["period"])),
+               "criteria": "; ".join(sorted(set(cases[cases["case"].str.contains(st, regex=False)]["criterion"])))}
+        for dom, (tcol, scol) in MAIN.pairs.items():
+            row[f"text_{dom}_first"], row[f"text_{dom}_last"] = (text_trad(g, tcol).iloc[0],
+                                                                 text_trad(g, tcol).iloc[-1])
+            row[f"survey_{dom}_first"], row[f"survey_{dom}_last"] = (survey_trad(g, scol).iloc[0],
+                                                                     survey_trad(g, scol).iloc[-1])
+        for vs in PROFILE.values():
+            for v in vs:
+                if v in g.columns:
+                    row[f"{v}_first"], row[f"{v}_last"] = a[v], b[v]
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
 def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out_root: Path) -> str:
     out = out_root / "main"
     for sub in ("figures", "tables"):
@@ -201,9 +238,18 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
     ax.set_title("3.2 Family and household terms: national RND by window", fontsize=10)
     save(fig, out / "figures" / "3_2_family_terms.pdf")
     _trajectories(panel, st, out)
+    prof = state_profiles(panel, cases)
+    prof.to_csv(out / "tables" / "3_3_state_profiles.csv", index=False)
 
+    show = ["state", "first_window", "last_window", "text_occupation_first", "text_occupation_last",
+            "survey_occupation_first", "survey_occupation_last", "tokens_first", "tokens_last",
+            "log_real_gdp_pc_first", "log_real_gdp_pc_last", "women_lfp_first", "women_lfp_last",
+            "pfl_share_last", "gop_two_party_share_first", "gop_two_party_share_last"]
     text = "\n".join(["# Part III — case selection\n",
                       "Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.\n",
-                      md_table(cases) + "\n"])
+                      md_table(cases) + "\n",
+                      "### 3.3 State profiles (first vs last observed window; full table "
+                      "tables/3_3_state_profiles.csv)\n",
+                      md_table(prof[[c for c in show if c in prof.columns]]) + "\n"])
     (out_root / "part3_summary.md").write_text(text, encoding="utf-8")
     return text

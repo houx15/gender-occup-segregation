@@ -99,6 +99,9 @@ def test_part2b_2c_3(tmp_path):
     assert {"most stable", "largest move toward less traditional",
             "largest text-survey discrepancy"} <= set(cases["criterion"])
     assert (tmp_path / "main" / "figures" / "3_3_state_cases_family.pdf").exists()
+    prof = pd.read_csv(tmp_path / "main" / "tables" / "3_3_state_profiles.csv")
+    assert {"text_occupation_first", "women_lfp_last", "gop_two_party_share_first"} <= set(prof.columns)
+    assert "3.3 State profiles" in t3
 
 
 def test_policy_timing_counts_clean_before_after(tmp_path):
