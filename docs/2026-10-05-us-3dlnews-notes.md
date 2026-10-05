@@ -288,7 +288,7 @@ Per state-window, same windows as the text units; built by
 | Policy | Universal pre-K | Correlates of State Policy Project v2.6 (`universalprek`) | to 2017 | state has universal pre-K (0/1) |
 | | Equal pay law | CSPP (`equalpay`) | to 2010 | equal pay for women (0/1) |
 | | Sexual-orientation employment protection | CSPP (`solaw`) | to 2013 | law prohibiting sexual-orientation discrimination (0/1) |
-| | Abortion restrictions | CSPP (`fundslife`, `infconsent`, `gagrule`, `medicalrest`, `insprivate`, `inspublic`, `inswaiver`) | to 2017 | count of the 7 restrictions in effect |
+| | Abortion restrictions | CSPP (`fundslife`, `infconsent`, `gagrule`, `medicalrest`, `insprivate`, `inspublic`, `inswaiver`) | to 2017 | restrictions in effect among the observed items, scaled to 7 (missing unless ≥ 5 of 7 observed) |
 | Political & cultural | Citizen ideology | Berry, Ringquist, Fording & Hanson, v2018 (`citi6016`) | to 2016 | higher = more liberal |
 | | Evangelical + LDS share | CSPP (`evangldsper`) | to 2015 | % of population |
 | Political | Republican two-party vote share | MIT Election Data and Science Lab, 1976–2024 presidential returns (Harvard Dataverse doi:10.7910/DVN/42MVDX) | elections 1996–2024 | R / (R + D), mean over the presidential elections in the window |

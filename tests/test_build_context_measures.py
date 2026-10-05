@@ -85,3 +85,15 @@ def test_cspp_policy_coding_rules():
     assert a.loc[("s20", 2000), "universal_prek"] == 0.0
     assert a.loc[("s20", 2000), "abortion_restrictions"] == 1     # infconsent only; fundslife blank -> 0
     assert a.loc[("s3", 2000), "abortion_restrictions"] == 2      # + fundslife
+
+
+def test_abortion_index_scales_over_observed_items():
+    from scripts.data_prep.build_context_measures import cspp_yearly
+    rows = [{"st": f"S{i}", "year": 2000, "universalprek": 0.0, "equalpay": 0.0, "solaw": 0.0,
+             "evangldsper": 1.0, "fundslife": 1.0, "infconsent": 1.0, "gagrule": None,
+             "medicalrest": 0.0, "insprivate": 0.0, "inspublic": 0.0, "inswaiver": 0.0}
+            for i in range(45)]
+    for r in rows:                       # gagrule never coded -> 6 observed items
+        r["gagrule"] = None
+    y = cspp_yearly(pd.DataFrame(rows), state_key=lambda s: s.lower())
+    assert y["abortion_restrictions"].iloc[0] == pytest.approx(2 / 6 * 7)

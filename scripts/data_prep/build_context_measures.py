@@ -27,7 +27,8 @@ OFFLINE (Slurm). Sources and blocks (analysis plan 2.4-2.7):
   unless >= half the window's years are observed — no carrying forward)
     log_real_gdp_pc      BEA SAGDP9 real GDP (chained 2017 $) / SAINC1 population
     universal_prek, equal_pay_law, so_employment_law, evangelical_lds_share,
-    abortion_restrictions (count of 7 restrictions)   CSPP v2.6
+    abortion_restrictions (restrictions in effect among observed items, scaled
+    to the 7 items; missing unless >= 5 observed)   CSPP v2.6
     citizen_ideology     Berry et al. citi6016 (higher = more liberal)
 
 Windows match the text units (scripts/common/periods.py).
@@ -149,8 +150,11 @@ def cspp_yearly(c: pd.DataFrame, state_key) -> pd.DataFrame:
     out = pd.DataFrame({"state": c["st"].map(state_key), "year": c["year"].astype(int)})
     for src, name in CSPP_POLICY.items():
         out[name] = _observed(c[src], c["year"])
-    parts = [_observed(c[v], c["year"]) for v in ABORTION_RESTRICTIONS]
-    out["abortion_restrictions"] = sum(parts)   # NaN if any item unobserved that year
+    # restrictions in effect among the items observed that year, scaled to 7;
+    # missing unless >= 5 of the 7 items are observed
+    items = pd.concat([_observed(c[v], c["year"]) for v in ABORTION_RESTRICTIONS], axis=1)
+    n_obs = items.notna().sum(axis=1)
+    out["abortion_restrictions"] = (items.mean(axis=1) * len(ABORTION_RESTRICTIONS)).where(n_obs >= 5)
     return out
 
 
