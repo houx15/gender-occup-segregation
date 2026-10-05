@@ -265,3 +265,28 @@ ATUS state values are much noisier than ACS. The 1995–2004 ACS window contains
 
 Mean (SD across states); states = those with a text model in the window
 (33, 48, 49, 51, 51). Min/max: `tables/survey_measures.csv`.
+
+## 5. State context predictors (Part II-B)
+
+Per state-window, same windows as the text units; built by
+`scripts/data_prep/build_context_measures.py`.
+
+| Block | Variable | Source | Years | Definition |
+|---|---|---|---|---|
+| Socioeconomic | log real income per adult | IPUMS USA, adults 25–64 | 2000–2024 | log of mean INCTOT × CPI99 (1999 dollars), PERWT |
+| | BA share | same | 2000–2024 | EDUC ≥ 10 (4+ years of college) |
+| | Metro share | same | 2000–2024 | METRO 2–4 among METRO 1–4 (0 = not identifiable, excluded) |
+| | Unemployment rate | same | 2000–2024 | unemployed / labour force |
+| | Manufacturing share | same | 2000–2024 | IND1990 100–392 among the employed |
+| | Service share | same | 2000–2024 | IND1990 400–932 among the employed |
+| Gendered labour market | Women's LFP | same | 2000–2024 | women in the labour force / women |
+| | Occupational segregation | IPUMS USA, employed | 2000–2024 | Duncan index (section 4.2) |
+| | Gender wage gap | IPUMS USA, adults 25–64 | 2000–2024 | 1 − mean real wage of full-time women / men (UHRSWORK ≥ 35, wage > 0) |
+| | Women's share of managers / professionals | IPUMS USA, employed | 2000–2024 | OCC2010 0010–0430 / 0500–3540 |
+| Policy | Paid family leave | `config/policy/paid_family_leave.csv` (A Better Balance 2023; New America) | benefits 2004–2024 | share of the window's years with state PFL benefits paid (CA 2004, NJ 2009, RI 2014, NY 2018, WA 2020, DC 2020, MA 2021, CT 2022, OR 2023, CO 2024) |
+| Political | Republican two-party vote share | MIT Election Data and Science Lab, 1976–2024 presidential returns (Harvard Dataverse doi:10.7910/DVN/42MVDX) | elections 1996–2024 | R / (R + D), mean over the presidential elections in the window |
+
+All IPUMS-based predictors use person weights summed over the window's years.
+Not yet collected: other policy domains in the plan (childcare, equal pay,
+discrimination protections, reproductive policy), state GDP per capita, and
+measures of social conservatism beyond presidential vote.

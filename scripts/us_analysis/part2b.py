@@ -126,8 +126,11 @@ def run_part2b(panel: pd.DataFrame, config: str, out_root: Path) -> str:
     fit.to_csv(out / "tables" / "2b_block_fit.csv", index=False)
     sig = res[(res["p"] < 0.05) & (res["model"] != "all blocks")][
         ["domain", "spec", "term", "coef", "se", "p"]]
+    from scripts.us_analysis.policy_timing import policy_timing
+    timing = policy_timing(panel, "config/policy/paid_family_leave.csv", out)
     text = "\n".join([
         "# Part II-B — explaining state differences\n",
+        timing,
         "Outcome: text score (higher = more traditional); all variables standardized. "
         "Between: state means, OLS (HC1). Within: state + window FE, SE clustered by state; "
         "fit column = added R2 over the FE-only model. Associational only.\n",

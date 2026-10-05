@@ -99,3 +99,16 @@ def test_part2b_2c_3(tmp_path):
     assert {"most stable", "largest move toward less traditional",
             "largest text-survey discrepancy"} <= set(cases["criterion"])
     assert (tmp_path / "main" / "figures" / "3_3_state_cases_family.pdf").exists()
+
+
+def test_policy_timing_counts_clean_before_after(tmp_path):
+    from scripts.us_analysis.policy_timing import policy_timing
+    (tmp_path / "tables").mkdir()
+    pfl = tmp_path / "pfl.csv"
+    pfl.write_text("state,benefits_start_year\ns0,2010\ns1,2024\n")
+    panel = _panel()                       # windows 1995..2015, states s0..s13
+    md = policy_timing(panel, str(pfl), tmp_path)
+    t = pd.read_csv(tmp_path / "tables" / "2_6_policy_timing.csv").set_index("state")
+    assert bool(t.loc["s0", "usable_before_after"]) is True   # 1995-04 before, 2010-19 after
+    assert bool(t.loc["s1", "usable_before_after"]) is False  # never fully after
+    assert "too few treated states" in md
