@@ -10,8 +10,10 @@ how close occupation and family words sit to female vs male words (RND, Garg et
 al. 2018). Aggregated nationally, the measure tracks the census closely: across
 72 occupations it correlates r = 0.63–0.70 with the ACS share of women in each
 occupation, and over time it moves the same way as ACS (occupations become
-less male-associated as women's share rises and segregation falls). Across
-states, the measure does not line up with ACS (|r| ≤ 0.24, unstable signs),
+less male-associated as women's share rises and segregation falls). Inside
+each state, the model also ranks occupations like the workforce does (median
+r ≈ 0.55), but no better against the state's own shares than against national
+ones. Across states, the measure does not line up with ACS (|r| ≤ 0.24, unstable signs),
 and a state's value in 2005–14 barely predicts its value in 2015–24 (r = 0.16),
 whereas ACS state values repeat almost exactly (r = 0.70–0.98). With the
 amount of text available per state, the embeddings capture national change
@@ -203,24 +205,68 @@ Correlation of state values between the two windows with no shared years
 
 ![Reliability](us_3dlnews_report/figures/06_reliability.png)
 
+### 5.5 State level, Garg-style: by occupation, by time, and both
+
+Same comparisons as 5.1 and 5.2, but inside each state: cells are state ×
+occupation × window, pairing the occupation's RND in that state's model with
+its ACS female share in that state and window (9,466 cells;
+`scripts/check_state_occupations.py`).
+
+**By occupation (within each state-window).** Correlation across a state's
+~60–70 occupations.
+
+| Window | State-windows | Median occupations | Median r, vs state's own share | Median r, vs national share | Share of state-windows with r > 0 |
+|---|---:|---:|---:|---:|---:|
+| 2005–14 | 49 | 60 | 0.52 | 0.54 | 98% |
+| 2010–19 | 51 | 67 | 0.55 | 0.56 | 100% |
+| 2015–24 | 51 | 69 | 0.56 | 0.58 | 100% |
+
+![State by occupation](us_3dlnews_report/figures/08_state_by_occupation.png)
+
+**By occupation & time (Garg's pooled design, one state at a time).**
+Correlation across a state's occupation × window points (~196 per state):
+median r = 0.53 (interquartile range 0.47–0.60), positive in all 51 states.
+
+![State by occupation and time](us_3dlnews_report/figures/09_state_by_occupation_time.png)
+
+**By time (within states).** Change from 2005–14 to 2015–24, ΔRND vs Δ female
+share: r = −0.00 over 2,800 state × occupation pairs; r = −0.08 for the
+states' average change (n = 49).
+
+![State by time](us_3dlnews_report/figures/10_state_by_time.png)
+
+Restricting to larger ACS cells (weighted_n ≥ 2,000) changes nothing
+(`tables/state_occ_*_large.csv`).
+
+**Reading.** Every state's model, small as it is, ranks occupations by gender
+much like the workforce does (r ≈ 0.55). But it matches the *national*
+ranking just as well as its own state's, so the state models reproduce the
+common US occupational gender typing rather than anything specific to the
+state; and changes within a state over time do not follow that state's ACS
+changes.
+
 ## 6. Interpretation
 
 1. **The measure works where text is plentiful.** Pooling across states, the
    embedding gender scores of occupations line up with the census (r ≈ 0.65,
    the same kind of evidence Garg et al. show), and their change over time
    follows ACS in direction every window.
-2. **It does not yet work across states.** Our state values barely repeat
+2. **Each state model gets the occupation ranking right, but nothing
+   state-specific.** Within every state-window, occupation RND correlates
+   r ≈ 0.55 with ACS female shares (5.5) — yet equally with the national
+   shares, and within-state changes over time show no relation to ACS changes.
+3. **It does not yet work across states.** Our state values barely repeat
    between non-overlapping windows (r = 0.16–0.21), while the ACS state values
    repeat almost perfectly. A measure that does not reproduce itself cannot
    correlate strongly with anything: with reliability ~0.15 for ours and ~0.85
    for ACS, even a perfectly valid measure could show at most r ≈ 0.36. The
    observed |r| ≤ 0.24 therefore cannot distinguish "valid but noisy" from
    "not valid".
-3. **The likely cause is the amount of text.** A typical state-window model
+4. **The likely cause is the amount of text.** A typical state-window model
    trains on 2–4 million tokens; embedding bias measures are known to be
    unstable at that size. The national results average over ~49 states, which
    cancels most of that noise.
-4. **What else we tried** (details in the research log): 5-year windows
+5. **What else we tried** (details in the research log): 5-year windows
    (same picture: national r = 0.70–0.78, state reliability ≈ 0.1–0.5 within
    sampling error); one shared model per window with state-tagged gender words
    (worse: state values essentially random and the national trend vanished).
