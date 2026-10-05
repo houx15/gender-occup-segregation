@@ -49,17 +49,25 @@ def maps(panel: pd.DataFrame, shapefile: Path, out: Path) -> str:
         d["NAME"] = d["state"].str.replace("_", " ").map(normalize_state)
         vmax = float(np.nanquantile(d["y"].abs(), 0.98))
         norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
-        fig, axes = plt.subplots(1, len(periods), figsize=(4.2 * len(periods), 3.3))
+        ncol = 3
+        nrow = int(np.ceil((len(periods) + 1) / ncol))
+        fig, axes = plt.subplots(nrow, ncol, figsize=(5.2 * ncol, 3.6 * nrow))
+        axes = axes.flat
         for ax, p in zip(axes, periods):
             g = states.merge(d[d["period"] == p][["NAME", "y"]], on="NAME", how="left")
             g.plot(column="y", ax=ax, cmap=CMAP, norm=norm, edgecolor="black", linewidth=0.2,
                    missing_kwds={"color": "#dddddd"})
             ax.set_title(window_label(p), fontsize=9)
             ax.set_axis_off()
+        rest = list(axes)[len(periods):]
+        for ax in rest:
+            ax.set_axis_off()
         sm = plt.cm.ScalarMappable(cmap=CMAP, norm=norm)
-        fig.colorbar(sm, ax=axes, shrink=0.7, label="higher = more traditional (0 = neutral)")
+        fig.colorbar(sm, ax=rest[0], orientation="horizontal", fraction=0.4,
+                     label="higher = more traditional (0 = neutral)")
         fig.suptitle(f"2.1 {TEXT_LABEL[col]} by state and window (common scale; grey = no "
                      "model; AK, HI not shown)", fontsize=10)
+        fig.tight_layout()
         fig.savefig(out / "figures" / f"2_1_maps_{col.replace('ours_', '')}.pdf")
         plt.close(fig)
     return "**2.1 Maps.** One map per window, common scale per domain (2_1_maps_*.pdf).\n"
