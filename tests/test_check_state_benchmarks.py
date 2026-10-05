@@ -78,3 +78,13 @@ def test_family_index_is_mean_of_oriented_z_scores():
     out = add_family_index(t)
     z = np.sqrt(1.5)  # z-scores of 0, 1, 2 (population SD)
     assert list(out["family_index_acs"]) == pytest.approx([-z, 0.0, z])
+
+
+def test_correlate_change_uses_windows_where_both_measures_exist():
+    t = _table()                              # periods 2005, 2010
+    early = t[t.period == 2005].assign(period=1995, iat_sex_balanced=np.nan)
+    t = pd.concat([early, t], ignore_index=True)
+    c = correlate(t, ["ours_occupation"], ["duncan", "iat_sex_balanced"])
+    scopes = set(c[c.survey == "iat_sex_balanced"].scope)
+    assert "change 2005->2010" in scopes      # IAT has no 1995 values
+    assert "change 1995->2010" in set(c[c.survey == "duncan"].scope)

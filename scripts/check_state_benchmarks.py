@@ -114,8 +114,12 @@ def correlate(t: pd.DataFrame, ours_cols: List[str], survey_cols: List[str]) -> 
             for p in periods:
                 g = t[t["period"] == p]
                 rows.append(_corr(f"period {p}", o, s, g[o], g[s]))
-            if len(periods) > 1:
-                a, b = periods[0], periods[-1]
+            # change: first -> last window in which BOTH measures have data
+            # (e.g. Project Implicit starts in 2005, after the first text window)
+            both = [p for p in periods
+                    if t.loc[t["period"] == p, [o, s]].notna().all(axis=1).any()]
+            if len(both) > 1:
+                a, b = both[0], both[-1]
                 w = t.pivot_table(index="state", columns="period", values=[o, s])
                 rows.append(_corr(f"change {a}->{b}", o, s,
                                   w[(o, b)] - w[(o, a)], w[(s, b)] - w[(s, a)]))
