@@ -149,6 +149,8 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 
 ### 4.2 Measures by field
 
+The "Higher =" column describes each raw measure. In the analysis (`scripts/us_analysis/`), every text and survey measure is re-oriented so that **higher = less traditional**: occupation text = +RND, family text = −RND, and survey measures are flipped where their raw higher value means more traditional. Maps use a blue–red scale (blue = less traditional, red = more traditional, centred at 0).
+
 **Objective — occupation.**
 
 | Role | Measure | Calculation | Higher = |

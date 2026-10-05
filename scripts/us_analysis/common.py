@@ -2,13 +2,13 @@
 
 Canonical orientation (used in every figure and model):
 
-    higher = MORE TRADITIONAL / more gender-stereotypical
+    higher = LESS TRADITIONAL / less gender-stereotypical
 
-- Text, occupation: -mean RND over occupations (occupation words closer to
-  male words = more traditional).
-- Text, family: +mean RND over family words (family words closer to female
-  words = more traditional).
-- Survey measures: oriented with check_state_benchmarks.TRADITIONAL_SIGN.
+- Text, occupation: +mean RND over occupations (occupation words closer to
+  female words = less traditional).
+- Text, family: -mean RND over family words (family words closer to male
+  words = less traditional).
+- Survey measures: oriented with -check_state_benchmarks.TRADITIONAL_SIGN.
 
 Occupation-level validation (Part I.1) keeps raw RND (> 0 = female-leaning)
 against the female share, where that reading is the intuitive one.
@@ -31,8 +31,11 @@ from scipy.stats import pearsonr  # noqa: E402
 
 from scripts.check_state_benchmarks import TRADITIONAL_SIGN  # noqa: E402
 
-# text category column -> sign that makes it "higher = more traditional"
-TEXT_SIGN = {"ours_occupation": -1, "ours_family_sphere": 1, "ours_household": 1}
+# text category column -> sign that makes it "higher = less traditional"
+TEXT_SIGN = {"ours_occupation": 1, "ours_family_sphere": -1, "ours_household": -1}
+# diverging colours: red = more traditional, blue = less traditional
+CMAP = "RdBu"
+LESS_TRAD_COLOR, MORE_TRAD_COLOR = "#2166ac", "#b2182b"
 TEXT_LABEL = {"ours_occupation": "Text: occupation", "ours_family_sphere": "Text: family sphere",
               "ours_household": "Text: household work"}
 SURVEY_LABEL = {
@@ -82,12 +85,14 @@ ROBUSTNESS: List[Spec] = (
 )
 
 
-def text_trad(panel: pd.DataFrame, col: str) -> pd.Series:
+def text_egal(panel: pd.DataFrame, col: str) -> pd.Series:
+    """Text score oriented higher = less traditional."""
     return TEXT_SIGN[col] * panel[col]
 
 
-def survey_trad(panel: pd.DataFrame, col: str) -> pd.Series:
-    return TRADITIONAL_SIGN.get(col, 1) * panel[col]
+def survey_egal(panel: pd.DataFrame, col: str) -> pd.Series:
+    """Survey measure oriented higher = less traditional."""
+    return -TRADITIONAL_SIGN.get(col, 1) * panel[col]
 
 
 def zscore(s: pd.Series) -> pd.Series:

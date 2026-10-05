@@ -64,7 +64,7 @@ def test_part2_heatmaps_and_change(tmp_path):
     assert (out / "figures" / "2_2_heatmap_occupation_region.pdf").exists()
     assert (out / "figures" / "2_3_change_family_sphere.pdf").exists()
     ch = pd.read_csv(out / "tables" / "2_3_change_occupation_2000_2015.csv")
-    assert (ch["change"] < 0).mean() > 0.5     # planted trend toward less traditional
+    assert (ch["change"] > 0).mean() > 0.5     # planted trend toward less traditional
     assert "Change ranking" in md
 
 

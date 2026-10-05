@@ -1,6 +1,6 @@
 """Part II-B — explaining state differences in text gender norms (plan 2.4-2.7).
 
-Outcome: text score per domain (higher = more traditional), standardized.
+Outcome: text score per domain (higher = less traditional), standardized.
 Predictors in theoretical blocks (standardized; built by
 scripts/data_prep/build_context_measures.py, plus the Duncan index):
 
@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-from scripts.us_analysis.common import TEXT_LABEL, md_table, save, text_trad, zscore
+from scripts.us_analysis.common import TEXT_LABEL, md_table, save, text_egal, zscore
 
 BLOCKS: Dict[str, List[str]] = {
     "socioeconomic": ["log_real_gdp_pc", "log_real_income_pc", "ba_share", "metro_share",
@@ -81,7 +81,7 @@ def models(d: pd.DataFrame) -> pd.DataFrame:
     specs["all blocks"] = [v for vs in blocks.values() for v in vs]
     rows = []
     for dom, col in OUTCOMES.items():
-        dd = d.assign(y=text_trad(d, col))
+        dd = d.assign(y=text_egal(d, col))
         for spec_name, fe in (("between states", False), ("within states (state + window FE)", True)):
             for block, xs in specs.items():
                 fit, r2, n = _fit(dd, "y", xs, fe)
@@ -110,7 +110,7 @@ def coefficient_plot(res: pd.DataFrame, out: Path) -> None:
             ax.set_xlabel("Standardized coefficient (95% CI), one model per block", fontsize=8)
         handles = [plt.Line2D([], [], color=c, marker="o", ls="", label=b) for b, c in BLOCK_COLOR.items()]
         axes[1].legend(handles=handles, fontsize=7, loc="lower right")
-        fig.suptitle(f"2B {TEXT_LABEL[OUTCOMES[dom]]} (higher = more traditional): state predictors",
+        fig.suptitle(f"2B {TEXT_LABEL[OUTCOMES[dom]]} (higher = less traditional): state predictors",
                      fontsize=10)
         save(fig, out / "figures" / f"2b_predictors_{dom}.pdf")
 
@@ -137,7 +137,7 @@ def run_part2b(panel: pd.DataFrame, config: str, out_root: Path) -> str:
     text = "\n".join([
         "# Part II-B — explaining state differences\n",
         timing,
-        "Outcome: text score (higher = more traditional); all variables standardized. "
+        "Outcome: text score (higher = less traditional); all variables standardized. "
         "Between: state means, OLS (HC1). Within: state + window FE, SE clustered by state; "
         "fit column = added R2 over the FE-only model. Associational only.\n",
         "### Block fit\n", md_table(fit) + "\n",

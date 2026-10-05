@@ -8,7 +8,7 @@ match the step figures. Written to <out_dir>/figures_combined/:
   figure4_maps_<domain>.pdf  2.1 (copied)
   figure5_dynamics_<domain>.pdf  2.2 heatmap + 2.3 change ranking
   figure6_explanatory.pdf    II-B between-state coefficients
-Orientation: higher = more traditional (state level).
+Orientation: higher = less traditional (state level).
 """
 
 from __future__ import annotations
@@ -23,7 +23,8 @@ import statsmodels.formula.api as smf
 from matplotlib.colors import TwoSlopeNorm
 
 from scripts.us_analysis.common import (
-    MAIN, SURVEY_LABEL, TEXT_LABEL, save, scatter_fit, survey_trad, text_trad, window_label, zscore,
+    CMAP, LESS_TRAD_COLOR, MAIN, MORE_TRAD_COLOR, SURVEY_LABEL, TEXT_LABEL, save, scatter_fit, survey_egal,
+    text_egal, window_label, zscore,
 )
 from scripts.us_analysis.part2b import BLOCK_COLOR
 
@@ -33,7 +34,7 @@ DOMS = list(MAIN.pairs)
 def _frame(panel, dom):
     tcol, scol = MAIN.pairs[dom]
     d = pd.DataFrame({"state": panel["state"], "period": panel["period"], "tokens": panel["tokens"],
-                      "text": text_trad(panel, tcol), "survey": survey_trad(panel, scol)}).dropna(
+                      "text": text_egal(panel, tcol), "survey": survey_egal(panel, scol)}).dropna(
         subset=["text", "survey"])
     return d, tcol, scol
 
@@ -52,7 +53,7 @@ def figure1(panel, main, out):
         ax.errorbar(x, g["mean"], yerr=g["ci95"], fmt="o", capsize=3, color="#4c72b0")
         ax.plot(x, g["mean"], ls=":", lw=0.8, color="#4c72b0")
         ax.set_xticks(x, g["window"], fontsize=7)
-        ax.set_ylabel("Mean text score (higher = more traditional)", fontsize=8)
+        ax.set_ylabel("Mean text score (higher = less traditional)", fontsize=8)
         ax.set_title(f"{lab} (95% CI over states)", fontsize=9)
     g = geo[geo["domain"] == "occupation"].sort_values("mean")
     y = np.arange(len(g))
@@ -77,7 +78,7 @@ def figure2(panel, out):
                     f"{dom}: between states")
         scatter_fit(axes[2][j], within["survey"], within["text"], "within-state deviation",
                     "within-state deviation", f"{dom}: within states")
-    fig.suptitle("Figure 2. Survey validation (main measures; higher = more traditional)", fontsize=11)
+    fig.suptitle("Figure 2. Survey validation (main measures; higher = less traditional)", fontsize=11)
     save(fig, out / "figure2_survey.pdf")
 
 
@@ -111,20 +112,20 @@ def figure5(panel, main, out):
         changes = sorted((main / "tables").glob(f"2_3_change_{tag}_2000_*.csv"))
         fig, axes = plt.subplots(1, 2, figsize=(11, 10))
         vmax = float(np.nanquantile(np.abs(w.values), 0.98))
-        im = axes[0].imshow(w.values, cmap="PuOr_r", norm=TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax), aspect="auto")
+        im = axes[0].imshow(w.values, cmap=CMAP, norm=TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax), aspect="auto")
         axes[0].set_xticks(range(w.shape[1]), [window_label(int(p)) for p in w.columns], fontsize=6)
         axes[0].set_yticks(range(w.shape[0]), w.index.str.replace("_", " ").str.title(), fontsize=5)
-        fig.colorbar(im, ax=axes[0], shrink=0.5, label="higher = more traditional")
+        fig.colorbar(im, ax=axes[0], shrink=0.5, label="higher = less traditional")
         axes[0].set_title("A. State x window (ordered by average)", fontsize=9)
         if changes:
             ch = pd.read_csv(changes[0]).sort_values("change")
             y = np.arange(len(ch))
-            colors = np.where(ch["hi"] < 0, "#5e3c99", np.where(ch["lo"] > 0, "#e66101", "#999999"))
+            colors = np.where(ch["lo"] > 0, LESS_TRAD_COLOR, np.where(ch["hi"] < 0, MORE_TRAD_COLOR, "#999999"))
             axes[1].errorbar(ch["change"], y, xerr=1.96 * ch["se"], fmt="none", ecolor=colors, elinewidth=0.7)
             axes[1].scatter(ch["change"], y, c=colors, s=8, zorder=3)
             axes[1].axvline(0, color="black", lw=0.6)
             axes[1].set_yticks(y, ch["state"].str.replace("_", " ").str.title(), fontsize=5)
-            axes[1].set_title("B. Change 2000–09 → 2015–24 (< 0 = less traditional)", fontsize=9)
+            axes[1].set_title("B. Change 2000–09 → 2015–24 (> 0 = less traditional)", fontsize=9)
         fig.suptitle(f"Figure 5. State-level dynamics: {TEXT_LABEL[col]}", fontsize=11)
         save(fig, out / f"figure5_dynamics_{dom}.pdf")
 

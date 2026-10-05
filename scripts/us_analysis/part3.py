@@ -10,7 +10,7 @@ Occupations (national RND = mean over state models, occupations in every window)
   reversal (RND changes sign, both |RND| > 0.005), largest |residual| from
   RND ~ female share.
 Family terms: largest |change|, most stable, reversal, largest SD across states.
-States (text score, higher = more traditional; baseline = second window,
+States (text score, higher = less traditional; baseline = second window,
   final = last): similar baseline / divergent final (pairs), similar
   socioeconomic structure / divergent change (pairs), largest move to less
   traditional, least change, largest |text - survey gap|, weakest / strongest
@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from scripts.us_analysis.common import MAIN, md_table, save, survey_trad, text_trad, window_label, zscore
+from scripts.us_analysis.common import MAIN, md_table, save, survey_egal, text_egal, window_label, zscore
 
 K = 5
 SOCIO = ["log_real_gdp_pc", "log_real_income_pc", "ba_share", "metro_share", "unemployment_rate",
@@ -96,7 +96,7 @@ def state_cases(panel: pd.DataFrame, out_root: Path) -> pd.DataFrame:
     base, final = periods[1], periods[-1]
     rows = []
     for dom, (tcol, scol) in MAIN.pairs.items():
-        d = panel.assign(y=text_trad(panel, tcol), s=survey_trad(panel, scol))
+        d = panel.assign(y=text_egal(panel, tcol), s=survey_egal(panel, scol))
         w = d.pivot_table(index="state", columns="period", values="y")
         sd = d["y"].std()
         both = w[[base, final]].dropna()
@@ -128,7 +128,7 @@ def state_cases(panel: pd.DataFrame, out_root: Path) -> pd.DataFrame:
                              "case": f"{r.a} / {r.b}", "value": r.d_change,
                              "details": f"socioeconomic distance {r.dist:.2f} (z units), change gap {r.d_change:.4f}"})
         # (3) largest move toward less traditional, (4) little change
-        for crit, sel in (("largest move toward less traditional", ch.sort_values().head(K)),
+        for crit, sel in (("largest move toward less traditional", ch.sort_values(ascending=False).head(K)),
                           ("little change", ch.reindex(ch.abs().sort_values().index).head(K))):
             for st, v in sel.items():
                 rows.append({"domain": dom, "level": "state", "criterion": crit, "case": st, "value": v,
@@ -153,7 +153,7 @@ def state_cases(panel: pd.DataFrame, out_root: Path) -> pd.DataFrame:
 
 def _trajectories(panel: pd.DataFrame, cases: pd.DataFrame, out: Path) -> None:
     for dom, (tcol, scol) in MAIN.pairs.items():
-        d = panel.assign(y=zscore(text_trad(panel, tcol)), s=zscore(survey_trad(panel, scol)))
+        d = panel.assign(y=zscore(text_egal(panel, tcol)), s=zscore(survey_egal(panel, scol)))
         sel = cases[(cases["domain"] == dom) & (cases["level"] == "state")]
         crits = list(dict.fromkeys(sel["criterion"]))
         fig, axes = plt.subplots(len(crits), 1, figsize=(9, 2.6 * len(crits)), squeeze=False)
@@ -163,7 +163,7 @@ def _trajectories(panel: pd.DataFrame, cases: pd.DataFrame, out: Path) -> None:
                 color = plt.cm.tab10(i)
                 ax.plot(g["period"], g["y"], "-o", color=color, ms=3, label=st.replace("_", " ").title())
                 ax.plot(g["period"], g["s"], "--", color=color, lw=0.8)
-            ax.set_title(f"{crit} (solid = text, dashed = survey; z, higher = more traditional)", fontsize=8)
+            ax.set_title(f"{crit} (solid = text, dashed = survey; z, higher = less traditional)", fontsize=8)
             ax.legend(fontsize=6, ncol=3)
             ax.tick_params(labelsize=7)
         fig.suptitle(f"3.3 State cases: {dom}", fontsize=10)
@@ -195,10 +195,10 @@ def state_profiles(panel: pd.DataFrame, cases: pd.DataFrame) -> pd.DataFrame:
                "last_window": window_label(int(b["period"])),
                "criteria": "; ".join(sorted(set(cases[cases["case"].str.contains(st, regex=False)]["criterion"])))}
         for dom, (tcol, scol) in MAIN.pairs.items():
-            row[f"text_{dom}_first"], row[f"text_{dom}_last"] = (text_trad(g, tcol).iloc[0],
-                                                                 text_trad(g, tcol).iloc[-1])
-            row[f"survey_{dom}_first"], row[f"survey_{dom}_last"] = (survey_trad(g, scol).iloc[0],
-                                                                     survey_trad(g, scol).iloc[-1])
+            row[f"text_{dom}_first"], row[f"text_{dom}_last"] = (text_egal(g, tcol).iloc[0],
+                                                                 text_egal(g, tcol).iloc[-1])
+            row[f"survey_{dom}_first"], row[f"survey_{dom}_last"] = (survey_egal(g, scol).iloc[0],
+                                                                     survey_egal(g, scol).iloc[-1])
         for vs in PROFILE.values():
             for v in vs:
                 if v in g.columns:

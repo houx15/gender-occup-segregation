@@ -1,6 +1,6 @@
 """Part I — measurement validation (analysis plan 1.1-1.8).
 
-Orientation: state-level scores are "higher = more traditional" (common.py).
+Orientation: state-level scores are "higher = less traditional" (common.py).
 1.1-1.3 use only the text measure and are written to main/. 1.4-1.7 are run
 per Spec (main + robustness-*); 1.8 (subjective) is the robustness-iat and
 robustness-explicit specs.
@@ -18,8 +18,8 @@ import pandas as pd
 import statsmodels.formula.api as smf
 
 from scripts.us_analysis.common import (
-    DOMAINS, SURVEY_LABEL, TEXT_LABEL, Spec, corr, md_table, save, scatter_fit, survey_trad,
-    text_trad, window_label, zscore,
+    DOMAINS, SURVEY_LABEL, TEXT_LABEL, Spec, corr, md_table, save, scatter_fit, survey_egal,
+    text_egal, window_label, zscore,
 )
 
 TEXT_DOMAIN = {"occupation": "ours_occupation", "family": "ours_family_sphere"}
@@ -48,7 +48,7 @@ def temporal(panel: pd.DataFrame, out: Path) -> str:
     rows = []
     cols = ["ours_occupation", "ours_family_sphere", "ours_household"]
     for col in cols:
-        v = panel.assign(y=text_trad(panel, col))
+        v = panel.assign(y=text_egal(panel, col))
         for p, g in v.groupby("period"):
             y = g["y"].dropna()
             rows.append({"text": col, "window": window_label(p), "period": p, "states": len(y),
@@ -64,7 +64,7 @@ def temporal(panel: pd.DataFrame, out: Path) -> str:
         ax.axhline(0, color="grey", lw=0.6)
         ax.set_xticks(x, g["window"], fontsize=7)
         ax.set_title(f"{TEXT_LABEL[col]}\n(n states: {', '.join(map(str, g['states']))})", fontsize=9)
-        ax.set_ylabel("Text score (higher = more traditional)", fontsize=8)
+        ax.set_ylabel("Text score (higher = less traditional)", fontsize=8)
     fig.suptitle("1.2 Mean text score per window (95% CI over states)", fontsize=10)
     save(fig, out / "figures" / "1_2_temporal.pdf")
     lines = []
@@ -72,7 +72,7 @@ def temporal(panel: pd.DataFrame, out: Path) -> str:
         g = tab[tab["text"] == col]
         lines.append(f"{TEXT_LABEL[col]}: " + ", ".join(
             f"{w} {m:+.4f}" for w, m in zip(g["window"], g["mean"])))
-    return "**1.2 Temporal variation** (higher = more traditional). " + "; ".join(lines) + ".\n"
+    return "**1.2 Temporal variation** (higher = less traditional). " + "; ".join(lines) + ".\n"
 
 
 def geography(panel: pd.DataFrame, out: Path) -> str:
@@ -81,7 +81,7 @@ def geography(panel: pd.DataFrame, out: Path) -> str:
     rows = []
     for ax, dom in zip(axes, DOMAINS):
         col = TEXT_DOMAIN[dom]
-        v = panel.assign(y=text_trad(panel, col), se=panel[f"se_{col}"])
+        v = panel.assign(y=text_egal(panel, col), se=panel[f"se_{col}"])
         g = (v.groupby("state").agg(mean=("y", "mean"), k=("y", "count"),
                                     se=("se", lambda x: np.sqrt((x ** 2).sum()) / len(x)))
              .reset_index().sort_values("mean"))
@@ -92,7 +92,7 @@ def geography(panel: pd.DataFrame, out: Path) -> str:
                     ecolor="#9ab", elinewidth=0.8)
         ax.axvline(g["mean"].mean(), color="black", lw=0.6, ls="--")
         ax.set_yticks(y, g["state"].str.replace("_", " ").str.title(), fontsize=6)
-        ax.set_xlabel("Mean text score over windows (higher = more traditional)", fontsize=8)
+        ax.set_xlabel("Mean text score over windows (higher = less traditional)", fontsize=8)
         ax.set_title(TEXT_LABEL[col], fontsize=9)
     fig.suptitle("1.3 States sorted by average text score (95% interval from word bootstrap)",
                  fontsize=10)
@@ -110,7 +110,7 @@ def geography(panel: pd.DataFrame, out: Path) -> str:
 # ---------------------------------------------------------------- 1.4 - 1.7 --
 def _domain_frame(panel: pd.DataFrame, text_col: str, survey_col: str) -> pd.DataFrame:
     d = pd.DataFrame({"state": panel["state"], "period": panel["period"],
-                      "text": text_trad(panel, text_col), "survey": survey_trad(panel, survey_col),
+                      "text": text_egal(panel, text_col), "survey": survey_egal(panel, survey_col),
                       "tokens": panel["tokens"]}).dropna(subset=["text", "survey"])
     d["text_z"], d["survey_z"] = zscore(d["text"]), zscore(d["survey"])
     return d
@@ -164,8 +164,8 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
     for ax, dm, panel_lab in zip(axes[0], doms, "AB"):
         tcol, scol = spec.pairs[dm]
         d = frames[dm]
-        scatter_fit(ax, d["survey"], d["text"], f"{SURVEY_LABEL[scol]}\n(higher = more traditional)",
-                    f"{TEXT_LABEL[tcol]} (higher = more traditional)", f"{panel_lab}. {dm}")
+        scatter_fit(ax, d["survey"], d["text"], f"{SURVEY_LABEL[scol]}\n(higher = less traditional)",
+                    f"{TEXT_LABEL[tcol]} (higher = less traditional)", f"{panel_lab}. {dm}")
         model_rows.append(_models(d).assign(domain=dm, text=tcol, survey=scol))
     fig.suptitle("1.4 State-window alignment: text vs survey", fontsize=10)
     save(fig, out_f / "1_4_state_window.pdf")
@@ -191,7 +191,7 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
                         f"Within-state deviation, {TEXT_LABEL[tcol]}", f"Within states — {dm}")
         bw_rows += [{"domain": dm, "component": "between states", **b},
                     {"domain": dm, "component": "within states", **w}]
-    fig.suptitle("1.5 Between- and within-state alignment (higher = more traditional)", fontsize=10)
+    fig.suptitle("1.5 Between- and within-state alignment (higher = less traditional)", fontsize=10)
     save(fig, out_f / "1_5_between_within.pdf")
     bw = pd.DataFrame(bw_rows)[["domain", "component", "r", "p", "n", "slope"]]
     bw.to_csv(out_t / "1_5_between_within.csv", index=False)
@@ -260,7 +260,7 @@ def run_part1(panel: pd.DataFrame, cells: pd.DataFrame, specs: List[Spec], out_r
     for sub in ("figures", "tables"):
         (main / sub).mkdir(parents=True, exist_ok=True)
     md = ["# Part I — measurement validation\n",
-          "Orientation: state-level scores are higher = more traditional.\n",
+          "Orientation: state-level scores are higher = less traditional.\n",
           occupation_validity(cells, main), temporal(panel, main), geography(panel, main)]
     for spec in specs:
         folder = out_root / spec.name

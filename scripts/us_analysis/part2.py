@@ -1,8 +1,8 @@
 """Part II — geography and dynamics of text gender norms (analysis plan 2.1-2.3).
 
-Scores: higher = more traditional (common.py); 0 = gender-neutral RND.
-Colour: diverging PuOr_r (colourblind-safe), orange = more traditional, purple =
-less, centred at 0, one fixed range per domain across all windows.
+Scores: higher = less traditional (common.py); 0 = gender-neutral RND.
+Colour: diverging RdBu, blue = less traditional, red = more traditional,
+centred at 0, one fixed range per domain across all windows.
 """
 
 from __future__ import annotations
@@ -16,9 +16,10 @@ from matplotlib.colors import TwoSlopeNorm
 
 from scripts.common.config_loader import load_config
 from scripts.data_prep.us_state_mapper import normalize_state
-from scripts.us_analysis.common import TEXT_LABEL, md_table, save, text_trad, window_label
+from scripts.us_analysis.common import (
+    CMAP, LESS_TRAD_COLOR, MORE_TRAD_COLOR, TEXT_LABEL, md_table, save, text_egal, window_label,
+)
 
-CMAP = "PuOr_r"
 TEXT_COLS = ["ours_occupation", "ours_family_sphere"]
 REGION = {  # US Census regions
     "Northeast": ["connecticut", "maine", "massachusetts", "new_hampshire", "rhode_island",
@@ -35,7 +36,7 @@ STATE_REGION = {s: r for r, ss in REGION.items() for s in ss}
 
 
 def _scores(panel: pd.DataFrame, col: str) -> pd.DataFrame:
-    return panel.assign(y=text_trad(panel, col), se=panel[f"se_{col}"])[
+    return panel.assign(y=text_egal(panel, col), se=panel[f"se_{col}"])[
         ["state", "period", "y", "se"]].dropna(subset=["y"])
 
 
@@ -64,7 +65,7 @@ def maps(panel: pd.DataFrame, shapefile: Path, out: Path) -> str:
             ax.set_axis_off()
         sm = plt.cm.ScalarMappable(cmap=CMAP, norm=norm)
         fig.colorbar(sm, ax=rest[0], orientation="horizontal", fraction=0.4,
-                     label="higher = more traditional (0 = neutral)")
+                     label="higher = less traditional (0 = neutral)")
         fig.suptitle(f"2.1 {TEXT_LABEL[col]} by state and window (common scale; grey = no "
                      "model; AK, HI not shown)", fontsize=10)
         fig.tight_layout()
@@ -98,7 +99,7 @@ def heatmaps(panel: pd.DataFrame, out: Path) -> str:
             labels = [s.replace("_", " ").title() + (f" ({STATE_REGION.get(s, '?')[:2]})"
                                                      if name == "region" else "") for s in m.index]
             ax.set_yticks(range(m.shape[0]), labels, fontsize=6)
-            fig.colorbar(im, ax=ax, shrink=0.5, label="higher = more traditional")
+            fig.colorbar(im, ax=ax, shrink=0.5, label="higher = less traditional")
             ax.set_title(f"2.2 {TEXT_LABEL[col]}: state x window\n(ordered by {name}; "
                          "white = no model)", fontsize=9)
             save(fig, out / "figures" / f"2_2_heatmap_{col.replace('ours_', '')}_{name}.pdf")
@@ -126,18 +127,18 @@ def change_ranking(panel: pd.DataFrame, out: Path) -> str:
                 continue
             fig, ax = plt.subplots(figsize=(5.5, 9.5))
             y = np.arange(len(ch))
-            colors = np.where(ch["hi"] < 0, "#5e3c99", np.where(ch["lo"] > 0, "#e66101", "#999999"))
+            colors = np.where(ch["lo"] > 0, LESS_TRAD_COLOR, np.where(ch["hi"] < 0, MORE_TRAD_COLOR, "#999999"))
             ax.errorbar(ch["change"], y, xerr=1.96 * ch["se"], fmt="none", ecolor=colors, elinewidth=0.8)
             ax.scatter(ch["change"], y, c=colors, s=12, zorder=3)
             ax.axvline(0, color="black", lw=0.6)
             ax.set_yticks(y, ch.index.str.replace("_", " ").str.title(), fontsize=6)
             ax.set_xlabel(f"Change {window_label(base)} → {window_label(last)}\n"
-                          "(< 0 = less traditional; 95% interval)", fontsize=8)
+                          "(> 0 = less traditional; 95% interval)", fontsize=8)
             ax.set_title(f"2.3 {TEXT_LABEL[col]}: change by state", fontsize=9)
             save(fig, out / "figures" / f"2_3_change_{col.replace('ours_', '')}.pdf")
             md.append(f"{TEXT_LABEL[col]} {window_label(base)}→{window_label(last)}: "
-                      f"{len(ch)} states, {int((ch['hi'] < 0).sum())} significantly less "
-                      f"traditional, {int((ch['lo'] > 0).sum())} significantly more; median "
+                      f"{len(ch)} states, {int((ch['lo'] > 0).sum())} significantly less "
+                      f"traditional, {int((ch['hi'] < 0).sum())} significantly more; median "
                       f"change {ch['change'].median():+.4f}")
     return "**2.3 Change ranking.** " + "; ".join(md) + ".\n"
 
@@ -149,7 +150,7 @@ def run_part2(panel: pd.DataFrame, config: str, out_root: Path) -> str:
         (out / sub).mkdir(parents=True, exist_ok=True)
     shp = Path(cfg["us_states"].get("shapefile", "data/shapefiles/us_states.shp"))
     md = ["# Part II — geography and dynamics\n",
-          "Orientation: higher = more traditional; 0 = gender-neutral RND.\n",
+          "Orientation: higher = less traditional; 0 = gender-neutral RND.\n",
           maps(panel, shp, out), heatmaps(panel, out), change_ranking(panel, out)]
     text = "\n".join(md)
     (out_root / "part2_summary.md").write_text(text, encoding="utf-8")

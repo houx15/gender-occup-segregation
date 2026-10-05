@@ -1,8 +1,8 @@
 """Part II-C — text-survey discrepancy as an outcome (plan II-C).
 
-gap_st = z(text score) - z(main survey measure), both oriented "higher = more
+gap_st = z(text score) - z(main survey measure), both oriented "higher = less
 traditional" and standardized over state-windows. gap > 0: the state's news
-text is more traditional than its survey measure suggests. Also the residual
+text is less traditional than its survey measure suggests. Also the residual
 from the survey-on-text calibration (survey_z ~ text_z) as an alternative.
 
 Predictors: the Part II-B blocks plus log text volume, (a) pooled with window
@@ -18,14 +18,14 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-from scripts.us_analysis.common import MAIN, md_table, save, survey_trad, text_trad, zscore
+from scripts.us_analysis.common import MAIN, md_table, save, survey_egal, text_egal, zscore
 from scripts.us_analysis.part2b import BLOCK_COLOR, available_blocks, prepare
 
 
 def add_gaps(panel: pd.DataFrame) -> pd.DataFrame:
     d = prepare(panel)
     for dom, (tcol, scol) in MAIN.pairs.items():
-        t, s = text_trad(d, tcol), survey_trad(d, scol)
+        t, s = text_egal(d, tcol), survey_egal(d, scol)
         ok = t.notna() & s.notna()
         tz, sz = zscore(t[ok]), zscore(s[ok])
         d.loc[ok, f"gap_{dom}"] = tz - sz
@@ -82,7 +82,7 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
                     color="#4c72b0", ecolor="#9ab", elinewidth=0.8)
         ax.axvline(0, color="grey", lw=0.6)
         ax.set_yticks(y, g.index.str.replace("_", " ").str.title(), fontsize=6)
-        ax.set_xlabel("Mean gap: z(text) − z(survey)\n(> 0 = text more traditional than survey)", fontsize=8)
+        ax.set_xlabel("Mean gap: z(text) − z(survey)\n(> 0 = text less traditional than survey)", fontsize=8)
         ax.set_title(dom, fontsize=9)
     fig.suptitle("2C Text-survey discrepancy by state (main survey measures)", fontsize=10)
     save(fig, out / "figures" / "2c_gap_states.pdf")
@@ -111,7 +111,7 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
                      if v not in used)
     text = "\n".join([
         "# Part II-C — text-survey discrepancy\n",
-        "gap = z(text) − z(survey), main measures, higher = text more traditional than survey. "
+        "gap = z(text) − z(survey), main measures, higher = text less traditional than survey. "
         "All predictors jointly, standardized; predictors observed in < 80% of state-windows "
         f"left out: {', '.join(dropped) or 'none'}.\n",
         "### Model fit\n", md_table(fit) + "\n",
