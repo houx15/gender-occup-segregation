@@ -1,0 +1,4 @@
+window,states,states_trained,articles_median,articles_total,tokens_median_millions,tokens_min_millions,tokens_max_millions
+2005–14,51,49,4259.0,342228,1.789666,0.415131,15.88038
+2010–19,51,51,7841.0,588326,3.103562,0.407659,24.407645
+2015–24,51,51,11559.0,780648,4.104263,0.411719,27.456112
