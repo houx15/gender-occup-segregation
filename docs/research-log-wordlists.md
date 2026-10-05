@@ -423,3 +423,17 @@ and `robustness-*/`). Orientation everywhere: higher = more traditional.
 - II-C: text-survey gap largest where women's share of professionals is high
   (both domains); the survey side of the gap is itself explained by context.
 - III: case-selection table `main/tables/3_case_selection.csv`.
+
+## 2026-10-05 — ATUS housework benchmark added
+
+IPUMS ATUS (respondents 25–54, WT06 / WT20 for 2020): women's share of
+household activities, housework, and childcare (parents) per state-window
+(`scripts/data_prep/build_housework_measures.py`; jobs 3393466–3393468).
+Women's share of household activities 0.633 (2000–09) → 0.611 (2015–24);
+smallest state cells 66–118 respondents.
+
+Robustness specs (family domain): family text vs household share β = 0.02,
+vs childcare share β = 0.11 (both n.s., ≈ 0 with FE); household-work text vs
+housework share β = −0.09, within-state r = −0.20 (p = 0.007, opposite
+direction: household words drift female-ward while women's housework share
+falls). No ATUS measure aligns with the text measures across states.
