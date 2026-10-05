@@ -199,6 +199,7 @@ def external_measures(sources: Path, periods: List[int], width: int) -> pd.DataF
 
     zf = zipfile.ZipFile(sources / "stateideology_v2018.dta.zip")
     berry = pd.read_stata(zf.open(next(n for n in zf.namelist() if n.endswith(".dta"))))
+    berry = berry.dropna(subset=["statename", "year"])
     berry = pd.DataFrame({"state": berry["statename"].map(slug), "year": berry["year"].astype(int),
                           "citizen_ideology": berry["citi6016"]}).dropna(subset=["state"])
 
