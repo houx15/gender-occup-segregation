@@ -8,9 +8,9 @@ from scripts.check_state_benchmarks import (
 
 
 def test_with_unit_name_accepts_names_and_usps_codes():
-    d = pd.DataFrame({"state": ["Ohio", "DC", "NY"], "period": [2005, 2010, 2015]})
+    d = pd.DataFrame({"state": ["Ohio", "DC", "NY", "new_york"], "period": [2005, 2010, 2015, 2020]})
     assert list(with_unit_name(d)["unit_name"]) == [
-        "ohio_2005", "district_of_columbia_2010", "new_york_2015"]
+        "ohio_2005", "district_of_columbia_2010", "new_york_2015", "new_york_2020"]
 
 
 def test_our_scores_wide_by_category():

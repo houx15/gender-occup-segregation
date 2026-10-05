@@ -77,7 +77,8 @@ def add_family_index(t: pd.DataFrame) -> pd.DataFrame:
 def with_unit_name(d: pd.DataFrame) -> pd.DataFrame:
     """Add unit_name ('ohio_2005') from a state name or USPS code + period."""
     d = d.copy()
-    d["unit_name"] = (d["state"].map(lambda s: unit_state(normalize_state(str(s))))
+    # accepts names ('New York'), USPS codes ('NY') and slugs ('new_york')
+    d["unit_name"] = (d["state"].map(lambda s: unit_state(normalize_state(str(s).replace("_", " "))))
                       + "_" + d["period"].astype(int).astype(str))
     return d
 
