@@ -483,48 +483,48 @@ Outcome: text score (higher = more traditional); all variables standardized. Bet
 
 | domain | spec | model | n | r2_or_added_r2 | significant_terms | terms |
 |---|---|---|---|---|---|---|
-| family | between states | all blocks | 50 | 0.156 | 0 | 13 |
+| family | between states | all blocks | 47 | 0.373 | 2 | 20 |
 | family | between states | gendered labour market | 51 | 0.079 | 0 | 5 |
-| family | between states | policy | 51 | 0.003 | 0 | 1 |
-| family | between states | political | 51 | 0.054 | 1 | 1 |
-| family | between states | socioeconomic | 50 | 0.045 | 0 | 6 |
-| family | within states (state + window FE) | all blocks | 227 | 0.084 | 2 | 13 |
+| family | between states | policy | 47 | 0.047 | 0 | 5 |
+| family | between states | political & cultural | 50 | 0.06 | 0 | 3 |
+| family | between states | socioeconomic | 50 | 0.068 | 0 | 7 |
+| family | within states (state + window FE) | all blocks | 79 | 0.148 | 0 | 20 |
 | family | within states (state + window FE) | gendered labour market | 232 | 0.019 | 0 | 5 |
-| family | within states (state + window FE) | policy | 232 | 0.0 | 0 | 1 |
-| family | within states (state + window FE) | political | 232 | 0.007 | 0 | 1 |
-| family | within states (state + window FE) | socioeconomic | 227 | 0.026 | 1 | 6 |
-| occupation | between states | all blocks | 50 | 0.429 | 2 | 13 |
+| family | within states (state + window FE) | policy | 79 | 0.054 | 0 | 5 |
+| family | within states (state + window FE) | political & cultural | 177 | 0.041 | 0 | 3 |
+| family | within states (state + window FE) | socioeconomic | 227 | 0.027 | 1 | 7 |
+| occupation | between states | all blocks | 47 | 0.49 | 0 | 20 |
 | occupation | between states | gendered labour market | 51 | 0.265 | 2 | 5 |
-| occupation | between states | policy | 51 | 0.004 | 0 | 1 |
-| occupation | between states | political | 51 | 0.081 | 1 | 1 |
-| occupation | between states | socioeconomic | 50 | 0.268 | 1 | 6 |
-| occupation | within states (state + window FE) | all blocks | 227 | 0.06 | 0 | 13 |
+| occupation | between states | policy | 47 | 0.102 | 1 | 5 |
+| occupation | between states | political & cultural | 50 | 0.018 | 0 | 3 |
+| occupation | between states | socioeconomic | 50 | 0.282 | 1 | 7 |
+| occupation | within states (state + window FE) | all blocks | 79 | 0.095 | 0 | 20 |
 | occupation | within states (state + window FE) | gendered labour market | 232 | 0.016 | 0 | 5 |
-| occupation | within states (state + window FE) | policy | 232 | 0.004 | 0 | 1 |
-| occupation | within states (state + window FE) | political | 232 | 0.0 | 0 | 1 |
-| occupation | within states (state + window FE) | socioeconomic | 227 | 0.033 | 0 | 6 |
+| occupation | within states (state + window FE) | policy | 79 | 0.032 | 1 | 5 |
+| occupation | within states (state + window FE) | political & cultural | 177 | 0.024 | 0 | 3 |
+| occupation | within states (state + window FE) | socioeconomic | 227 | 0.039 | 0 | 7 |
 
 ### Terms with p < 0.05 (one model per block)
 
 | domain | spec | term | coef | se | p |
 |---|---|---|---|---|---|
-| occupation | between states | metro_share | 0.44 | 0.153 | 0.004 |
+| occupation | between states | metro_share | 0.448 | 0.153 | 0.003 |
 | occupation | between states | duncan | -0.915 | 0.214 | 0.0 |
 | occupation | between states | female_share_professionals | 0.446 | 0.181 | 0.014 |
-| occupation | between states | gop_two_party_share | -0.285 | 0.128 | 0.027 |
-| family | between states | gop_two_party_share | 0.232 | 0.104 | 0.025 |
-| family | within states (state + window FE) | unemployment_rate | -0.522 | 0.208 | 0.012 |
+| occupation | between states | abortion_restrictions | 0.332 | 0.163 | 0.042 |
+| occupation | within states (state + window FE) | pfl_share | -0.149 | 0.076 | 0.049 |
+| family | within states (state + window FE) | unemployment_rate | -0.534 | 0.21 | 0.011 |
 
 # Part II-C — text-survey discrepancy
 
-gap = z(text) − z(survey), main measures, higher = text more traditional than survey. All predictors jointly, standardized.
+gap = z(text) − z(survey), main measures, higher = text more traditional than survey. All predictors jointly, standardized; predictors observed in < 80% of state-windows left out: abortion_restrictions, citizen_ideology, equal_pay_law, evangelical_lds_share, so_employment_law, universal_prek.
 
 ### Model fit
 
 | domain | spec | n | r2 |
 |---|---|---|---|
-| family | between states | 50 | 0.665 |
-| family | pooled + window FE | 227 | 0.492 |
+| family | between states | 50 | 0.684 |
+| family | pooled + window FE | 227 | 0.502 |
 | occupation | between states | 50 | 0.605 |
 | occupation | pooled + window FE | 227 | 0.399 |
 
@@ -532,19 +532,19 @@ gap = z(text) − z(survey), main measures, higher = text more traditional than 
 
 | domain | spec | term | coef | se | p |
 |---|---|---|---|---|---|
-| occupation | pooled + window FE | ba_share | 0.385 | 0.18 | 0.032 |
-| occupation | pooled + window FE | metro_share | 0.266 | 0.098 | 0.007 |
-| occupation | pooled + window FE | manufacturing_share | -0.576 | 0.191 | 0.003 |
-| occupation | pooled + window FE | service_share | -0.614 | 0.244 | 0.012 |
-| occupation | pooled + window FE | duncan | -0.49 | 0.237 | 0.039 |
-| occupation | pooled + window FE | female_share_professionals | 0.625 | 0.156 | 0.0 |
-| occupation | between states | metro_share | 0.423 | 0.181 | 0.02 |
-| occupation | between states | manufacturing_share | -0.892 | 0.311 | 0.004 |
-| occupation | between states | service_share | -0.895 | 0.395 | 0.024 |
-| occupation | between states | female_share_professionals | 0.952 | 0.27 | 0.0 |
-| occupation | between states | pfl_share | -0.222 | 0.11 | 0.043 |
-| family | pooled + window FE | female_share_professionals | 0.495 | 0.168 | 0.003 |
-| family | between states | female_share_professionals | 0.688 | 0.259 | 0.008 |
+| occupation | pooled + window FE | ba_share | 0.395 | 0.184 | 0.032 |
+| occupation | pooled + window FE | metro_share | 0.266 | 0.097 | 0.006 |
+| occupation | pooled + window FE | manufacturing_share | -0.571 | 0.194 | 0.003 |
+| occupation | pooled + window FE | service_share | -0.612 | 0.245 | 0.012 |
+| occupation | pooled + window FE | duncan | -0.489 | 0.238 | 0.04 |
+| occupation | pooled + window FE | female_share_professionals | 0.622 | 0.161 | 0.0 |
+| occupation | between states | metro_share | 0.421 | 0.188 | 0.025 |
+| occupation | between states | manufacturing_share | -0.873 | 0.333 | 0.009 |
+| occupation | between states | service_share | -0.882 | 0.417 | 0.035 |
+| occupation | between states | female_share_professionals | 0.941 | 0.285 | 0.001 |
+| family | pooled + window FE | log_real_gdp_pc | -0.263 | 0.113 | 0.02 |
+| family | pooled + window FE | female_share_professionals | 0.533 | 0.164 | 0.001 |
+| family | between states | female_share_professionals | 0.781 | 0.253 | 0.002 |
 
 # Part III — case selection
 
@@ -596,10 +596,10 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | occupation | state pair | similar baseline, divergent final | alabama / indiana | 0.015 | baseline gap 0.0005, final gap 0.0152 |
 | occupation | state pair | similar baseline, divergent final | florida / vermont | 0.015 | baseline gap 0.0012, final gap 0.0146 |
 | occupation | state pair | similar socioeconomic structure, divergent change | rhode_island / texas | 0.033 | socioeconomic distance 1.55 (z units), change gap 0.0334 |
-| occupation | state pair | similar socioeconomic structure, divergent change | connecticut / new_jersey | 0.029 | socioeconomic distance 1.24 (z units), change gap 0.0286 |
-| occupation | state pair | similar socioeconomic structure, divergent change | south_dakota / wyoming | 0.028 | socioeconomic distance 1.49 (z units), change gap 0.0284 |
-| occupation | state pair | similar socioeconomic structure, divergent change | rhode_island / utah | 0.028 | socioeconomic distance 1.50 (z units), change gap 0.0280 |
-| occupation | state pair | similar socioeconomic structure, divergent change | delaware / maine | 0.026 | socioeconomic distance 1.45 (z units), change gap 0.0265 |
+| occupation | state pair | similar socioeconomic structure, divergent change | ohio / wisconsin | 0.032 | socioeconomic distance 1.73 (z units), change gap 0.0320 |
+| occupation | state pair | similar socioeconomic structure, divergent change | maine / utah | 0.029 | socioeconomic distance 1.62 (z units), change gap 0.0291 |
+| occupation | state pair | similar socioeconomic structure, divergent change | connecticut / new_jersey | 0.029 | socioeconomic distance 1.52 (z units), change gap 0.0286 |
+| occupation | state pair | similar socioeconomic structure, divergent change | rhode_island / utah | 0.028 | socioeconomic distance 1.56 (z units), change gap 0.0280 |
 | occupation | state | largest move toward less traditional | north_dakota | -0.031 | 2000–09 -> 2015–24 |
 | occupation | state | largest move toward less traditional | wisconsin | -0.03 | 2000–09 -> 2015–24 |
 | occupation | state | largest move toward less traditional | texas | -0.026 | 2000–09 -> 2015–24 |
@@ -627,10 +627,10 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | family | state pair | similar baseline, divergent final | vermont / virginia | 0.027 | baseline gap 0.0002, final gap 0.0265 |
 | family | state pair | similar baseline, divergent final | florida / virginia | 0.025 | baseline gap 0.0014, final gap 0.0250 |
 | family | state pair | similar socioeconomic structure, divergent change | kentucky / south_carolina | 0.043 | socioeconomic distance 1.36 (z units), change gap 0.0428 |
-| family | state pair | similar socioeconomic structure, divergent change | kansas / vermont | 0.042 | socioeconomic distance 1.49 (z units), change gap 0.0423 |
-| family | state pair | similar socioeconomic structure, divergent change | delaware / oklahoma | 0.039 | socioeconomic distance 1.49 (z units), change gap 0.0392 |
-| family | state pair | similar socioeconomic structure, divergent change | oregon / south_carolina | 0.038 | socioeconomic distance 1.24 (z units), change gap 0.0376 |
-| family | state pair | similar socioeconomic structure, divergent change | florida / nevada | 0.037 | socioeconomic distance 1.22 (z units), change gap 0.0367 |
+| family | state pair | similar socioeconomic structure, divergent change | kansas / vermont | 0.042 | socioeconomic distance 1.52 (z units), change gap 0.0423 |
+| family | state pair | similar socioeconomic structure, divergent change | oregon / south_carolina | 0.038 | socioeconomic distance 1.33 (z units), change gap 0.0376 |
+| family | state pair | similar socioeconomic structure, divergent change | florida / nevada | 0.037 | socioeconomic distance 1.71 (z units), change gap 0.0367 |
+| family | state pair | similar socioeconomic structure, divergent change | ohio / south_carolina | 0.036 | socioeconomic distance 1.13 (z units), change gap 0.0360 |
 | family | state | largest move toward less traditional | west_virginia | -0.036 | 2000–09 -> 2015–24 |
 | family | state | largest move toward less traditional | south_carolina | -0.027 | 2000–09 -> 2015–24 |
 | family | state | largest move toward less traditional | oklahoma | -0.018 | 2000–09 -> 2015–24 |

@@ -451,3 +451,21 @@ falls). No ATUS measure aligns with the text measures across states.
 - Still not collected (needs a source decision): other policy domains
   (childcare, equal pay, discrimination, reproductive), state GDP per capita,
   social-conservatism measures beyond presidential vote.
+
+## 2026-10-05 — Remaining II-B predictors added
+
+Sources (`scripts/data_prep/download_context_sources.py`): BEA regional
+accounts (real GDP per capita), Correlates of State Policy Project v2.6
+(universal pre-K, equal pay law, sexual-orientation employment protection,
+abortion restriction index, evangelical + LDS share), Berry et al. citizen
+ideology v2018. Window value = mean of observed years, missing unless half
+the window is observed (no carrying forward); CSPP years need >= 40 states
+coded. Coverage: GDP all windows; pre-K 1995–04 and 2000–09; equal pay and
+SO protection to 2005–14; abortion index to 2005–14; ideology and religion to
+2010–19; none of the CSPP / Berry variables for 2015–24.
+
+II-B (one model per block): between states, more abortion restrictions go
+with a more traditional occupation score (β = 0.33, p = 0.04); within states,
+paid family leave goes with a less traditional occupation score (β = −0.15,
+p = 0.049). Both borderline. II-C joint model uses predictors observed in
+>= 80% of state-windows (n = 227); sparse external predictors only in II-B.

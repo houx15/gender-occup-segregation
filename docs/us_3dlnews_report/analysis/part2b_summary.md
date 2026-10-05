@@ -21,34 +21,34 @@ Outcome: text score (higher = more traditional); all variables standardized. Bet
 
 | domain | spec | model | n | r2_or_added_r2 | significant_terms | terms |
 |---|---|---|---|---|---|---|
-| family | between states | all blocks | 50 | 0.156 | 0 | 13 |
+| family | between states | all blocks | 47 | 0.373 | 2 | 20 |
 | family | between states | gendered labour market | 51 | 0.079 | 0 | 5 |
-| family | between states | policy | 51 | 0.003 | 0 | 1 |
-| family | between states | political | 51 | 0.054 | 1 | 1 |
-| family | between states | socioeconomic | 50 | 0.045 | 0 | 6 |
-| family | within states (state + window FE) | all blocks | 227 | 0.084 | 2 | 13 |
+| family | between states | policy | 47 | 0.047 | 0 | 5 |
+| family | between states | political & cultural | 50 | 0.06 | 0 | 3 |
+| family | between states | socioeconomic | 50 | 0.068 | 0 | 7 |
+| family | within states (state + window FE) | all blocks | 79 | 0.148 | 0 | 20 |
 | family | within states (state + window FE) | gendered labour market | 232 | 0.019 | 0 | 5 |
-| family | within states (state + window FE) | policy | 232 | 0.0 | 0 | 1 |
-| family | within states (state + window FE) | political | 232 | 0.007 | 0 | 1 |
-| family | within states (state + window FE) | socioeconomic | 227 | 0.026 | 1 | 6 |
-| occupation | between states | all blocks | 50 | 0.429 | 2 | 13 |
+| family | within states (state + window FE) | policy | 79 | 0.054 | 0 | 5 |
+| family | within states (state + window FE) | political & cultural | 177 | 0.041 | 0 | 3 |
+| family | within states (state + window FE) | socioeconomic | 227 | 0.027 | 1 | 7 |
+| occupation | between states | all blocks | 47 | 0.49 | 0 | 20 |
 | occupation | between states | gendered labour market | 51 | 0.265 | 2 | 5 |
-| occupation | between states | policy | 51 | 0.004 | 0 | 1 |
-| occupation | between states | political | 51 | 0.081 | 1 | 1 |
-| occupation | between states | socioeconomic | 50 | 0.268 | 1 | 6 |
-| occupation | within states (state + window FE) | all blocks | 227 | 0.06 | 0 | 13 |
+| occupation | between states | policy | 47 | 0.102 | 1 | 5 |
+| occupation | between states | political & cultural | 50 | 0.018 | 0 | 3 |
+| occupation | between states | socioeconomic | 50 | 0.282 | 1 | 7 |
+| occupation | within states (state + window FE) | all blocks | 79 | 0.095 | 0 | 20 |
 | occupation | within states (state + window FE) | gendered labour market | 232 | 0.016 | 0 | 5 |
-| occupation | within states (state + window FE) | policy | 232 | 0.004 | 0 | 1 |
-| occupation | within states (state + window FE) | political | 232 | 0.0 | 0 | 1 |
-| occupation | within states (state + window FE) | socioeconomic | 227 | 0.033 | 0 | 6 |
+| occupation | within states (state + window FE) | policy | 79 | 0.032 | 1 | 5 |
+| occupation | within states (state + window FE) | political & cultural | 177 | 0.024 | 0 | 3 |
+| occupation | within states (state + window FE) | socioeconomic | 227 | 0.039 | 0 | 7 |
 
 ### Terms with p < 0.05 (one model per block)
 
 | domain | spec | term | coef | se | p |
 |---|---|---|---|---|---|
-| occupation | between states | metro_share | 0.44 | 0.153 | 0.004 |
+| occupation | between states | metro_share | 0.448 | 0.153 | 0.003 |
 | occupation | between states | duncan | -0.915 | 0.214 | 0.0 |
 | occupation | between states | female_share_professionals | 0.446 | 0.181 | 0.014 |
-| occupation | between states | gop_two_party_share | -0.285 | 0.128 | 0.027 |
-| family | between states | gop_two_party_share | 0.232 | 0.104 | 0.025 |
-| family | within states (state + window FE) | unemployment_rate | -0.522 | 0.208 | 0.012 |
+| occupation | between states | abortion_restrictions | 0.332 | 0.163 | 0.042 |
+| occupation | within states (state + window FE) | pfl_share | -0.149 | 0.076 | 0.049 |
+| family | within states (state + window FE) | unemployment_rate | -0.534 | 0.21 | 0.011 |

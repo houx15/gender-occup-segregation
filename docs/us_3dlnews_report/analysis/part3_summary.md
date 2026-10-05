@@ -48,10 +48,10 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | occupation | state pair | similar baseline, divergent final | alabama / indiana | 0.015 | baseline gap 0.0005, final gap 0.0152 |
 | occupation | state pair | similar baseline, divergent final | florida / vermont | 0.015 | baseline gap 0.0012, final gap 0.0146 |
 | occupation | state pair | similar socioeconomic structure, divergent change | rhode_island / texas | 0.033 | socioeconomic distance 1.55 (z units), change gap 0.0334 |
-| occupation | state pair | similar socioeconomic structure, divergent change | connecticut / new_jersey | 0.029 | socioeconomic distance 1.24 (z units), change gap 0.0286 |
-| occupation | state pair | similar socioeconomic structure, divergent change | south_dakota / wyoming | 0.028 | socioeconomic distance 1.49 (z units), change gap 0.0284 |
-| occupation | state pair | similar socioeconomic structure, divergent change | rhode_island / utah | 0.028 | socioeconomic distance 1.50 (z units), change gap 0.0280 |
-| occupation | state pair | similar socioeconomic structure, divergent change | delaware / maine | 0.026 | socioeconomic distance 1.45 (z units), change gap 0.0265 |
+| occupation | state pair | similar socioeconomic structure, divergent change | ohio / wisconsin | 0.032 | socioeconomic distance 1.73 (z units), change gap 0.0320 |
+| occupation | state pair | similar socioeconomic structure, divergent change | maine / utah | 0.029 | socioeconomic distance 1.62 (z units), change gap 0.0291 |
+| occupation | state pair | similar socioeconomic structure, divergent change | connecticut / new_jersey | 0.029 | socioeconomic distance 1.52 (z units), change gap 0.0286 |
+| occupation | state pair | similar socioeconomic structure, divergent change | rhode_island / utah | 0.028 | socioeconomic distance 1.56 (z units), change gap 0.0280 |
 | occupation | state | largest move toward less traditional | north_dakota | -0.031 | 2000–09 -> 2015–24 |
 | occupation | state | largest move toward less traditional | wisconsin | -0.03 | 2000–09 -> 2015–24 |
 | occupation | state | largest move toward less traditional | texas | -0.026 | 2000–09 -> 2015–24 |
@@ -79,10 +79,10 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | family | state pair | similar baseline, divergent final | vermont / virginia | 0.027 | baseline gap 0.0002, final gap 0.0265 |
 | family | state pair | similar baseline, divergent final | florida / virginia | 0.025 | baseline gap 0.0014, final gap 0.0250 |
 | family | state pair | similar socioeconomic structure, divergent change | kentucky / south_carolina | 0.043 | socioeconomic distance 1.36 (z units), change gap 0.0428 |
-| family | state pair | similar socioeconomic structure, divergent change | kansas / vermont | 0.042 | socioeconomic distance 1.49 (z units), change gap 0.0423 |
-| family | state pair | similar socioeconomic structure, divergent change | delaware / oklahoma | 0.039 | socioeconomic distance 1.49 (z units), change gap 0.0392 |
-| family | state pair | similar socioeconomic structure, divergent change | oregon / south_carolina | 0.038 | socioeconomic distance 1.24 (z units), change gap 0.0376 |
-| family | state pair | similar socioeconomic structure, divergent change | florida / nevada | 0.037 | socioeconomic distance 1.22 (z units), change gap 0.0367 |
+| family | state pair | similar socioeconomic structure, divergent change | kansas / vermont | 0.042 | socioeconomic distance 1.52 (z units), change gap 0.0423 |
+| family | state pair | similar socioeconomic structure, divergent change | oregon / south_carolina | 0.038 | socioeconomic distance 1.33 (z units), change gap 0.0376 |
+| family | state pair | similar socioeconomic structure, divergent change | florida / nevada | 0.037 | socioeconomic distance 1.71 (z units), change gap 0.0367 |
+| family | state pair | similar socioeconomic structure, divergent change | ohio / south_carolina | 0.036 | socioeconomic distance 1.13 (z units), change gap 0.0360 |
 | family | state | largest move toward less traditional | west_virginia | -0.036 | 2000–09 -> 2015–24 |
 | family | state | largest move toward less traditional | south_carolina | -0.027 | 2000–09 -> 2015–24 |
 | family | state | largest move toward less traditional | oklahoma | -0.018 | 2000–09 -> 2015–24 |
