@@ -45,6 +45,7 @@ OCCUPATION = ["matched_female_share", "duncan", "female_emp_share"]
 FAMILY = ["motherhood_emp_gap", "motherhood_hours_gap", "married_women_nilf",
           "wife_earnings_share", "wife_earns_more", "gender_emp_gap"]
 ATTITUDE = ["iat_sex_balanced", "explicit_sex_balanced", "iat_mean", "explicit_mean"]
+HOUSEWORK = ["women_share_household", "women_share_housework", "women_share_childcare_parents"]
 
 # +1 if a higher value means MORE traditional gender norms, -1 if less.
 # ours_*: raw mean RND (> 0 = closer to women); female-leaning occupations are
@@ -56,6 +57,7 @@ TRADITIONAL_SIGN = {
     "wife_earnings_share": -1, "wife_earns_more": -1, "gender_emp_gap": 1,
     "iat_sex_balanced": 1, "explicit_sex_balanced": 1, "iat_mean": 1, "explicit_mean": 1,
     "family_index_acs": 1,
+    "women_share_household": 1, "women_share_housework": 1, "women_share_childcare_parents": 1,
 }
 
 
@@ -156,7 +158,8 @@ def main(config: str) -> None:
     occ = occ[["unit_name"] + OCCUPATION]
 
     sources, survey_cols = [], list(OCCUPATION)
-    for key, cols in (("family_file", FAMILY), ("attitude_file", ATTITUDE)):
+    for key, cols in (("family_file", FAMILY), ("attitude_file", ATTITUDE),
+                      ("housework_file", HOUSEWORK)):
         path = cc.get(key)
         if path and Path(path).exists():
             sources.append(pd.read_csv(path))

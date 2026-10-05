@@ -32,6 +32,7 @@ OCCUPATION = ["matched_female_share", "duncan", "female_emp_share"]
 FAMILY = ["family_index_acs", "motherhood_emp_gap", "motherhood_hours_gap",
           "married_women_nilf", "wife_earnings_share", "wife_earns_more", "gender_emp_gap"]
 SUBJECTIVE = ["iat_sex_balanced", "explicit_sex_balanced"]
+HOUSEWORK = ["women_share_household", "women_share_housework", "women_share_childcare_parents"]
 OURS = ["ours_occupation", "ours_family_sphere", "ours_household"]
 
 
@@ -174,15 +175,17 @@ def main(config: str, out_dir: str) -> None:
 
     # 4. survey measures -----------------------------------------------------------
     t = pd.read_csv(res / "state_benchmark_table.csv")
-    sv = _stats_by_window(t, OCCUPATION + FAMILY + SUBJECTIVE, lab)
+    sv = _stats_by_window(t, OCCUPATION + FAMILY + HOUSEWORK + SUBJECTIVE, lab)
     table("survey_measures", sv, "Survey measures per window (across states)")
     shares = Path(cfg["census_check"]["shares_dir"])
     n_rows = []
     for name, path, col in (
             ("ACS occupation (employed persons)", shares / "state_labor_indicators.csv", "n_persons"),
             ("ACS family (adults 25-54)", Path(cfg["census_check"]["family_file"]), "n_persons"),
-            ("Project Implicit IAT (US respondents)", Path(cfg["census_check"]["attitude_file"]), "n")):
-        if not path.exists():
+            ("Project Implicit IAT (US respondents)", Path(cfg["census_check"]["attitude_file"]), "n"),
+            ("ATUS (respondents 25-54)", Path(cfg["census_check"].get("housework_file", "")),
+             "n_respondents")):
+        if not path.is_file():
             continue
         d = pd.read_csv(path)
         if col not in d:

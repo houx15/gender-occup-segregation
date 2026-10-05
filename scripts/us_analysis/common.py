@@ -48,6 +48,9 @@ SURVEY_LABEL = {
     "gender_emp_gap": "ACS: gender employment gap",
     "iat_sex_balanced": "IAT: implicit career-family stereotype",
     "explicit_sex_balanced": "Project Implicit: explicit stereotype",
+    "women_share_household": "ATUS: women's share of household activities",
+    "women_share_housework": "ATUS: women's share of housework",
+    "women_share_childcare_parents": "ATUS: women's share of childcare (parents)",
 }
 DOMAINS = ("occupation", "family")
 
@@ -71,7 +74,11 @@ ROBUSTNESS: List[Spec] = (
                                "family": ("ours_family_sphere", "iat_sex_balanced")}),
        Spec("robustness-explicit", {"occupation": ("ours_occupation", "explicit_sex_balanced"),
                                     "family": ("ours_family_sphere", "explicit_sex_balanced")}),
-       Spec("robustness-household-text", {"family": ("ours_household", "family_index_acs")})]
+       Spec("robustness-household-text", {"family": ("ours_household", "family_index_acs")}),
+       Spec("robustness-atus-household", {"family": ("ours_family_sphere", "women_share_household")}),
+       Spec("robustness-atus-childcare", {"family": ("ours_family_sphere",
+                                                     "women_share_childcare_parents")}),
+       Spec("robustness-household-text-atus", {"family": ("ours_household", "women_share_housework")})]
 )
 
 

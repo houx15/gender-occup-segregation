@@ -41,6 +41,10 @@ echo "== 3. census check"
 python -m scripts.check_occupation_census --config="$CONFIG"
 echo "== 4. family + attitude benchmarks"
 python -m scripts.data_prep.build_family_measures --config=config/ipums_acs_family.yml --width="$WIDTH" --step="$STEP" --period_start="$START"
+ATUS=$(ls /scratch/network/yh6580/gender-occup/data/ipums_atus/ 2>&1 | grep "^atus_.*csv.gz$" || true)
+if [ -n "$ATUS" ]; then
+    python -m scripts.data_prep.build_housework_measures --width="$WIDTH" --step="$STEP" --period_start="$START"
+fi
 python -m scripts.data_prep.build_attitude_measures --config=config/project_implicit.yml --width="$WIDTH" --step="$STEP" --period_start="$START"
 python -m scripts.check_state_benchmarks --config="$CONFIG"
 echo "DONE check_dlnews"

@@ -39,12 +39,15 @@ def _cells(seed=0):
 
 def test_part1_main_and_robustness_outputs(tmp_path):
     panel = _panel()
-    text = part1.run_part1(panel, _cells(), [MAIN] + ROBUSTNESS[:1] + ROBUSTNESS[-3:-1], tmp_path)
+    picked = [sp for sp in ROBUSTNESS if sp.name in ("robustness-duncan", "robustness-iat",
+                                                     "robustness-atus-household")]
+    text = part1.run_part1(panel, _cells(), [MAIN] + picked, tmp_path)
     for f in ("1_1_occupation_validity.pdf", "1_2_temporal.pdf", "1_3_geography.pdf",
               "1_4_state_window.pdf", "1_5_between_within.pdf", "1_6_volume_error.pdf",
               "1_7_state_slopes.pdf"):
         assert (tmp_path / "main" / "figures" / f).exists(), f
     assert (tmp_path / "robustness-iat" / "tables" / "1_4_models.csv").exists()
+    assert (tmp_path / "robustness-atus-household" / "figures" / "1_4_state_window.pdf").exists()
     models = pd.read_csv(tmp_path / "main" / "tables" / "1_4_models.csv")
     pooled = models[(models.model == "pooled") & (models.domain == "occupation")].iloc[0]
     assert pooled["beta_std"] > 0.5            # planted positive alignment (oriented)
