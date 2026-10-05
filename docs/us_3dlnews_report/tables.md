@@ -83,6 +83,18 @@
 | gender_emp_gap | 2005–14 | 49 | 0.098 | 0.0279 | 0.042 | 0.2047 |
 | gender_emp_gap | 2010–19 | 51 | 0.0885 | 0.0268 | 0.0321 | 0.1938 |
 | gender_emp_gap | 2015–24 | 51 | 0.0813 | 0.0267 | 0.0124 | 0.1782 |
+| women_share_household | 2000–09 | 48 | 0.6329 | 0.052 | 0.5446 | 0.7881 |
+| women_share_household | 2005–14 | 49 | 0.626 | 0.042 | 0.4793 | 0.7117 |
+| women_share_household | 2010–19 | 51 | 0.6191 | 0.0357 | 0.5185 | 0.7055 |
+| women_share_household | 2015–24 | 51 | 0.6111 | 0.0314 | 0.551 | 0.6672 |
+| women_share_housework | 2000–09 | 48 | 0.7813 | 0.0528 | 0.6106 | 0.9114 |
+| women_share_housework | 2005–14 | 49 | 0.7652 | 0.0535 | 0.6204 | 0.8873 |
+| women_share_housework | 2010–19 | 51 | 0.7547 | 0.0418 | 0.6426 | 0.8321 |
+| women_share_housework | 2015–24 | 51 | 0.7414 | 0.0413 | 0.6474 | 0.8602 |
+| women_share_childcare_parents | 2000–09 | 48 | 0.6499 | 0.0602 | 0.5368 | 0.8307 |
+| women_share_childcare_parents | 2005–14 | 49 | 0.6451 | 0.0423 | 0.5304 | 0.7473 |
+| women_share_childcare_parents | 2010–19 | 51 | 0.6358 | 0.0413 | 0.5027 | 0.7046 |
+| women_share_childcare_parents | 2015–24 | 51 | 0.6279 | 0.0503 | 0.4572 | 0.7031 |
 | iat_sex_balanced | 2000–09 | 48 | 0.3679 | 0.0165 | 0.3118 | 0.4085 |
 | iat_sex_balanced | 2005–14 | 49 | 0.3704 | 0.0147 | 0.3204 | 0.3934 |
 | iat_sex_balanced | 2010–19 | 51 | 0.3552 | 0.0111 | 0.3267 | 0.3707 |
@@ -110,6 +122,10 @@
 | Project Implicit IAT (US respondents) | 2005–14 | 51 | 509289 | 5799 | 628 |
 | Project Implicit IAT (US respondents) | 2010–19 | 51 | 996831 | 11607 | 1028 |
 | Project Implicit IAT (US respondents) | 2015–24 | 51 | 1501880 | 18700 | 1637 |
+| ATUS (respondents 25-54) | 2000–09 | 51 | 36578 | 531 | 66 |
+| ATUS (respondents 25-54) | 2005–14 | 51 | 69455 | 1028 | 118 |
+| ATUS (respondents 25-54) | 2010–19 | 51 | 57875 | 920 | 100 |
+| ATUS (respondents 25-54) | 2015–24 | 51 | 43554 | 722 | 82 |
 
 ### Text scores (RND, word fixed effects) per window
 

@@ -361,3 +361,87 @@ Orientation: state-level scores are higher = more traditional.
 | domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
 |---|---|---|---|---|
 | family | -0.123 | 0.046 | 0.045 | 39 |
+
+## robustness-atus-household
+
+### 1.4 State-window alignment (standardized; SE clustered by state)
+
+| domain | text | survey | model | beta_std | se | p | n | r2 |
+|---|---|---|---|---|---|---|---|---|
+| family | ours_family_sphere | women_share_household | pooled | 0.02 | 0.07 | 0.779 | 199 | 0.0 |
+| family | ours_family_sphere | women_share_household | state + window FE | 0.015 | 0.1 | 0.878 | 199 | 0.649 |
+
+### 1.5 Between- and within-state alignment
+
+| domain | component | r | p | n | slope |
+|---|---|---|---|---|---|
+| family | between states | 0.042 | 0.772 | 51 | 0.008 |
+| family | within states | -0.017 | 0.813 | 199 | -0.004 |
+
+### 1.6 Discrepancy vs text volume
+
+| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
+|---|---|---|---|---|---|---|
+| family | -0.338 | 0.0 | -0.501 | 199 | 1.138 | 0.561 |
+
+### 1.7 Hierarchical state-specific slopes
+
+| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
+|---|---|---|---|---|
+| family | -0.051 | 0.076 | 0.275 | 2 |
+
+## robustness-atus-childcare
+
+### 1.4 State-window alignment (standardized; SE clustered by state)
+
+| domain | text | survey | model | beta_std | se | p | n | r2 |
+|---|---|---|---|---|---|---|---|---|
+| family | ours_family_sphere | women_share_childcare_parents | pooled | 0.111 | 0.085 | 0.191 | 199 | 0.012 |
+| family | ours_family_sphere | women_share_childcare_parents | state + window FE | 0.064 | 0.139 | 0.646 | 199 | 0.473 |
+
+### 1.5 Between- and within-state alignment
+
+| domain | component | r | p | n | slope |
+|---|---|---|---|---|---|
+| family | between states | 0.196 | 0.168 | 51 | 0.035 |
+| family | within states | 0.036 | 0.614 | 199 | 0.006 |
+
+### 1.6 Discrepancy vs text volume
+
+| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
+|---|---|---|---|---|---|---|
+| family | -0.319 | 0.0 | -0.496 | 199 | 1.0 | 0.498 |
+
+### 1.7 Hierarchical state-specific slopes
+
+| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
+|---|---|---|---|---|
+| family | 0.034 | 0.098 | 0.416 | 3 |
+
+## robustness-household-text-atus
+
+### 1.4 State-window alignment (standardized; SE clustered by state)
+
+| domain | text | survey | model | beta_std | se | p | n | r2 |
+|---|---|---|---|---|---|---|---|---|
+| family | ours_household | women_share_housework | pooled | -0.094 | 0.092 | 0.309 | 191 | 0.009 |
+| family | ours_household | women_share_housework | state + window FE | -0.09 | 0.121 | 0.457 | 191 | 0.455 |
+
+### 1.5 Between- and within-state alignment
+
+| domain | component | r | p | n | slope |
+|---|---|---|---|---|---|
+| family | between states | 0.062 | 0.671 | 50 | 0.015 |
+| family | within states | -0.195 | 0.007 | 191 | -0.051 |
+
+### 1.6 Discrepancy vs text volume
+
+| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
+|---|---|---|---|---|---|---|
+| family | -0.387 | 0.0 | -0.618 | 191 | 1.197 | 0.513 |
+
+### 1.7 Hierarchical state-specific slopes
+
+| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
+|---|---|---|---|---|
+| family | -0.141 | 0.081 | 0.189 | 3 |

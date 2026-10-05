@@ -1,0 +1,3 @@
+domain,text,survey,model,beta_std,se,p,n,r2
+family,ours_household,women_share_housework,pooled,-0.09380259730492532,0.09213432858426358,0.3086271481088485,191,0.008798927261149947
+family,ours_household,women_share_housework,state + window FE,-0.0903194200980105,0.1213045070010615,0.45653308874844056,191,0.455271475921478

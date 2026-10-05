@@ -145,6 +145,7 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 | IPUMS USA: Census 2000 5% + ACS 1-year 2001–2024 | 2000–2024 | employed persons | YEAR, STATEFIP, SEX, OCC2010, PERWT |
 | same | 2000–2024 | adults 25–54 | + NCHILD, NCHLT5, MARST, EMPSTAT, LABFORCE, UHRSWORK, INCWAGE, spouse's INCWAGE |
 | Project Implicit Gender–Career IAT | 2005–2024 | US respondents with a state (from ZIP code) | IAT D score, explicit career/family items, sex |
+| IPUMS ATUS (American Time Use Survey) | 2003–2024 (2003–04 not in any window) | respondents 25–54, one diary day | minutes of household activities, housework, childcare of household children; SEX, STATEFIP, HH_CHILD, WT06 / WT20 |
 
 ### 4.2 Measures by field
 
@@ -168,6 +169,14 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 | Robustness | Wife earns more | share of those couples where the wife earns more | less traditional |
 | Robustness | Gender employment gap | employment rate, men − women | more traditional |
 
+**Objective — housework and care** (ATUS, respondents 25–54; robustness).
+
+| Role | Measure | Calculation | Higher = |
+|---|---|---|---|
+| Robustness | Women's share of household activities | women's mean minutes / (women's + men's mean minutes), BLS household activities | more traditional |
+| Robustness | Women's share of housework | same, BLS core housework | more traditional |
+| Robustness | Women's share of childcare | same, caring for household children, respondents with an own child < 18 | more traditional |
+
 **Subjective.**
 
 | Role | Measure | Calculation | Higher = |
@@ -185,6 +194,8 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
   (standard errors of survey measures) are not used.
 - **Occupations** enter the matched female share with equal weight, matching
   the equal word weighting of the text score.
+- **ATUS:** final person weights WT06; WT20 for 2020 (BLS guidance for the
+  pandemic year). Shares are ratios of weighted mean minutes.
 - **Project Implicit** has no survey weights (volunteer sample); the main
   measures are sex-balanced (mean of women's and men's means) because
   respondents are mostly women.
@@ -202,6 +213,8 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 | Family index with a missing component | mean of the available components |
 | Project Implicit: no US state, missing sex, non-binary | no state: dropped; missing / non-binary sex: in the raw mean, not in the sex-balanced mean |
 | Project Implicit before 2005 | no data: no subjective value for 1995–2004; 2000–09 uses 2005–09 only |
+| ATUS minutes coded ≥ 1440 (invalid) | treated as 0 for that activity |
+| ATUS before 2003 | no data: no housework value for 1995–2004; 2000–09 uses 2003–09 |
 
 ### 4.5 Sample sizes (unweighted respondents)
 
@@ -217,12 +230,17 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 | | 2005–14 | 11.9M | 168,668 (21,169) |
 | | 2010–19 | 11.8M | 163,548 (20,711) |
 | | 2015–24 | 11.6M | 154,065 (19,917) |
+| ATUS, respondents 25–54 | 2000–09 (2003–09) | 36,578 | 531 (66) |
+| | 2005–14 | 69,455 | 1,028 (118) |
+| | 2010–19 | 57,875 | 920 (100) |
+| | 2015–24 | 43,554 | 722 (82) |
 | Project Implicit, US respondents | 2000–09 (2005–09) | 0.21M | 2,449 (339) |
 | | 2005–14 | 0.51M | 5,799 (628) |
 | | 2010–19 | 1.00M | 11,607 (1,028) |
 | | 2015–24 | 1.50M | 18,700 (1,637) |
 
-The 1995–2004 ACS window contains Census 2000 + ACS 2001–2004; Census 2000
+ATUS state cells are small (as few as 66 respondents per state-window), so
+ATUS state values are much noisier than ACS. The 1995–2004 ACS window contains Census 2000 + ACS 2001–2004; Census 2000
 (5%) is larger than the early ACS, hence the larger 2000–09 total.
 
 ### 4.6 Survey measures per window (across states with a text model)
@@ -239,6 +257,9 @@ The 1995–2004 ACS window contains Census 2000 + ACS 2001–2004; Census 2000
 | Wife's earnings share | 0.349 (0.023) | 0.356 (0.025) | 0.362 (0.026) | 0.365 (0.026) | 0.372 (0.026) |
 | Wife earns more | 0.252 (0.023) | 0.261 (0.024) | 0.276 (0.026) | 0.286 (0.027) | 0.293 (0.028) |
 | Gender employment gap | 0.128 (0.029) | 0.116 (0.029) | 0.098 (0.028) | 0.089 (0.027) | 0.081 (0.027) |
+| ATUS: women's share of household activities | — | 0.633 (0.052) | 0.626 (0.042) | 0.619 (0.036) | 0.611 (0.031) |
+| ATUS: women's share of housework | — | 0.781 (0.053) | 0.765 (0.054) | 0.755 (0.042) | 0.741 (0.041) |
+| ATUS: women's share of childcare (parents) | — | 0.650 (0.060) | 0.645 (0.042) | 0.636 (0.041) | 0.628 (0.050) |
 | IAT D score (sex-balanced) | — | 0.368 (0.017) | 0.370 (0.015) | 0.355 (0.011) | 0.332 (0.012) |
 | Explicit stereotype (sex-balanced) | — | 1.56 (0.12) | 1.60 (0.12) | 1.31 (0.11) | 0.97 (0.07) |
 
