@@ -68,3 +68,13 @@ def test_agreement_r_flips_to_common_traditional_direction():
     # occupation (higher = less traditional) vs IAT (higher = more traditional): -0.4 agrees
     assert list(a["agreement_r"]) == pytest.approx([0.4, 0.3, 0.2])
     assert TRADITIONAL_SIGN["duncan"] == 1 and TRADITIONAL_SIGN["ours_occupation"] == -1
+
+
+def test_family_index_is_mean_of_oriented_z_scores():
+    from scripts.check_state_benchmarks import FAMILY, add_family_index
+    t = pd.DataFrame({c: [0.0, 1.0, 2.0] for c in FAMILY})
+    t["wife_earnings_share"] = [2.0, 1.0, 0.0]   # less traditional when higher -> flipped
+    t["wife_earns_more"] = [2.0, 1.0, 0.0]
+    out = add_family_index(t)
+    z = np.sqrt(1.5)  # z-scores of 0, 1, 2 (population SD)
+    assert list(out["family_index_acs"]) == pytest.approx([-z, 0.0, z])

@@ -105,3 +105,10 @@ def test_find_extracts_reads_subfolders_and_tracks_sources(tmp_path):
     assert sources_changed(tmp_path, found) is True       # no record yet
     (tmp_path / "aggregate_sources.txt").write_text("\n".join(str(f) for f in found))
     assert sources_changed(tmp_path, found) is False
+
+
+def test_aggregate_counts_unweighted_respondents(tmp_path):
+    p = tmp_path / "usa_00001.csv.gz"
+    _write_extract(p)
+    agg = aggregate_extract(p).set_index(["YEAR", "STATEFIP", "OCC2010"])
+    assert agg.loc[(2005, 6, 3255), "n_persons"] == 2

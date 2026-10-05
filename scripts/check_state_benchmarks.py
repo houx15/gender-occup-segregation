@@ -55,7 +55,21 @@ TRADITIONAL_SIGN = {
     "motherhood_emp_gap": 1, "motherhood_hours_gap": 1, "married_women_nilf": 1,
     "wife_earnings_share": -1, "wife_earns_more": -1, "gender_emp_gap": 1,
     "iat_sex_balanced": 1, "explicit_sex_balanced": 1, "iat_mean": 1, "explicit_mean": 1,
+    "family_index_acs": 1,
 }
+
+
+def add_family_index(t: pd.DataFrame) -> pd.DataFrame:
+    """family_index_acs: the main objective family measure. Each ACS family
+    measure is z-scored across all state-windows, oriented with
+    TRADITIONAL_SIGN (higher = more traditional), and averaged over the
+    measures available for the unit."""
+    cols = [c for c in FAMILY if c in t.columns]
+    if not cols:
+        return t
+    z = pd.DataFrame({c: TRADITIONAL_SIGN[c] * (t[c] - t[c].mean()) / t[c].std(ddof=0)
+                      for c in cols})
+    return t.assign(family_index_acs=z.mean(axis=1, skipna=True))
 
 
 def with_unit_name(d: pd.DataFrame) -> pd.DataFrame:
@@ -146,7 +160,10 @@ def main(config: str) -> None:
         else:
             print(f"  (skipping {key}: {path} not found)")
 
-    t = benchmark_table(our_scores(summary).merge(occ, on="unit_name", how="left"), sources)
+    t = add_family_index(
+        benchmark_table(our_scores(summary).merge(occ, on="unit_name", how="left"), sources))
+    if "family_index_acs" in t.columns:
+        survey_cols.append("family_index_acs")
     ours_cols = [c for c in t.columns if c.startswith("ours_")]
     corr = add_agreement(correlate(t, ours_cols, survey_cols))
     trend = national_trend(t, ours_cols + survey_cols)

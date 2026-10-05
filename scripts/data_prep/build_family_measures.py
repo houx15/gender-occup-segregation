@@ -67,6 +67,7 @@ def _stats(c: pd.DataFrame) -> pd.DataFrame:
         "w_couple_wife_more": w * (valid & (own > sp)),
         "w_men": w * man, "w_men_emp": w * (man & emp),
         "w_women": w * woman, "w_women_emp": w * (woman & emp),
+        "n_persons": pd.Series(1, index=c.index),  # unweighted respondents
     }
     out = pd.DataFrame(cols)
     out[["YEAR", "STATEFIP"]] = c[["YEAR", "STATEFIP"]]
@@ -96,6 +97,7 @@ def family_measures(stats: pd.DataFrame, period_start: int, width: int,
             "wife_earns_more": s.w_couple_wife_more / s.w_couple,
             "gender_emp_gap": s.w_men_emp / s.w_men - s.w_women_emp / s.w_women,
             "weighted_n_women": s.w_women,
+            "n_persons": s.n_persons,
         })
     return out.reset_index()
 

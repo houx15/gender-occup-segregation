@@ -40,11 +40,13 @@ NOT_AN_OCCUPATION = {9920, 9999}  # never worked / NIU
 
 
 def aggregate_extract(path: Path, chunksize: int = 2_000_000) -> pd.DataFrame:
-    """YEAR, STATEFIP, OCC2010, female, total (sums of PERWT)."""
+    """YEAR, STATEFIP, OCC2010, female, total (sums of PERWT), n_persons (unweighted)."""
     parts = []
     for chunk in pd.read_csv(path, usecols=USECOLS, chunksize=chunksize):
         chunk["female"] = chunk["PERWT"].where(chunk["SEX"] == FEMALE, 0)
-        parts.append(chunk.groupby(["YEAR", "STATEFIP", "OCC2010"])[["female", "PERWT"]].sum())
+        chunk["n_persons"] = 1  # unweighted respondents, for reporting sample sizes
+        parts.append(chunk.groupby(["YEAR", "STATEFIP", "OCC2010"])
+                     [["female", "PERWT", "n_persons"]].sum())
     agg = pd.concat(parts).groupby(level=[0, 1, 2]).sum()
     return agg.rename(columns={"PERWT": "total"}).reset_index()
 
@@ -64,7 +66,8 @@ def word_female_shares(agg: pd.DataFrame, mapping: pd.DataFrame, period_start: i
     d = _with_windows(agg.merge(link, on="OCC2010"), period_start, width, step, last_year)
 
     def _share(keys):
-        g = d.groupby(keys)[["female", "total"]].sum().reset_index()
+        cols = ["female", "total"] + (["n_persons"] if "n_persons" in d else [])
+        g = d.groupby(keys)[cols].sum().reset_index()
         g["female_share"] = g["female"] / g["total"]
         return g.rename(columns={"total": "weighted_n"}).drop(columns="female")
 
@@ -96,7 +99,10 @@ def state_labor_indicators(agg: pd.DataFrame, period_start: int, width: int,
     duncan = 0.5 * gap.groupby(level=[0, 1]).sum()
     sums = cells.groupby(level=[0, 1]).sum()
     share = sums["female"] / (sums["female"] + sums["male"])
-    return pd.DataFrame({"duncan": duncan, "female_emp_share": share}).reset_index()
+    out = pd.DataFrame({"duncan": duncan, "female_emp_share": share})
+    if "n_persons" in d:
+        out["n_persons"] = d.groupby(["STATEFIP", "period"])["n_persons"].sum()
+    return out.reset_index()
 
 
 def ddi_labels(xml_path: Path, var: str) -> dict:
@@ -131,7 +137,7 @@ def load_aggregate(out: Path, rebuild: bool = False) -> pd.DataFrame:
     if agg_path.exists() and not rebuild and not sources_changed(out, extracts):
         return pd.read_parquet(agg_path)
     agg = pd.concat([aggregate_extract(e) for e in extracts], ignore_index=True)
-    agg = agg.groupby(["YEAR", "STATEFIP", "OCC2010"], as_index=False)[["female", "total"]].sum()
+    agg = agg.groupby(["YEAR", "STATEFIP", "OCC2010"], as_index=False).sum()
     agg.to_parquet(agg_path, index=False)
     (out / "aggregate_sources.txt").write_text("\n".join(str(e) for e in extracts))
     return agg
