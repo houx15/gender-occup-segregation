@@ -112,3 +112,17 @@ def test_policy_timing_counts_clean_before_after(tmp_path):
     assert bool(t.loc["s0", "usable_before_after"]) is True   # 1995-04 before, 2010-19 after
     assert bool(t.loc["s1", "usable_before_after"]) is False  # never fully after
     assert "too few treated states" in md
+
+
+def test_combined_figures(tmp_path):
+    from scripts.us_analysis import part2b, figures
+    panel = _panel_with_context()
+    part1.run_part1(panel, _cells(), [MAIN], tmp_path)
+    main = tmp_path / "main"
+    part2.heatmaps(panel, main)
+    part2.change_ranking(panel, main)
+    part2b.run_part2b(panel, "", tmp_path)
+    figures.run_figures(panel, tmp_path)
+    for f in ("figure1_validation.pdf", "figure2_survey.pdf", "figure3_reliability.pdf",
+              "figure5_dynamics_occupation.pdf", "figure6_explanatory.pdf"):
+        assert (tmp_path / "figures_combined" / f).exists(), f

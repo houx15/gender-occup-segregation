@@ -6,7 +6,8 @@
 
 Parts: panel (canonical datasets), 1 (validation), 2 (maps / heatmap / change),
 2b (explaining differences), 2c (text-survey discrepancy), 3 (case selection),
-3s (semantic neighbours of selected cases; loads models).
+3s (semantic neighbours of selected cases; loads models), figs (combined figures
+following the plan's recommended figure structure).
 Each part writes <out_dir>/partX_summary.md; figures/tables go to
 <out_dir>/main/ and <out_dir>/robustness-*/.
 """
@@ -19,7 +20,7 @@ import fire
 import pandas as pd
 
 
-def main(config: str, out_dir: str, parts: str = "panel,1,2,2b,2c,3,3s") -> None:
+def main(config: str, out_dir: str, parts: str = "panel,1,2,2b,2c,3,3s,figs") -> None:
     out = Path(out_dir)
     # fire parses "1,2" as a tuple of ints; accept both forms
     items = parts if isinstance(parts, (list, tuple)) else str(parts).split(",")
@@ -54,6 +55,10 @@ def main(config: str, out_dir: str, parts: str = "panel,1,2,2b,2c,3,3s") -> None
     if "3s" in todo:
         from scripts.us_analysis.semantics import run_semantics
         print(run_semantics(config, out))
+
+    if "figs" in todo:
+        from scripts.us_analysis.figures import run_figures
+        print(run_figures(panel, out))
 
     # one combined summary of whatever parts exist
     parts_md = [out / f"part{p}_summary.md" for p in ("1", "2", "2b", "2c", "3", "3s")]
