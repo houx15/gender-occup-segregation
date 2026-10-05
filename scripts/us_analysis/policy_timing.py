@@ -40,6 +40,6 @@ def policy_timing(panel: pd.DataFrame, pfl_file: str, out: Path, width: int = 10
                if n_usable < 5 else "enough treated states for a before/after comparison")
     return ("**2.6 Policy timing (paid family leave).** "
             f"{len(t)} treated states; {n_usable} have both a window entirely before and one "
-            f"entirely after benefits began: {verdict}. Other policy domains in the plan "
-            "(childcare, equal pay, discrimination protections, reproductive policy) are not "
-            "yet collected.\n\n" + md_table(t) + "\n")
+            f"entirely after benefits began: {verdict}. The other policy domains (universal pre-K, "
+            "equal pay, sexual-orientation employment protection, abortion restrictions; CSPP) "
+            "enter Part II-B as window means; their coverage ends 2013-2017, so no timing design.\n\n" + md_table(t) + "\n")

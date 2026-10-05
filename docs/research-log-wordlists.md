@@ -499,3 +499,25 @@ although its neighbours also show a plant-nursery sense). Kitchen, from the old 
 dropped (restaurant sense). Just below the coverage bar: caregiver 0.47,
 homemaker 0.47, newborn 0.44, parenting 0.44, grandkids 0.41, daycare 0.39,
 childcare 0.31. Full table: `wordlists/en/occupation_family/family_screening.csv`.
+
+**Result with the 20-entry list** (jobs 3393521-3393523, 232 state-window
+models). From this entry on, analysis scores are oriented **higher = less
+traditional** (family text = −RND); earlier entries used the opposite sign.
+
+| | 10 entries (before) | 20 entries |
+|---|---:|---:|
+| entries used (coverage >= 0.5) | 10 | 20 |
+| median 95% CI half-width, state-window score | 0.0063 | 0.0049 |
+| SD of state scores | 0.0059 | 0.0051 |
+| adjacent-window r, 2005→2010 / 2010→2015 | 0.48 (mean) | 0.44 / 0.48 |
+| state × window cells with CI excluding 0 | — | 85% |
+
+- State scores are more precise (narrower CIs, now about the size of the spread
+  between states); window-to-window stability is unchanged.
+- National level (oriented, higher = less traditional): −0.0115, −0.0112,
+  −0.0118, −0.0132, −0.0120 for 1995–04 … 2015–24: family words stay
+  female-leaning, no trend. 2000–09 → 2015–24: 4 states significantly less
+  traditional, 4 more (occupation: 22 less, 3 more).
+- Agreement with the ACS family index is still absent: pooled β = 0.03
+  (p = 0.65); within states (state + window FE) β = −0.045 (p = 0.04), i.e. a
+  small *negative* association, so the wider list does not create alignment.

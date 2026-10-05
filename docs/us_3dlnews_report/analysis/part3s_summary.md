@@ -34,6 +34,14 @@
 - 2010–19: book (5), authored (5), nonfiction (4), novelist (4), novels (4), bestselling (3), books (3), scholarly (2)
 - 2015–24: book (5), authored (5), nonfiction (4), bestselling (3), novels (3), novelist (3), books (3), illustrator (2)
 
+**baby**
+
+- 1995–04: infants (3), infant (3), newborn (2), twins (2), pregnant (2), boomers (1), rae (1), niece (1)
+- 2000–09: newborn (5), infant (4), diapers (3), infants (3), pregnancy (3), children (3), pregnant (3), unborn (2)
+- 2005–14: newborn (5), infant (4), pregnant (4), crib (3), diapers (3), mommy (3), boomers (2), birth (2)
+- 2010–19: newborn (5), infants (5), infant (5), birth (4), diapers (4), pregnant (4), womb (3), premature (3)
+- 2015–24: newborn (5), infant (5), newborns (4), infants (3), children (3), momma (3), nicu (2), fawns (2)
+
 **biologist**
 
 - 1995–04: wildlife (3), fisheries (2), scientist (1), conservation (1), mammals (1), burgess (1), ecology (1), birder (1)
@@ -73,14 +81,6 @@
 - 2005–14: cashier (4), office (2), assessor (2), bookkeeper (2), employee (2), employees (2), incumbents (1), magistrate (1)
 - 2010–19: assessor (2), office (2), bailiff (2), attorney (2), invoices (2), cashier (2), solicitor (2), jastrzemski (1)
 - 2015–24: bailiff (2), office (2), assessor (2), attorney (2), registrar (2), affidavits (2), offices (2), receptionist (2)
-
-**cousins**
-
-- 1995–04: grandchild (5), niece (5), aunts (4), uncles (4), nieces (4), nephews (4), grandsons (4), aunt (3)
-- 2000–09: aunts (5), uncles (5), nieces (5), nephews (5), niece (5), nephew (5), grandchild (4), brother (3)
-- 2005–14: aunts (5), uncles (5), nieces (5), nephews (5), brother (4), sister (4), nephew (4), aunt (4)
-- 2010–19: aunts (5), uncles (5), nieces (5), brother (5), nephews (5), sister (5), nephew (5), uncle (5)
-- 2015–24: aunts (5), uncles (5), brother (5), nieces (5), nephews (5), nephew (5), sister (5), uncle (5)
 
 **designer**
 
@@ -122,13 +122,21 @@
 - 2010–19: relatives (5), parents (5), children (5), friends (5), mother (4), grandparents (2), siblings (2), father (2)
 - 2015–24: parents (5), relatives (5), friends (5), children (5), mother (4), grandparents (3), neighbors (3), sympathies (3)
 
-**groceries**
+**grandchildren**
 
-- 1995–04: stores (4), hardware (3), store (3), supermarkets (2), convenience (2), deli (2), shoppers (2), shelves (2)
-- 2000–09: store (5), stores (5), supermarkets (4), supermarket (4), doughnuts (3), shopping (2), deliveries (2), deli (2)
-- 2005–14: store (5), stores (5), supermarket (5), supermarkets (4), shopping (4), shoppers (3), deli (3), drugstore (2)
-- 2010–19: store (5), stores (5), supermarket (5), shopping (5), grocer (5), supermarkets (4), deli (4), shoppers (4)
-- 2015–24: store (5), stores (5), shopping (5), grocer (4), supermarket (3), supermarkets (3), shoppers (3), checkout (3)
+- 1995–04: nieces (4), grandsons (4), nephews (4), granddaughter (4), niece (4), granddaughters (3), predeceased (3), aunts (3)
+- 2000–09: nieces (5), nephews (5), grandsons (5), aunts (5), grandson (5), granddaughters (4), predeceased (4), granddaughter (4)
+- 2005–14: nieces (5), nephews (5), grandsons (5), granddaughters (5), aunts (5), predeceased (4), stepchildren (3), grandson (3)
+- 2010–19: nieces (5), nephews (5), granddaughters (5), grandsons (5), grandson (5), granddaughter (5), predeceased (4), stepchildren (4)
+- 2015–24: nieces (5), nephews (5), granddaughters (5), grandsons (5), granddaughter (5), grandson (5), predeceased (4), stepchildren (4)
+
+**grandparents**
+
+- 1995–04: maternal (4), aunts (4), grandchild (4), uncles (4), granddaughter (3), niece (3), grandmother (3), paternal (2)
+- 2000–09: paternal (5), grandmother (5), aunts (5), uncles (5), maternal (4), parents (3), siblings (3), sister (3)
+- 2005–14: paternal (5), grandmother (5), parents (5), aunts (5), maternal (4), aunt (4), siblings (4), mother (3)
+- 2010–19: grandmother (5), parents (5), aunts (5), siblings (5), paternal (4), aunt (4), maternal (4), mother (4)
+- 2015–24: paternal (5), grandmother (5), parents (5), mother (5), aunts (5), siblings (5), grandfather (5), maternal (4)
 
 **home**
 
@@ -138,13 +146,13 @@
 - 2010–19: houses (5), residences (4), house (3), residence (3), apartment (2), apartments (2), townhouse (2), crematory (2)
 - 2015–24: houses (5), apartment (5), apartments (5), residences (4), residence (3), townhomes (3), duplex (2), units (2)
 
-**household**
+**infant**
 
-- 1995–04: income (3), premium (2), declining (1), profitable (1), reducing (1), sector (1), consumption (1), multifamily (1)
-- 2000–09: incomes (3), income (3), median (3), poorest (2), chores (2), affluent (2), unemployment (1), cragin (1)
-- 2005–14: income (5), capita (4), incomes (3), subsidized (2), premiums (2), vouchers (2), families (2), median (2)
-- 2010–19: incomes (5), income (5), capita (4), median (3), census (3), percent (3), uninsured (2), families (2)
-- 2015–24: income (5), incomes (5), median (4), families (3), renters (3), homes (3), mortgages (2), poorer (2)
+- 1995–04: babies (3), newborn (2), toddler (2), illnesses (2), edmund (1), hondl (1), torborg (1), osb (1)
+- 2000–09: newborn (4), births (3), newborns (2), babies (2), child (2), mortality (2), unborn (2), adoptive (2)
+- 2005–14: children (5), toddlers (5), newborn (4), babies (3), orphaned (3), child (3), newborns (2), pregnancies (2)
+- 2010–19: babies (5), newborn (5), children (5), baby (5), toddlers (4), newborns (3), child (3), unborn (3)
+- 2015–24: children (5), newborn (4), newborns (4), child (4), neonatal (4), toddlers (4), babies (3), congenital (3)
 
 **inspector**
 
@@ -154,13 +162,13 @@
 - 2010–19: inspections (5), inspection (5), inspected (5), compliance (2), osha (2), oig (2), violations (2), oepa (1)
 - 2015–24: inspection (5), inspections (5), inspected (5), osha (4), department (4), oig (3), unannounced (2), investigators (2)
 
-**laundry**
+**married**
 
-- 1995–04: bathrooms (3), portable (2), stove (2), bathroom (2), washing (1), stored (1), spaces (1), equipped (1)
-- 2000–09: refrigerator (3), washing (3), towels (3), dishwasher (3), appliances (2), kitchen (2), toilets (2), cardboard (2)
-- 2005–14: kitchen (4), cleaning (3), bedrooms (3), dryer (3), washing (2), microwave (2), towels (2), bathroom (2)
-- 2010–19: towels (4), washer (3), dryer (3), kitchen (3), washers (3), microwave (3), detergent (2), dryers (2)
-- 2015–24: bathroom (3), bedding (3), kitchen (3), detergent (2), dryer (2), dryers (2), washers (2), utensils (2)
+- 1995–04: divorced (5), marriage (5), marry (4), baptized (2), wife (2), homemaker (2), wed (2), husband (2)
+- 2000–09: divorced (5), wife (5), marry (4), marrying (4), marriage (4), husband (3), sweetheart (3), survives (2)
+- 2005–14: divorced (5), wife (5), husband (5), marry (5), remarried (4), marrying (4), marriage (4), born (4)
+- 2010–19: wife (5), divorced (5), husband (5), remarried (5), marrying (5), marry (5), marriage (4), born (4)
+- 2015–24: wife (5), divorced (5), husband (5), marriage (5), marrying (5), graduated (4), born (4), marry (4)
 
 **nurse**
 
@@ -212,11 +220,11 @@
 
 **relatives**
 
-- 1995–04: friends (4), uncles (4), cousins (4), aunts (3), nieces (3), nephews (2), elian (2), family (2)
-- 2000–09: friends (5), nephews (4), aunts (4), nieces (4), uncles (4), family (3), cousins (3), acquaintances (3)
-- 2005–14: friends (5), aunts (5), family (5), nieces (5), uncles (5), cousins (5), nephews (4), families (2)
-- 2010–19: family (5), friends (5), uncles (5), families (4), cousins (4), aunts (4), grandparents (4), acquaintances (4)
-- 2015–24: friends (5), family (5), aunts (5), families (5), uncles (4), cousins (4), nieces (4), grandparents (3)
+- 1995–04: slain (2), friends (2), uncles (2), acquaintances (2), estranged (2), cousins (2), family (2), solace (2)
+- 2000–09: family (4), acquaintances (4), friends (3), cousins (3), aunts (3), uncles (2), adoptive (2), hearn (1)
+- 2005–14: family (5), friends (5), mother (4), aunts (3), cousins (3), families (3), grandmother (2), aunt (2)
+- 2010–19: family (5), families (3), parents (3), friends (3), acquaintances (3), mother (3), grandparents (3), cousins (2)
+- 2015–24: family (5), mother (5), friends (5), adoptive (3), grandparents (3), cremated (3), acquaintances (2), siblings (2)
 
 **secretary**
 
@@ -225,6 +233,14 @@
 - 2005–14: treasurer (5), president (4), vice (3), treasury (3), adviser (3), aide (3), appointee (2), aides (2)
 - 2010–19: treasurer (5), president (5), aides (4), vice (4), kissinger (2), aide (2), adviser (2), pompeo (2)
 - 2015–24: treasurer (5), aides (4), president (3), parliamentarian (2), pompeo (2), karine (2), sens (2), vice (2)
+
+**siblings**
+
+- 1995–04: sisters (4), grandsons (3), niece (2), predeceased (2), aunts (2), granddaughters (2), stepson (2), eldest (2)
+- 2000–09: sister (5), brother (4), aunts (4), uncles (4), sisters (4), eldest (3), grandchild (3), parents (2)
+- 2005–14: brother (5), sister (5), mother (5), sisters (5), parents (5), children (4), stepmother (3), stepchildren (3)
+- 2010–19: brother (5), sister (5), sisters (5), mother (5), grandparents (5), parents (4), brothers (4), father (3)
+- 2015–24: brother (5), sister (5), sisters (5), mother (5), grandparents (4), predeceased (4), parents (4), aunts (4)
 
 **soldier**
 
