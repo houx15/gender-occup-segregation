@@ -156,13 +156,15 @@ def main(config: str, out_dir: str) -> None:
     table("wordlist_summary", summ, "Word lists: candidates, words used (in vocabulary of "
           f">= {cfg['analysis'].get('min_word_coverage')} of state models), median coverage")
     cats = list(summ["category"])
-    fig, axes = plt.subplots(1, len(cats), figsize=(4.5 * len(cats), 0.13 * len(words) / len(cats) * 3 + 2))
+    n_max = int(summ["candidates"].max())
+    fig, axes = plt.subplots(1, len(cats), figsize=(4.5 * len(cats), 0.11 * n_max + 1.5))
     for ax, cat in zip(np.atleast_1d(axes), cats):
         g = words[words["category"] == cat].sort_values("coverage_all")
         colors = np.where(g["used"], "#4c72b0", "#c0c0c0")
         ax.barh(g["word"], g["coverage_all"], color=colors)
         ax.axvline(cfg["analysis"].get("min_word_coverage", 0.5), color="black", lw=0.8, ls="--")
         ax.set_xlim(0, 1)
+        ax.set_ylim(-0.5, n_max - 0.5)          # same bar height in every panel
         ax.set_title(f"{cat}: {int(g['used'].sum())}/{len(g)} used")
         ax.set_xlabel("Share of state models with the word in vocabulary")
         ax.tick_params(axis="y", labelsize=5)
