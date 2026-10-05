@@ -35,11 +35,12 @@ echo "== 2. ACS shares"
 # same time windows as the text units in $CONFIG
 WIDTH=$(python -c "import yaml; print(yaml.safe_load(open('$CONFIG'))['us_states']['year_bins'])")
 STEP=$(python -c "import yaml; u=yaml.safe_load(open('$CONFIG'))['us_states']; print(u.get('year_step') or u['year_bins'])")
-python -m scripts.data_prep.build_occupation_shares --config=config/ipums_acs.yml --width="$WIDTH" --step="$STEP"
+START=$(python -c "import yaml; c=yaml.safe_load(open('$CONFIG')); print(c['analysis'].get('decade_range', [min(c['us_states']['years'])])[0])")
+python -m scripts.data_prep.build_occupation_shares --config=config/ipums_acs.yml --width="$WIDTH" --step="$STEP" --period_start="$START"
 echo "== 3. census check"
 python -m scripts.check_occupation_census --config="$CONFIG"
 echo "== 4. family + attitude benchmarks"
-python -m scripts.data_prep.build_family_measures --config=config/ipums_acs_family.yml --width="$WIDTH" --step="$STEP"
-python -m scripts.data_prep.build_attitude_measures --config=config/project_implicit.yml --width="$WIDTH" --step="$STEP"
+python -m scripts.data_prep.build_family_measures --config=config/ipums_acs_family.yml --width="$WIDTH" --step="$STEP" --period_start="$START"
+python -m scripts.data_prep.build_attitude_measures --config=config/project_implicit.yml --width="$WIDTH" --step="$STEP" --period_start="$START"
 python -m scripts.check_state_benchmarks --config="$CONFIG"
 echo "DONE check_dlnews"

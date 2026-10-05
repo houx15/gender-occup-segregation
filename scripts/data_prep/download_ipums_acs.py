@@ -50,10 +50,12 @@ def extract_body(years: List[int], variables: List[str],
                  attached: Optional[Dict[str, List[str]]] = None,
                  sample_template: str = "us{year}a",
                  time_use_variables: Optional[List[str]] = None,
-                 sample_members: Optional[dict] = None) -> dict:
+                 sample_members: Optional[dict] = None,
+                 samples: Optional[List[str]] = None) -> dict:
     """IPUMS API v2 request body. ``attached`` adds household members'
     values, e.g. {"INCWAGE": ["spouse"]} -> INCWAGE_SP. ``sample_template``
-    names samples per collection (USA 'us{year}a', ATUS 'at{year}');
+    names samples per collection (USA 'us{year}a', ATUS 'at{year}'); an
+    explicit ``samples`` list overrides it (e.g. the 2000 census 'us2000a');
     ``time_use_variables`` / ``sample_members`` are ATUS-only."""
     attached = attached or {}
 
@@ -69,7 +71,8 @@ def extract_body(years: List[int], variables: List[str],
         "description": description,
         "dataStructure": {"rectangular": {"on": "P"}},
         "dataFormat": "csv",
-        "samples": {sample_template.format(year=y): {} for y in years},
+        "samples": {name: {} for name in
+                    (samples or [sample_template.format(year=y) for y in years])},
         "variables": {v: _spec(v) for v in variables},
     }
     if time_use_variables:
@@ -108,7 +111,8 @@ def main(config: str = "config/ipums_acs.yml", poll_seconds: int = 60) -> None:
         body = extract_body(cfg["years"], cfg["variables"], cfg.get("case_selections", {}),
                             cfg["description"], cfg.get("attached"),
                             cfg.get("sample_template", "us{year}a"),
-                            cfg.get("time_use_variables"), cfg.get("sample_members"))
+                            cfg.get("time_use_variables"), cfg.get("sample_members"),
+                            cfg.get("samples"))
         r = requests.post(API, params=params, headers=headers, json=body, timeout=120)
         if r.status_code >= 400:
             raise SystemExit(f"Extract submission failed ({r.status_code}): {r.text}")

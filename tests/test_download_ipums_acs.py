@@ -46,3 +46,9 @@ def test_extract_body_atus_samples_and_time_use_variables():
 def test_extract_body_usa_default_has_no_time_use_block():
     body = extract_body(years=[2005], variables=["SEX"], case_selections={}, description="x")
     assert "timeUseVariables" not in body and "sampleMembers" not in body
+
+
+def test_extract_body_explicit_samples_override_years():
+    body = extract_body(years=[], variables=["SEX"], case_selections={}, description="early",
+                        samples=["us2000a", "us2001a"])
+    assert body["samples"] == {"us2000a": {}, "us2001a": {}}

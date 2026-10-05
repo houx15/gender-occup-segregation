@@ -36,7 +36,7 @@ import pandas as pd
 import yaml
 
 from scripts.common.periods import window_label_map
-from scripts.data_prep.build_occupation_shares import ddi_labels
+from scripts.data_prep.build_occupation_shares import ddi_labels, find_extracts, sources_changed
 
 USECOLS = ["YEAR", "STATEFIP", "PERWT", "NCHILD", "NCHLT5", "SEX", "MARST",
            "EMPSTAT", "LABFORCE", "UHRSWORK", "INCWAGE", "INCWAGE_SP"]
@@ -105,14 +105,17 @@ def main(config: str = "config/ipums_acs_family.yml", width: int = 10, step: int
     cfg = yaml.safe_load(open(config))
     out = Path(cfg["out_dir"])
     cache = out / "year_state_stats.parquet"
-    if cache.exists() and not rebuild:
+    extracts = find_extracts(out)
+    if not extracts:
+        raise SystemExit(f"no usa_*.csv.gz under {out}")
+    if cache.exists() and not rebuild and not sources_changed(out, extracts):
         stats = pd.read_parquet(cache)
     else:
-        extracts = sorted(out.glob("usa_*.csv.gz"))
-        if len(extracts) != 1:
-            raise SystemExit(f"expected one usa_*.csv.gz in {out}, found {extracts}")
-        stats = year_state_stats(extracts[0])
+        # every extract (2005-2024 + early_2000_2004/); rebuilt when the set changes
+        stats = (pd.concat([year_state_stats(e) for e in extracts])
+                 .groupby(["YEAR", "STATEFIP"]).sum().reset_index())
         stats.to_parquet(cache, index=False)
+        (out / "aggregate_sources.txt").write_text("\n".join(str(e) for e in extracts))
     m = family_measures(stats, period_start, width, step)
     states = ddi_labels(sorted(out.glob("usa_*.xml"))[0], "STATEFIP")
     m.insert(1, "state", m["STATEFIP"].map(states))

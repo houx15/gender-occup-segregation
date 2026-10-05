@@ -111,25 +111,44 @@ def ddi_labels(xml_path: Path, var: str) -> dict:
     raise KeyError(f"{var} not in {xml_path}")
 
 
+def find_extracts(out: Path) -> List[Path]:
+    """Every usa_*.csv.gz under out_dir, incl. sub-folders (e.g. early_2000_2004/)."""
+    return sorted(out.rglob("usa_*.csv.gz"), key=lambda p: (len(p.parts), p.name))
+
+
+def sources_changed(out: Path, extracts: List[Path]) -> bool:
+    rec = out / "aggregate_sources.txt"
+    return not rec.exists() or rec.read_text().split("\n") != [str(e) for e in extracts]
+
+
+def load_aggregate(out: Path, rebuild: bool = False) -> pd.DataFrame:
+    """Cached (YEAR, STATEFIP, OCC2010) sums over all extracts; rebuilt when the
+    set of extract files changes (e.g. the 2000-2004 extract was added)."""
+    agg_path = out / "occ2010_sex_state_year.parquet"
+    extracts = find_extracts(out)
+    if not extracts:
+        raise SystemExit(f"no usa_*.csv.gz under {out}")
+    if agg_path.exists() and not rebuild and not sources_changed(out, extracts):
+        return pd.read_parquet(agg_path)
+    agg = pd.concat([aggregate_extract(e) for e in extracts], ignore_index=True)
+    agg = agg.groupby(["YEAR", "STATEFIP", "OCC2010"], as_index=False)[["female", "total"]].sum()
+    agg.to_parquet(agg_path, index=False)
+    (out / "aggregate_sources.txt").write_text("\n".join(str(e) for e in extracts))
+    return agg
+
+
 def main(config: str = "config/ipums_acs.yml", width: Optional[int] = None,
-         step: Optional[int] = None, rebuild: bool = False) -> None:
+         step: Optional[int] = None, period_start: Optional[int] = None,
+         rebuild: bool = False) -> None:
     """Shares for one time-window setting (default: period_width / period_step in
     the config), written to a shares_WIDTHy_stepSTEP folder in out_dir."""
     cfg = yaml.safe_load(open(config))
     out = Path(cfg["out_dir"])
-    agg_path = out / "occ2010_sex_state_year.parquet"
-    if agg_path.exists() and not rebuild:
-        agg = pd.read_parquet(agg_path)
-    else:
-        extracts = sorted(out.glob("usa_*.csv.gz"))
-        if len(extracts) != 1:
-            raise SystemExit(f"expected one usa_*.csv.gz in {out}, found {extracts}")
-        agg = aggregate_extract(extracts[0])
-        agg.to_parquet(agg_path, index=False)
+    agg = load_aggregate(out, rebuild)
     print(f"aggregate: {len(agg)} (year, state, occ2010) cells, years "
           f"{agg['YEAR'].min()}-{agg['YEAR'].max()}")
 
-    period_start = int(cfg["period_start"])
+    period_start = int(period_start or cfg["period_start"])
     width = int(width or cfg["period_width"])
     step = int(step or cfg.get("period_step") or width)
     dest = out / f"shares_{width}y_step{step}"

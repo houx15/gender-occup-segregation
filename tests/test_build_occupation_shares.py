@@ -93,3 +93,15 @@ def test_rolling_windows_count_a_year_in_every_window(tmp_path):
     assert set(nat["period"]) == {2005}
     lab = state_labor_indicators(agg, period_start=2005, width=2, step=1, last_year=2006)
     assert set(lab["period"]) == {2005}  # windows 2005-06 only (2006-07 not full)
+
+
+def test_find_extracts_reads_subfolders_and_tracks_sources(tmp_path):
+    from scripts.data_prep.build_occupation_shares import find_extracts, sources_changed
+    (tmp_path / "early_2000_2004").mkdir()
+    for p in (tmp_path / "usa_00001.csv.gz", tmp_path / "early_2000_2004" / "usa_00005.csv.gz"):
+        _write_extract(p)
+    found = find_extracts(tmp_path)
+    assert [f.name for f in found] == ["usa_00001.csv.gz", "usa_00005.csv.gz"]
+    assert sources_changed(tmp_path, found) is True       # no record yet
+    (tmp_path / "aggregate_sources.txt").write_text("\n".join(str(f) for f in found))
+    assert sources_changed(tmp_path, found) is False

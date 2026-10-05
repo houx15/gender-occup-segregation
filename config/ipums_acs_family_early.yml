@@ -1,0 +1,12 @@
+# Family-side survey data for the early text windows: 2000 decennial census 5%
+# sample + ACS 2001-2004, same variables / selection as config/ipums_acs_family.yml.
+# Downloaded into a sub-folder; build_family_measures reads every extract.
+description: "gender-occup family: adults 25-54, Census 2000 5% + ACS 2001-2004"
+out_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs_family/early_2000_2004"
+years: []
+samples: [us2000a, us2001a, us2002a, us2003a, us2004a]
+variables: [YEAR, STATEFIP, SEX, AGE, MARST, NCHILD, NCHLT5, LABFORCE, EMPSTAT, UHRSWORK, INCWAGE, PERWT]
+case_selections:
+  AGE: ["025", "026", "027", "028", "029", "030", "031", "032", "033", "034", "035", "036", "037", "038", "039", "040", "041", "042", "043", "044", "045", "046", "047", "048", "049", "050", "051", "052", "053", "054"]
+attached:
+  INCWAGE: [spouse]

@@ -78,7 +78,9 @@ analysis:
     family_sphere: -1
     household: -1
   # Analyze only 2005-09 .. 2020-24: earlier periods cover too few states.
-  decade_range: [2005, 2015]
+  # all five windows: 1995-2004 (33 states with >= 500 articles), 2000-09 (48),
+  # 2005-14, 2010-19, 2015-24; survey data from Census 2000 + ACS 2001-2024
+  decade_range: [1995, 2015]
   # Small state-period models miss many words, so instead of requiring every
   # word in every unit (consistent set), use words in vocab in >= 50% of the
   # analyzed units and estimate each unit's level with word fixed effects.
