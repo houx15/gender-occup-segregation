@@ -1,0 +1,13 @@
+# State context for Part II-B (explaining state differences): adults 25-64,
+# Census 2000 5% + ACS 2001-2024. scripts/data_prep/download_ipums_acs.py (login
+# node, tmux); measures built by scripts/data_prep/build_context_measures.py.
+#   EDUC (BA+), METRO (metro share), IND1990 (manufacturing / services),
+#   INCTOT x CPI99 (real income), EMPSTAT / LABFORCE (unemployment, women's LFP),
+#   UHRSWORK + INCWAGE (full-time gender wage gap)
+description: "gender-occup context: adults 25-64, education, metro, industry, income, work, Census 2000 + ACS 2001-2024"
+out_dir: "/scratch/network/yh6580/gender-occup/data/ipums_acs_context"
+years: []
+samples: [us2000a, us2001a, us2002a, us2003a, us2004a, us2005a, us2006a, us2007a, us2008a, us2009a, us2010a, us2011a, us2012a, us2013a, us2014a, us2015a, us2016a, us2017a, us2018a, us2019a, us2020a, us2021a, us2022a, us2023a, us2024a]
+variables: [YEAR, STATEFIP, SEX, AGE, EDUC, METRO, IND1990, INCTOT, INCWAGE, CPI99, UHRSWORK, EMPSTAT, LABFORCE, PERWT]
+case_selections:
+  AGE: ["025", "026", "027", "028", "029", "030", "031", "032", "033", "034", "035", "036", "037", "038", "039", "040", "041", "042", "043", "044", "045", "046", "047", "048", "049", "050", "051", "052", "053", "054", "055", "056", "057", "058", "059", "060", "061", "062", "063", "064"]
