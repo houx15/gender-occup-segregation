@@ -22,6 +22,7 @@ from pathlib import Path
 import fire
 import pandas as pd
 
+from scripts.check_state_benchmarks import add_agreement
 from scripts.common.config_loader import load_config
 
 
@@ -63,7 +64,10 @@ def main(configs: str, out_dir: str) -> None:
         s = pd.read_csv(res / "unit_stability_summary.csv")
         s.insert(0, "arm", arm)
         stab.append(s)
-        agree.append(agreement_overview(pd.read_csv(res / "state_benchmark_correlations.csv"), arm))
+        # recompute agreement_r from pearson_r (older outputs predate the column)
+        corr = add_agreement(pd.read_csv(res / "state_benchmark_correlations.csv")
+                             .drop(columns="agreement_r", errors="ignore"))
+        agree.append(agreement_overview(corr, arm))
         trend.append(trend_overview(pd.read_csv(res / "state_benchmark_trend.csv"), arm))
 
     stab, agree, trend = (pd.concat(x, ignore_index=True) for x in (stab, agree, trend))
