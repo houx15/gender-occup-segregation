@@ -1,0 +1,3 @@
+domain,text,survey,model,beta_std,se,p,n,r2
+family,ours_family_sphere,motherhood_emp_gap,pooled,0.0018286892171624283,0.05461408834096727,0.9732887550258259,232,3.344104252844815e-06
+family,ours_family_sphere,motherhood_emp_gap,state + window FE,-0.019867717547400483,0.04083506506136344,0.6265873900244837,232,0.9410834474666345

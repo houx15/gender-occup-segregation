@@ -1,0 +1,3 @@
+domain,text,survey,model,beta_std,se,p,n,r2
+occupation,ours_occupation,female_emp_share,pooled,-0.10052736405667749,0.0942702320030686,0.2862544198958037,232,0.010105750924183976
+occupation,ours_occupation,female_emp_share,state + window FE,0.008712463487800706,0.03485566659883983,0.802619589836904,232,0.9558564482870733

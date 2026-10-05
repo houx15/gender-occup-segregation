@@ -396,3 +396,30 @@ by any of the three designs.
   state-level validation).
 - Do *secretary* / *supervisor* behave as outliers? If so, drop them.
 - TV arm: keep as robustness only (≤ 8 states present in every period).
+
+## 2026-10-05 — Analysis plan executed (Parts I, II, II-B, II-C, III)
+
+10-year windows every 5 years, 5 windows (1995–2004 … 2015–24); survey data
+now Census 2000 + ACS 2001–2024 for every window; subjective = Project
+Implicit IAT (robustness). Code `scripts/us_analysis/`, job 3393431; results
+`docs/us_3dlnews_report/analysis/` (`analysis_summary.md`, PDFs in `main/`
+and `robustness-*/`). Orientation everywhere: higher = more traditional.
+
+- I.1 occupations (62, pooled): r = 0.75 between occupation RND and ACS
+  female share.
+- I.2 occupation score falls from 2000–09 (+0.0122) to 2015–24 (+0.0049);
+  family flat (~+0.010).
+- I.4 state-window: pooled β = 0.09 (occupation), 0.04 (family), n.s.; with
+  state + window FE ≈ 0. I.5: within-state occupation r = 0.28 reflects the
+  common time trend. I.6: more text → smaller discrepancy (occupation r =
+  −0.13, p = 0.04). I.7: partially pooled slopes, occupation 0.25 (SE 0.08),
+  family −0.07.
+- II: occupation 2000–09 → 2015–24: 22/48 states significantly less
+  traditional, 3 more; family: 3 less, 2 more.
+- II-B (between states, one block at a time): occupation text score higher
+  where metro share and women's share of professionals are higher, lower with
+  occupational segregation and Republican vote share; within states nothing
+  significant.
+- II-C: text-survey gap largest where women's share of professionals is high
+  (both domains); the survey side of the gap is itself explained by context.
+- III: case-selection table `main/tables/3_case_selection.csv`.
