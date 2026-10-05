@@ -35,8 +35,16 @@ def add_gaps(panel: pd.DataFrame) -> pd.DataFrame:
     return d
 
 
+MIN_COVERAGE = 0.8
+
+
 def models(d: pd.DataFrame) -> pd.DataFrame:
-    blocks = available_blocks(d)
+    """All predictors jointly; only predictors observed in >= 80% of state-windows,
+    so the joint model is not cut down to the few complete cases of sparse
+    external sources (those stay in the per-block Part II-B models)."""
+    blocks = {b: [v for v in vs if d[v].notna().mean() >= MIN_COVERAGE]
+              for b, vs in available_blocks(d).items()}
+    blocks = {b: vs for b, vs in blocks.items() if vs}
     blocks["text volume"] = ["log_tokens"]
     xs_all = [v for vs in blocks.values() for v in vs]
     rows = []
@@ -98,10 +106,14 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
         save(fig, out / "figures" / f"2c_predictors_{dom}.pdf")
     sig = res[res["p"] < 0.05][["domain", "spec", "term", "coef", "se", "p"]]
     fit = res.groupby(["domain", "spec"]).agg(n=("n", "first"), r2=("r2", "first")).reset_index()
+    used = sorted(set(res["term"]))
+    dropped = sorted(v for vs in available_blocks(prepare(panel)).values() for v in vs
+                     if v not in used)
     text = "\n".join([
         "# Part II-C — text-survey discrepancy\n",
         "gap = z(text) − z(survey), main measures, higher = text more traditional than survey. "
-        "All predictors jointly, standardized.\n",
+        "All predictors jointly, standardized; predictors observed in < 80% of state-windows "
+        f"left out: {', '.join(dropped) or 'none'}.\n",
         "### Model fit\n", md_table(fit) + "\n",
         "### Terms with p < 0.05\n", (md_table(sig) if len(sig) else "None.") + "\n"])
     (out_root / "part2c_summary.md").write_text(text, encoding="utf-8")
