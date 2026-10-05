@@ -29,7 +29,7 @@ import pandas as pd
 from scripts.us_analysis.common import MAIN, md_table, save, survey_trad, text_trad, window_label, zscore
 
 K = 5
-SOCIO = ["log_real_income_pc", "ba_share", "metro_share", "unemployment_rate",
+SOCIO = ["log_real_gdp_pc", "log_real_income_pc", "ba_share", "metro_share", "unemployment_rate",
          "manufacturing_share", "service_share"]
 
 

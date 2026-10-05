@@ -4,12 +4,17 @@ Outcome: text score per domain (higher = more traditional), standardized.
 Predictors in theoretical blocks (standardized; built by
 scripts/data_prep/build_context_measures.py, plus the Duncan index):
 
-  socioeconomic       log real income per adult, BA share, metro share,
+  socioeconomic       log real GDP per capita, log real income per adult, BA share, metro share,
                       unemployment, manufacturing share, service share
   gendered labour     women's LFP, occupational segregation (Duncan), gender
                       wage gap, women's share of managers / professionals
-  policy              paid family leave in effect (share of window years)
-  political           Republican two-party presidential vote share
+  policy              paid family leave in effect (share of window years), universal
+                      pre-K, equal pay law, sexual-orientation employment
+                      protection, abortion restrictions (count)
+  political &         Republican two-party presidential vote share, citizen
+  cultural            ideology (Berry et al.), evangelical + LDS share
+Several external predictors end before 2015-24 (see the notes); models use
+complete cases, so blocks containing them have fewer state-windows.
 
 Two specifications per block and for all blocks together:
   between   state means over windows, OLS (HC1 SEs)                 n = states
@@ -30,15 +35,16 @@ import statsmodels.formula.api as smf
 from scripts.us_analysis.common import TEXT_LABEL, md_table, save, text_trad, zscore
 
 BLOCKS: Dict[str, List[str]] = {
-    "socioeconomic": ["log_real_income_pc", "ba_share", "metro_share", "unemployment_rate",
-                      "manufacturing_share", "service_share"],
+    "socioeconomic": ["log_real_gdp_pc", "log_real_income_pc", "ba_share", "metro_share",
+                      "unemployment_rate", "manufacturing_share", "service_share"],
     "gendered labour market": ["women_lfp", "duncan", "gender_wage_gap",
                                "female_share_managers", "female_share_professionals"],
-    "policy": ["pfl_share"],
-    "political": ["gop_two_party_share"],
+    "policy": ["pfl_share", "universal_prek", "equal_pay_law", "so_employment_law",
+               "abortion_restrictions"],
+    "political & cultural": ["gop_two_party_share", "citizen_ideology", "evangelical_lds_share"],
 }
 BLOCK_COLOR = {"socioeconomic": "#4c72b0", "gendered labour market": "#dd8452",
-               "policy": "#55a868", "political": "#c44e52"}
+               "policy": "#55a868", "political & cultural": "#c44e52"}
 OUTCOMES = {"occupation": "ours_occupation", "family": "ours_family_sphere"}
 
 

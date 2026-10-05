@@ -23,6 +23,12 @@ OFFLINE (Slurm). Sources and blocks (analysis plan 2.4-2.7):
   political
     gop_two_party_share  Republican / (Republican + Democrat) presidential
                          vote, mean over elections in the window (MIT Election Lab)
+  external (download_context_sources; window mean over observed years, NaN
+  unless >= half the window's years are observed — no carrying forward)
+    log_real_gdp_pc      BEA SAGDP9 real GDP (chained 2017 $) / SAINC1 population
+    universal_prek, equal_pay_law, so_employment_law, evangelical_lds_share,
+    abortion_restrictions (count of 7 restrictions)   CSPP v2.6
+    citizen_ideology     Berry et al. citi6016 (higher = more liberal)
 
 Windows match the text units (scripts/common/periods.py).
 
@@ -120,6 +126,87 @@ def occupation_group_shares(agg: pd.DataFrame, period_start: int, width: int,
     return pd.DataFrame(rows).reset_index()
 
 
+# ------------------------------------------------------------------ external sources
+ABORTION_RESTRICTIONS = ["fundslife", "infconsent", "gagrule", "medicalrest", "insprivate",
+                         "inspublic", "inswaiver"]
+CSPP_POLICY = {"universalprek": "universal_prek", "equalpay": "equal_pay_law",
+               "solaw": "so_employment_law", "evangldsper": "evangelical_lds_share"}
+MIN_STATES_CODED = 40
+
+
+def _observed(col: pd.Series, year: pd.Series) -> pd.Series:
+    """CSPP coding rules: a year counts only if >= 40 states are coded; a variable
+    that never takes 0 is a '1 or blank' dummy, so blank = 0 within coded years."""
+    coded = col.notna().groupby(year).transform("sum") >= MIN_STATES_CODED
+    if col.dropna().isin([0, 1]).all() and not (col == 0).any():
+        years = year[col.notna()]
+        in_range = year.between(years.min(), years.max()) if len(years) else year.isna()
+        return col.fillna(0).where(in_range)
+    return col.where(coded)
+
+
+def cspp_yearly(c: pd.DataFrame, state_key) -> pd.DataFrame:
+    out = pd.DataFrame({"state": c["st"].map(state_key), "year": c["year"].astype(int)})
+    for src, name in CSPP_POLICY.items():
+        out[name] = _observed(c[src], c["year"])
+    parts = [_observed(c[v], c["year"]) for v in ABORTION_RESTRICTIONS]
+    out["abortion_restrictions"] = sum(parts)   # NaN if any item unobserved that year
+    return out
+
+
+def window_means(yearly: pd.DataFrame, cols: List[str], periods: List[int], width: int) -> pd.DataFrame:
+    """Mean over the window's observed years; NaN unless >= half the years are observed."""
+    rows = []
+    for p in periods:
+        g = yearly[(yearly["year"] >= p) & (yearly["year"] < p + width)]
+        for st, gg in g.groupby("state"):
+            row = {"state": st, "period": p}
+            for c in cols:
+                v = gg[c].dropna()
+                row[c] = v.mean() if len(v) >= width / 2 else np.nan
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def external_measures(sources: Path, periods: List[int], width: int) -> pd.DataFrame:
+    """BEA real GDP per capita, CSPP policies / religion, Berry citizen ideology."""
+    import zipfile
+    slug = lambda s: unit_state(normalize_state(str(s).strip()))  # noqa: E731
+
+    def bea(zipname, prefix, line):
+        zf = zipfile.ZipFile(sources / zipname)
+        name = next(n for n in zf.namelist() if n.startswith(prefix))
+        d = pd.read_csv(zf.open(name), encoding="latin-1", dtype=str)
+        d = d[(d["LineCode"].str.strip() == str(line)) & (d["GeoFIPS"].str.strip('" ').str.endswith("000"))
+              & (d["GeoFIPS"].str.strip('" ') != "00000")]
+        long = d.melt(id_vars=["GeoName"], value_vars=[c for c in d.columns if c.isdigit()],
+                      var_name="year", value_name="v")
+        long["v"] = pd.to_numeric(long["v"], errors="coerce")
+        long["state"] = long["GeoName"].str.replace("*", "", regex=False).map(slug)
+        return long.dropna(subset=["state"]).assign(year=lambda x: x["year"].astype(int))[["state", "year", "v"]]
+
+    gdp = bea("SAGDP.zip", "SAGDP9__ALL_AREAS", 1).rename(columns={"v": "gdp"})
+    pop = bea("SAINC.zip", "SAINC1__ALL_AREAS", 2).rename(columns={"v": "pop"})
+    econ = gdp.merge(pop, on=["state", "year"])
+    econ["log_real_gdp_pc"] = np.log(econ["gdp"] * 1e6 / econ["pop"])
+
+    cspp = pd.read_csv(sources / "correlates2-6.csv", encoding="latin-1",
+                       usecols=lambda x: x in ["st", "year"] + list(CSPP_POLICY) + ABORTION_RESTRICTIONS)
+    pol = cspp_yearly(cspp, slug)
+
+    zf = zipfile.ZipFile(sources / "stateideology_v2018.dta.zip")
+    berry = pd.read_stata(zf.open(next(n for n in zf.namelist() if n.endswith(".dta"))))
+    berry = pd.DataFrame({"state": berry["statename"].map(slug), "year": berry["year"].astype(int),
+                          "citizen_ideology": berry["citi6016"]})
+
+    yearly = (econ[["state", "year", "log_real_gdp_pc"]]
+              .merge(pol, on=["state", "year"], how="outer")
+              .merge(berry, on=["state", "year"], how="outer"))
+    cols = ["log_real_gdp_pc", "universal_prek", "equal_pay_law", "so_employment_law",
+            "abortion_restrictions", "evangelical_lds_share", "citizen_ideology"]
+    return window_means(yearly, cols, periods, width)
+
+
 def pfl_share_by_window(pfl: pd.DataFrame, states: List[str], periods: List[int],
                         width: int) -> pd.DataFrame:
     start = dict(zip(pfl["state"], pfl["benefits_start_year"]))
@@ -153,6 +240,7 @@ def main(config: str = "config/ipums_acs_context.yml", width: int = 10, step: in
          occupation_config: str = "config/ipums_acs.yml",
          pfl_file: str = "config/policy/paid_family_leave.csv",
          votes_file: str = "/scratch/network/yh6580/gender-occup/data/politics/1976-2024-president.csv",
+         sources_dir: str = "/scratch/network/yh6580/gender-occup/data/context_sources",
          ) -> None:
     cfg = yaml.safe_load(open(config))
     out = Path(cfg["out_dir"])
@@ -178,6 +266,9 @@ def main(config: str = "config/ipums_acs_context.yml", width: int = 10, step: in
                                      periods, width), on=["state", "period"], how="left")
          .merge(gop_share_by_window(pd.read_csv(votes_file), periods, width)
                 [["state", "period", "gop_two_party_share"]], on=["state", "period"], how="left"))
+    sources = Path(sources_dir)
+    if sources.exists():
+        m = m.merge(external_measures(sources, periods, width), on=["state", "period"], how="left")
     dest = out / f"context_measures_{width}y_step{step}.csv"
     m.to_csv(dest, index=False)
     print(f"{dest.name}: {len(m)} state-window rows")

@@ -273,7 +273,8 @@ Per state-window, same windows as the text units; built by
 
 | Block | Variable | Source | Years | Definition |
 |---|---|---|---|---|
-| Socioeconomic | log real income per adult | IPUMS USA, adults 25–64 | 2000–2024 | log of mean INCTOT × CPI99 (1999 dollars), PERWT |
+| Socioeconomic | log real GDP per capita | BEA regional accounts: SAGDP9 real GDP (chained 2017 $) / SAINC1 population | 1997–2025 | log(GDP × 10⁶ / population) |
+| | log real income per adult | IPUMS USA, adults 25–64 | 2000–2024 | log of mean INCTOT × CPI99 (1999 dollars), PERWT |
 | | BA share | same | 2000–2024 | EDUC ≥ 10 (4+ years of college) |
 | | Metro share | same | 2000–2024 | METRO 2–4 among METRO 1–4 (0 = not identifiable, excluded) |
 | | Unemployment rate | same | 2000–2024 | unemployed / labour force |
@@ -284,9 +285,25 @@ Per state-window, same windows as the text units; built by
 | | Gender wage gap | IPUMS USA, adults 25–64 | 2000–2024 | 1 − mean real wage of full-time women / men (UHRSWORK ≥ 35, wage > 0) |
 | | Women's share of managers / professionals | IPUMS USA, employed | 2000–2024 | OCC2010 0010–0430 / 0500–3540 |
 | Policy | Paid family leave | `config/policy/paid_family_leave.csv` (A Better Balance 2023; New America) | benefits 2004–2024 | share of the window's years with state PFL benefits paid (CA 2004, NJ 2009, RI 2014, NY 2018, WA 2020, DC 2020, MA 2021, CT 2022, OR 2023, CO 2024) |
+| Policy | Universal pre-K | Correlates of State Policy Project v2.6 (`universalprek`) | to 2017 | state has universal pre-K (0/1) |
+| | Equal pay law | CSPP (`equalpay`) | to 2010 | equal pay for women (0/1) |
+| | Sexual-orientation employment protection | CSPP (`solaw`) | to 2013 | law prohibiting sexual-orientation discrimination (0/1) |
+| | Abortion restrictions | CSPP (`fundslife`, `infconsent`, `gagrule`, `medicalrest`, `insprivate`, `inspublic`, `inswaiver`) | to 2017 | count of the 7 restrictions in effect |
+| Political & cultural | Citizen ideology | Berry, Ringquist, Fording & Hanson, v2018 (`citi6016`) | to 2016 | higher = more liberal |
+| | Evangelical + LDS share | CSPP (`evangldsper`) | to 2015 | % of population |
 | Political | Republican two-party vote share | MIT Election Data and Science Lab, 1976–2024 presidential returns (Harvard Dataverse doi:10.7910/DVN/42MVDX) | elections 1996–2024 | R / (R + D), mean over the presidential elections in the window |
 
 All IPUMS-based predictors use person weights summed over the window's years.
-Not yet collected: other policy domains in the plan (childcare, equal pay,
-discrimination protections, reproductive policy), state GDP per capita, and
-measures of social conservatism beyond presidential vote.
+
+External sources (`scripts/data_prep/download_context_sources.py`): a window's
+value is the mean over its observed years and is missing unless at least half
+of the window's years are observed — nothing is carried forward (e.g. abortion
+policy changed sharply after 2022). CSPP coding: a year counts only if ≥ 40
+states are coded; dummies that never take 0 are "1 or blank", so blank = 0
+within their coverage years. Consequence: CSPP and Berry predictors are missing
+for 2015–24 (and equal pay, sexual-orientation protection for 2010–19);
+models use complete cases.
+
+Paid family leave: policy timing (plan 2.6) in
+`analysis/main/tables/2_6_policy_timing.csv` — 2 of 10 states have a window
+fully before and one fully after benefits began, too few for DID.

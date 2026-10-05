@@ -57,3 +57,31 @@ def test_gop_share_by_window():
     ])
     out = gop_share_by_window(votes, periods=[2015], width=10).set_index("state")
     assert out.loc["ohio", "gop_two_party_share"] == pytest.approx(0.55)
+
+
+def test_window_mean_requires_half_the_years():
+    from scripts.data_prep.build_context_measures import window_means
+    yearly = pd.DataFrame({"state": ["ohio"] * 6, "year": [2005, 2006, 2007, 2008, 2009, 2016],
+                           "x": [1, 1, 1, 1, 0, 9]})
+    out = window_means(yearly, ["x"], periods=[2005, 2015], width=10).set_index(["state", "period"])
+    assert out.loc[("ohio", 2005), "x"] == pytest.approx(0.8)    # 5 observed years of 10
+    assert pd.isna(out.loc[("ohio", 2015), "x"])                  # 1 observed year: too few
+
+
+def test_cspp_policy_coding_rules():
+    from scripts.data_prep.build_context_measures import cspp_yearly
+    rows = []
+    for y in (2000, 2001):
+        for i in range(45):
+            st = f"S{i}"
+            rows.append({"st": st, "year": y,
+                         "universalprek": float(i % 2) if y == 2000 else (1.0 if i < 5 else None),
+                         "fundslife": 1.0 if i < 10 else None, "equalpay": 0.0, "solaw": 1.0,
+                         "infconsent": 1.0, "gagrule": 0.0, "medicalrest": 0.0, "insprivate": 0.0,
+                         "inspublic": 0.0, "inswaiver": 0.0, "evangldsper": 20.0})
+    y = cspp_yearly(pd.DataFrame(rows), state_key=lambda s: s.lower())
+    a = y.set_index(["state", "year"])
+    assert pd.isna(a.loc[("s20", 2001), "universal_prek"])       # 2001: < 40 states coded
+    assert a.loc[("s20", 2000), "universal_prek"] == 0.0
+    assert a.loc[("s20", 2000), "abortion_restrictions"] == 1     # infconsent only; fundslife blank -> 0
+    assert a.loc[("s3", 2000), "abortion_restrictions"] == 2      # + fundslife
