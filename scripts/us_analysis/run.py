@@ -20,7 +20,11 @@ import pandas as pd
 
 def main(config: str, out_dir: str, parts: str = "panel,1,2,2b,2c,3") -> None:
     out = Path(out_dir)
-    todo = [p.strip() for p in str(parts).split(",") if p.strip()]
+    # fire parses "1,2" as a tuple of ints; accept both forms
+    items = parts if isinstance(parts, (list, tuple)) else str(parts).split(",")
+    todo = [str(p).strip() for p in items if str(p).strip()]
+    if not todo:
+        raise SystemExit(f"no parts selected from {parts!r}")
     data = out / "data"
     if "panel" in todo or not (data / "state_window_panel.csv").exists():
         from scripts.us_analysis.panel import build_panel
