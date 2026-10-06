@@ -144,3 +144,26 @@ def test_household_direction():
     assert text_egal(d, "ours_household").iloc[0] < text_egal(d, "ours_household").iloc[1]
     assert survey_egal(d, "women_share_housework").iloc[0] < survey_egal(d, "women_share_housework").iloc[1]
     assert survey_egal(d, "family_index_acs").iloc[0] < survey_egal(d, "family_index_acs").iloc[1]
+
+
+def test_balanced_trend_removes_composition_effect():
+    """A late-entering, less traditional state creates a spurious national trend;
+    the balanced panel (states observed in every window) removes it."""
+    from scripts.us_analysis.balanced import complete_units, trend_table, word_trajectories
+    periods = [2000, 2005, 2010, 2015]
+    rows = [{"state": "a", "period": p, "ours_occupation": -0.02, "ours_household": 0.01}
+            for p in periods]
+    rows += [{"state": "b", "period": p, "ours_occupation": 0.02, "ours_household": -0.01}
+             for p in (2010, 2015)]   # enters late; flat within state
+    panel = pd.DataFrame(rows)
+    tab = trend_table(panel, periods)
+    occ = tab[tab["text"] == "ours_occupation"].set_index(["sample", "period"])["mean"]
+    assert occ[("all states", 2015)] > occ[("all states", 2000)]          # spurious rise
+    assert occ[("balanced", 2015)] == pytest.approx(occ[("balanced", 2000)])  # flat
+    assert set(complete_units(panel, "state", "ours_occupation", periods)["state"]) == {"a"}
+    cells = pd.DataFrame([{"state": s, "period": p, "occupation": "nurse", "rnd": r}
+                          for s, ps, r in (("a", periods, 0.01), ("b", (2010, 2015), 0.05))
+                          for p in ps])
+    t = word_trajectories(cells, "occupation", periods)
+    assert t["balanced"].loc["nurse", 2015] == pytest.approx(0.01)
+    assert t["all states"].loc["nurse", 2015] == pytest.approx(0.03)
