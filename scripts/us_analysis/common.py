@@ -6,8 +6,8 @@ Canonical orientation (used in every figure and model):
 
 - Text, occupation: +mean RND over occupations (occupation words closer to
   female words = less traditional).
-- Text, family domain: household-work words (main) and family-sphere words
-  (robustness), -mean RND (words closer to male words = less traditional).
+- Text, household work: -mean RND over household-work words (closer to
+  female words = more traditional, so closer to male words = less).
 - Survey measures: oriented with -check_state_benchmarks.TRADITIONAL_SIGN.
 
 Occupation-level validation (Part I.1) keeps raw RND (> 0 = female-leaning)
@@ -32,12 +32,11 @@ from scipy.stats import pearsonr  # noqa: E402
 from scripts.check_state_benchmarks import TRADITIONAL_SIGN  # noqa: E402
 
 # text category column -> sign that makes it "higher = less traditional"
-TEXT_SIGN = {"ours_occupation": 1, "ours_family_sphere": -1, "ours_household": -1}
+TEXT_SIGN = {"ours_occupation": 1, "ours_household": -1}
 # diverging colours: red = more traditional, blue = less traditional
 CMAP = "RdBu"
 LESS_TRAD_COLOR, MORE_TRAD_COLOR = "#2166ac", "#b2182b"
-TEXT_LABEL = {"ours_occupation": "Text: occupation", "ours_family_sphere": "Text: family sphere",
-              "ours_household": "Text: household work"}
+TEXT_LABEL = {"ours_occupation": "Text: occupation", "ours_household": "Text: household work"}
 SURVEY_LABEL = {
     "matched_female_share": "ACS: female share of our occupations",
     "duncan": "ACS: occupational segregation (Duncan)",
@@ -55,9 +54,9 @@ SURVEY_LABEL = {
     "women_share_housework": "ATUS: women's share of housework",
     "women_share_childcare_parents": "ATUS: women's share of childcare (parents)",
 }
-DOMAINS = ("occupation", "family")
+DOMAINS = ("occupation", "household")
 # main text measure per domain
-TEXT_COL = {"occupation": "ours_occupation", "family": "ours_household"}
+TEXT_COL = {"occupation": "ours_occupation", "household": "ours_household"}
 
 # axis wording shared by the step figures (1.5-1.7) and the combined figures
 BETWEEN_NOTE = "state average over windows"
@@ -76,19 +75,18 @@ class Spec:
 
 
 MAIN = Spec("main", {"occupation": (TEXT_COL["occupation"], "matched_female_share"),
-                     "family": (TEXT_COL["family"], "family_index_acs")})
+                     "household": (TEXT_COL["household"], "family_index_acs")})
 ROBUSTNESS: List[Spec] = (
     [Spec(f"robustness-{m}", {"occupation": ("ours_occupation", m)})
      for m in ("duncan", "female_emp_share")]
-    + [Spec(f"robustness-{m}", {"family": (TEXT_COL["family"], m)})
+    + [Spec(f"robustness-{m}", {"household": (TEXT_COL["household"], m)})
        for m in ("motherhood_emp_gap", "motherhood_hours_gap", "married_women_nilf",
                  "wife_earnings_share", "wife_earns_more", "gender_emp_gap")]
     + [Spec(f"robustness-{name}", {d: (TEXT_COL[d], m) for d in DOMAINS})
        for name, m in (("iat", "iat_sex_balanced"), ("explicit", "explicit_sex_balanced"))]
-    + [Spec(f"robustness-atus-{name}", {"family": (TEXT_COL["family"], m)})
+    + [Spec(f"robustness-atus-{name}", {"household": (TEXT_COL["household"], m)})
        for name, m in (("housework", "women_share_housework"), ("household", "women_share_household"),
                        ("childcare", "women_share_childcare_parents"))]
-    + [Spec("robustness-family-sphere-text", {"family": ("ours_family_sphere", "family_index_acs")})]
 )
 
 

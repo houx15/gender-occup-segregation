@@ -5,8 +5,7 @@ Writes to <out_dir>/data/:
                           half-widths), every survey measure, text volume
   occupation_cells.csv    state x occupation x window: RND, ACS state and
                           national female share
-  family_terms.csv        state x term x window: RND for family_sphere and
-                          household terms
+  household_terms.csv     state x term x window: RND for household-work terms
 """
 
 from __future__ import annotations
@@ -66,12 +65,12 @@ def build_panel(config: str, out_dir: str) -> pd.DataFrame:
     occ = occ[(occ["period"] >= start) & (occ["period"] <= end)]
     occ.to_csv(data / "occupation_cells.csv", index=False)
 
-    fam = long_df[long_df["category"].isin(["family_sphere", "household"]) & long_df["in_vocab"]]
+    fam = long_df[(long_df["category"] == "household") & long_df["in_vocab"]]
     fam = fam.merge(used[["category", "occupation"]], on=["category", "occupation"])
     parts = fam["unit_name"].str.rsplit("_", n=1)
     fam = fam.assign(state=parts.str[0], period=parts.str[1].astype(int)).rename(
         columns={"occupation": "term"})
     fam = fam[(fam["period"] >= start) & (fam["period"] <= end)]
-    fam[["state", "period", "category", "term", "rnd"]].to_csv(data / "family_terms.csv", index=False)
-    print(f"panel: {len(t)} state-windows; {len(occ)} occupation cells; {len(fam)} family-term cells")
+    fam[["state", "period", "category", "term", "rnd"]].to_csv(data / "household_terms.csv", index=False)
+    print(f"panel: {len(t)} state-windows; {len(occ)} occupation cells; {len(fam)} household-term cells")
     return t

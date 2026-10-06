@@ -33,7 +33,7 @@ FAMILY = ["family_index_acs", "motherhood_emp_gap", "motherhood_hours_gap",
           "married_women_nilf", "wife_earnings_share", "wife_earns_more", "gender_emp_gap"]
 SUBJECTIVE = ["iat_sex_balanced", "explicit_sex_balanced"]
 HOUSEWORK = ["women_share_household", "women_share_housework", "women_share_childcare_parents"]
-OURS = ["ours_occupation", "ours_family_sphere", "ours_household"]
+OURS = ["ours_occupation", "ours_household"]
 
 
 def window_label(p: int, width: int) -> str:

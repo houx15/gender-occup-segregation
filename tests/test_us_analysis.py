@@ -14,9 +14,9 @@ def _panel(seed=0, n_states=14, periods=(1995, 2000, 2005, 2010, 2015)):
         for p in periods:
             trad = base - 0.1 * (p - 2005) / 5 + rng.normal(0, 0.3)
             row = {"unit_name": f"s{i}_{p}", "state": f"s{i}", "period": p,
-                   "ours_occupation": -0.01 * trad, "ours_family_sphere": 0.01 * trad,
+                   "ours_occupation": -0.01 * trad,
                    "ours_household": 0.005 * trad + rng.normal(0, 0.01),
-                   "se_ours_occupation": 0.003, "se_ours_family_sphere": 0.006,
+                   "se_ours_occupation": 0.003,
                    "se_ours_household": 0.006, "tokens": float(rng.integers(2e5, 2e7))}
             for c in SURVEY_LABEL:
                 row[c] = trad + rng.normal(0, 0.5)
@@ -93,15 +93,15 @@ def test_part2b_2c_3(tmp_path):
     terms = pd.DataFrame([{"state": f"s{s}", "period": p, "category": c,
                            "term": t, "rnd": np.random.default_rng(s).normal(0.01, 0.01)}
                           for s in range(5) for p in (2005, 2015)
-                          for c, t in (("family_sphere", "home"), ("household", "laundry"),
+                          for c, t in (("other", "home"), ("household", "laundry"),
                                        ("household", "cooking"), ("household", "kitchen"))])
     cells = pd.concat([_cells(0).assign(period=2005), _cells(0).assign(period=2015)])
     t3 = part3.run_part3(panel, cells, terms, tmp_path)
     cases = pd.read_csv(tmp_path / "main" / "tables" / "3_case_selection.csv")
     assert {"most stable", "largest move toward less traditional",
             "largest text-survey discrepancy"} <= set(cases["criterion"])
-    assert (tmp_path / "main" / "figures" / "3_3_state_cases_family.pdf").exists()
-    # family term cases come from the main family list only
+    assert (tmp_path / "main" / "figures" / "3_3_state_cases_household.pdf").exists()
+    # term cases come from the household-work list only
     assert set(cases[cases["level"].str.startswith("term")]["level"]) == {"term (household)"}
     prof = pd.read_csv(tmp_path / "main" / "tables" / "3_3_state_profiles.csv")
     assert {"text_occupation_first", "women_lfp_last", "gop_two_party_share_first"} <= set(prof.columns)
@@ -133,3 +133,14 @@ def test_combined_figures(tmp_path):
     for f in ("figure1_validation.pdf", "figure2_survey.pdf", "figure3_reliability.pdf",
               "figure5_dynamics_occupation.pdf", "figure6_explanatory.pdf"):
         assert (tmp_path / "figures_combined" / f).exists(), f
+
+
+def test_household_direction():
+    """Household words closer to female words (RND > 0) = more traditional =
+    lower oriented score; a higher women's housework share likewise scores lower."""
+    from scripts.us_analysis.common import survey_egal, text_egal
+    d = pd.DataFrame({"ours_household": [0.02, -0.02], "women_share_housework": [0.8, 0.6],
+                      "family_index_acs": [1.0, -1.0]})
+    assert text_egal(d, "ours_household").iloc[0] < text_egal(d, "ours_household").iloc[1]
+    assert survey_egal(d, "women_share_housework").iloc[0] < survey_egal(d, "women_share_housework").iloc[1]
+    assert survey_egal(d, "family_index_acs").iloc[0] < survey_egal(d, "family_index_acs").iloc[1]

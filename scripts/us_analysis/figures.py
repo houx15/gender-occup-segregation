@@ -2,8 +2,8 @@
 
 Built from the saved per-step tables and the canonical panel, so they always
 match the step figures. Written to <out_dir>/figures_combined/:
-  figure1_validation.pdf     1.1 occupations, 1.3 state means; 1.2 trends (occupation | family)
-  figure2_survey.pdf         1.4 state-window, 1.5 between, 1.5 within (occupation | family)
+  figure1_validation.pdf     1.1 occupations, 1.3 state means; 1.2 trends (occupation | household work)
+  figure2_survey.pdf         1.4 state-window, 1.5 between, 1.5 within (occupation | household work)
   figure3_reliability.pdf    1.6 volume vs error, 1.7 state slopes
   figure4_maps_<domain>.pdf  2.1 (copied)
   figure5_dynamics_<domain>.pdf  2.2 heatmap + 2.3 change ranking
@@ -57,7 +57,7 @@ def figure1(panel, main, out):
                           "(higher = less traditional)", fontsize=8)
     axes[0][1].set_title("B. State means (occupation; 95% interval)", fontsize=9)
     for ax, col, lab in ((axes[1][0], "ours_occupation", "C. Occupation trend"),
-                         (axes[1][1], TEXT_COL["family"], "D. Family trend (household work)")):
+                         (axes[1][1], TEXT_COL["household"], "D. Household-work trend")):
         g = trend[trend["text"] == col]
         x = np.arange(len(g))
         ax.errorbar(x, g["mean"], yerr=g["ci95"], fmt="o", capsize=3, color="#4c72b0")

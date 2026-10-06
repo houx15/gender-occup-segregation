@@ -33,7 +33,7 @@ def main(config: str, out_dir: str, parts: str = "panel,1,2,2b,2c,3,3s,figs") ->
         build_panel(config, out_dir)
     panel = pd.read_csv(data / "state_window_panel.csv")
     cells = pd.read_csv(data / "occupation_cells.csv")
-    terms = pd.read_csv(data / "family_terms.csv")
+    terms = pd.read_csv(data / "household_terms.csv")
 
     if "1" in todo:
         from scripts.us_analysis.common import MAIN, ROBUSTNESS

@@ -3,7 +3,7 @@
 
 Descriptive check. One row per analyzed state-window unit with:
   ours_<category>   our word-fixed-effects score per category (occupation,
-                    family_sphere, household; oriented RND, > 0 = female-leaning)
+                    household; raw RND, > 0 = female-leaning)
 and survey benchmarks for the same state and window:
   objective, occupation  matched_female_share, duncan, female_emp_share (ACS)
   objective, family      motherhood_emp_gap, motherhood_hours_gap,
@@ -49,9 +49,9 @@ HOUSEWORK = ["women_share_household", "women_share_housework", "women_share_chil
 
 # +1 if a higher value means MORE traditional gender norms, -1 if less.
 # ours_*: raw mean RND (> 0 = closer to women); female-leaning occupations are
-# less traditional, female-leaning family / household words more traditional.
+# less traditional, female-leaning household-work words more traditional.
 TRADITIONAL_SIGN = {
-    "ours_occupation": -1, "ours_family_sphere": 1, "ours_household": 1,
+    "ours_occupation": -1, "ours_household": 1,
     "matched_female_share": -1, "duncan": 1, "female_emp_share": -1,
     "motherhood_emp_gap": 1, "motherhood_hours_gap": 1, "married_women_nilf": 1,
     "wife_earnings_share": -1, "wife_earns_more": -1, "gender_emp_gap": 1,

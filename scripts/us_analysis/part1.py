@@ -37,14 +37,14 @@ def occupation_validity(cells: pd.DataFrame, out: Path) -> str:
                      labels=occ["occupation"])
     save(fig, out / "figures" / "1_1_occupation_validity.pdf")
     return (f"**1.1 Occupation-level validity.** {st['n']} occupations, pooled over states and "
-            f"windows: r = {st['r']:.2f} (p = {st['p']:.3g}). No family analogue: there is no "
-            "per-term external benchmark for family words.\n")
+            f"windows: r = {st['r']:.2f} (p = {st['p']:.3g}). No household-work "
+            "analogue: there is no per-term external benchmark for household words.\n")
 
 
 def temporal(panel: pd.DataFrame, out: Path) -> str:
     """1.2 Mean text score per window (discrete waves), 95% CI over states."""
     rows = []
-    cols = ["ours_occupation", "ours_household", "ours_family_sphere"]
+    cols = ["ours_occupation", "ours_household"]
     for col in cols:
         v = panel.assign(y=text_egal(panel, col))
         for p, g in v.groupby("period"):

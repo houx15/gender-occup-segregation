@@ -33,7 +33,7 @@ us_states:
   trend_start: 2005
 
 wordlists:
-  # Occupation (primary) + family. occupation_grounding.csv documents every
+  # Occupation + household work. occupation_grounding.csv documents every
   # occupation candidate: plural form, 2018 Census occupation title, Garg (2018)
   # source word, and the reason for each exclusion. Entries 'a|b' pool surface
   # forms (vector = mean of in-vocab forms). Word selection happens in the
@@ -42,10 +42,6 @@ wordlists:
   gender_words_file: "gender_words.json"
   categories:
     occupation: "candidates_occupation.txt"
-    # Gender-neutral family-sphere words: Caliskan et al. 2017 WEAT-6 family list,
-    # expanded from 61 brainstormed candidates (candidates_family.txt) to the 20
-    # with coverage >= 0.5 and a family sense; every decision in family_screening.csv.
-    family_sphere: "family_sphere.txt"
     # Unpaid household work and care (ATUS activity categories): 107 brainstormed
     # candidates (candidates_household.txt) -> 21 with coverage >= 0.3 and a
     # household-work sense; every decision in household_screening.csv.
@@ -78,7 +74,6 @@ analysis:
   seed: 42
   ideation_sign:
     occupation: 1
-    family_sphere: -1
     household: -1
   # Analyze only 2005-09 .. 2020-24: earlier periods cover too few states.
   # all five windows: 1995-2004 (33 states with >= 500 articles), 2000-09 (48),

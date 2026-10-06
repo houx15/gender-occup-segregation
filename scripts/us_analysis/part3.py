@@ -9,7 +9,7 @@ Occupations (national RND = mean over state models, occupations in every window)
   (first -> last window), most stable RND (smallest SD over windows),
   reversal (RND changes sign, both |RND| > 0.005), largest |residual| from
   RND ~ female share.
-Household-work terms (main family list): largest |change|, most stable, reversal, largest SD across states.
+Household-work terms: largest |change|, most stable, reversal, largest SD across states.
 States (text score, higher = less traditional; baseline = second window,
   final = last): similar baseline / divergent final (pairs), similar
   socioeconomic structure / divergent change (pairs), largest move to less
@@ -72,7 +72,7 @@ def occupation_cases(cells: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows), w
 
 
-def family_cases(terms: pd.DataFrame) -> pd.DataFrame:
+def household_cases(terms: pd.DataFrame) -> pd.DataFrame:
     periods = sorted(terms["period"].unique())
     nat = terms.groupby(["category", "term", "period"])["rnd"].mean().reset_index()
     w = nat.pivot_table(index=["category", "term"], columns="period", values="rnd")
@@ -87,7 +87,7 @@ def family_cases(terms: pd.DataFrame) -> pd.DataFrame:
             ("reversal", o[np.sign(o["first"]) != np.sign(o["last"])], "change"),
             ("strongest state heterogeneity", _top(o, "state_sd", 3), "state_sd")):
         for (cat, term), r in sel.iterrows():
-            rows.append({"domain": "family", "level": f"term ({cat})", "criterion": crit, "case": term,
+            rows.append({"domain": "household", "level": f"term ({cat})", "criterion": crit, "case": term,
                          "value": r[val], "details": f"RND {window_label(a)} {r['first']:+.4f} -> "
                                                      f"{window_label(b)} {r['last']:+.4f}"})
     return pd.DataFrame(rows), w
@@ -272,8 +272,7 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
     for sub in ("figures", "tables"):
         (out / sub).mkdir(parents=True, exist_ok=True)
     occ, w_occ = occupation_cases(cells)
-    fam_cat = TEXT_COL["family"].replace("ours_", "")  # main family list
-    fam, w_fam = family_cases(terms[terms["category"] == fam_cat])
+    fam, w_fam = household_cases(terms[terms["category"] == TEXT_COL["household"].replace("ours_", "")])
     st = state_cases(panel, out_root)
     cases = pd.concat([occ, fam, st], ignore_index=True)
     cases.to_csv(out / "tables" / "3_case_selection.csv", index=False)
@@ -285,7 +284,7 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
     fam_l = fam.assign(case=[f"{c} ({lvl[6:-1]})" for c, lvl in zip(fam["case"], fam["level"])])
     _rule_panels(lines, fam_l, "3.2 Household-work terms: national RND by window "
                  "(> 0 = more traditional for these terms; other terms grey)",
-                 out / "figures" / "3_2_family_terms.pdf")
+                 out / "figures" / "3_2_household_terms.pdf")
     _trajectories(panel, st, out)
     prof = state_profiles(panel, cases)
     prof.to_csv(out / "tables" / "3_3_state_profiles.csv", index=False)

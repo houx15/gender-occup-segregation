@@ -1,6 +1,6 @@
 """Plan 3.1-3.2 — how the semantic neighbourhood of selected cases changes.
 
-For each occupation / family term selected in Part III and each window: the
+For each occupation / household-work term selected in Part III and each window: the
 `n_states` largest state models (most text), the entry's `topn` nearest
 neighbours in each (singular/plural forms pooled, the entry's own forms
 excluded), and neighbours that recur across those states.
