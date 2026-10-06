@@ -6,8 +6,8 @@ Canonical orientation (used in every figure and model):
 
 - Text, occupation: +mean RND over occupations (occupation words closer to
   female words = less traditional).
-- Text, household work: -mean RND over household-work words (closer to
-  female words = more traditional, so closer to male words = less).
+- Text, domestic and care work (code key "household"): -mean RND over the
+  domestic- and care-work words (closer to female words = more traditional).
 - Survey measures: oriented with -check_state_benchmarks.TRADITIONAL_SIGN.
 
 Occupation-level validation (Part I.1) keeps raw RND (> 0 = female-leaning)
@@ -36,7 +36,7 @@ TEXT_SIGN = {"ours_occupation": 1, "ours_household": -1}
 # diverging colours: red = more traditional, blue = less traditional
 CMAP = "RdBu"
 LESS_TRAD_COLOR, MORE_TRAD_COLOR = "#2166ac", "#b2182b"
-TEXT_LABEL = {"ours_occupation": "Text: occupation", "ours_household": "Text: household work"}
+TEXT_LABEL = {"ours_occupation": "Text: occupation", "ours_household": "Text: domestic and care work"}
 SURVEY_LABEL = {
     "matched_female_share": "ACS: female share of our occupations",
     "duncan": "ACS: occupational segregation (Duncan)",
@@ -57,6 +57,7 @@ SURVEY_LABEL = {
 DOMAINS = ("occupation", "household")
 # main text measure per domain
 TEXT_COL = {"occupation": "ours_occupation", "household": "ours_household"}
+DOMAIN_LABEL = {"occupation": "occupation", "household": "domestic and care work"}
 
 # axis wording shared by the step figures (1.5-1.7) and the combined figures
 BETWEEN_NOTE = "state average over windows"

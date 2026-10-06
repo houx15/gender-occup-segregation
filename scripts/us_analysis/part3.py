@@ -9,7 +9,7 @@ Occupations (national RND = mean over state models, occupations in every window)
   (first -> last window), most stable RND (smallest SD over windows),
   reversal (RND changes sign, both |RND| > 0.005), largest |residual| from
   RND ~ female share.
-Household-work terms: largest |change|, most stable, reversal, largest SD across states.
+Domestic- and care-work terms: largest |change|, most stable, reversal, largest SD across states.
 States (text score, higher = less traditional; baseline = second window,
   final = last): similar baseline / divergent final (pairs), similar
   socioeconomic structure / divergent change (pairs), largest move to less
@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 
 from scripts.us_analysis.common import (
-    MAIN, TEXT_COL, md_table, save, survey_egal, text_egal, window_label, zscore,
+    DOMAIN_LABEL, MAIN, TEXT_COL, md_table, save, survey_egal, text_egal, window_label, zscore,
 )
 
 K = 5
@@ -225,7 +225,7 @@ def _trajectories(panel: pd.DataFrame, cases: pd.DataFrame, out: Path, n_focus: 
             ax.set_ylabel("z (higher = less traditional)", fontsize=7)
             ax.legend(fontsize=6, ncol=3, loc="best")
             ax.tick_params(labelsize=7)
-        fig.suptitle(f"3.3 State cases: {dom} (top {n_focus} per rule; full lists in "
+        fig.suptitle(f"3.3 State cases: {DOMAIN_LABEL[dom]} (top {n_focus} per rule; full lists in "
                      "3_case_selection.csv)", fontsize=10)
         save(fig, out / "figures" / f"3_3_state_cases_{dom}.pdf")
 
@@ -282,7 +282,7 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
     lines = w_fam.copy()
     lines.index = [f"{t} ({c})" for c, t in lines.index]
     fam_l = fam.assign(case=[f"{c} ({lvl[6:-1]})" for c, lvl in zip(fam["case"], fam["level"])])
-    _rule_panels(lines, fam_l, "3.2 Household-work terms: national RND by window "
+    _rule_panels(lines, fam_l, "3.2 Domestic and care work terms: national RND by window "
                  "(> 0 = more traditional for these terms; other terms grey)",
                  out / "figures" / "3_2_household_terms.pdf")
     _trajectories(panel, st, out)

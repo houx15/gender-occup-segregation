@@ -2,8 +2,8 @@
 
 Built from the saved per-step tables and the canonical panel, so they always
 match the step figures. Written to <out_dir>/figures_combined/:
-  figure1_validation.pdf     1.1 occupations, 1.3 state means; 1.2 trends (occupation | household work)
-  figure2_survey.pdf         1.4 state-window, 1.5 between, 1.5 within (occupation | household work)
+  figure1_validation.pdf     1.1 occupations, 1.3 state means; 1.2 trends (occupation | domestic and care work)
+  figure2_survey.pdf         1.4 state-window, 1.5 between, 1.5 within (occupation | domestic and care work)
   figure3_reliability.pdf    1.6 volume vs error, 1.7 state slopes
   figure4_maps_<domain>.pdf  2.1 (copied)
   figure5_dynamics_<domain>.pdf  2.2 heatmap + 2.3 change ranking
@@ -24,9 +24,9 @@ import statsmodels.formula.api as smf
 from matplotlib.colors import TwoSlopeNorm
 
 from scripts.us_analysis.common import (
-    BETWEEN_NOTE, CMAP, LESS_TRAD_COLOR, MAIN, MISMATCH_LABEL, MORE_TRAD_COLOR, SLOPE_LABEL, SURVEY_LABEL,
-    TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, change_legend, save, scatter_fit, survey_egal,
-    text_egal, window_label, zscore,
+    BETWEEN_NOTE, CMAP, DOMAIN_LABEL, LESS_TRAD_COLOR, MAIN, MISMATCH_LABEL, MORE_TRAD_COLOR,
+    SLOPE_LABEL, SURVEY_LABEL, TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, change_legend, save,
+    scatter_fit, survey_egal, text_egal, window_label, zscore,
 )
 from scripts.us_analysis.part2b import BLOCK_COLOR
 
@@ -57,7 +57,7 @@ def figure1(panel, main, out):
                           "(higher = less traditional)", fontsize=8)
     axes[0][1].set_title("B. State means (occupation; 95% interval)", fontsize=9)
     for ax, col, lab in ((axes[1][0], "ours_occupation", "C. Occupation trend"),
-                         (axes[1][1], TEXT_COL["household"], "D. Household-work trend")):
+                         (axes[1][1], TEXT_COL["household"], "D. Domestic and care work trend")):
         g = trend[trend["text"] == col]
         x = np.arange(len(g))
         ax.errorbar(x, g["mean"], yerr=g["ci95"], fmt="o", capsize=3, color="#4c72b0")
@@ -77,13 +77,13 @@ def figure2(panel, out):
         within = d[["text", "survey"]] - d.groupby("state")[["text", "survey"]].transform("mean")
         tlab, slab = TEXT_LABEL[tcol], SURVEY_LABEL[scol]
         scatter_fit(axes[0][j], d["survey"], d["text"], slab, tlab,
-                    f"{letters[0]}. {dom}: one point = one state in one window")
+                    f"{letters[0]}. {DOMAIN_LABEL[dom]}: one point = one state in one window")
         scatter_fit(axes[1][j], between["survey"], between["text"], f"{slab}\n({BETWEEN_NOTE})",
                     f"{tlab}\n({BETWEEN_NOTE})",
-                    f"{letters[1]}. {dom}, between states: one point = one state")
+                    f"{letters[1]}. {DOMAIN_LABEL[dom]}, between states: one point = one state")
         scatter_fit(axes[2][j], within["survey"], within["text"], f"{slab}\n({WITHIN_NOTE})",
                     f"{tlab}\n({WITHIN_NOTE})",
-                    f"{letters[2]}. {dom}, within states: one point = one state-window")
+                    f"{letters[2]}. {DOMAIN_LABEL[dom]}, within states: one point = one state-window")
     fig.suptitle("Figure 2. Does the text score agree with the survey? (higher = less traditional)",
                  fontsize=11)
     fig.text(0.5, 0.004, "C, D: are states that are less traditional in the survey also less "
@@ -103,7 +103,7 @@ def figure3(panel, main, out):
         fit = smf.ols("sz ~ tz", data=d).fit()
         scatter_fit(axes[0][j], np.log10(d["tokens"]), (d["sz"] - fit.fittedvalues).abs(),
                     VOLUME_LABEL, MISMATCH_LABEL,
-                    f"{letters[0]}. {dom}: is the mismatch larger where there is less text?")
+                    f"{letters[0]}. {DOMAIN_LABEL[dom]}: is the mismatch larger where there is less text?")
         f = main / "tables" / f"1_7_state_slopes_{dom}.csv"
         if f.exists():
             h = pd.read_csv(f).sort_values("slope")
@@ -119,7 +119,7 @@ def figure3(panel, main, out):
             axes[1][j].set_yticks(y, h["state"].str.replace("_", " ").str.title(), fontsize=4)
             axes[1][j].set_xlabel(SLOPE_LABEL, fontsize=8)
             axes[1][j].legend(fontsize=6, loc="lower right")
-            axes[1][j].set_title(f"{letters[1]}. {dom}: how closely does text track the survey "
+            axes[1][j].set_title(f"{letters[1]}. {DOMAIN_LABEL[dom]}: how closely does text track the survey "
                                  "in each state?", fontsize=9)
     fig.suptitle("Figure 3. Measurement reliability", fontsize=11)
     fig.text(0.5, 0.004, "C, D: one hierarchical model, slopes partially pooled toward the average; "
@@ -178,7 +178,7 @@ def figure6(main, out):
                 ax.errorbar(r["coef"], k, xerr=1.96 * r["se"], fmt="o", ms=4, color=BLOCK_COLOR[r["block"]])
             ax.axvline(0, color="grey", lw=0.6)
             ax.set_yticks(range(len(g)), g["term"], fontsize=7)
-            ax.set_title(f"{dom} text score — {SPEC_TITLE[spec]}\n(n = {g['n'].min()}–{g['n'].max()})",
+            ax.set_title(f"{DOMAIN_LABEL[dom]} text score — {SPEC_TITLE[spec]}\n(n = {g['n'].min()}–{g['n'].max()})",
                          fontsize=8)
             ax.set_xlabel("Standardized coefficient (95% CI), one model per block", fontsize=8)
     handles = [plt.Line2D([], [], color=c, marker="o", ls="", label=b) for b, c in BLOCK_COLOR.items()]

@@ -49,7 +49,7 @@ HOUSEWORK = ["women_share_household", "women_share_housework", "women_share_chil
 
 # +1 if a higher value means MORE traditional gender norms, -1 if less.
 # ours_*: raw mean RND (> 0 = closer to women); female-leaning occupations are
-# less traditional, female-leaning household-work words more traditional.
+# less traditional, female-leaning domestic- and care-work words more traditional.
 TRADITIONAL_SIGN = {
     "ours_occupation": -1, "ours_household": 1,
     "matched_female_share": -1, "duncan": 1, "female_emp_share": -1,

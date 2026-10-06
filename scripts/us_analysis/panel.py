@@ -5,7 +5,7 @@ Writes to <out_dir>/data/:
                           half-widths), every survey measure, text volume
   occupation_cells.csv    state x occupation x window: RND, ACS state and
                           national female share
-  household_terms.csv     state x term x window: RND for household-work terms
+  household_terms.csv     state x term x window: RND for domestic- and care-work terms
 """
 
 from __future__ import annotations

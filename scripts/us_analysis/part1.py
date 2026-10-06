@@ -18,9 +18,9 @@ import pandas as pd
 import statsmodels.formula.api as smf
 
 from scripts.us_analysis.common import (
-    BETWEEN_NOTE, DOMAINS, TEXT_COL, LESS_TRAD_COLOR, MISMATCH_LABEL, MORE_TRAD_COLOR, SLOPE_LABEL, SURVEY_LABEL,
-    TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, Spec, corr, md_table, save, scatter_fit, survey_egal,
-    text_egal, window_label, zscore,
+    BETWEEN_NOTE, DOMAINS, DOMAIN_LABEL, LESS_TRAD_COLOR, MISMATCH_LABEL, MORE_TRAD_COLOR,
+    SLOPE_LABEL, SURVEY_LABEL, Spec, TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, corr,
+    md_table, save, scatter_fit, survey_egal, text_egal, window_label, zscore,
 )
 
 # ---------------------------------------------------------------- 1.1 - 1.3 --
@@ -37,7 +37,7 @@ def occupation_validity(cells: pd.DataFrame, out: Path) -> str:
                      labels=occ["occupation"])
     save(fig, out / "figures" / "1_1_occupation_validity.pdf")
     return (f"**1.1 Occupation-level validity.** {st['n']} occupations, pooled over states and "
-            f"windows: r = {st['r']:.2f} (p = {st['p']:.3g}). No household-work "
+            f"windows: r = {st['r']:.2f} (p = {st['p']:.3g}). No domestic-work "
             "analogue: there is no per-term external benchmark for household words.\n")
 
 
@@ -100,7 +100,7 @@ def geography(panel: pd.DataFrame, out: Path) -> str:
     parts = []
     for dom in DOMAINS:
         g = tab[tab["domain"] == dom]
-        parts.append(f"{dom}: SD across states {g['mean'].std():.4f}, median 95% half-width "
+        parts.append(f"{DOMAIN_LABEL[dom]}: SD across states {g['mean'].std():.4f}, median 95% half-width "
                      f"{(1.96 * g['se']).median():.4f}")
     return "**1.3 Geographic heterogeneity.** " + "; ".join(parts) + ".\n"
 
@@ -164,7 +164,7 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         d = frames[dm]
         scatter_fit(ax, d["survey"], d["text"], f"{SURVEY_LABEL[scol]}\n(higher = less traditional)",
                     f"{TEXT_LABEL[tcol]} (higher = less traditional)",
-                    f"{panel_lab}. {dm}: one point = one state in one 10-year window")
+                    f"{panel_lab}. {DOMAIN_LABEL[dm]}: one point = one state in one 10-year window")
         model_rows.append(_models(d).assign(domain=dm, text=tcol, survey=scol))
     fig.suptitle("1.4 State-window alignment: text vs survey", fontsize=10)
     save(fig, out_f / "1_4_state_window.pdf")
@@ -184,11 +184,11 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         within = d[["text", "survey"]] - d.groupby("state")[["text", "survey"]].transform("mean")
         b = scatter_fit(axes[0][j], between["survey"], between["text"],
                         f"{SURVEY_LABEL[scol]}\n({BETWEEN_NOTE})", f"{TEXT_LABEL[tcol]}\n({BETWEEN_NOTE})",
-                        f"Between states — {dm}: one point = one state")
+                        f"Between states — {DOMAIN_LABEL[dm]}: one point = one state")
         w = scatter_fit(axes[1][j], within["survey"], within["text"],
                         f"{SURVEY_LABEL[scol]}\n({WITHIN_NOTE})",
                         f"{TEXT_LABEL[tcol]}\n({WITHIN_NOTE})",
-                        f"Within states — {dm}: one point = one state-window")
+                        f"Within states — {DOMAIN_LABEL[dm]}: one point = one state-window")
         bw_rows += [{"domain": dm, "component": "between states", **b},
                     {"domain": dm, "component": "within states", **w}]
     fig.suptitle("1.5 Between- and within-state alignment (higher = less traditional)", fontsize=10)
@@ -206,7 +206,7 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         d["abs_error"] = (d["survey_z"] - fit.fittedvalues).abs()
         d["log_tokens"] = np.log10(d["tokens"])
         st = scatter_fit(axes[0][j], d["log_tokens"], d["abs_error"],
-                         VOLUME_LABEL, MISMATCH_LABEL, f"{dm}: is the mismatch larger where there is less text?")
+                         VOLUME_LABEL, MISMATCH_LABEL, f"{DOMAIN_LABEL[dm]}: is the mismatch larger where there is less text?")
         d["quintile"] = pd.qcut(d["log_tokens"], 5, labels=[1, 2, 3, 4, 5])
         q = d.groupby("quintile", observed=True)["abs_error"].agg(["mean", "std", "count"])
         axes[1][j].errorbar(q.index.astype(int), q["mean"], yerr=1.96 * q["std"] / np.sqrt(q["count"]),
@@ -229,7 +229,7 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         try:
             h = _hierarchical(frames[dm])
         except Exception as e:  # noqa: BLE001
-            ax.set_title(f"{dm}: model did not converge ({type(e).__name__})", fontsize=8)
+            ax.set_title(f"{DOMAIN_LABEL[dm]}: model did not converge ({type(e).__name__})", fontsize=8)
             hier_rows.append({"domain": dm, "global_slope": np.nan, "global_se": np.nan,
                               "slope_sd": np.nan, "states_ci_excl_0": np.nan})
             continue
@@ -246,7 +246,7 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         ax.set_xlabel(SLOPE_LABEL + "\npartial pooling; 95% interval: blue > 0, red < 0, grey includes 0",
                       fontsize=8)
         ax.legend(fontsize=6, loc="lower right")
-        ax.set_title(f"{dm}: global slope {h.attrs['global_slope']:.2f} "
+        ax.set_title(f"{DOMAIN_LABEL[dm]}: global slope {h.attrs['global_slope']:.2f} "
                      f"(SE {h.attrs['global_se']:.2f})", fontsize=9)
         hier_rows.append({"domain": dm, "global_slope": h.attrs["global_slope"],
                           "global_se": h.attrs["global_se"], "slope_sd": h.attrs["slope_sd"],

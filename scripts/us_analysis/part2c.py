@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-from scripts.us_analysis.common import MAIN, md_table, save, survey_egal, text_egal, zscore
+from scripts.us_analysis.common import DOMAIN_LABEL, MAIN, md_table, save, survey_egal, text_egal, zscore
 from scripts.us_analysis.part2b import BLOCK_COLOR, available_blocks, prepare
 
 
@@ -102,7 +102,7 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
             ax.set_yticks(range(len(g)), g["term"], fontsize=7)
             ax.set_title(f"{spec} (R² = {g['r2'].iloc[0]:.2f}, n = {g['n'].iloc[0]})", fontsize=9)
             ax.set_xlabel("Standardized coefficient (95% CI), all predictors jointly", fontsize=8)
-        fig.suptitle(f"2C Predictors of the text-survey gap: {dom}", fontsize=10)
+        fig.suptitle(f"2C Predictors of the text-survey gap: {DOMAIN_LABEL[dom]}", fontsize=10)
         save(fig, out / "figures" / f"2c_predictors_{dom}.pdf")
     sig = res[res["p"] < 0.05][["domain", "spec", "term", "coef", "se", "p"]]
     fit = res.groupby(["domain", "spec"]).agg(n=("n", "first"), r2=("r2", "first")).reset_index()
