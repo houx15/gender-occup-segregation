@@ -61,7 +61,7 @@ def test_benchmark_table_joins_sources_on_unit_name():
 
 def test_agreement_r_flips_to_common_traditional_direction():
     from scripts.check_state_benchmarks import TRADITIONAL_SIGN, add_agreement
-    c = pd.DataFrame({"ours": ["ours_occupation", "ours_occupation", "ours_family_sphere"],
+    c = pd.DataFrame({"ours": ["ours_occupation", "ours_occupation", "ours_household"],
                       "survey": ["iat_sex_balanced", "matched_female_share", "iat_sex_balanced"],
                       "pearson_r": [-0.4, 0.3, 0.2]})
     a = add_agreement(c)
