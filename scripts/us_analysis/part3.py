@@ -300,7 +300,9 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
             "log_real_gdp_pc_first", "log_real_gdp_pc_last", "women_lfp_first", "women_lfp_last",
             "pfl_share_last", "gop_two_party_share_first", "gop_two_party_share_last"]
     text = "\n".join(["# Part III — case selection\n",
-                      "Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.\n",
+                      "Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv. "
+                      "Survey-based state rules use the survey composite (mean of the z-scored direct "
+                      "benchmarks) and the 1.7 state slopes averaged over the direct benchmarks.\n",
                       md_table(cases) + "\n",
                       "### 3.3 State profiles (first vs last observed window; full table "
                       "tables/3_3_state_profiles.csv)\n",

@@ -316,7 +316,9 @@ def reliability(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
     save(fig, out_f / "1_6_volume_error.pdf")
     vol = pd.DataFrame(vol_rows)
     vol.to_csv(out_t / "1_6_volume_error.csv", index=False)
-    md += ["### 1.6 Discrepancy vs text volume\n", md_table(vol) + "\n"]
+    md += ["### 1.6 Discrepancy vs text volume\n",
+           "r between |residual of the pooled survey-on-text regression| and log10 tokens "
+           "(< 0: less mismatch where there is more text).\n", md_table(vol) + "\n"]
 
     # 1.7 hierarchical state-specific slopes
     fig, axes = plt.subplots(1, len(doms), figsize=(5.2 * len(doms), 9.5), squeeze=False)
@@ -342,7 +344,10 @@ def reliability(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
     save(fig, out_f / "1_7_state_slopes.pdf")
     hier = pd.DataFrame(hier_rows)
     hier.to_csv(out_t / "1_7_hierarchical.csv", index=False)
-    md += ["### 1.7 Hierarchical state-specific slopes\n", md_table(hier) + "\n"]
+    md += ["### 1.7 Hierarchical state-specific slopes\n",
+           "Mixed model, random intercepts and text slopes by state (REML). slopes_pooled: SD of "
+           "the state slopes < SE of the common slope, so the states do not differ detectably.\n",
+           md_table(hier) + "\n"]
     return "\n".join(md)
 
 
