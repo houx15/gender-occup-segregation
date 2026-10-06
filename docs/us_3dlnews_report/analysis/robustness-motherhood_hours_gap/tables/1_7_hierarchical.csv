@@ -1,2 +1,2 @@
-domain,global_slope,global_se,slope_sd,states_ci_excl_0
-household,-0.1662461037468409,0.04985495043713271,0.007428896684612809,51
+domain,global_slope,global_se,slope_sd,slopes_pooled,states_ci_excl_0
+household,-0.1662461037468409,0.04985495043713271,0.007428896684612809,True,51

@@ -25,12 +25,12 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| occupation | between states | -0.15 | 0.295 | 51 | -0.062 |
-| occupation | within states | 0.276 | 0.0 | 232 | 0.14 |
-| household | between states | 0.38 | 0.006 | 51 | 0.004 |
-| household | within states | -0.228 | 0.001 | 228 | -0.007 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| occupation | between states | -0.15 | 0.295 | -0.113 | 0.43 | 51 | -0.062 |
+| occupation | within states | 0.276 | 0.0 | 0.317 | 0.0 | 232 | 0.14 |
+| household | between states | 0.38 | 0.006 | 0.33 | 0.018 | 51 | 0.004 |
+| household | within states | -0.228 | 0.001 | -0.207 | 0.002 | 228 | -0.007 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -41,10 +41,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| occupation | 0.25 | 0.079 | 0.287 | 3 |
-| household | -0.094 | 0.053 | 0.091 | 0 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| occupation | 0.25 | 0.079 | 0.287 | False | 3 |
+| household | -0.094 | 0.053 | 0.091 | False | 0 |
 
 ## robustness-duncan
 
@@ -57,10 +57,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| occupation | between states | -0.403 | 0.003 | 51 | -0.056 |
-| occupation | within states | 0.32 | 0.0 | 232 | 0.153 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| occupation | between states | -0.403 | 0.003 | -0.281 | 0.046 | 51 | -0.056 |
+| occupation | within states | 0.32 | 0.0 | 0.329 | 0.0 | 232 | 0.153 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -70,9 +70,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| occupation | 0.133 | 0.034 | 0.072 | 35 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| occupation | 0.133 | 0.034 | 0.072 | False | 35 |
 
 ## robustness-female_emp_share
 
@@ -85,10 +85,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| occupation | between states | -0.265 | 0.06 | 51 | -0.119 |
-| occupation | within states | 0.23 | 0.0 | 232 | 0.364 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| occupation | between states | -0.265 | 0.06 | -0.207 | 0.146 | 51 | -0.119 |
+| occupation | within states | 0.23 | 0.0 | 0.299 | 0.0 | 232 | 0.364 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -98,9 +98,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| occupation | 0.114 | 0.039 | 0.138 | 1 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| occupation | 0.114 | 0.039 | 0.138 | False | 1 |
 
 ## robustness-motherhood_emp_gap
 
@@ -113,10 +113,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.18 | 0.207 | 51 | 0.033 |
-| household | within states | -0.154 | 0.02 | 228 | -0.096 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.18 | 0.207 | 0.204 | 0.151 | 51 | 0.033 |
+| household | within states | -0.154 | 0.02 | -0.151 | 0.023 | 228 | -0.096 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -126,9 +126,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.069 | 0.031 | 0.049 | 18 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.069 | 0.031 | 0.049 | False | 18 |
 
 ## robustness-motherhood_hours_gap
 
@@ -141,10 +141,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.19 | 0.183 | 51 | 0.002 |
-| household | within states | -0.275 | 0.0 | 228 | -0.005 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.19 | 0.183 | 0.167 | 0.242 | 51 | 0.002 |
+| household | within states | -0.275 | 0.0 | -0.292 | 0.0 | 228 | -0.005 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -154,9 +154,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.166 | 0.05 | 0.007 | 51 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.166 | 0.05 | 0.007 | True | 51 |
 
 ## robustness-married_women_nilf
 
@@ -169,10 +169,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.282 | 0.045 | 51 | 0.051 |
-| household | within states | -0.256 | 0.0 | 228 | -0.217 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.282 | 0.045 | 0.145 | 0.309 | 51 | 0.051 |
+| household | within states | -0.256 | 0.0 | -0.19 | 0.004 | 228 | -0.217 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -182,9 +182,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.066 | 0.034 | 0.061 | 3 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.066 | 0.034 | 0.061 | False | 3 |
 
 ## robustness-wife_earnings_share
 
@@ -197,10 +197,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.417 | 0.002 | 51 | 0.137 |
-| household | within states | -0.192 | 0.004 | 228 | -0.286 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.417 | 0.002 | 0.305 | 0.03 | 51 | 0.137 |
+| household | within states | -0.192 | 0.004 | -0.132 | 0.046 | 228 | -0.286 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -210,9 +210,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.045 | 0.036 | 0.071 | 1 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.045 | 0.036 | 0.071 | False | 1 |
 
 ## robustness-wife_earns_more
 
@@ -225,10 +225,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.398 | 0.004 | 51 | 0.127 |
-| household | within states | -0.217 | 0.001 | 228 | -0.183 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.398 | 0.004 | 0.326 | 0.019 | 51 | 0.127 |
+| household | within states | -0.217 | 0.001 | -0.183 | 0.006 | 228 | -0.183 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -238,9 +238,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.086 | 0.049 | 0.025 | 10 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.086 | 0.049 | 0.025 | True | 10 |
 
 ## robustness-gender_emp_gap
 
@@ -253,10 +253,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.381 | 0.006 | 51 | 0.115 |
-| household | within states | -0.193 | 0.003 | 228 | -0.143 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.381 | 0.006 | 0.29 | 0.039 | 51 | 0.115 |
+| household | within states | -0.193 | 0.003 | -0.184 | 0.005 | 228 | -0.143 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -266,9 +266,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.091 | 0.053 | 0.003 | 0 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.091 | 0.053 | 0.003 | True | 0 |
 
 ## robustness-iat
 
@@ -283,12 +283,12 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| occupation | between states | 0.493 | 0.0 | 51 | 0.237 |
-| occupation | within states | 0.361 | 0.0 | 199 | 0.133 |
-| household | between states | -0.111 | 0.437 | 51 | -0.071 |
-| household | within states | -0.18 | 0.011 | 198 | -0.102 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| occupation | between states | 0.493 | 0.0 | 0.487 | 0.0 | 51 | 0.237 |
+| occupation | within states | 0.361 | 0.0 | 0.392 | 0.0 | 199 | 0.133 |
+| household | between states | -0.111 | 0.437 | -0.147 | 0.304 | 51 | -0.071 |
+| household | within states | -0.18 | 0.011 | -0.169 | 0.017 | 198 | -0.102 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -299,10 +299,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| occupation | 0.439 | 0.082 | 0.28 | 17 |
-| household | -0.179 | 0.082 | 0.164 | 1 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| occupation | 0.439 | 0.082 | 0.28 | False | 17 |
+| household | -0.179 | 0.082 | 0.164 | False | 1 |
 
 ## robustness-explicit
 
@@ -317,12 +317,12 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| occupation | between states | 0.112 | 0.433 | 51 | 0.006 |
-| occupation | within states | 0.414 | 0.0 | 199 | 0.01 |
-| household | between states | 0.14 | 0.328 | 51 | 0.01 |
-| household | within states | -0.309 | 0.0 | 198 | -0.012 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| occupation | between states | 0.112 | 0.433 | 0.248 | 0.08 | 51 | 0.006 |
+| occupation | within states | 0.414 | 0.0 | 0.403 | 0.0 | 199 | 0.01 |
+| household | between states | 0.14 | 0.328 | 0.163 | 0.254 | 51 | 0.01 |
+| household | within states | -0.309 | 0.0 | -0.303 | 0.0 | 198 | -0.012 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -333,10 +333,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| occupation | 0.331 | 0.134 | 0.041 | 51 |
-| household | -0.205 | 0.094 | 0.008 | 51 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| occupation | 0.331 | 0.134 | 0.041 | True | 51 |
+| household | -0.205 | 0.094 | 0.008 | True | 51 |
 
 ## robustness-atus-housework
 
@@ -349,10 +349,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.123 | 0.388 | 51 | 0.028 |
-| household | within states | -0.121 | 0.09 | 198 | -0.03 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.123 | 0.388 | 0.071 | 0.623 | 51 | 0.028 |
+| household | within states | -0.121 | 0.09 | -0.178 | 0.012 | 198 | -0.03 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -362,9 +362,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.105 | 0.084 | 0.221 | 5 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.105 | 0.084 | 0.221 | False | 5 |
 
 ## robustness-atus-household
 
@@ -377,10 +377,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.11 | 0.443 | 51 | 0.024 |
-| household | within states | -0.171 | 0.016 | 198 | -0.068 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.11 | 0.443 | 0.15 | 0.292 | 51 | 0.024 |
+| household | within states | -0.171 | 0.016 | -0.099 | 0.166 | 198 | -0.068 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -390,9 +390,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | -0.079 | 0.08 | 0.325 | 1 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | -0.079 | 0.08 | 0.325 | False | 1 |
 
 ## robustness-atus-childcare
 
@@ -405,10 +405,10 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.5 Between- and within-state alignment
 
-| domain | component | r | p | n | slope |
-|---|---|---|---|---|---|
-| household | between states | 0.159 | 0.264 | 51 | 0.034 |
-| household | within states | 0.059 | 0.409 | 198 | 0.016 |
+| domain | component | r | p | rho | rho_p | n | slope |
+|---|---|---|---|---|---|---|---|
+| household | between states | 0.159 | 0.264 | 0.105 | 0.462 | 51 | 0.034 |
+| household | within states | 0.059 | 0.409 | 0.101 | 0.157 | 198 | 0.016 |
 
 ### 1.6 Discrepancy vs text volume
 
@@ -418,9 +418,9 @@ Orientation: state-level scores are higher = less traditional.
 
 ### 1.7 Hierarchical state-specific slopes
 
-| domain | global_slope | global_se | slope_sd | states_ci_excl_0 |
-|---|---|---|---|---|
-| household | 0.034 | 0.095 | 0.386 | 3 |
+| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
+|---|---|---|---|---|---|
+| household | 0.034 | 0.095 | 0.386 | False | 3 |
 
 # Part II — geography and dynamics
 

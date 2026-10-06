@@ -1,2 +1,2 @@
-domain,global_slope,global_se,slope_sd,states_ci_excl_0
-occupation,0.1328139232820688,0.034102049582461415,0.07208790835952232,35
+domain,global_slope,global_se,slope_sd,slopes_pooled,states_ci_excl_0
+occupation,0.1328139232820688,0.034102049582461415,0.07208790835952232,False,35

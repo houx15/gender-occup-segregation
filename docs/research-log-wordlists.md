@@ -635,3 +635,23 @@ all four windows (median 35 states per occupation, 16 per domestic/care term).
 Word level: 2000–09 → 2015–24 change, balanced vs all states, r = 0.92
 (occupations, 91.9% same sign) and 0.87 (domestic and care terms, 90.5% same
 sign). The trends are not a composition effect of states entering later.
+
+## 2026-10-06 — Duncan distribution; Spearman ρ; pooled state slopes
+
+**Duncan.** Not transformed. A narrow range is not a problem for Pearson r
+(scale-free; the models z-score anyway); skew and outliers are. Duncan is
+left-skewed (skew −2.06) only because of DC (0.27–0.36; every state ≥ 0.445);
+without DC skew is 0.15. A log would not help (it stretches the low tail:
+pooled r −0.142 vs −0.135). Effect of DC: between-state r = −0.40 (p = 0.003)
+with DC, −0.26 (p = 0.07) without; Spearman ρ = −0.28 (p = 0.046). Within
+states r = 0.32 with and 0.29 without DC. Every scatter and the 1.5 tables now
+report Spearman ρ beside Pearson r.
+
+**1.7 state slopes.** When the hierarchical model pools the state slopes to
+the common slope (SD of state slopes < SE of the common slope), every state's
+interval is the common interval; the figure then shows the points and one
+band for the common 95% interval instead of 51 identical bars
+(`plot_state_slopes`; column `slopes_pooled` in `1_7_hierarchical.csv`).
+Pooled: robustness-explicit (both domains), gender_emp_gap,
+motherhood_hours_gap, wife_earns_more. In those, the text–survey relation does
+not differ detectably across states.
