@@ -18,7 +18,7 @@ set -eu
 SHIM=/scratch/network/yh6580/gender-occup/pytest_shim
 SITE=/usr/licensed/anaconda3/2023.3/lib/python3.10/site-packages
 mkdir -p "$SHIM"
-for m in pytest _pytest pluggy iniconfig exceptiongroup tomli py.py; do
+for m in pytest _pytest pluggy iniconfig exceptiongroup tomli py py.py attr attrs; do
     if [ -e "$SITE/$m" ]; then ln -sfn "$SITE/$m" "$SHIM/$m"; fi
 done
 PYTHONPATH="$SHIM" python -m pytest -q -p no:cacheprovider "${@:-tests/}"
