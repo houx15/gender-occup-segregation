@@ -79,25 +79,25 @@ def figure3(out_root, out):
     t["label"] = [f"{DOMAIN_LABEL[d]}: {SURVEY_LABEL.get(s, s)}" for d, s in zip(t["domain"], t["survey"])]
     t = t.sort_values(["domain", "survey"]).reset_index(drop=True)
     y = np.arange(len(t))
-    fig, axes = plt.subplots(1, 2, figsize=(13, 0.45 * len(t) + 2.2), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(14, 0.45 * len(t) + 3), sharey=True)
     z, zse = np.arctanh(t["r6"]), 1 / np.sqrt(t["n"] - 3)        # Fisher CI for r
     axes[0].errorbar(t["r6"], y, xerr=[t["r6"] - np.tanh(z - 1.96 * zse), np.tanh(z + 1.96 * zse) - t["r6"]],
                      fmt="o", color="#4c72b0")
     axes[0].axvline(0, color="grey", lw=0.6)
     axes[0].set_yticks(y, t["label"], fontsize=8)
-    axes[0].set_xlabel("Correlation of the mismatch |survey - survey predicted from text| with the\n"
-                       "state-window's news corpus size (log10 tokens), 95% CI. "
+    axes[0].set_xlabel("r between the mismatch |survey − survey predicted from text|\n"
+                       "and the state-window's news corpus size (log10 tokens), 95% CI\n"
                        "< 0: smaller mismatch where there is more text", fontsize=8)
-    axes[0].set_title("A. Is the mismatch with the survey just noise from thin corpora? (1.6)", fontsize=9)
+    axes[0].set_title("A. Is the mismatch with the survey\njust noise from thin corpora? (1.6)", fontsize=9)
     axes[1].errorbar(t["slope"], y, xerr=1.96 * t["se"], fmt="o", color="#4c72b0")
     for yi, (sl, sd) in enumerate(zip(t["slope"], t["sd"])):
         axes[1].annotate(f"SD across states {sd:.2f}", (sl, yi), xytext=(0, 6), textcoords="offset points",
                          fontsize=6, ha="center")
     axes[1].axvline(0, color="grey", lw=0.6)
-    axes[1].set_xlabel("Average slope of survey on text across states (SD of survey per SD of text), 95% CI\n"
-                       "mixed model, each state its own slope; label = SD of those state slopes "
-                       "(0 = same in every state)", fontsize=8)
-    axes[1].set_title("B. How strongly does the survey follow the text, and does it differ by state? (1.7)",
+    axes[1].set_xlabel("Average slope of survey on text (SD of survey per SD of text), 95% CI\n"
+                       "mixed model, each state its own slope; label = SD of the\n"
+                       "state slopes (0 = same slope in every state)", fontsize=8)
+    axes[1].set_title("B. How strongly does the survey follow the text,\nand does it differ by state? (1.7)",
                       fontsize=9)
     fig.suptitle("Figure 3. Measurement reliability, every direct benchmark "
                  "(state-level slopes: validation-*/figures/1_7_state_slopes.pdf)", fontsize=10)
@@ -133,9 +133,9 @@ def figure5(panel, main, out):
         save(fig, out / f"figure5_dynamics_{dom}.pdf")
 
 
-SPEC_TITLE = {"between states": "between states: state averages over windows, one point per state",
-              "within states (state + window FE)": "within states: state-windows with state and "
-                                                   "window fixed effects"}
+SPEC_TITLE = {"between states": "between states\n(state averages over windows, one point per state)",
+              "within states (state + window FE)": "within states\n(state-windows, state and window "
+                                                   "fixed effects)"}
 
 
 def figure6(main, out):
@@ -152,8 +152,8 @@ def figure6(main, out):
                 ax.errorbar(r["coef"], k, xerr=1.96 * r["se"], fmt="o", ms=4, color=BLOCK_COLOR[r["block"]])
             ax.axvline(0, color="grey", lw=0.6)
             ax.set_yticks(range(len(g)), g["term"], fontsize=7)
-            ax.set_title(f"{DOMAIN_LABEL[dom]} text score — {SPEC_TITLE[spec]}\n(n = {g['n'].min()}–{g['n'].max()})",
-                         fontsize=8)
+            ax.set_title(f"{DOMAIN_LABEL[dom].capitalize()} text score, {SPEC_TITLE[spec]}, "
+                         f"n = {g['n'].min()}–{g['n'].max()}", fontsize=8)
             ax.set_xlabel("Standardized coefficient (95% CI), one model per block", fontsize=8)
     for j, dom in enumerate(DOMS):   # gender blocks differ by domain
         block_legend(axes[0][j], dict.fromkeys(res[res["domain"] == dom]["block"]))
