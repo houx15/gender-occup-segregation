@@ -158,40 +158,45 @@ Domestic- and care-work scores before 2005 rest on few words per state (median 3
 
 The "Higher =" column describes each raw measure. In the analysis (`scripts/us_analysis/`), every text and survey measure is re-oriented so that **higher = less traditional**: occupation text = +RND, domestic- and care-work text = −RND (these words closer to female words = more traditional), and survey measures are flipped where their raw higher value means more traditional. Maps use a blue–red scale (blue = less traditional, red = more traditional, centred at 0).
 
+Role: **Validation** = direct benchmark of the same concept as the text
+measure (every one reported, in three dimensions: pooled, between states,
+within states); **Correlate** = related concept, reported as associations
+(coefficient table), not validation.
+
 **Objective — occupation.**
 
 | Role | Measure | Calculation | Higher = |
 |---|---|---|---|
-| Main | Female share of our occupations | Female share of each used occupation's OCC2010 codes in the state-window, averaged over occupations with equal weight | less traditional |
-| Robustness | Occupational segregation (Duncan index) | ½ Σ\_occ \|women\_occ / women − men\_occ / men\| over all occupation codes | more traditional |
-| Robustness | Women's share of employment | women / employed | less traditional |
+| Validation (occupation) | Female share of our occupations | Female share of each used occupation's OCC2010 codes in the state-window, averaged over occupations with equal weight | less traditional |
+| Correlate | Occupational segregation (Duncan index) | ½ Σ\_occ \|women\_occ / women − men\_occ / men\| over all occupation codes | more traditional |
+| Correlate | Women's share of employment | women / employed | less traditional |
 
-**Objective — family roles** (ACS, adults 25–54; the survey benchmark for domestic- and care-work text).
-
-| Role | Measure | Calculation | Higher = |
-|---|---|---|---|
-| Main | Family index | mean of the six measures below, each z-scored across all state-windows and oriented so that higher = more traditional | more traditional |
-| Robustness | Motherhood employment gap | employment rate, childless women − mothers of a child < 5 | more traditional |
-| Robustness | Motherhood hours gap | usual weekly hours among the employed, same two groups | more traditional |
-| Robustness | Married women not in the labor force | share among married women, spouse present | more traditional |
-| Robustness | Wife's earnings share | mean of wife's wage / (wife's + spouse's wage), couples with positive wage income | less traditional |
-| Robustness | Wife earns more | share of those couples where the wife earns more | less traditional |
-| Robustness | Gender employment gap | employment rate, men − women | more traditional |
-
-**Objective — housework and care** (ATUS, respondents 25–54; robustness).
+**Objective — family roles** (ACS, adults 25–54; correlates).
 
 | Role | Measure | Calculation | Higher = |
 |---|---|---|---|
-| Robustness | Women's share of household activities | women's mean minutes / (women's + men's mean minutes), BLS household activities | more traditional |
-| Robustness | Women's share of housework | same, BLS core housework | more traditional |
-| Robustness | Women's share of childcare | same, caring for household children, respondents with an own child < 18 | more traditional |
+| Correlate | Family index | mean of the six measures below, each z-scored across all state-windows and oriented so that higher = more traditional | more traditional |
+| Correlate | Motherhood employment gap | employment rate, childless women − mothers of a child < 5 | more traditional |
+| Correlate | Motherhood hours gap | usual weekly hours among the employed, same two groups | more traditional |
+| Correlate | Married women not in the labor force | share among married women, spouse present | more traditional |
+| Correlate | Wife's earnings share | mean of wife's wage / (wife's + spouse's wage), couples with positive wage income | less traditional |
+| Correlate | Wife earns more | share of those couples where the wife earns more | less traditional |
+| Correlate | Gender employment gap | employment rate, men − women | more traditional |
+
+**Objective — housework and care** (ATUS, respondents 25–54; direct benchmarks for domestic- and care-work text).
+
+| Role | Measure | Calculation | Higher = |
+|---|---|---|---|
+| Validation (domestic and care work) | Women's share of household activities | women's mean minutes / (women's + men's mean minutes), BLS household activities | more traditional |
+| Validation (domestic and care work) | Women's share of housework | same, BLS core housework | more traditional |
+| Validation (domestic and care work) | Women's share of childcare | same, caring for household children, respondents with an own child < 18 | more traditional |
 
 **Subjective.**
 
 | Role | Measure | Calculation | Higher = |
 |---|---|---|---|
-| Main | Implicit career–family stereotype | IAT D score (male–career / female–family pairing), mean of women's and men's means | more traditional |
-| Robustness | Explicit stereotype | career rating − family rating (each 1 = strongly female … 7 = strongly male), mean of women's and men's means | more traditional |
+| Validation (both domains) | Implicit career–family stereotype | IAT D score (male–career / female–family pairing), mean of women's and men's means | more traditional |
+| Validation (both domains) | Explicit stereotype | career rating − family rating (each 1 = strongly female … 7 = strongly male), mean of women's and men's means | more traditional |
 
 ### 4.3 Weights
 
