@@ -86,11 +86,10 @@ def figure2(panel, out):
                     f"{letters[2]}. {dom}, within states: one point = one state-window")
     fig.suptitle("Figure 2. Does the text score agree with the survey? (higher = less traditional)",
                  fontsize=11)
-    fig.text(0.5, 0.005, "Between (C, D): are states that are less traditional in the survey also "
-             "less traditional in text?  Within (E, F): when a state moves between windows in the "
-             "survey, does its text move the same way?  r > 0 = agreement.", ha="center", fontsize=8,
-             wrap=True)
-    fig.tight_layout(rect=(0, 0.02, 1, 1))
+    fig.text(0.5, 0.004, "C, D: are states that are less traditional in the survey also less "
+             "traditional in text?\nE, F: when a state moves between windows in the survey, does its "
+             "text move the same way?  r > 0 = agreement.", ha="center", fontsize=8)
+    fig.tight_layout(rect=(0, 0.035, 1, 1))
     fig.savefig(out / "figure2_survey.pdf")
     plt.close(fig)
 
@@ -123,11 +122,10 @@ def figure3(panel, main, out):
             axes[1][j].set_title(f"{letters[1]}. {dom}: how closely does text track the survey "
                                  "in each state?", fontsize=9)
     fig.suptitle("Figure 3. Measurement reliability", fontsize=11)
-    fig.text(0.5, 0.005, "C, D: one hierarchical model, slopes partially pooled toward the average; "
-             "bars = 95% intervals; blue = interval above 0, red = below 0, grey = includes 0. "
-             "Each state has at most 5 windows, so most intervals include 0.", ha="center", fontsize=8,
-             wrap=True)
-    fig.tight_layout(rect=(0, 0.02, 1, 1))
+    fig.text(0.5, 0.004, "C, D: one hierarchical model, slopes partially pooled toward the average; "
+             "bars = 95% intervals (blue > 0, red < 0, grey includes 0).\nEach state has at most 5 "
+             "windows, so most intervals include 0.", ha="center", fontsize=8)
+    fig.tight_layout(rect=(0, 0.035, 1, 1))
     fig.savefig(out / "figure3_reliability.pdf")
     plt.close(fig)
 

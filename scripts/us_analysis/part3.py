@@ -151,29 +151,49 @@ def state_cases(panel: pd.DataFrame, out_root: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-FOCUS_COLORS = ("#d62728", "#1f77b4", "#2ca02c", "#9467bd")
+FOCUS_COLORS = ("#d62728", "#1f77b4")
 BACKGROUND = dict(ls="--", lw=0.6, color="#bbbbbb", alpha=0.6)
 
 
-def _highlight(ax, x, lines: pd.DataFrame, focus: dict) -> None:
-    """Every row of `lines` as a faint dashed grey line; rows in `focus`
-    ({row key: legend label}, at most 4) in colour."""
-    for key, y in lines.iterrows():
-        if key not in focus:
+# what each selection rule shows, used as the panel title
+MESSAGE = {
+    "largest decline in stereotyping": "Stereotyping fell most: RND moved away from the occupation's majority gender",
+    "largest increase in stereotyping": "Stereotyping rose most: RND moved toward the occupation's majority gender",
+    "reversal in gender association": "Gender association reversed (RND changed sign)",
+    "largest text vs female-share discrepancy": "Text furthest from what the ACS female share predicts",
+    "most stable": "Most stable over windows",
+    "largest temporal change": "Largest change over windows",
+    "reversal": "Gender association reversed (RND changed sign)",
+    "strongest state heterogeneity": "Largest disagreement across states (national mean shown)",
+}
+
+
+def _rule_panels(lines: pd.DataFrame, cases: pd.DataFrame, title: str, path: Path,
+                 n_focus: int = 2) -> None:
+    """One panel per selection rule: the rule's top n_focus cases in colour,
+    every other row of `lines` (index = case) as a faint dashed grey line."""
+    x = [window_label(p) for p in lines.columns]
+    crits = list(dict.fromkeys(cases["criterion"]))
+    ncol = 2
+    nrow = int(np.ceil(len(crits) / ncol))
+    fig, axes = plt.subplots(nrow, ncol, figsize=(11, 3.2 * nrow), sharey=True, squeeze=False)
+    for ax, crit in zip(axes.flat, crits):
+        top = [c for c in dict.fromkeys(cases[cases["criterion"] == crit]["case"])
+               if c in lines.index][:n_focus]
+        for _, y in lines.drop(index=top).iterrows():
             ax.plot(x, y.values, **BACKGROUND)
-    for (key, lab), c in zip(focus.items(), FOCUS_COLORS):
-        ax.plot(x, lines.loc[key].values, "-o", ms=4, lw=1.8, color=c, label=lab)
-    ax.plot([], [], **BACKGROUND, label="other cases")
-
-
-def _first_of(cases: pd.DataFrame, criteria) -> dict:
-    """First pick of each criterion -> 'case: criterion' (distinct cases)."""
-    out = {}
-    for crit in criteria:
-        sel = cases[cases["criterion"] == crit]
-        if len(sel) and sel["case"].iloc[0] not in out:
-            out[sel["case"].iloc[0]] = f"{sel['case'].iloc[0]}: {crit}"
-    return out
+        for key, c in zip(top, FOCUS_COLORS):
+            ax.plot(x, lines.loc[key].values, "-o", ms=4, lw=1.8, color=c, label=key)
+        ax.axhline(0, color="black", lw=0.5)
+        ax.set_title(MESSAGE.get(crit, crit), fontsize=8)
+        ax.legend(fontsize=7, loc="best")
+        ax.tick_params(labelsize=7)
+    for ax in axes.flat[len(crits):]:
+        ax.set_axis_off()
+    for ax in axes[:, 0]:
+        ax.set_ylabel("National RND\n(> 0 = closer to female words)", fontsize=8)
+    fig.suptitle(title, fontsize=10)
+    save(fig, path)
 
 
 def _trajectories(panel: pd.DataFrame, cases: pd.DataFrame, out: Path, n_focus: int = 2) -> None:
@@ -255,32 +275,14 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
     cases = pd.concat([occ, fam, st], ignore_index=True)
     cases.to_csv(out / "tables" / "3_case_selection.csv", index=False)
 
-    # 3.1 selected occupations: one pick per rule highlighted, the rest faint
-    sel = list(dict.fromkeys(occ["case"]))
-    focus = _first_of(occ, ["largest decline in stereotyping", "largest increase in stereotyping",
-                            "reversal in gender association", "most stable"])
-    fig, ax = plt.subplots(figsize=(8, 5))
-    _highlight(ax, [window_label(p) for p in w_occ.columns], w_occ.loc[sel], focus)
-    ax.axhline(0, color="black", lw=0.5)
-    ax.set_ylabel("National RND (> 0 = closer to female words)")
-    ax.legend(fontsize=7)
-    ax.set_title("3.1 Selected occupations: national RND by window\n(first pick of each rule in "
-                 "colour; all picks in 3_case_selection.csv)", fontsize=10)
-    save(fig, out / "figures" / "3_1_occupation_cases.pdf")
-    # 3.2 family and household terms, same layout
+    _rule_panels(w_occ, occ, "3.1 Selected occupations: national RND by window (top 2 per rule "
+                 "in colour; other occupations grey)", out / "figures" / "3_1_occupation_cases.pdf")
     lines = w_fam.copy()
     lines.index = [f"{t} ({c})" for c, t in lines.index]
     fam_l = fam.assign(case=[f"{c} ({lvl[6:-1]})" for c, lvl in zip(fam["case"], fam["level"])])
-    focus = _first_of(fam_l, ["largest temporal change", "reversal", "strongest state heterogeneity",
-                              "most stable"])
-    fig, ax = plt.subplots(figsize=(8, 5))
-    _highlight(ax, [window_label(p) for p in w_fam.columns], lines, focus)
-    ax.axhline(0, color="black", lw=0.5)
-    ax.set_ylabel("National RND (> 0 = closer to female words)")
-    ax.legend(fontsize=7)
-    ax.set_title("3.2 Family and household terms: national RND by window\n(first pick of each rule "
-                 "in colour; > 0 = more traditional for these terms)", fontsize=10)
-    save(fig, out / "figures" / "3_2_family_terms.pdf")
+    _rule_panels(lines, fam_l, "3.2 Family and household terms: national RND by window "
+                 "(> 0 = more traditional for these terms; other terms grey)",
+                 out / "figures" / "3_2_family_terms.pdf")
     _trajectories(panel, st, out)
     prof = state_profiles(panel, cases)
     prof.to_csv(out / "tables" / "3_3_state_profiles.csv", index=False)
