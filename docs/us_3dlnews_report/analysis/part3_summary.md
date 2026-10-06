@@ -30,24 +30,20 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | occupation | occupation | largest text vs female-share discrepancy | nurse | 0.023 | RND 1995–04 +0.0321 -> 2015–24 +0.0485; female share 0.91 |
 | occupation | occupation | largest text vs female-share discrepancy | broker | -0.023 | RND 1995–04 -0.0202 -> 2015–24 -0.0203; female share 0.49 |
 | family | term (household) | largest temporal change | parenting | 0.027 | RND 1995–04 +0.0028 -> 2015–24 +0.0299 |
-| family | term (family_sphere) | largest temporal change | infant | 0.023 | RND 1995–04 +0.0111 -> 2015–24 +0.0343 |
 | family | term (household) | largest temporal change | sewing | 0.022 | RND 1995–04 -0.0049 -> 2015–24 +0.0173 |
-| family | term (family_sphere) | most stable | parents | 0.001 | RND 1995–04 +0.0200 -> 2015–24 +0.0187 |
+| family | term (household) | largest temporal change | caregiver | -0.022 | RND 1995–04 +0.0628 -> 2015–24 +0.0409 |
 | family | term (household) | most stable | meals | 0.001 | RND 1995–04 +0.0105 -> 2015–24 +0.0098 |
-| family | term (family_sphere) | most stable | family | 0.002 | RND 1995–04 +0.0074 -> 2015–24 +0.0080 |
-| family | term (family_sphere) | reversal | grandparents | -0.013 | RND 1995–04 +0.0046 -> 2015–24 -0.0087 |
-| family | term (family_sphere) | reversal | home | -0.001 | RND 1995–04 +0.0008 -> 2015–24 -0.0002 |
-| family | term (family_sphere) | reversal | relatives | -0.007 | RND 1995–04 +0.0022 -> 2015–24 -0.0050 |
-| family | term (family_sphere) | reversal | siblings | -0.003 | RND 1995–04 +0.0010 -> 2015–24 -0.0021 |
+| family | term (household) | most stable | laundry | 0.002 | RND 1995–04 +0.0084 -> 2015–24 +0.0088 |
+| family | term (household) | most stable | stove | 0.003 | RND 1995–04 -0.0098 -> 2015–24 -0.0138 |
 | family | term (household) | reversal | chores | -0.017 | RND 1995–04 +0.0104 -> 2015–24 -0.0062 |
 | family | term (household) | reversal | cleaning | -0.005 | RND 1995–04 +0.0044 -> 2015–24 -0.0004 |
 | family | term (household) | reversal | lunches | 0.014 | RND 1995–04 -0.0002 -> 2015–24 +0.0134 |
 | family | term (household) | reversal | oven | -0.006 | RND 1995–04 +0.0012 -> 2015–24 -0.0047 |
 | family | term (household) | reversal | refrigerator | -0.015 | RND 1995–04 +0.0131 -> 2015–24 -0.0023 |
 | family | term (household) | reversal | sewing | 0.022 | RND 1995–04 -0.0049 -> 2015–24 +0.0173 |
-| family | term (family_sphere) | strongest state heterogeneity | baby | 0.025 | RND 1995–04 +0.0310 -> 2015–24 +0.0473 |
-| family | term (family_sphere) | strongest state heterogeneity | infant | 0.024 | RND 1995–04 +0.0111 -> 2015–24 +0.0343 |
-| family | term (family_sphere) | strongest state heterogeneity | grandchildren | 0.022 | RND 1995–04 +0.0109 -> 2015–24 +0.0086 |
+| family | term (household) | strongest state heterogeneity | caregiver | 0.02 | RND 1995–04 +0.0628 -> 2015–24 +0.0409 |
+| family | term (household) | strongest state heterogeneity | sewing | 0.019 | RND 1995–04 -0.0049 -> 2015–24 +0.0173 |
+| family | term (household) | strongest state heterogeneity | cooking | 0.019 | RND 1995–04 +0.0001 -> 2015–24 +0.0089 |
 | occupation | state pair | similar baseline, divergent final | hawaii / oregon | 0.024 | baseline gap 0.0012, final gap 0.0237 |
 | occupation | state pair | similar baseline, divergent final | missouri / vermont | 0.019 | baseline gap 0.0012, final gap 0.0186 |
 | occupation | state pair | similar baseline, divergent final | hawaii / kansas | 0.016 | baseline gap 0.0008, final gap 0.0160 |

@@ -25,11 +25,11 @@ notes §3.3) show **raw RND**: > 0 = closer to female words.
 
 | File | Content | Plan step |
 |---|---|---|
-| `figure1_validation.pdf` | top: occupation RND vs ACS female share, state means; bottom: national trends (occupation, family) | 1.1–1.3 |
+| `figure1_validation.pdf` | top: occupation RND vs ACS female share, state means; bottom: national trends (occupation, household work) | 1.1–1.3 |
 | `figure2_survey.pdf` | text vs survey: state-window, between states, within states | 1.4–1.5 |
 | `figure3_reliability.pdf` | text volume vs uncertainty; state-specific alignment slopes | 1.6–1.7 |
-| `figure4_maps_{occupation,family}.pdf` | state maps, one per window | 2.1 |
-| `figure5_dynamics_{occupation,family}.pdf` | state × window heatmap; change 2000–09 → 2015–24 by state | 2.2–2.3 |
+| `figure4_maps_{occupation,family}.pdf` | state maps, one per window (family = household-work words) | 2.1 |
+| `figure5_dynamics_{occupation,family}.pdf` | state × window heatmap; change 2000–09 → 2015–24 by state (family = household-work words) | 2.2–2.3 |
 | `figure6_explanatory.pdf` | state predictors of the text score: between states (state averages) and within states (state + window FE) | II-B |
 
 ## Folder structure

@@ -145,16 +145,16 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 | | 2005–14 | 49 | 60 | −0.0101 | 0.0072 | 0.0033 |
 | | 2010–19 | 51 | 64 | −0.0065 | 0.0056 | 0.0032 |
 | | 2015–24 | 51 | 65 | −0.0049 | 0.0062 | 0.0029 |
-| Family sphere | 1995–2004 | 33 | 15 | 0.0115 | 0.0126 | 0.0061 |
-| | 2000–09 | 48 | 18 | 0.0112 | 0.0088 | 0.0057 |
-| | 2005–14 | 49 | 19 | 0.0118 | 0.0075 | 0.0051 |
-| | 2010–19 | 51 | 20 | 0.0132 | 0.0067 | 0.0050 |
-| | 2015–24 | 51 | 20 | 0.0120 | 0.0076 | 0.0049 |
 | Household work | 1995–2004 | 33 | 3 | 0.0022 | 0.0285 | 0.0058 |
 | | 2000–09 | 48 | 6.5 | 0.0010 | 0.0164 | 0.0058 |
 | | 2005–14 | 49 | 13 | 0.0038 | 0.0118 | 0.0052 |
 | | 2010–19 | 51 | 18 | 0.0081 | 0.0083 | 0.0047 |
 | | 2015–24 | 51 | 20 | 0.0096 | 0.0084 | 0.0045 |
+| Family sphere | 1995–2004 | 33 | 15 | 0.0115 | 0.0126 | 0.0061 |
+| | 2000–09 | 48 | 18 | 0.0112 | 0.0088 | 0.0057 |
+| | 2005–14 | 49 | 19 | 0.0118 | 0.0075 | 0.0051 |
+| | 2010–19 | 51 | 20 | 0.0132 | 0.0067 | 0.0050 |
+| | 2015–24 | 51 | 20 | 0.0120 | 0.0076 | 0.0049 |
 
 Household-work scores before 2005 rest on few words per state (median 3 and
 6.5 of 21), because the smaller early models miss the rarer words.
@@ -231,7 +231,7 @@ The "Higher =" column describes each raw measure. In the analysis (`scripts/us_a
 |---|---|
 | State-window with < 500 articles | no model; state absent from that window (1995–2004: 18 states, 2000–09: 3, 2005–14: 2) |
 | Word not in a state model's vocabulary | no RND for that cell; word effects keep the state score comparable |
-| Word in < 50% of state models | word not used in the category |
+| Word in < 50% of state models (household work: < 30%) | word not used in the category |
 | Occupation without an OCC2010 code | not in the matched female share |
 | ACS wage income missing / N/A (≥ 999998) or couple income 0 | couple excluded from the earnings measures |
 | ACS persons never worked / not in universe (OCC2010 9920, 9999) | excluded from occupation measures |
