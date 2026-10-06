@@ -76,9 +76,15 @@ adapted to modern local news; every candidate and decision is in
   several codes, 4 with no code (entrepreneur, operator, proprietor,
   supervisor).
 
-**Family sphere.** Caliskan et al. (2017) WEAT family words + household,
-kitchen: home, parents, children, family, cousins, marriage, wedding,
-relatives, household, kitchen (singular/plural pooled).
+**Family sphere.** 20 gender-neutral entries (singular/plural pooled): home,
+kids, parents, married, family, children, baby, grandchildren, marriage,
+relatives, wedding, cousins, childhood, grandparents, siblings, infant,
+divorce, household, toddler, nursery. Built from Caliskan et al. (2017) WEAT
+family words plus 61 brainstormed candidates (`candidates_family.txt`; gendered
+kin terms excluded because they mirror the gender anchors), kept if in ≥ 50% of
+state models and if their nearest neighbours show a family sense
+(`family_screening.csv` gives every decision; e.g. *house* = Congress,
+*couple* = "a couple of", *kitchen* = restaurants were dropped).
 
 **Household work.** 20 words from American Time Use Survey activity
 categories (housework, chores, cleaning, laundry, cooking, groceries, dishes,
