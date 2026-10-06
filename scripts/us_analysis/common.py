@@ -62,7 +62,7 @@ DOMAIN_LABEL = {"occupation": "occupation", "household": "domestic and care work
 # axis wording shared by the step figures (1.5-1.7) and the combined figures
 BETWEEN_NOTE = "state average over windows"
 MISMATCH_LABEL = "Text-survey mismatch: |survey - survey predicted from text| (SD)"
-VOLUME_LABEL = "Text volume of the state-window model (log10 tokens)"
+VOLUME_LABEL = "News corpus size of the state-window (log10 tokens the embedding was trained on)"
 SLOPE_LABEL = ("State-specific slope of survey on text (z units)\n"
                "> 0: where text is less traditional, the survey is too")
 

@@ -105,8 +105,15 @@ def test_part2b_2c_3(tmp_path):
     t2b = part2b.run_part2b(panel, "", tmp_path)
     assert "Block fit" in t2b
     assert (tmp_path / "main" / "figures" / "2b_predictors_occupation.pdf").exists()
+    b = pd.read_csv(tmp_path / "main" / "tables" / "2b_models.csv")
     t2c = part2c.run_part2c(panel, "", tmp_path)
     assert (tmp_path / "main" / "tables" / "2c_gaps.csv").exists() and "Model fit" in t2c
+    c = pd.read_csv(tmp_path / "main" / "tables" / "2c_models.csv")
+    for res in (b, c):   # gender predictors follow the domain; no text volume
+        occ, hh = (set(res[res["domain"] == dm]["term"]) for dm in ("occupation", "household"))
+        assert "duncan" in occ and "duncan" not in hh
+        assert "pfl_share" in hh and "pfl_share" not in occ
+        assert "motherhood_emp_gap" in hh and "log_tokens" not in occ | hh
     terms = pd.DataFrame([{"state": f"s{s}", "period": p, "category": c,
                            "term": t, "rnd": np.random.default_rng(s).normal(0.01, 0.01)}
                           for s in range(5) for p in (2005, 2015)

@@ -6,8 +6,9 @@ mean of the domain's z-scored direct benchmarks (common.survey_composite). gap >
 text is less traditional than its survey measure suggests. Also the residual
 from the survey-on-text calibration (survey_z ~ text_z) as an alternative.
 
-Predictors: the Part II-B blocks plus log text volume, (a) pooled with window
-FE (SE clustered by state) and (b) between states (state means, HC1).
+Predictors: the domain's Part II-B blocks (occupation-related gender blocks
+for occupation, family-related for domestic and care work), (a) pooled with
+window FE (SE clustered by state) and (b) between states (state means, HC1).
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ import statsmodels.formula.api as smf
 from scripts.us_analysis.common import (
     DOMAIN_LABEL, TEXT_COL, md_table, save, survey_composite, text_egal, zscore,
 )
-from scripts.us_analysis.part2b import BLOCK_COLOR, available_blocks, prepare
+from scripts.us_analysis.part2b import BLOCK_COLOR, available_blocks, block_legend, prepare
 
 
 def add_gaps(panel: pd.DataFrame) -> pd.DataFrame:
@@ -34,7 +35,6 @@ def add_gaps(panel: pd.DataFrame) -> pd.DataFrame:
         d.loc[ok, f"gap_{dom}"] = tz - sz
         fit = smf.ols("s ~ t", data=pd.DataFrame({"s": sz, "t": tz})).fit()
         d.loc[ok, f"resid_{dom}"] = fit.resid
-    d["log_tokens"] = np.log10(d["tokens"])
     return d
 
 
@@ -45,13 +45,14 @@ def models(d: pd.DataFrame) -> pd.DataFrame:
     """All predictors jointly; only predictors observed in >= 80% of state-windows,
     so the joint model is not cut down to the few complete cases of sparse
     external sources (those stay in the per-block Part II-B models)."""
-    blocks = {b: [v for v in vs if d[v].notna().mean() >= MIN_COVERAGE]
-              for b, vs in available_blocks(d).items()}
-    blocks = {b: vs for b, vs in blocks.items() if vs}
-    blocks["text volume"] = ["log_tokens"]
-    xs_all = [v for vs in blocks.values() for v in vs]
     rows = []
     for dom in TEXT_COL:
+        blocks = {b: [v for v in vs if d[v].notna().mean() >= MIN_COVERAGE]
+                  for b, vs in available_blocks(d, dom).items()}
+        blocks = {b: vs for b, vs in blocks.items() if vs}
+        if not blocks:
+            continue
+        xs_all = [v for vs in blocks.values() for v in vs]
         y = f"gap_{dom}"
         data = d[["state", "period", y] + xs_all].dropna()
         z = data.copy()
@@ -90,32 +91,37 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
     fig.suptitle("2C Text-survey discrepancy by state (survey composite of the direct benchmarks)", fontsize=10)
     save(fig, out / "figures" / "2c_gap_states.pdf")
 
-    if not available_blocks(prepare(panel)):
+    if not any(available_blocks(prepare(panel), dom) for dom in TEXT_COL):
         return "# Part II-C\n\nGaps computed; no context predictors yet.\n"
     res = models(d)
     res.to_csv(out / "tables" / "2c_models.csv", index=False)
-    for dom in TEXT_COL:
+    for dom in sorted(set(res["domain"]), key=list(TEXT_COL).index):
         fig, axes = plt.subplots(1, 2, figsize=(11, 5), sharey=True)
         for ax, spec in zip(axes, ["pooled + window FE", "between states"]):
             g = res[(res["domain"] == dom) & (res["spec"] == spec)].reset_index(drop=True)
             for i, r in g.iterrows():
                 ax.errorbar(r["coef"], i, xerr=1.96 * r["se"], fmt="o", ms=4,
-                            color=BLOCK_COLOR.get(r["block"], "#8172b3"))
+                            color=BLOCK_COLOR[r["block"]])
             ax.axvline(0, color="grey", lw=0.6)
             ax.set_yticks(range(len(g)), g["term"], fontsize=7)
             ax.set_title(f"{spec} (R² = {g['r2'].iloc[0]:.2f}, n = {g['n'].iloc[0]})", fontsize=9)
             ax.set_xlabel("Standardized coefficient (95% CI), all predictors jointly", fontsize=8)
+        block_legend(axes[1], dict.fromkeys(res[res["domain"] == dom]["block"]))
         fig.suptitle(f"2C Predictors of the text-survey gap: {DOMAIN_LABEL[dom]}", fontsize=10)
         save(fig, out / "figures" / f"2c_predictors_{dom}.pdf")
     sig = res[res["p"] < 0.05][["domain", "spec", "term", "coef", "se", "p"]]
     fit = res.groupby(["domain", "spec"]).agg(n=("n", "first"), r2=("r2", "first")).reset_index()
-    used = sorted(set(res["term"]))
-    dropped = sorted(v for vs in available_blocks(prepare(panel)).values() for v in vs
-                     if v not in used)
+    dropped = []
+    for dom in TEXT_COL:
+        used = set(res[res["domain"] == dom]["term"])
+        dropped += [f"{v} ({DOMAIN_LABEL[dom]})" for vs in available_blocks(prepare(panel), dom).values()
+                    for v in vs if v not in used]
     text = "\n".join([
         "# Part II-C — text-survey discrepancy\n",
         "gap = z(text) − z(survey composite: mean of the z-scored direct benchmarks), higher = text less traditional than survey. "
-        "All predictors jointly, standardized; predictors observed in < 80% of state-windows "
+        "Predictors: the domain's Part II-B blocks (shared socioeconomic and political & cultural; "
+        "occupation: gendered labour market, workplace policy; domestic and care work: family and "
+        "care, family policy), all jointly, standardized; predictors observed in < 80% of state-windows "
         f"left out: {', '.join(dropped) or 'none'}.\n",
         "### Model fit\n", md_table(fit) + "\n",
         "### Terms with p < 0.05\n", (md_table(sig) if len(sig) else "None.") + "\n"])

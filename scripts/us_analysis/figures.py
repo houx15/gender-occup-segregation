@@ -27,7 +27,7 @@ from scripts.us_analysis.common import (
     CMAP, DOMAIN_LABEL, DOMAINS, LESS_TRAD_COLOR, MORE_TRAD_COLOR, SURVEY_LABEL, TEXT_COL, TEXT_LABEL,
     change_legend, save, scatter_fit, window_label,
 )
-from scripts.us_analysis.part2b import BLOCK_COLOR
+from scripts.us_analysis.part2b import BLOCK_COLOR, block_legend
 
 DOMS = list(DOMAINS)
 
@@ -85,17 +85,20 @@ def figure3(out_root, out):
                      fmt="o", color="#4c72b0")
     axes[0].axvline(0, color="grey", lw=0.6)
     axes[0].set_yticks(y, t["label"], fontsize=8)
-    axes[0].set_xlabel("r(|survey - survey predicted from text|, log10 tokens), 95% CI\n"
-                       "< 0: less mismatch where there is more text", fontsize=8)
-    axes[0].set_title("A. Mismatch vs text volume (1.6)", fontsize=9)
+    axes[0].set_xlabel("Correlation of the mismatch |survey - survey predicted from text| with the\n"
+                       "state-window's news corpus size (log10 tokens), 95% CI. "
+                       "< 0: smaller mismatch where there is more text", fontsize=8)
+    axes[0].set_title("A. Is the mismatch with the survey just noise from thin corpora? (1.6)", fontsize=9)
     axes[1].errorbar(t["slope"], y, xerr=1.96 * t["se"], fmt="o", color="#4c72b0")
     for yi, (sl, sd) in enumerate(zip(t["slope"], t["sd"])):
         axes[1].annotate(f"SD across states {sd:.2f}", (sl, yi), xytext=(0, 6), textcoords="offset points",
                          fontsize=6, ha="center")
     axes[1].axvline(0, color="grey", lw=0.6)
-    axes[1].set_xlabel("Average slope of survey on text (z), 95% CI\n"
-                       "label = SD of the state-specific slopes", fontsize=8)
-    axes[1].set_title("B. Hierarchical alignment slope (1.7)", fontsize=9)
+    axes[1].set_xlabel("Average slope of survey on text across states (SD of survey per SD of text), 95% CI\n"
+                       "mixed model, each state its own slope; label = SD of those state slopes "
+                       "(0 = same in every state)", fontsize=8)
+    axes[1].set_title("B. How strongly does the survey follow the text, and does it differ by state? (1.7)",
+                      fontsize=9)
     fig.suptitle("Figure 3. Measurement reliability, every direct benchmark "
                  "(state-level slopes: validation-*/figures/1_7_state_slopes.pdf)", fontsize=10)
     save(fig, out / "figure3_reliability.pdf")
@@ -141,7 +144,7 @@ def figure6(main, out):
         return
     res = pd.read_csv(f)
     res = res[res["model"] != "all blocks"]
-    fig, axes = plt.subplots(2, 2, figsize=(12, 9), sharey="row")
+    fig, axes = plt.subplots(2, 2, figsize=(12, 9))
     for i, spec in enumerate(SPEC_TITLE):
         for ax, dom in zip(axes[i], DOMS):
             g = res[(res["domain"] == dom) & (res["spec"] == spec)].reset_index(drop=True)
@@ -152,8 +155,8 @@ def figure6(main, out):
             ax.set_title(f"{DOMAIN_LABEL[dom]} text score — {SPEC_TITLE[spec]}\n(n = {g['n'].min()}–{g['n'].max()})",
                          fontsize=8)
             ax.set_xlabel("Standardized coefficient (95% CI), one model per block", fontsize=8)
-    handles = [plt.Line2D([], [], color=c, marker="o", ls="", label=b) for b, c in BLOCK_COLOR.items()]
-    axes[0][1].legend(handles=handles, fontsize=7)
+    for j, dom in enumerate(DOMS):   # gender blocks differ by domain
+        block_legend(axes[0][j], dict.fromkeys(res[res["domain"] == dom]["block"]))
     fig.suptitle("Figure 6. State characteristics and text gender norms (associational; "
                  "higher = less traditional)", fontsize=11)
     save(fig, out / "figure6_explanatory.pdf")
