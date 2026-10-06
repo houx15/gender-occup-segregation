@@ -9,7 +9,7 @@ Occupations (national RND = mean over state models, occupations in every window)
   (first -> last window), most stable RND (smallest SD over windows),
   reversal (RND changes sign, both |RND| > 0.005), largest |residual| from
   RND ~ female share.
-Family terms: largest |change|, most stable, reversal, largest SD across states.
+Household-work terms (main family list): largest |change|, most stable, reversal, largest SD across states.
 States (text score, higher = less traditional; baseline = second window,
   final = last): similar baseline / divergent final (pairs), similar
   socioeconomic structure / divergent change (pairs), largest move to less
@@ -26,7 +26,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from scripts.us_analysis.common import MAIN, md_table, save, survey_egal, text_egal, window_label, zscore
+from scripts.us_analysis.common import (
+    MAIN, TEXT_COL, md_table, save, survey_egal, text_egal, window_label, zscore,
+)
 
 K = 5
 SOCIO = ["log_real_gdp_pc", "log_real_income_pc", "ba_share", "metro_share", "unemployment_rate",
@@ -270,7 +272,8 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
     for sub in ("figures", "tables"):
         (out / sub).mkdir(parents=True, exist_ok=True)
     occ, w_occ = occupation_cases(cells)
-    fam, w_fam = family_cases(terms)
+    fam_cat = TEXT_COL["family"].replace("ours_", "")  # main family list
+    fam, w_fam = family_cases(terms[terms["category"] == fam_cat])
     st = state_cases(panel, out_root)
     cases = pd.concat([occ, fam, st], ignore_index=True)
     cases.to_csv(out / "tables" / "3_case_selection.csv", index=False)
@@ -280,7 +283,7 @@ def run_part3(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, out
     lines = w_fam.copy()
     lines.index = [f"{t} ({c})" for c, t in lines.index]
     fam_l = fam.assign(case=[f"{c} ({lvl[6:-1]})" for c, lvl in zip(fam["case"], fam["level"])])
-    _rule_panels(lines, fam_l, "3.2 Family and household terms: national RND by window "
+    _rule_panels(lines, fam_l, "3.2 Household-work terms: national RND by window "
                  "(> 0 = more traditional for these terms; other terms grey)",
                  out / "figures" / "3_2_family_terms.pdf")
     _trajectories(panel, st, out)

@@ -90,15 +90,19 @@ def test_part2b_2c_3(tmp_path):
     assert (tmp_path / "main" / "figures" / "2b_predictors_occupation.pdf").exists()
     t2c = part2c.run_part2c(panel, "", tmp_path)
     assert (tmp_path / "main" / "tables" / "2c_gaps.csv").exists() and "Model fit" in t2c
-    terms = pd.DataFrame([{"state": f"s{s}", "period": p, "category": "family_sphere",
+    terms = pd.DataFrame([{"state": f"s{s}", "period": p, "category": c,
                            "term": t, "rnd": np.random.default_rng(s).normal(0.01, 0.01)}
-                          for s in range(5) for p in (2005, 2015) for t in ("home", "family", "kitchen")])
+                          for s in range(5) for p in (2005, 2015)
+                          for c, t in (("family_sphere", "home"), ("household", "laundry"),
+                                       ("household", "cooking"), ("household", "kitchen"))])
     cells = pd.concat([_cells(0).assign(period=2005), _cells(0).assign(period=2015)])
     t3 = part3.run_part3(panel, cells, terms, tmp_path)
     cases = pd.read_csv(tmp_path / "main" / "tables" / "3_case_selection.csv")
     assert {"most stable", "largest move toward less traditional",
             "largest text-survey discrepancy"} <= set(cases["criterion"])
     assert (tmp_path / "main" / "figures" / "3_3_state_cases_family.pdf").exists()
+    # family term cases come from the main family list only
+    assert set(cases[cases["level"].str.startswith("term")]["level"]) == {"term (household)"}
     prof = pd.read_csv(tmp_path / "main" / "tables" / "3_3_state_profiles.csv")
     assert {"text_occupation_first", "women_lfp_last", "gop_two_party_share_first"} <= set(prof.columns)
     assert "3.3 State profiles" in t3
