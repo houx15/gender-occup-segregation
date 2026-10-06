@@ -94,3 +94,14 @@ spoon
 toys|toy
 clutter
 decluttering
+cooked
+baked
+cleaned
+washed
+dinner
+lunch
+refrigerator|refrigerators
+microwave
+washer
+dryer
+preschool|preschools

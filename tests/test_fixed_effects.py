@@ -50,6 +50,9 @@ def test_coverage_word_sets_and_table():
     table = word_coverage_table(long_df, ["a", "b", "c"], sets).set_index("occupation")
     assert table.loc["x", "coverage"] == 1.0 and bool(table.loc["x", "used"])
     assert table.loc["y", "coverage"] == pytest.approx(1 / 3) and not table.loc["y", "used"]
+    # a category-specific bar overrides the global one
+    assert coverage_word_sets(long_df, ["a", "b", "c"], min_coverage=0.5,
+                              by_category={"occ": 0.3}) == {"occ": ["x", "y"]}
 
 
 def test_build_fe_summary_shape_and_bands():

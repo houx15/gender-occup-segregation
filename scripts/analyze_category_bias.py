@@ -123,8 +123,10 @@ def summarize_and_write(collected: Dict[str, Tuple[List[pd.DataFrame], List[str]
     if word_set == "fixed_effects" and min_cov is None:
         raise ValueError("analysis.word_set: fixed_effects needs analysis.min_word_coverage "
                          "(share of analyzed units a word must be in vocab for, e.g. 0.5)")
+    cov_by_cat = analysis_cfg.get("min_word_coverage_by_category") or {}
     logger.info(f"Word set: {word_set}"
-                + (f" (min_word_coverage={min_cov})" if word_set == "fixed_effects" else ""))
+                + (f" (min_word_coverage={min_cov}, by category {cov_by_cat})"
+                   if word_set == "fixed_effects" else ""))
     boot = analysis_cfg.get("bootstrap", {})
     sub = analysis_cfg.get("subsample", {})
     seed = int(analysis_cfg.get("seed", 42))
@@ -149,10 +151,10 @@ def summarize_and_write(collected: Dict[str, Tuple[List[pd.DataFrame], List[str]
             continue
         long_combined = pd.concat(frames, ignore_index=True)
         if word_set == "fixed_effects":
-            word_sets = coverage_word_sets(long_combined, units, float(min_cov))
+            word_sets = coverage_word_sets(long_combined, units, float(min_cov), cov_by_cat)
             for cat, ws in word_sets.items():
                 logger.info(f"[{m}] coverage-set {cat}: {len(ws)}/{len(categories[cat])} "
-                            f"words in vocab in >= {min_cov} of {len(units)} units")
+                            f"words in vocab in >= {cov_by_cat.get(cat, min_cov)} of {len(units)} units")
             word_coverage_table(long_combined, units, word_sets).to_csv(
                 results_dir / "word_coverage.csv", index=False)
             summarize = build_fe_summary

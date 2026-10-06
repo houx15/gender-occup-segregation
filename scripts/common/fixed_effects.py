@@ -18,7 +18,7 @@ Output columns match build_summary, so plots and diagnostics are unchanged.
 from __future__ import annotations
 
 import warnings
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -48,15 +48,18 @@ def fit_unit_effects(u: np.ndarray, w: np.ndarray, y: np.ndarray, n_units: int,
     return a
 
 
-def coverage_word_sets(long_df: pd.DataFrame, units: List[str],
-                       min_coverage: float) -> Dict[str, List[str]]:
-    """Per category, words in vocab in >= min_coverage of ``units``."""
+def coverage_word_sets(long_df: pd.DataFrame, units: List[str], min_coverage: float,
+                       by_category: Optional[Dict[str, float]] = None) -> Dict[str, List[str]]:
+    """Per category, words in vocab in >= min_coverage of ``units``
+    (``by_category`` overrides the bar for named categories)."""
+    by_category = by_category or {}
     sets: Dict[str, List[str]] = {}
     sub = long_df[long_df["unit_name"].isin(units)]
     for cat, g in sub.groupby("category", sort=False):
         cov = g[g["in_vocab"]].groupby("occupation")["unit_name"].nunique() / len(units)
         order = list(dict.fromkeys(g["occupation"]))  # wordlist order
-        sets[cat] = [w for w in order if cov.get(w, 0.0) >= min_coverage]
+        bar = float(by_category.get(cat, min_coverage))
+        sets[cat] = [w for w in order if cov.get(w, 0.0) >= bar]
     return sets
 
 

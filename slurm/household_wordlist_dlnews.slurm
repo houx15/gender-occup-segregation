@@ -11,17 +11,18 @@
 # Household-work wordlist expansion (docs/research-log-wordlists.md):
 #   1. coverage of every candidates_household.txt entry over the analyzed
 #      state-window models; report under results_dir/wordlist_precheck_report.csv,
-#      entries with coverage >= 0.5 in wordlist_dir/cleaned_household.txt
+#      entries with coverage >= THRESHOLD in wordlist_dir/cleaned_household.txt
 #   2. nearest neighbours of every entry that passed, for the sense screen
-#   sbatch slurm/household_wordlist_dlnews.slurm [config]
+#   sbatch slurm/household_wordlist_dlnews.slurm [threshold=0.5] [config]
 module load anaconda3/2023.3
 conda activate llm
 set -eu
-CONFIG="${1:-config/profiles/garg_weat_dlnews_w10.yml}"
+THRESHOLD="${1:-0.5}"
+CONFIG="${2:-config/profiles/garg_weat_dlnews_w10.yml}"
 WL=wordlists/en/occupation_family
 echo "== 1. coverage"
 python -m scripts.prepare_wordlists --configs="$CONFIG" --wordlist_dir="$WL" \
-    --candidates=candidates_household.txt --threshold=0.5
+    --candidates=candidates_household.txt --threshold="$THRESHOLD"
 echo "== 2. senses"
 python -m scripts.diagnose_word_senses --config="$CONFIG" \
     --words="$(paste -sd, "$WL/cleaned_household.txt")" --n_units=4 --topn=12
