@@ -93,8 +93,8 @@ def figure3(out_root, out):
         axes[1].annotate(f"SD across states {sd:.2f}", (sl, yi), xytext=(0, 6), textcoords="offset points",
                          fontsize=6, ha="center")
     axes[1].axvline(0, color="grey", lw=0.6)
-    axes[1].set_xlabel("Average slope of survey on text (z units), 95% CI; label = SD of the "
-                       "state-specific slopes", fontsize=8)
+    axes[1].set_xlabel("Average slope of survey on text (z), 95% CI\n"
+                       "label = SD of the state-specific slopes", fontsize=8)
     axes[1].set_title("B. Hierarchical alignment slope (1.7)", fontsize=9)
     fig.suptitle("Figure 3. Measurement reliability, every direct benchmark "
                  "(state-level slopes: validation-*/figures/1_7_state_slopes.pdf)", fontsize=10)

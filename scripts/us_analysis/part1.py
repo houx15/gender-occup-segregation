@@ -206,7 +206,7 @@ def validation(panel: pd.DataFrame, out: Path) -> str:
             slab, tlab = SURVEY_LABEL[s], TEXT_LABEL[tcol]
             ax = axes[i]
             scatter_fit(ax[0], d["survey_z"], d["text_z"], f"{slab} (z)", f"{tlab} (z)",
-                        f"A. Pooled: one point = one state-window", s=8)
+                        f"[{slab}]\nA. Pooled: one point = one state-window", s=8)
             m = d.groupby("state")[["text_z", "survey_z"]].mean()
             scatter_fit(ax[1], m["survey_z"], m["text_z"], f"{slab}\n({BETWEEN_NOTE})",
                         f"{tlab}\n({BETWEEN_NOTE})", "B. State dimension: one point = one state", s=10)
@@ -223,8 +223,6 @@ def validation(panel: pd.DataFrame, out: Path) -> str:
             ax[3].set_ylabel("mean z (higher = less traditional)", fontsize=8)
             ax[3].legend(fontsize=7)
             ax[3].tick_params(labelsize=7)
-            ax[0].annotate(slab, xy=(-0.32, 0.5), xycoords="axes fraction", rotation=90, va="center",
-                           ha="center", fontsize=9, fontweight="bold")
             rows += [dict(domain=dm, survey=s, **r_) for r_ in three_dimensions(d)]
         fig.suptitle(f"1.4 Validation against direct benchmarks: {DOMAIN_LABEL[dm]} "
                      "(both sides z, higher = less traditional; slope > 0 = agreement)", fontsize=11)
