@@ -18,7 +18,8 @@ import pandas as pd
 import statsmodels.formula.api as smf
 
 from scripts.us_analysis.common import (
-    DOMAINS, SURVEY_LABEL, TEXT_LABEL, Spec, corr, md_table, save, scatter_fit, survey_egal,
+    BETWEEN_NOTE, DOMAINS, LESS_TRAD_COLOR, MISMATCH_LABEL, MORE_TRAD_COLOR, SLOPE_LABEL, SURVEY_LABEL,
+    TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, Spec, corr, md_table, save, scatter_fit, survey_egal,
     text_egal, window_label, zscore,
 )
 
@@ -165,7 +166,8 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         tcol, scol = spec.pairs[dm]
         d = frames[dm]
         scatter_fit(ax, d["survey"], d["text"], f"{SURVEY_LABEL[scol]}\n(higher = less traditional)",
-                    f"{TEXT_LABEL[tcol]} (higher = less traditional)", f"{panel_lab}. {dm}")
+                    f"{TEXT_LABEL[tcol]} (higher = less traditional)",
+                    f"{panel_lab}. {dm}: one point = one state in one 10-year window")
         model_rows.append(_models(d).assign(domain=dm, text=tcol, survey=scol))
     fig.suptitle("1.4 State-window alignment: text vs survey", fontsize=10)
     save(fig, out_f / "1_4_state_window.pdf")
@@ -184,11 +186,12 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         between = d.groupby("state")[["text", "survey"]].mean()
         within = d[["text", "survey"]] - d.groupby("state")[["text", "survey"]].transform("mean")
         b = scatter_fit(axes[0][j], between["survey"], between["text"],
-                        f"State mean, {SURVEY_LABEL[scol]}", f"State mean, {TEXT_LABEL[tcol]}",
-                        f"Between states — {dm}")
+                        f"{SURVEY_LABEL[scol]}\n({BETWEEN_NOTE})", f"{TEXT_LABEL[tcol]}\n({BETWEEN_NOTE})",
+                        f"Between states — {dm}: one point = one state")
         w = scatter_fit(axes[1][j], within["survey"], within["text"],
-                        f"Within-state deviation, {SURVEY_LABEL[scol]}",
-                        f"Within-state deviation, {TEXT_LABEL[tcol]}", f"Within states — {dm}")
+                        f"{SURVEY_LABEL[scol]}\n({WITHIN_NOTE})",
+                        f"{TEXT_LABEL[tcol]}\n({WITHIN_NOTE})",
+                        f"Within states — {dm}: one point = one state-window")
         bw_rows += [{"domain": dm, "component": "between states", **b},
                     {"domain": dm, "component": "within states", **w}]
     fig.suptitle("1.5 Between- and within-state alignment (higher = less traditional)", fontsize=10)
@@ -206,8 +209,7 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         d["abs_error"] = (d["survey_z"] - fit.fittedvalues).abs()
         d["log_tokens"] = np.log10(d["tokens"])
         st = scatter_fit(axes[0][j], d["log_tokens"], d["abs_error"],
-                         "log10 tokens in the state-window model", "|survey − predicted| (SD units)",
-                         f"{dm}")
+                         VOLUME_LABEL, MISMATCH_LABEL, f"{dm}: is the mismatch larger where there is less text?")
         d["quintile"] = pd.qcut(d["log_tokens"], 5, labels=[1, 2, 3, 4, 5])
         q = d.groupby("quintile", observed=True)["abs_error"].agg(["mean", "std", "count"])
         axes[1][j].errorbar(q.index.astype(int), q["mean"], yerr=1.96 * q["std"] / np.sqrt(q["count"]),
@@ -236,18 +238,23 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
             continue
         h.assign(domain=dm).to_csv(out_t / f"1_7_state_slopes_{dm}.csv", index=False)
         y = np.arange(len(h))
-        ax.errorbar(h["slope"], y, xerr=[h["slope"] - h["lo"], h["hi"] - h["slope"]], fmt="o",
-                    ms=3, color="#4c72b0", ecolor="#9ab", elinewidth=0.8)
-        ax.axvline(0, color="grey", lw=0.6)
-        ax.axvline(h.attrs["global_slope"], color="black", lw=0.8, ls="--")
+        colors = np.where(h["lo"] > 0, LESS_TRAD_COLOR, np.where(h["hi"] < 0, MORE_TRAD_COLOR, "#888888"))
+        ax.errorbar(h["slope"], y, xerr=[h["slope"] - h["lo"], h["hi"] - h["slope"]], fmt="none",
+                    ecolor=colors, elinewidth=0.8)
+        ax.scatter(h["slope"], y, c=colors, s=9, zorder=3)
+        ax.axvline(0, color="grey", lw=0.6, label="0 = text unrelated to survey")
+        ax.axvline(h.attrs["global_slope"], color="black", lw=0.8, ls="--",
+                   label="average slope over all states")
         ax.set_yticks(y, h["state"].str.replace("_", " ").str.title(), fontsize=6)
-        ax.set_xlabel("State-specific alignment slope (partial pooling, 95%)", fontsize=8)
+        ax.set_xlabel(SLOPE_LABEL + "\npartial pooling; 95% interval: blue > 0, red < 0, grey includes 0",
+                      fontsize=8)
+        ax.legend(fontsize=6, loc="lower right")
         ax.set_title(f"{dm}: global slope {h.attrs['global_slope']:.2f} "
                      f"(SE {h.attrs['global_se']:.2f})", fontsize=9)
         hier_rows.append({"domain": dm, "global_slope": h.attrs["global_slope"],
                           "global_se": h.attrs["global_se"], "slope_sd": h.attrs["slope_sd"],
                           "states_ci_excl_0": int(((h["lo"] > 0) | (h["hi"] < 0)).sum())})
-    fig.suptitle("1.7 State-specific text-survey alignment (exploratory)", fontsize=10)
+    fig.suptitle("1.7 How closely does text track the survey in each state? (exploratory)", fontsize=10)
     save(fig, out_f / "1_7_state_slopes.pdf")
     hier = pd.DataFrame(hier_rows)
     hier.to_csv(out_t / "1_7_hierarchical.csv", index=False)

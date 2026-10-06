@@ -17,7 +17,7 @@ from matplotlib.colors import TwoSlopeNorm
 from scripts.common.config_loader import load_config
 from scripts.data_prep.us_state_mapper import normalize_state
 from scripts.us_analysis.common import (
-    CMAP, LESS_TRAD_COLOR, MORE_TRAD_COLOR, TEXT_LABEL, md_table, save, text_egal, window_label,
+    CMAP, LESS_TRAD_COLOR, MORE_TRAD_COLOR, TEXT_LABEL, change_legend, md_table, save, text_egal, window_label,
 )
 
 TEXT_COLS = ["ours_occupation", "ours_family_sphere"]
@@ -99,7 +99,7 @@ def heatmaps(panel: pd.DataFrame, out: Path) -> str:
             labels = [s.replace("_", " ").title() + (f" ({STATE_REGION.get(s, '?')[:2]})"
                                                      if name == "region" else "") for s in m.index]
             ax.set_yticks(range(m.shape[0]), labels, fontsize=6)
-            fig.colorbar(im, ax=ax, shrink=0.5, label="higher = less traditional")
+            fig.colorbar(im, ax=ax, shrink=0.5, label="blue = less, red = more traditional (0 = neutral)")
             ax.set_title(f"2.2 {TEXT_LABEL[col]}: state x window\n(ordered by {name}; "
                          "white = no model)", fontsize=9)
             save(fig, out / "figures" / f"2_2_heatmap_{col.replace('ours_', '')}_{name}.pdf")
@@ -135,6 +135,7 @@ def change_ranking(panel: pd.DataFrame, out: Path) -> str:
             ax.set_xlabel(f"Change {window_label(base)} → {window_label(last)}\n"
                           "(> 0 = less traditional; 95% interval)", fontsize=8)
             ax.set_title(f"2.3 {TEXT_LABEL[col]}: change by state", fontsize=9)
+            change_legend(ax)
             save(fig, out / "figures" / f"2_3_change_{col.replace('ours_', '')}.pdf")
             md.append(f"{TEXT_LABEL[col]} {window_label(base)}→{window_label(last)}: "
                       f"{len(ch)} states, {int((ch['lo'] > 0).sum())} significantly less "

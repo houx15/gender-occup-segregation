@@ -57,6 +57,14 @@ SURVEY_LABEL = {
 }
 DOMAINS = ("occupation", "family")
 
+# axis wording shared by the step figures (1.5-1.7) and the combined figures
+BETWEEN_NOTE = "state average over windows"
+WITHIN_NOTE = "window minus the state's own average"
+MISMATCH_LABEL = "Text-survey mismatch: |survey - survey predicted from text| (SD)"
+VOLUME_LABEL = "Text volume of the state-window model (log10 tokens)"
+SLOPE_LABEL = ("State-specific slope of survey on text (z units)\n"
+               "> 0: where text is less traditional, the survey is too")
+
 
 @dataclass
 class Spec:
@@ -135,6 +143,14 @@ def scatter_fit(ax, x: pd.Series, y: pd.Series, xlabel: str, ylabel: str, title:
     ax.set_title((title + "\n" if title else "") + f"r = {r:.2f} (p = {p:.3f}), n = {n}", fontsize=9)
     ax.tick_params(labelsize=7)
     return out
+
+
+def change_legend(ax) -> None:
+    """Legend for change plots coloured by whether the 95% CI excludes 0."""
+    ax.legend(handles=[plt.Line2D([], [], color=c, marker="o", ls="-", lw=0.7, ms=4, label=lab) for c, lab in (
+        (LESS_TRAD_COLOR, "less traditional (95% CI above 0)"),
+        (MORE_TRAD_COLOR, "more traditional (95% CI below 0)"),
+        ("#999999", "no clear change (CI includes 0)"))], fontsize=6, loc="lower right")
 
 
 def save(fig, path: Path) -> None:
