@@ -167,3 +167,13 @@ def test_balanced_trend_removes_composition_effect():
     t = word_trajectories(cells, "occupation", periods)
     assert t["balanced"].loc["nurse", 2015] == pytest.approx(0.01)
     assert t["all states"].loc["nurse", 2015] == pytest.approx(0.03)
+
+
+def test_plot_state_slopes_pools_when_states_do_not_differ():
+    import matplotlib.pyplot as plt
+    from scripts.us_analysis.common import plot_state_slopes
+    h = pd.DataFrame({"state": ["a", "b"], "slope": [0.30, 0.31], "lo": [0.05, 0.06], "hi": [0.55, 0.56]})
+    fig, ax = plt.subplots()
+    assert plot_state_slopes(ax, h, 0.3, 0.13, slope_sd=0.01)          # band, no bars
+    assert not plot_state_slopes(ax, h, 0.3, 0.13, slope_sd=0.30)      # per-state bars
+    plt.close(fig)

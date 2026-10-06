@@ -25,8 +25,8 @@ from matplotlib.colors import TwoSlopeNorm
 
 from scripts.us_analysis.common import (
     BETWEEN_NOTE, CMAP, DOMAIN_LABEL, LESS_TRAD_COLOR, MAIN, MISMATCH_LABEL, MORE_TRAD_COLOR,
-    SLOPE_LABEL, SURVEY_LABEL, TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, change_legend, save,
-    scatter_fit, survey_egal, text_egal, window_label, zscore,
+    SLOPE_LABEL, SURVEY_LABEL, TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, change_legend,
+    plot_state_slopes, save, scatter_fit, survey_egal, text_egal, window_label, zscore,
 )
 from scripts.us_analysis.part2b import BLOCK_COLOR
 
@@ -108,23 +108,14 @@ def figure3(panel, main, out):
         if f.exists():
             h = pd.read_csv(f).sort_values("slope")
             glob = pd.read_csv(main / "tables" / "1_7_hierarchical.csv").set_index("domain")
-            y = np.arange(len(h))
-            colors = np.where(h["lo"] > 0, LESS_TRAD_COLOR, np.where(h["hi"] < 0, MORE_TRAD_COLOR, "#888888"))
-            axes[1][j].errorbar(h["slope"], y, xerr=[h["slope"] - h["lo"], h["hi"] - h["slope"]],
-                                fmt="none", ecolor=colors, elinewidth=0.7)
-            axes[1][j].scatter(h["slope"], y, c=colors, s=6, zorder=3)
-            axes[1][j].axvline(0, color="grey", lw=0.6, label="0 = text unrelated to survey")
-            axes[1][j].axvline(glob.loc[dom, "global_slope"], color="black", lw=0.8, ls="--",
-                               label="average slope over all states")
-            axes[1][j].set_yticks(y, h["state"].str.replace("_", " ").str.title(), fontsize=4)
-            axes[1][j].set_xlabel(SLOPE_LABEL, fontsize=8)
-            axes[1][j].legend(fontsize=6, loc="lower right")
+            g = glob.loc[dom]
+            plot_state_slopes(axes[1][j], h, g["global_slope"], g["global_se"], g["slope_sd"], fontsize=4)
             axes[1][j].set_title(f"{letters[1]}. {DOMAIN_LABEL[dom]}: how closely does text track the survey "
                                  "in each state?", fontsize=9)
     fig.suptitle("Figure 3. Measurement reliability", fontsize=11)
     fig.text(0.5, 0.004, "C, D: one hierarchical model, slopes partially pooled toward the average; "
-             "bars = 95% intervals (blue > 0, red < 0, grey includes 0).\nEach state has at most 5 "
-             "windows, so most intervals include 0.", ha="center", fontsize=8)
+             "bars = 95% intervals (blue > 0, red < 0, grey includes 0), or one band when the\n"
+             "state slopes are pooled to the average. Each state has at most 5 windows.", ha="center", fontsize=8)
     fig.tight_layout(rect=(0, 0.035, 1, 1))
     fig.savefig(out / "figure3_reliability.pdf")
     plt.close(fig)

@@ -18,9 +18,9 @@ import pandas as pd
 import statsmodels.formula.api as smf
 
 from scripts.us_analysis.common import (
-    BETWEEN_NOTE, DOMAINS, DOMAIN_LABEL, LESS_TRAD_COLOR, MISMATCH_LABEL, MORE_TRAD_COLOR,
+    BETWEEN_NOTE, DOMAINS, DOMAIN_LABEL, MISMATCH_LABEL,
     SLOPE_LABEL, SURVEY_LABEL, Spec, TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, corr,
-    md_table, save, scatter_fit, survey_egal, text_egal, window_label, zscore,
+    md_table, plot_state_slopes, save, scatter_fit, survey_egal, text_egal, window_label, zscore,
 )
 
 # ---------------------------------------------------------------- 1.1 - 1.3 --
@@ -193,7 +193,7 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
                     {"domain": dm, "component": "within states", **w}]
     fig.suptitle("1.5 Between- and within-state alignment (higher = less traditional)", fontsize=10)
     save(fig, out_f / "1_5_between_within.pdf")
-    bw = pd.DataFrame(bw_rows)[["domain", "component", "r", "p", "n", "slope"]]
+    bw = pd.DataFrame(bw_rows)[["domain", "component", "r", "p", "rho", "rho_p", "n", "slope"]]
     bw.to_csv(out_t / "1_5_between_within.csv", index=False)
     md += ["### 1.5 Between- and within-state alignment\n", md_table(bw) + "\n"]
 
@@ -231,25 +231,16 @@ def survey_validation(panel: pd.DataFrame, spec: Spec, out: Path) -> str:
         except Exception as e:  # noqa: BLE001
             ax.set_title(f"{DOMAIN_LABEL[dm]}: model did not converge ({type(e).__name__})", fontsize=8)
             hier_rows.append({"domain": dm, "global_slope": np.nan, "global_se": np.nan,
-                              "slope_sd": np.nan, "states_ci_excl_0": np.nan})
+                              "slope_sd": np.nan, "slopes_pooled": np.nan, "states_ci_excl_0": np.nan})
             continue
         h.assign(domain=dm).to_csv(out_t / f"1_7_state_slopes_{dm}.csv", index=False)
-        y = np.arange(len(h))
-        colors = np.where(h["lo"] > 0, LESS_TRAD_COLOR, np.where(h["hi"] < 0, MORE_TRAD_COLOR, "#888888"))
-        ax.errorbar(h["slope"], y, xerr=[h["slope"] - h["lo"], h["hi"] - h["slope"]], fmt="none",
-                    ecolor=colors, elinewidth=0.8)
-        ax.scatter(h["slope"], y, c=colors, s=9, zorder=3)
-        ax.axvline(0, color="grey", lw=0.6, label="0 = text unrelated to survey")
-        ax.axvline(h.attrs["global_slope"], color="black", lw=0.8, ls="--",
-                   label="average slope over all states")
-        ax.set_yticks(y, h["state"].str.replace("_", " ").str.title(), fontsize=6)
-        ax.set_xlabel(SLOPE_LABEL + "\npartial pooling; 95% interval: blue > 0, red < 0, grey includes 0",
-                      fontsize=8)
-        ax.legend(fontsize=6, loc="lower right")
+        pooled = plot_state_slopes(ax, h, h.attrs["global_slope"], h.attrs["global_se"],
+                                   h.attrs["slope_sd"])
         ax.set_title(f"{DOMAIN_LABEL[dm]}: global slope {h.attrs['global_slope']:.2f} "
                      f"(SE {h.attrs['global_se']:.2f})", fontsize=9)
         hier_rows.append({"domain": dm, "global_slope": h.attrs["global_slope"],
                           "global_se": h.attrs["global_se"], "slope_sd": h.attrs["slope_sd"],
+                          "slopes_pooled": pooled,
                           "states_ci_excl_0": int(((h["lo"] > 0) | (h["hi"] < 0)).sum())})
     fig.suptitle("1.7 How closely does text track the survey in each state? (exploratory)", fontsize=10)
     save(fig, out_f / "1_7_state_slopes.pdf")

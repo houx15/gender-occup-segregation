@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import statsmodels.api as sm  # noqa: E402
-from scipy.stats import pearsonr  # noqa: E402
+from scipy.stats import pearsonr, spearmanr  # noqa: E402
 
 from scripts.check_state_benchmarks import TRADITIONAL_SIGN  # noqa: E402
 
@@ -128,7 +128,8 @@ def scatter_fit(ax, x: pd.Series, y: pd.Series, xlabel: str, ylabel: str, title:
         for xi, yi, lab in zip(x, y, labels[ok]):
             ax.annotate(str(lab), (xi, yi), fontsize=5, alpha=0.8)
     r, p, n = corr(x, y)
-    out = {"r": r, "p": p, "n": n, "slope": np.nan}
+    rho, rho_p = spearmanr(x, y) if n >= 3 else (np.nan, np.nan)
+    out = {"r": r, "p": p, "rho": float(rho), "rho_p": float(rho_p), "n": n, "slope": np.nan}
     if n >= 3:
         fit = sm.OLS(y, sm.add_constant(x)).fit()
         xs = np.linspace(x.min(), x.max(), 100)
@@ -138,7 +139,8 @@ def scatter_fit(ax, x: pd.Series, y: pd.Series, xlabel: str, ylabel: str, title:
         out["slope"] = float(fit.params.iloc[1])
     ax.set_xlabel(xlabel, fontsize=8)
     ax.set_ylabel(ylabel, fontsize=8)
-    ax.set_title((title + "\n" if title else "") + f"r = {r:.2f} (p = {p:.3f}), n = {n}", fontsize=9)
+    ax.set_title((title + "\n" if title else "") + f"r = {r:.2f} (p = {p:.3f}), Spearman ρ = {rho:.2f} (p = {rho_p:.3f}), n = {n}",
+                 fontsize=9)
     ax.tick_params(labelsize=7)
     return out
 
@@ -149,6 +151,34 @@ def change_legend(ax) -> None:
         (LESS_TRAD_COLOR, "less traditional (95% CI above 0)"),
         (MORE_TRAD_COLOR, "more traditional (95% CI below 0)"),
         ("#999999", "no clear change (CI includes 0)"))], fontsize=6, loc="lower right")
+
+
+def plot_state_slopes(ax, h: pd.DataFrame, global_slope: float, global_se: float,
+                      slope_sd: float, fontsize: int = 6) -> bool:
+    """Partially pooled state slopes (1.7), one row per state. When the state
+    slopes barely vary (SD of state slopes < SE of the common slope), every
+    state's interval is about the common interval, so per-state bars are not
+    drawn: the common 95% interval is shown once as a band. Returns that flag."""
+    pooled = bool(slope_sd < global_se)
+    y = np.arange(len(h))
+    ax.axvline(0, color="grey", lw=0.6, label="0 = text unrelated to survey")
+    ax.axvline(global_slope, color="black", lw=0.8, ls="--", label="average slope over all states")
+    if pooled:
+        ax.axvspan(global_slope - 1.96 * global_se, global_slope + 1.96 * global_se, color="#4c72b0",
+                   alpha=0.12, label="95% interval of the average slope")
+        ax.scatter(h["slope"], y, color="#333333", s=9, zorder=3)
+        note = (f"state slopes pooled to the average (SD across states {slope_sd:.3f} < SE "
+                f"{global_se:.3f});\nper-state intervals equal the band and are not drawn")
+    else:
+        colors = np.where(h["lo"] > 0, LESS_TRAD_COLOR, np.where(h["hi"] < 0, MORE_TRAD_COLOR, "#888888"))
+        ax.errorbar(h["slope"], y, xerr=[h["slope"] - h["lo"], h["hi"] - h["slope"]], fmt="none",
+                    ecolor=colors, elinewidth=0.8)
+        ax.scatter(h["slope"], y, c=colors, s=9, zorder=3)
+        note = "partial pooling; 95% interval: blue > 0, red < 0, grey includes 0"
+    ax.set_yticks(y, h["state"].str.replace("_", " ").str.title(), fontsize=fontsize)
+    ax.set_xlabel(SLOPE_LABEL + "\n" + note, fontsize=8)
+    ax.legend(fontsize=6, loc="lower right")
+    return pooled
 
 
 def save(fig, path: Path) -> None:
