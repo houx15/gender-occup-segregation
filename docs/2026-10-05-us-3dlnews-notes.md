@@ -76,14 +76,15 @@ adapted to modern local news; every candidate and decision is in
   several codes, 4 with no code (entrepreneur, operator, proprietor,
   supervisor).
 
-**Household work.** 21 entries (singular/plural
+**Domestic and care work.** Unpaid domestic and care work (the term used by
+the ILO and feminist economics; "household labor" in US sociology). 21 entries (singular/plural
 pooled) for unpaid domestic work and care, from American Time Use Survey
 activity categories: cleaning, cleaned, laundry, washing, chores (cleaning and
 laundry); cooking, baking, recipes, meals, lunches (food preparation);
 kitchen, stove, oven, appliances, refrigerator (kitchen and appliances);
 gardening, sewing; caregiver, childcare, daycare, parenting (care). Built
 from 107 brainstormed candidates (`candidates_household.txt`), kept if in ≥ 30%
-of state models and if their nearest neighbours show a household-work sense
+of state models and if their nearest neighbours show a domestic- or care-work sense
 (`household_screening.csv` gives every decision). Dropped for another sense,
 e.g. *nursing* (medical), *shopping*, *groceries* (retail), *cleanup*
 (environmental), *dishes*, *cooked*, *dinner* (restaurant cuisine and events),
@@ -95,14 +96,14 @@ babysitter) are in the occupation list instead.
 ### 3.2 Coverage
 
 A word enters a category score if it is in the vocabulary (≥ 20 occurrences)
-of at least 50% of the state models across all windows (household work: 30%,
+of at least 50% of the state models across all windows (domestic and care work: 30%,
 because care words are rare in news: childcare 0.31, daycare 0.39, parenting
 0.44, caregiver 0.47).
 
 | Category | Candidates | Coverage bar | Used | Median coverage |
 |---|---:|---:|---:|---:|
 | Occupation | 133 | 0.5 | 65 | 0.49 |
-| Household work | 107 | 0.3 | 21 | 0.63 |
+| Domestic and care work | 107 | 0.3 | 21 | 0.63 |
 
 Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 
@@ -133,13 +134,13 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 | | 2005–14 | 49 | 60 | −0.0101 | 0.0072 | 0.0033 |
 | | 2010–19 | 51 | 64 | −0.0065 | 0.0056 | 0.0032 |
 | | 2015–24 | 51 | 65 | −0.0049 | 0.0062 | 0.0029 |
-| Household work | 1995–2004 | 33 | 3 | 0.0022 | 0.0285 | 0.0058 |
+| Domestic and care work | 1995–2004 | 33 | 3 | 0.0022 | 0.0285 | 0.0058 |
 | | 2000–09 | 48 | 6.5 | 0.0010 | 0.0164 | 0.0058 |
 | | 2005–14 | 49 | 13 | 0.0038 | 0.0118 | 0.0052 |
 | | 2010–19 | 51 | 18 | 0.0081 | 0.0083 | 0.0047 |
 | | 2015–24 | 51 | 20 | 0.0096 | 0.0084 | 0.0045 |
 
-Household-work scores before 2005 rest on few words per state (median 3 and
+Domestic- and care-work scores before 2005 rest on few words per state (median 3 and
 6.5 of 21), because the smaller early models miss the rarer words.
 
 ## 4. Survey measures
@@ -155,7 +156,7 @@ Household-work scores before 2005 rest on few words per state (median 3 and
 
 ### 4.2 Measures by field
 
-The "Higher =" column describes each raw measure. In the analysis (`scripts/us_analysis/`), every text and survey measure is re-oriented so that **higher = less traditional**: occupation text = +RND, household-work text = −RND (household words closer to female words = more traditional), and survey measures are flipped where their raw higher value means more traditional. Maps use a blue–red scale (blue = less traditional, red = more traditional, centred at 0).
+The "Higher =" column describes each raw measure. In the analysis (`scripts/us_analysis/`), every text and survey measure is re-oriented so that **higher = less traditional**: occupation text = +RND, domestic- and care-work text = −RND (these words closer to female words = more traditional), and survey measures are flipped where their raw higher value means more traditional. Maps use a blue–red scale (blue = less traditional, red = more traditional, centred at 0).
 
 **Objective — occupation.**
 
@@ -165,7 +166,7 @@ The "Higher =" column describes each raw measure. In the analysis (`scripts/us_a
 | Robustness | Occupational segregation (Duncan index) | ½ Σ\_occ \|women\_occ / women − men\_occ / men\| over all occupation codes | more traditional |
 | Robustness | Women's share of employment | women / employed | less traditional |
 
-**Objective — family roles** (ACS, adults 25–54; the survey benchmark for household-work text).
+**Objective — family roles** (ACS, adults 25–54; the survey benchmark for domestic- and care-work text).
 
 | Role | Measure | Calculation | Higher = |
 |---|---|---|---|
@@ -214,7 +215,7 @@ The "Higher =" column describes each raw measure. In the analysis (`scripts/us_a
 |---|---|
 | State-window with < 500 articles | no model; state absent from that window (1995–2004: 18 states, 2000–09: 3, 2005–14: 2) |
 | Word not in a state model's vocabulary | no RND for that cell; word effects keep the state score comparable |
-| Word in < 50% of state models (household work: < 30%) | word not used in the category |
+| Word in < 50% of state models (domestic and care work: < 30%) | word not used in the category |
 | Occupation without an OCC2010 code | not in the matched female share |
 | ACS wage income missing / N/A (≥ 999998) or couple income 0 | couple excluded from the earnings measures |
 | ACS persons never worked / not in universe (OCC2010 9920, 9999) | excluded from occupation measures |

@@ -2,11 +2,11 @@
 
 Orientation: state-level scores are higher = less traditional.
 
-**1.1 Occupation-level validity.** 62 occupations, pooled over states and windows: r = 0.75 (p = 1.66e-12). No household-work analogue: there is no per-term external benchmark for household words.
+**1.1 Occupation-level validity.** 62 occupations, pooled over states and windows: r = 0.75 (p = 1.66e-12). No domestic-work analogue: there is no per-term external benchmark for household words.
 
-**1.2 Temporal variation** (higher = less traditional). Text: occupation: 1995–04 -0.0093, 2000–09 -0.0122, 2005–14 -0.0101, 2010–19 -0.0065, 2015–24 -0.0049; Text: household work: 1995–04 -0.0022, 2000–09 -0.0010, 2005–14 -0.0038, 2010–19 -0.0081, 2015–24 -0.0096.
+**1.2 Temporal variation** (higher = less traditional). Text: occupation: 1995–04 -0.0093, 2000–09 -0.0122, 2005–14 -0.0101, 2010–19 -0.0065, 2015–24 -0.0049; Text: domestic and care work: 1995–04 -0.0022, 2000–09 -0.0010, 2005–14 -0.0038, 2010–19 -0.0081, 2015–24 -0.0096.
 
-**1.3 Geographic heterogeneity.** occupation: SD across states 0.0056, median 95% half-width 0.0032; household: SD across states 0.0082, median 95% half-width 0.0053.
+**1.3 Geographic heterogeneity.** occupation: SD across states 0.0056, median 95% half-width 0.0032; domestic and care work: SD across states 0.0082, median 95% half-width 0.0053.
 
 ## main
 

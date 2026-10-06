@@ -6,11 +6,11 @@ Orientation: state-level scores are higher = less traditional.
 
 Orientation: state-level scores are higher = less traditional.
 
-**1.1 Occupation-level validity.** 62 occupations, pooled over states and windows: r = 0.75 (p = 1.66e-12). No household-work analogue: there is no per-term external benchmark for household words.
+**1.1 Occupation-level validity.** 62 occupations, pooled over states and windows: r = 0.75 (p = 1.66e-12). No domestic-work analogue: there is no per-term external benchmark for household words.
 
-**1.2 Temporal variation** (higher = less traditional). Text: occupation: 1995–04 -0.0093, 2000–09 -0.0122, 2005–14 -0.0101, 2010–19 -0.0065, 2015–24 -0.0049; Text: household work: 1995–04 -0.0022, 2000–09 -0.0010, 2005–14 -0.0038, 2010–19 -0.0081, 2015–24 -0.0096.
+**1.2 Temporal variation** (higher = less traditional). Text: occupation: 1995–04 -0.0093, 2000–09 -0.0122, 2005–14 -0.0101, 2010–19 -0.0065, 2015–24 -0.0049; Text: domestic and care work: 1995–04 -0.0022, 2000–09 -0.0010, 2005–14 -0.0038, 2010–19 -0.0081, 2015–24 -0.0096.
 
-**1.3 Geographic heterogeneity.** occupation: SD across states 0.0056, median 95% half-width 0.0032; household: SD across states 0.0082, median 95% half-width 0.0053.
+**1.3 Geographic heterogeneity.** occupation: SD across states 0.0056, median 95% half-width 0.0032; domestic and care work: SD across states 0.0082, median 95% half-width 0.0053.
 
 ## main
 
@@ -428,9 +428,9 @@ Orientation: higher = less traditional; 0 = gender-neutral RND.
 
 **2.1 Maps.** One map per window, common scale per domain (2_1_maps_*.pdf).
 
-**2.2 State x window heatmaps.** Text: occupation: orderings average (main), baseline, final, region; Text: household work: orderings average (main), baseline, final, region.
+**2.2 State x window heatmaps.** Text: occupation: orderings average (main), baseline, final, region; Text: domestic and care work: orderings average (main), baseline, final, region.
 
-**2.3 Change ranking.** Text: occupation 2000–09→2015–24: 48 states, 22 significantly less traditional, 3 significantly more; median change +0.0073; Text: household work 2000–09→2015–24: 47 states, 2 significantly less traditional, 13 significantly more; median change -0.0074.
+**2.3 Change ranking.** Text: occupation 2000–09→2015–24: 48 states, 22 significantly less traditional, 3 significantly more; median change +0.0073; Text: domestic and care work 2000–09→2015–24: 47 states, 2 significantly less traditional, 13 significantly more; median change -0.0074.
 
 # Part II-B — explaining state differences
 

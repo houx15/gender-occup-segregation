@@ -600,3 +600,16 @@ agrees (caregiver +0.044, childcare +0.034, parenting +0.028, daycare +0.027
 raw RND, the most female-leaning entries). Survey side: women's housework
 share and the ACS family index are "higher = more traditional" and also
 flipped once. Tested in `tests/test_us_analysis.py::test_household_direction`.
+
+## 2026-10-06 — Domain label: "domestic and care work"
+
+The second domain is labelled **domestic and care work** (short for unpaid
+domestic and care work, the ILO / feminist-economics term; "household labor"
+in US sociology, e.g. Coltrane 2000). Not "housework": in time-use research
+that is routine chores only (BLS housework = cleaning, laundry), narrower than
+the list, which also covers food preparation, gardening, sewing and care
+(caregiver, childcare, daycare, parenting), and it would be confused with the
+ATUS housework-share benchmark. Not "domestic work" alone: in the literature
+that usually means paid domestic workers (ILO C189), who are in the occupation
+list. Labels only; the code key, config category and file names stay
+`household`.
