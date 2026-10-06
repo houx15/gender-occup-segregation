@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-from scripts.us_analysis.common import TEXT_LABEL, md_table, save, text_egal, zscore
+from scripts.us_analysis.common import TEXT_COL, TEXT_LABEL, md_table, save, text_egal, zscore
 
 BLOCKS: Dict[str, List[str]] = {
     "socioeconomic": ["log_real_gdp_pc", "log_real_income_pc", "ba_share", "metro_share",
@@ -45,7 +45,7 @@ BLOCKS: Dict[str, List[str]] = {
 }
 BLOCK_COLOR = {"socioeconomic": "#4c72b0", "gendered labour market": "#dd8452",
                "policy": "#55a868", "political & cultural": "#c44e52"}
-OUTCOMES = {"occupation": "ours_occupation", "family": "ours_family_sphere"}
+OUTCOMES = TEXT_COL
 
 
 def prepare(panel: pd.DataFrame) -> pd.DataFrame:

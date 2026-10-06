@@ -6,8 +6,8 @@ Canonical orientation (used in every figure and model):
 
 - Text, occupation: +mean RND over occupations (occupation words closer to
   female words = less traditional).
-- Text, family: -mean RND over family words (family words closer to male
-  words = less traditional).
+- Text, family domain: household-work words (main) and family-sphere words
+  (robustness), -mean RND (words closer to male words = less traditional).
 - Survey measures: oriented with -check_state_benchmarks.TRADITIONAL_SIGN.
 
 Occupation-level validation (Part I.1) keeps raw RND (> 0 = female-leaning)
@@ -56,6 +56,8 @@ SURVEY_LABEL = {
     "women_share_childcare_parents": "ATUS: women's share of childcare (parents)",
 }
 DOMAINS = ("occupation", "family")
+# main text measure per domain
+TEXT_COL = {"occupation": "ours_occupation", "family": "ours_household"}
 
 # axis wording shared by the step figures (1.5-1.7) and the combined figures
 BETWEEN_NOTE = "state average over windows"
@@ -73,23 +75,20 @@ class Spec:
     pairs: Dict[str, Tuple[str, str]] = field(default_factory=dict)
 
 
-MAIN = Spec("main", {"occupation": ("ours_occupation", "matched_female_share"),
-                     "family": ("ours_family_sphere", "family_index_acs")})
+MAIN = Spec("main", {"occupation": (TEXT_COL["occupation"], "matched_female_share"),
+                     "family": (TEXT_COL["family"], "family_index_acs")})
 ROBUSTNESS: List[Spec] = (
     [Spec(f"robustness-{m}", {"occupation": ("ours_occupation", m)})
      for m in ("duncan", "female_emp_share")]
-    + [Spec(f"robustness-{m}", {"family": ("ours_family_sphere", m)})
+    + [Spec(f"robustness-{m}", {"family": (TEXT_COL["family"], m)})
        for m in ("motherhood_emp_gap", "motherhood_hours_gap", "married_women_nilf",
                  "wife_earnings_share", "wife_earns_more", "gender_emp_gap")]
-    + [Spec("robustness-iat", {"occupation": ("ours_occupation", "iat_sex_balanced"),
-                               "family": ("ours_family_sphere", "iat_sex_balanced")}),
-       Spec("robustness-explicit", {"occupation": ("ours_occupation", "explicit_sex_balanced"),
-                                    "family": ("ours_family_sphere", "explicit_sex_balanced")}),
-       Spec("robustness-household-text", {"family": ("ours_household", "family_index_acs")}),
-       Spec("robustness-atus-household", {"family": ("ours_family_sphere", "women_share_household")}),
-       Spec("robustness-atus-childcare", {"family": ("ours_family_sphere",
-                                                     "women_share_childcare_parents")}),
-       Spec("robustness-household-text-atus", {"family": ("ours_household", "women_share_housework")})]
+    + [Spec(f"robustness-{name}", {d: (TEXT_COL[d], m) for d in DOMAINS})
+       for name, m in (("iat", "iat_sex_balanced"), ("explicit", "explicit_sex_balanced"))]
+    + [Spec(f"robustness-atus-{name}", {"family": (TEXT_COL["family"], m)})
+       for name, m in (("housework", "women_share_housework"), ("household", "women_share_household"),
+                       ("childcare", "women_share_childcare_parents"))]
+    + [Spec("robustness-family-sphere-text", {"family": ("ours_family_sphere", "family_index_acs")})]
 )
 
 

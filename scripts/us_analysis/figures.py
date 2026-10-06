@@ -25,7 +25,7 @@ from matplotlib.colors import TwoSlopeNorm
 
 from scripts.us_analysis.common import (
     BETWEEN_NOTE, CMAP, LESS_TRAD_COLOR, MAIN, MISMATCH_LABEL, MORE_TRAD_COLOR, SLOPE_LABEL, SURVEY_LABEL,
-    TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, change_legend, save, scatter_fit, survey_egal,
+    TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, change_legend, save, scatter_fit, survey_egal,
     text_egal, window_label, zscore,
 )
 from scripts.us_analysis.part2b import BLOCK_COLOR
@@ -57,7 +57,7 @@ def figure1(panel, main, out):
                           "(higher = less traditional)", fontsize=8)
     axes[0][1].set_title("B. State means (occupation; 95% interval)", fontsize=9)
     for ax, col, lab in ((axes[1][0], "ours_occupation", "C. Occupation trend"),
-                         (axes[1][1], "ours_family_sphere", "D. Family trend")):
+                         (axes[1][1], TEXT_COL["family"], "D. Family trend (household work)")):
         g = trend[trend["text"] == col]
         x = np.arange(len(g))
         ax.errorbar(x, g["mean"], yerr=g["ci95"], fmt="o", capsize=3, color="#4c72b0")
@@ -131,7 +131,7 @@ def figure3(panel, main, out):
 
 
 def figure5(panel, main, out):
-    for dom, col in (("occupation", "ours_occupation"), ("family", "ours_family_sphere")):
+    for dom, col in TEXT_COL.items():
         tag = col.replace("ours_", "")
         w = pd.read_csv(main / "tables" / f"2_2_state_window_{tag}.csv").set_index("state")
         w = w.loc[w.mean(axis=1).sort_values().index]
@@ -195,8 +195,8 @@ def run_figures(panel: pd.DataFrame, out_root: Path) -> str:
     figure1(panel, main, out)
     figure2(panel, out)
     figure3(panel, main, out)
-    for dom, tag in (("occupation", "occupation"), ("family", "family_sphere")):
-        src = main / "figures" / f"2_1_maps_{tag}.pdf"
+    for dom, col in TEXT_COL.items():
+        src = main / "figures" / f"2_1_maps_{col.replace('ours_', '')}.pdf"
         if src.exists():
             shutil.copy(src, out / f"figure4_maps_{dom}.pdf")
     figure5(panel, main, out)

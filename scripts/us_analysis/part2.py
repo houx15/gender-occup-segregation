@@ -17,10 +17,10 @@ from matplotlib.colors import TwoSlopeNorm
 from scripts.common.config_loader import load_config
 from scripts.data_prep.us_state_mapper import normalize_state
 from scripts.us_analysis.common import (
-    CMAP, LESS_TRAD_COLOR, MORE_TRAD_COLOR, TEXT_LABEL, change_legend, md_table, save, text_egal, window_label,
+    CMAP, LESS_TRAD_COLOR, MORE_TRAD_COLOR, TEXT_COL, TEXT_LABEL, change_legend, md_table, save, text_egal, window_label,
 )
 
-TEXT_COLS = ["ours_occupation", "ours_family_sphere"]
+TEXT_COLS = list(TEXT_COL.values())
 REGION = {  # US Census regions
     "Northeast": ["connecticut", "maine", "massachusetts", "new_hampshire", "rhode_island",
                   "vermont", "new_jersey", "new_york", "pennsylvania"],

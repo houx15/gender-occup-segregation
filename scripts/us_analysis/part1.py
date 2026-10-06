@@ -18,13 +18,10 @@ import pandas as pd
 import statsmodels.formula.api as smf
 
 from scripts.us_analysis.common import (
-    BETWEEN_NOTE, DOMAINS, LESS_TRAD_COLOR, MISMATCH_LABEL, MORE_TRAD_COLOR, SLOPE_LABEL, SURVEY_LABEL,
+    BETWEEN_NOTE, DOMAINS, TEXT_COL, LESS_TRAD_COLOR, MISMATCH_LABEL, MORE_TRAD_COLOR, SLOPE_LABEL, SURVEY_LABEL,
     TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, Spec, corr, md_table, save, scatter_fit, survey_egal,
     text_egal, window_label, zscore,
 )
-
-TEXT_DOMAIN = {"occupation": "ours_occupation", "family": "ours_family_sphere"}
-
 
 # ---------------------------------------------------------------- 1.1 - 1.3 --
 def occupation_validity(cells: pd.DataFrame, out: Path) -> str:
@@ -47,7 +44,7 @@ def occupation_validity(cells: pd.DataFrame, out: Path) -> str:
 def temporal(panel: pd.DataFrame, out: Path) -> str:
     """1.2 Mean text score per window (discrete waves), 95% CI over states."""
     rows = []
-    cols = ["ours_occupation", "ours_family_sphere", "ours_household"]
+    cols = ["ours_occupation", "ours_household", "ours_family_sphere"]
     for col in cols:
         v = panel.assign(y=text_egal(panel, col))
         for p, g in v.groupby("period"):
@@ -81,7 +78,7 @@ def geography(panel: pd.DataFrame, out: Path) -> str:
     fig, axes = plt.subplots(1, 2, figsize=(10, 9.5))
     rows = []
     for ax, dom in zip(axes, DOMAINS):
-        col = TEXT_DOMAIN[dom]
+        col = TEXT_COL[dom]
         v = panel.assign(y=text_egal(panel, col), se=panel[f"se_{col}"])
         g = (v.groupby("state").agg(mean=("y", "mean"), k=("y", "count"),
                                     se=("se", lambda x: np.sqrt((x ** 2).sum()) / len(x)))
