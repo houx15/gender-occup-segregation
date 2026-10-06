@@ -8,283 +8,83 @@ Orientation: state-level scores are higher = less traditional.
 
 **1.3 Geographic heterogeneity.** occupation: SD across states 0.0056, median 95% half-width 0.0032; domestic and care work: SD across states 0.0082, median 95% half-width 0.0053.
 
-## main
+### 1.4 Validation (direct benchmarks; pooled, state and time dimensions)
 
-### 1.4 State-window alignment (standardized; SE clustered by state)
+**Validation: text scores against direct survey benchmarks**
 
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | matched_female_share | pooled | 0.094 | 0.096 | 0.323 | 232 | 0.009 |
-| occupation | ours_occupation | matched_female_share | state + window FE | -0.019 | 0.032 | 0.551 | 232 | 0.925 |
-| household | ours_household | family_index_acs | pooled | 0.071 | 0.077 | 0.354 | 228 | 0.005 |
-| household | ours_household | family_index_acs | state + window FE | 0.018 | 0.034 | 0.599 | 228 | 0.962 |
+| Survey measure | Occupation: Pooled | Occupation: Between states | Occupation: Within states | Domestic and care work: Pooled | Domestic and care work: Between states | Domestic and care work: Within states |
+|---|---|---|---|---|---|---|
+| ACS: female share of our occupations | 0.09 (0.10) | -0.15 (0.19) | -0.02 (0.03) |   |   |   |
+| IAT: implicit career-family stereotype | 0.41*** (0.08) | 0.49** (0.18) | -0.01 (0.06) | -0.15 (0.08) | -0.11 (0.14) | 0.11 (0.08) |
+| Project Implicit: explicit stereotype | 0.33*** (0.07) | 0.11 (0.11) | -0.01 (0.02) | -0.20** (0.06) | 0.14 (0.12) | 0.00 (0.02) |
+| ATUS: women's share of housework |   |   |   | -0.03 (0.10) | 0.12 (0.22) | 0.01 (0.10) |
+| ATUS: women's share of household activities |   |   |   | -0.03 (0.12) | 0.11 (0.16) | -0.06 (0.10) |
+| ATUS: women's share of childcare (parents) |   |   |   | 0.10 (0.10) | 0.16 (0.13) | 0.16 (0.12) |
+| Observations | 199–232 | 51 | 199–232 | 198 | 51 | 198 |
+| State FE | No | — | Yes | No | — | Yes |
+| Window FE | No | — | Yes | No | — | Yes |
 
-### 1.5 Between- and within-state alignment
+Standardized coefficients of the survey measure on the text score (both oriented higher = less traditional; > 0 = agreement). Pooled: state-windows, SE clustered by state. Between: state means over windows, HC1 SE. Within: state and window fixed effects, SE clustered by state. * p < 0.05, ** p < 0.01, *** p < 0.001.
 
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | -0.15 | 0.295 | -0.113 | 0.43 | 51 | -0.062 |
-| occupation | within states | 0.276 | 0.0 | 0.317 | 0.0 | 232 | 0.14 |
-| household | between states | 0.38 | 0.006 | 0.33 | 0.018 | 51 | 0.004 |
-| household | within states | -0.228 | 0.001 | -0.207 | 0.002 | 228 | -0.007 |
+### 1.9 Correlates (related survey measures; associations, not validation)
+
+**Correlates: text scores and related survey measures**
+
+| Survey measure | Occupation: Pooled | Occupation: Between states | Occupation: Within states | Domestic and care work: Pooled | Domestic and care work: Between states | Domestic and care work: Within states |
+|---|---|---|---|---|---|---|
+| ACS: family index | 0.02 (0.06) | -0.19 (0.11) | 0.02 (0.03) | 0.07 (0.08) | 0.38** (0.13) | 0.02 (0.03) |
+| ACS: motherhood employment gap | 0.08 (0.06) | -0.00 (0.11) | 0.03 (0.04) | 0.03 (0.09) | 0.18 (0.15) | 0.04 (0.03) |
+| ACS: motherhood hours gap | 0.02 (0.08) | -0.26* (0.11) | 0.03 (0.04) | -0.05 (0.07) | 0.19 (0.13) | -0.02 (0.03) |
+| ACS: married women not in LF | 0.04 (0.07) | -0.07 (0.13) | 0.04 (0.03) | 0.06 (0.08) | 0.28 (0.15) | -0.01 (0.04) |
+| ACS: wife's earnings share | -0.06 (0.07) | -0.21 (0.13) | 0.02 (0.03) | 0.15 (0.08) | 0.42** (0.14) | 0.01 (0.04) |
+| ACS: wife earns more | -0.05 (0.09) | -0.29* (0.15) | -0.01 (0.03) | 0.09 (0.08) | 0.40** (0.15) | 0.02 (0.03) |
+| ACS: gender employment gap | 0.05 (0.08) | -0.11 (0.13) | 0.00 (0.03) | 0.08 (0.08) | 0.38** (0.13) | 0.04 (0.03) |
+| ACS: women's share of employment | -0.10 (0.09) | -0.27 (0.17) | 0.01 (0.03) | 0.11 (0.08) | 0.26 (0.18) | 0.04 (0.04) |
+| ACS: occupational segregation (Duncan) | -0.13 (0.13) | -0.40 (0.21) | 0.01 (0.02) | 0.02 (0.15) | 0.17 (0.31) | -0.01 (0.03) |
+| Observations | 232 | 51 | 232 | 228 | 51 | 228 |
+| State FE | No | — | Yes | No | — | Yes |
+| Window FE | No | — | Yes | No | — | Yes |
+
+Standardized coefficients of the survey measure on the text score (both oriented higher = less traditional; > 0 = agreement). Pooled: state-windows, SE clustered by state. Between: state means over windows, HC1 SE. Within: state and window fixed effects, SE clustered by state. * p < 0.05, ** p < 0.01, *** p < 0.001. Benjamini–Hochberg q-values over the correlates within each column: 1_9_correlates.csv.
+
+Sensitivity without DC (an outlier on Duncan):
+
+**Correlates: text scores and related survey measures (excluding DC)**
+
+| Survey measure | Occupation: Pooled | Occupation: Between states | Occupation: Within states | Domestic and care work: Pooled | Domestic and care work: Between states | Domestic and care work: Within states |
+|---|---|---|---|---|---|---|
+| ACS: family index | 0.04 (0.06) | -0.13 (0.10) | 0.01 (0.03) | 0.07 (0.09) | 0.32* (0.15) | 0.04 (0.03) |
+| ACS: motherhood employment gap | 0.06 (0.06) | -0.03 (0.11) | 0.02 (0.04) | 0.08 (0.08) | 0.24 (0.14) | 0.05* (0.03) |
+| ACS: motherhood hours gap | 0.01 (0.08) | -0.28** (0.11) | 0.03 (0.04) | -0.02 (0.08) | 0.22 (0.14) | -0.00 (0.03) |
+| ACS: married women not in LF | 0.06 (0.07) | -0.00 (0.12) | 0.02 (0.02) | 0.07 (0.10) | 0.22 (0.16) | 0.03 (0.02) |
+| ACS: wife's earnings share | -0.01 (0.06) | -0.13 (0.11) | 0.01 (0.03) | 0.13 (0.10) | 0.34* (0.15) | 0.04 (0.03) |
+| ACS: wife earns more | 0.01 (0.07) | -0.19 (0.11) | -0.01 (0.03) | 0.03 (0.09) | 0.27* (0.14) | 0.04 (0.03) |
+| ACS: gender employment gap | 0.10 (0.06) | -0.01 (0.09) | 0.00 (0.03) | 0.04 (0.08) | 0.29* (0.13) | 0.05 (0.03) |
+| ACS: women's share of employment | -0.02 (0.07) | -0.14 (0.13) | 0.01 (0.04) | 0.02 (0.06) | 0.09 (0.11) | 0.06 (0.04) |
+| ACS: occupational segregation (Duncan) | -0.01 (0.07) | -0.26* (0.13) | -0.01 (0.02) | -0.19* (0.09) | -0.22 (0.16) | 0.03 (0.02) |
+| Observations | 227 | 50 | 227 | 223 | 50 | 223 |
+| State FE | No | — | Yes | No | — | Yes |
+| Window FE | No | — | Yes | No | — | Yes |
+
+Standardized coefficients of the survey measure on the text score (both oriented higher = less traditional; > 0 = agreement). Pooled: state-windows, SE clustered by state. Between: state means over windows, HC1 SE. Within: state and window fixed effects, SE clustered by state. * p < 0.05, ** p < 0.01, *** p < 0.001. Benjamini–Hochberg q-values over the correlates within each column: 1_9_correlates_no_dc.csv. Excluding: district_of_columbia.
+
+## Reliability per direct benchmark (1.6 – 1.7)
+
+## validation-matched_female_share
 
 ### 1.6 Discrepancy vs text volume
 
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | occupation | -0.134 | 0.041 | -0.175 | 232 | 0.98 | 0.812 |
-| household | -0.078 | 0.242 | -0.11 | 228 | 0.803 | 0.609 |
 
 ### 1.7 Hierarchical state-specific slopes
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|
 | occupation | 0.25 | 0.079 | 0.287 | False | 3 |
-| household | -0.094 | 0.053 | 0.091 | False | 0 |
 
-## robustness-duncan
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | duncan | pooled | -0.135 | 0.125 | 0.282 | 232 | 0.018 |
-| occupation | ours_occupation | duncan | state + window FE | 0.006 | 0.018 | 0.75 | 232 | 0.986 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | -0.403 | 0.003 | -0.281 | 0.046 | 51 | -0.056 |
-| occupation | within states | 0.32 | 0.0 | 0.329 | 0.0 | 232 | 0.153 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| occupation | -0.074 | 0.264 | -0.115 | 232 | 0.694 | 0.669 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| occupation | 0.133 | 0.034 | 0.072 | False | 35 |
-
-## robustness-female_emp_share
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | female_emp_share | pooled | -0.101 | 0.094 | 0.286 | 232 | 0.01 |
-| occupation | ours_occupation | female_emp_share | state + window FE | 0.009 | 0.035 | 0.803 | 232 | 0.956 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | -0.265 | 0.06 | -0.207 | 0.146 | 51 | -0.119 |
-| occupation | within states | 0.23 | 0.0 | 0.299 | 0.0 | 232 | 0.364 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| occupation | 0.006 | 0.922 | 0.009 | 232 | 0.727 | 0.747 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| occupation | 0.114 | 0.039 | 0.138 | False | 1 |
-
-## robustness-motherhood_emp_gap
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | motherhood_emp_gap | pooled | 0.027 | 0.087 | 0.76 | 228 | 0.001 |
-| household | ours_household | motherhood_emp_gap | state + window FE | 0.038 | 0.031 | 0.221 | 228 | 0.942 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.18 | 0.207 | 0.204 | 0.151 | 51 | 0.033 |
-| household | within states | -0.154 | 0.02 | -0.151 | 0.023 | 228 | -0.096 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.069 | 0.298 | -0.095 | 228 | 0.851 | 0.588 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.069 | 0.031 | 0.049 | False | 18 |
-
-## robustness-motherhood_hours_gap
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | motherhood_hours_gap | pooled | -0.052 | 0.073 | 0.48 | 228 | 0.003 |
-| household | ours_household | motherhood_hours_gap | state + window FE | -0.018 | 0.029 | 0.532 | 228 | 0.935 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.19 | 0.183 | 0.167 | 0.242 | 51 | 0.002 |
-| household | within states | -0.275 | 0.0 | -0.292 | 0.0 | 228 | -0.005 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.115 | 0.082 | -0.158 | 228 | 0.946 | 0.589 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.166 | 0.05 | 0.007 | True | 51 |
-
-## robustness-married_women_nilf
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | married_women_nilf | pooled | 0.065 | 0.082 | 0.428 | 228 | 0.004 |
-| household | ours_household | married_women_nilf | state + window FE | -0.008 | 0.039 | 0.83 | 228 | 0.974 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.282 | 0.045 | 0.145 | 0.309 | 51 | 0.051 |
-| household | within states | -0.256 | 0.0 | -0.19 | 0.004 | 228 | -0.217 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.093 | 0.159 | -0.12 | 228 | 0.839 | 0.705 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.066 | 0.034 | 0.061 | False | 3 |
-
-## robustness-wife_earnings_share
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | wife_earnings_share | pooled | 0.149 | 0.085 | 0.078 | 228 | 0.022 |
-| household | ours_household | wife_earnings_share | state + window FE | 0.012 | 0.036 | 0.738 | 228 | 0.962 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.417 | 0.002 | 0.305 | 0.03 | 51 | 0.137 |
-| household | within states | -0.192 | 0.004 | -0.132 | 0.046 | 228 | -0.286 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.096 | 0.149 | -0.137 | 228 | 0.781 | 0.575 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.045 | 0.036 | 0.071 | False | 1 |
-
-## robustness-wife_earns_more
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | wife_earns_more | pooled | 0.086 | 0.081 | 0.29 | 228 | 0.007 |
-| household | ours_household | wife_earns_more | state + window FE | 0.023 | 0.032 | 0.466 | 228 | 0.955 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.398 | 0.004 | 0.326 | 0.019 | 51 | 0.127 |
-| household | within states | -0.217 | 0.001 | -0.183 | 0.006 | 228 | -0.183 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.132 | 0.047 | -0.187 | 228 | 0.824 | 0.565 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.086 | 0.049 | 0.025 | True | 10 |
-
-## robustness-gender_emp_gap
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | gender_emp_gap | pooled | 0.083 | 0.076 | 0.271 | 228 | 0.007 |
-| household | ours_household | gender_emp_gap | state + window FE | 0.042 | 0.028 | 0.135 | 228 | 0.962 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.381 | 0.006 | 0.29 | 0.039 | 51 | 0.115 |
-| household | within states | -0.193 | 0.003 | -0.184 | 0.005 | 228 | -0.143 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.071 | 0.285 | -0.096 | 228 | 0.83 | 0.689 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.091 | 0.053 | 0.003 | True | 0 |
-
-## robustness-iat
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | iat_sex_balanced | pooled | 0.405 | 0.083 | 0.0 | 199 | 0.164 |
-| occupation | ours_occupation | iat_sex_balanced | state + window FE | -0.008 | 0.062 | 0.894 | 199 | 0.857 |
-| household | ours_household | iat_sex_balanced | pooled | -0.152 | 0.083 | 0.066 | 198 | 0.023 |
-| household | ours_household | iat_sex_balanced | state + window FE | 0.112 | 0.077 | 0.149 | 198 | 0.865 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | 0.493 | 0.0 | 0.487 | 0.0 | 51 | 0.237 |
-| occupation | within states | 0.361 | 0.0 | 0.392 | 0.0 | 199 | 0.133 |
-| household | between states | -0.111 | 0.437 | -0.147 | 0.304 | 51 | -0.071 |
-| household | within states | -0.18 | 0.011 | -0.169 | 0.017 | 198 | -0.102 |
+## validation-iat_sex_balanced
 
 ### 1.6 Discrepancy vs text volume
 
@@ -300,25 +100,7 @@ Orientation: state-level scores are higher = less traditional.
 | occupation | 0.439 | 0.082 | 0.28 | False | 17 |
 | household | -0.179 | 0.082 | 0.164 | False | 1 |
 
-## robustness-explicit
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | explicit_sex_balanced | pooled | 0.329 | 0.067 | 0.0 | 199 | 0.108 |
-| occupation | ours_occupation | explicit_sex_balanced | state + window FE | -0.005 | 0.024 | 0.82 | 199 | 0.975 |
-| household | ours_household | explicit_sex_balanced | pooled | -0.205 | 0.063 | 0.001 | 198 | 0.042 |
-| household | ours_household | explicit_sex_balanced | state + window FE | 0.001 | 0.022 | 0.973 | 198 | 0.975 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | 0.112 | 0.433 | 0.248 | 0.08 | 51 | 0.006 |
-| occupation | within states | 0.414 | 0.0 | 0.403 | 0.0 | 199 | 0.01 |
-| household | between states | 0.14 | 0.328 | 0.163 | 0.254 | 51 | 0.01 |
-| household | within states | -0.309 | 0.0 | -0.303 | 0.0 | 198 | -0.012 |
+## validation-explicit_sex_balanced
 
 ### 1.6 Discrepancy vs text volume
 
@@ -334,21 +116,7 @@ Orientation: state-level scores are higher = less traditional.
 | occupation | 0.331 | 0.134 | 0.041 | True | 51 |
 | household | -0.205 | 0.094 | 0.008 | True | 51 |
 
-## robustness-atus-housework
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | women_share_housework | pooled | -0.03 | 0.104 | 0.774 | 198 | 0.001 |
-| household | ours_household | women_share_housework | state + window FE | 0.009 | 0.096 | 0.925 | 198 | 0.469 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.123 | 0.388 | 0.071 | 0.623 | 51 | 0.028 |
-| household | within states | -0.121 | 0.09 | -0.178 | 0.012 | 198 | -0.03 |
+## validation-women_share_housework
 
 ### 1.6 Discrepancy vs text volume
 
@@ -362,21 +130,7 @@ Orientation: state-level scores are higher = less traditional.
 |---|---|---|---|---|---|
 | household | -0.105 | 0.084 | 0.221 | False | 5 |
 
-## robustness-atus-household
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | women_share_household | pooled | -0.032 | 0.115 | 0.779 | 198 | 0.001 |
-| household | ours_household | women_share_household | state + window FE | -0.059 | 0.104 | 0.572 | 198 | 0.659 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.11 | 0.443 | 0.15 | 0.292 | 51 | 0.024 |
-| household | within states | -0.171 | 0.016 | -0.099 | 0.166 | 198 | -0.068 |
+## validation-women_share_household
 
 ### 1.6 Discrepancy vs text volume
 
@@ -390,21 +144,7 @@ Orientation: state-level scores are higher = less traditional.
 |---|---|---|---|---|---|
 | household | -0.079 | 0.08 | 0.325 | False | 1 |
 
-## robustness-atus-childcare
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | women_share_childcare_parents | pooled | 0.099 | 0.103 | 0.336 | 198 | 0.01 |
-| household | ours_household | women_share_childcare_parents | state + window FE | 0.156 | 0.119 | 0.191 | 198 | 0.499 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.159 | 0.264 | 0.105 | 0.462 | 51 | 0.034 |
-| household | within states | 0.059 | 0.409 | 0.101 | 0.157 | 198 | 0.016 |
+## validation-women_share_childcare_parents
 
 ### 1.6 Discrepancy vs text volume
 

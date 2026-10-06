@@ -22,3 +22,9 @@ Since 2026-10-06 (later the same day) the family-sphere list is dropped from
 the analysis entirely: the study has two text domains, occupation and
 household work. The family-sphere word list and its screening table stay in
 `wordlists/en/occupation_family/` as a record.
+
+`old-robustness-structure/` — Part I outputs before the validation / correlates
+restructure (2026-10-06): one robustness folder per survey measure with steps
+1.4–1.7, and the old main step files (1_4_state_window, 1_5_between_within,
+1_6, 1_7, with the ACS family index as the main family benchmark). Superseded
+by `analysis/main/` 1.4 validation and 1.9 correlates and `analysis/validation-*/`.

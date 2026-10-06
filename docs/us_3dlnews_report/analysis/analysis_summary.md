@@ -12,283 +12,83 @@ Orientation: state-level scores are higher = less traditional.
 
 **1.3 Geographic heterogeneity.** occupation: SD across states 0.0056, median 95% half-width 0.0032; domestic and care work: SD across states 0.0082, median 95% half-width 0.0053.
 
-## main
+### 1.4 Validation (direct benchmarks; pooled, state and time dimensions)
 
-### 1.4 State-window alignment (standardized; SE clustered by state)
+**Validation: text scores against direct survey benchmarks**
 
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | matched_female_share | pooled | 0.094 | 0.096 | 0.323 | 232 | 0.009 |
-| occupation | ours_occupation | matched_female_share | state + window FE | -0.019 | 0.032 | 0.551 | 232 | 0.925 |
-| household | ours_household | family_index_acs | pooled | 0.071 | 0.077 | 0.354 | 228 | 0.005 |
-| household | ours_household | family_index_acs | state + window FE | 0.018 | 0.034 | 0.599 | 228 | 0.962 |
+| Survey measure | Occupation: Pooled | Occupation: Between states | Occupation: Within states | Domestic and care work: Pooled | Domestic and care work: Between states | Domestic and care work: Within states |
+|---|---|---|---|---|---|---|
+| ACS: female share of our occupations | 0.09 (0.10) | -0.15 (0.19) | -0.02 (0.03) |   |   |   |
+| IAT: implicit career-family stereotype | 0.41*** (0.08) | 0.49** (0.18) | -0.01 (0.06) | -0.15 (0.08) | -0.11 (0.14) | 0.11 (0.08) |
+| Project Implicit: explicit stereotype | 0.33*** (0.07) | 0.11 (0.11) | -0.01 (0.02) | -0.20** (0.06) | 0.14 (0.12) | 0.00 (0.02) |
+| ATUS: women's share of housework |   |   |   | -0.03 (0.10) | 0.12 (0.22) | 0.01 (0.10) |
+| ATUS: women's share of household activities |   |   |   | -0.03 (0.12) | 0.11 (0.16) | -0.06 (0.10) |
+| ATUS: women's share of childcare (parents) |   |   |   | 0.10 (0.10) | 0.16 (0.13) | 0.16 (0.12) |
+| Observations | 199–232 | 51 | 199–232 | 198 | 51 | 198 |
+| State FE | No | — | Yes | No | — | Yes |
+| Window FE | No | — | Yes | No | — | Yes |
 
-### 1.5 Between- and within-state alignment
+Standardized coefficients of the survey measure on the text score (both oriented higher = less traditional; > 0 = agreement). Pooled: state-windows, SE clustered by state. Between: state means over windows, HC1 SE. Within: state and window fixed effects, SE clustered by state. * p < 0.05, ** p < 0.01, *** p < 0.001.
 
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | -0.15 | 0.295 | -0.113 | 0.43 | 51 | -0.062 |
-| occupation | within states | 0.276 | 0.0 | 0.317 | 0.0 | 232 | 0.14 |
-| household | between states | 0.38 | 0.006 | 0.33 | 0.018 | 51 | 0.004 |
-| household | within states | -0.228 | 0.001 | -0.207 | 0.002 | 228 | -0.007 |
+### 1.9 Correlates (related survey measures; associations, not validation)
+
+**Correlates: text scores and related survey measures**
+
+| Survey measure | Occupation: Pooled | Occupation: Between states | Occupation: Within states | Domestic and care work: Pooled | Domestic and care work: Between states | Domestic and care work: Within states |
+|---|---|---|---|---|---|---|
+| ACS: family index | 0.02 (0.06) | -0.19 (0.11) | 0.02 (0.03) | 0.07 (0.08) | 0.38** (0.13) | 0.02 (0.03) |
+| ACS: motherhood employment gap | 0.08 (0.06) | -0.00 (0.11) | 0.03 (0.04) | 0.03 (0.09) | 0.18 (0.15) | 0.04 (0.03) |
+| ACS: motherhood hours gap | 0.02 (0.08) | -0.26* (0.11) | 0.03 (0.04) | -0.05 (0.07) | 0.19 (0.13) | -0.02 (0.03) |
+| ACS: married women not in LF | 0.04 (0.07) | -0.07 (0.13) | 0.04 (0.03) | 0.06 (0.08) | 0.28 (0.15) | -0.01 (0.04) |
+| ACS: wife's earnings share | -0.06 (0.07) | -0.21 (0.13) | 0.02 (0.03) | 0.15 (0.08) | 0.42** (0.14) | 0.01 (0.04) |
+| ACS: wife earns more | -0.05 (0.09) | -0.29* (0.15) | -0.01 (0.03) | 0.09 (0.08) | 0.40** (0.15) | 0.02 (0.03) |
+| ACS: gender employment gap | 0.05 (0.08) | -0.11 (0.13) | 0.00 (0.03) | 0.08 (0.08) | 0.38** (0.13) | 0.04 (0.03) |
+| ACS: women's share of employment | -0.10 (0.09) | -0.27 (0.17) | 0.01 (0.03) | 0.11 (0.08) | 0.26 (0.18) | 0.04 (0.04) |
+| ACS: occupational segregation (Duncan) | -0.13 (0.13) | -0.40 (0.21) | 0.01 (0.02) | 0.02 (0.15) | 0.17 (0.31) | -0.01 (0.03) |
+| Observations | 232 | 51 | 232 | 228 | 51 | 228 |
+| State FE | No | — | Yes | No | — | Yes |
+| Window FE | No | — | Yes | No | — | Yes |
+
+Standardized coefficients of the survey measure on the text score (both oriented higher = less traditional; > 0 = agreement). Pooled: state-windows, SE clustered by state. Between: state means over windows, HC1 SE. Within: state and window fixed effects, SE clustered by state. * p < 0.05, ** p < 0.01, *** p < 0.001. Benjamini–Hochberg q-values over the correlates within each column: 1_9_correlates.csv.
+
+Sensitivity without DC (an outlier on Duncan):
+
+**Correlates: text scores and related survey measures (excluding DC)**
+
+| Survey measure | Occupation: Pooled | Occupation: Between states | Occupation: Within states | Domestic and care work: Pooled | Domestic and care work: Between states | Domestic and care work: Within states |
+|---|---|---|---|---|---|---|
+| ACS: family index | 0.04 (0.06) | -0.13 (0.10) | 0.01 (0.03) | 0.07 (0.09) | 0.32* (0.15) | 0.04 (0.03) |
+| ACS: motherhood employment gap | 0.06 (0.06) | -0.03 (0.11) | 0.02 (0.04) | 0.08 (0.08) | 0.24 (0.14) | 0.05* (0.03) |
+| ACS: motherhood hours gap | 0.01 (0.08) | -0.28** (0.11) | 0.03 (0.04) | -0.02 (0.08) | 0.22 (0.14) | -0.00 (0.03) |
+| ACS: married women not in LF | 0.06 (0.07) | -0.00 (0.12) | 0.02 (0.02) | 0.07 (0.10) | 0.22 (0.16) | 0.03 (0.02) |
+| ACS: wife's earnings share | -0.01 (0.06) | -0.13 (0.11) | 0.01 (0.03) | 0.13 (0.10) | 0.34* (0.15) | 0.04 (0.03) |
+| ACS: wife earns more | 0.01 (0.07) | -0.19 (0.11) | -0.01 (0.03) | 0.03 (0.09) | 0.27* (0.14) | 0.04 (0.03) |
+| ACS: gender employment gap | 0.10 (0.06) | -0.01 (0.09) | 0.00 (0.03) | 0.04 (0.08) | 0.29* (0.13) | 0.05 (0.03) |
+| ACS: women's share of employment | -0.02 (0.07) | -0.14 (0.13) | 0.01 (0.04) | 0.02 (0.06) | 0.09 (0.11) | 0.06 (0.04) |
+| ACS: occupational segregation (Duncan) | -0.01 (0.07) | -0.26* (0.13) | -0.01 (0.02) | -0.19* (0.09) | -0.22 (0.16) | 0.03 (0.02) |
+| Observations | 227 | 50 | 227 | 223 | 50 | 223 |
+| State FE | No | — | Yes | No | — | Yes |
+| Window FE | No | — | Yes | No | — | Yes |
+
+Standardized coefficients of the survey measure on the text score (both oriented higher = less traditional; > 0 = agreement). Pooled: state-windows, SE clustered by state. Between: state means over windows, HC1 SE. Within: state and window fixed effects, SE clustered by state. * p < 0.05, ** p < 0.01, *** p < 0.001. Benjamini–Hochberg q-values over the correlates within each column: 1_9_correlates_no_dc.csv. Excluding: district_of_columbia.
+
+## Reliability per direct benchmark (1.6 – 1.7)
+
+## validation-matched_female_share
 
 ### 1.6 Discrepancy vs text volume
 
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | occupation | -0.134 | 0.041 | -0.175 | 232 | 0.98 | 0.812 |
-| household | -0.078 | 0.242 | -0.11 | 228 | 0.803 | 0.609 |
 
 ### 1.7 Hierarchical state-specific slopes
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|
 | occupation | 0.25 | 0.079 | 0.287 | False | 3 |
-| household | -0.094 | 0.053 | 0.091 | False | 0 |
 
-## robustness-duncan
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | duncan | pooled | -0.135 | 0.125 | 0.282 | 232 | 0.018 |
-| occupation | ours_occupation | duncan | state + window FE | 0.006 | 0.018 | 0.75 | 232 | 0.986 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | -0.403 | 0.003 | -0.281 | 0.046 | 51 | -0.056 |
-| occupation | within states | 0.32 | 0.0 | 0.329 | 0.0 | 232 | 0.153 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| occupation | -0.074 | 0.264 | -0.115 | 232 | 0.694 | 0.669 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| occupation | 0.133 | 0.034 | 0.072 | False | 35 |
-
-## robustness-female_emp_share
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | female_emp_share | pooled | -0.101 | 0.094 | 0.286 | 232 | 0.01 |
-| occupation | ours_occupation | female_emp_share | state + window FE | 0.009 | 0.035 | 0.803 | 232 | 0.956 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | -0.265 | 0.06 | -0.207 | 0.146 | 51 | -0.119 |
-| occupation | within states | 0.23 | 0.0 | 0.299 | 0.0 | 232 | 0.364 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| occupation | 0.006 | 0.922 | 0.009 | 232 | 0.727 | 0.747 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| occupation | 0.114 | 0.039 | 0.138 | False | 1 |
-
-## robustness-motherhood_emp_gap
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | motherhood_emp_gap | pooled | 0.027 | 0.087 | 0.76 | 228 | 0.001 |
-| household | ours_household | motherhood_emp_gap | state + window FE | 0.038 | 0.031 | 0.221 | 228 | 0.942 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.18 | 0.207 | 0.204 | 0.151 | 51 | 0.033 |
-| household | within states | -0.154 | 0.02 | -0.151 | 0.023 | 228 | -0.096 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.069 | 0.298 | -0.095 | 228 | 0.851 | 0.588 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.069 | 0.031 | 0.049 | False | 18 |
-
-## robustness-motherhood_hours_gap
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | motherhood_hours_gap | pooled | -0.052 | 0.073 | 0.48 | 228 | 0.003 |
-| household | ours_household | motherhood_hours_gap | state + window FE | -0.018 | 0.029 | 0.532 | 228 | 0.935 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.19 | 0.183 | 0.167 | 0.242 | 51 | 0.002 |
-| household | within states | -0.275 | 0.0 | -0.292 | 0.0 | 228 | -0.005 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.115 | 0.082 | -0.158 | 228 | 0.946 | 0.589 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.166 | 0.05 | 0.007 | True | 51 |
-
-## robustness-married_women_nilf
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | married_women_nilf | pooled | 0.065 | 0.082 | 0.428 | 228 | 0.004 |
-| household | ours_household | married_women_nilf | state + window FE | -0.008 | 0.039 | 0.83 | 228 | 0.974 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.282 | 0.045 | 0.145 | 0.309 | 51 | 0.051 |
-| household | within states | -0.256 | 0.0 | -0.19 | 0.004 | 228 | -0.217 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.093 | 0.159 | -0.12 | 228 | 0.839 | 0.705 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.066 | 0.034 | 0.061 | False | 3 |
-
-## robustness-wife_earnings_share
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | wife_earnings_share | pooled | 0.149 | 0.085 | 0.078 | 228 | 0.022 |
-| household | ours_household | wife_earnings_share | state + window FE | 0.012 | 0.036 | 0.738 | 228 | 0.962 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.417 | 0.002 | 0.305 | 0.03 | 51 | 0.137 |
-| household | within states | -0.192 | 0.004 | -0.132 | 0.046 | 228 | -0.286 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.096 | 0.149 | -0.137 | 228 | 0.781 | 0.575 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.045 | 0.036 | 0.071 | False | 1 |
-
-## robustness-wife_earns_more
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | wife_earns_more | pooled | 0.086 | 0.081 | 0.29 | 228 | 0.007 |
-| household | ours_household | wife_earns_more | state + window FE | 0.023 | 0.032 | 0.466 | 228 | 0.955 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.398 | 0.004 | 0.326 | 0.019 | 51 | 0.127 |
-| household | within states | -0.217 | 0.001 | -0.183 | 0.006 | 228 | -0.183 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.132 | 0.047 | -0.187 | 228 | 0.824 | 0.565 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.086 | 0.049 | 0.025 | True | 10 |
-
-## robustness-gender_emp_gap
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | gender_emp_gap | pooled | 0.083 | 0.076 | 0.271 | 228 | 0.007 |
-| household | ours_household | gender_emp_gap | state + window FE | 0.042 | 0.028 | 0.135 | 228 | 0.962 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.381 | 0.006 | 0.29 | 0.039 | 51 | 0.115 |
-| household | within states | -0.193 | 0.003 | -0.184 | 0.005 | 228 | -0.143 |
-
-### 1.6 Discrepancy vs text volume
-
-| domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
-|---|---|---|---|---|---|---|
-| household | -0.071 | 0.285 | -0.096 | 228 | 0.83 | 0.689 |
-
-### 1.7 Hierarchical state-specific slopes
-
-| domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
-|---|---|---|---|---|---|
-| household | -0.091 | 0.053 | 0.003 | True | 0 |
-
-## robustness-iat
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | iat_sex_balanced | pooled | 0.405 | 0.083 | 0.0 | 199 | 0.164 |
-| occupation | ours_occupation | iat_sex_balanced | state + window FE | -0.008 | 0.062 | 0.894 | 199 | 0.857 |
-| household | ours_household | iat_sex_balanced | pooled | -0.152 | 0.083 | 0.066 | 198 | 0.023 |
-| household | ours_household | iat_sex_balanced | state + window FE | 0.112 | 0.077 | 0.149 | 198 | 0.865 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | 0.493 | 0.0 | 0.487 | 0.0 | 51 | 0.237 |
-| occupation | within states | 0.361 | 0.0 | 0.392 | 0.0 | 199 | 0.133 |
-| household | between states | -0.111 | 0.437 | -0.147 | 0.304 | 51 | -0.071 |
-| household | within states | -0.18 | 0.011 | -0.169 | 0.017 | 198 | -0.102 |
+## validation-iat_sex_balanced
 
 ### 1.6 Discrepancy vs text volume
 
@@ -304,25 +104,7 @@ Orientation: state-level scores are higher = less traditional.
 | occupation | 0.439 | 0.082 | 0.28 | False | 17 |
 | household | -0.179 | 0.082 | 0.164 | False | 1 |
 
-## robustness-explicit
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| occupation | ours_occupation | explicit_sex_balanced | pooled | 0.329 | 0.067 | 0.0 | 199 | 0.108 |
-| occupation | ours_occupation | explicit_sex_balanced | state + window FE | -0.005 | 0.024 | 0.82 | 199 | 0.975 |
-| household | ours_household | explicit_sex_balanced | pooled | -0.205 | 0.063 | 0.001 | 198 | 0.042 |
-| household | ours_household | explicit_sex_balanced | state + window FE | 0.001 | 0.022 | 0.973 | 198 | 0.975 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| occupation | between states | 0.112 | 0.433 | 0.248 | 0.08 | 51 | 0.006 |
-| occupation | within states | 0.414 | 0.0 | 0.403 | 0.0 | 199 | 0.01 |
-| household | between states | 0.14 | 0.328 | 0.163 | 0.254 | 51 | 0.01 |
-| household | within states | -0.309 | 0.0 | -0.303 | 0.0 | 198 | -0.012 |
+## validation-explicit_sex_balanced
 
 ### 1.6 Discrepancy vs text volume
 
@@ -338,21 +120,7 @@ Orientation: state-level scores are higher = less traditional.
 | occupation | 0.331 | 0.134 | 0.041 | True | 51 |
 | household | -0.205 | 0.094 | 0.008 | True | 51 |
 
-## robustness-atus-housework
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | women_share_housework | pooled | -0.03 | 0.104 | 0.774 | 198 | 0.001 |
-| household | ours_household | women_share_housework | state + window FE | 0.009 | 0.096 | 0.925 | 198 | 0.469 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.123 | 0.388 | 0.071 | 0.623 | 51 | 0.028 |
-| household | within states | -0.121 | 0.09 | -0.178 | 0.012 | 198 | -0.03 |
+## validation-women_share_housework
 
 ### 1.6 Discrepancy vs text volume
 
@@ -366,21 +134,7 @@ Orientation: state-level scores are higher = less traditional.
 |---|---|---|---|---|---|
 | household | -0.105 | 0.084 | 0.221 | False | 5 |
 
-## robustness-atus-household
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | women_share_household | pooled | -0.032 | 0.115 | 0.779 | 198 | 0.001 |
-| household | ours_household | women_share_household | state + window FE | -0.059 | 0.104 | 0.572 | 198 | 0.659 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.11 | 0.443 | 0.15 | 0.292 | 51 | 0.024 |
-| household | within states | -0.171 | 0.016 | -0.099 | 0.166 | 198 | -0.068 |
+## validation-women_share_household
 
 ### 1.6 Discrepancy vs text volume
 
@@ -394,21 +148,7 @@ Orientation: state-level scores are higher = less traditional.
 |---|---|---|---|---|---|
 | household | -0.079 | 0.08 | 0.325 | False | 1 |
 
-## robustness-atus-childcare
-
-### 1.4 State-window alignment (standardized; SE clustered by state)
-
-| domain | text | survey | model | beta_std | se | p | n | r2 |
-|---|---|---|---|---|---|---|---|---|
-| household | ours_household | women_share_childcare_parents | pooled | 0.099 | 0.103 | 0.336 | 198 | 0.01 |
-| household | ours_household | women_share_childcare_parents | state + window FE | 0.156 | 0.119 | 0.191 | 198 | 0.499 |
-
-### 1.5 Between- and within-state alignment
-
-| domain | component | r | p | rho | rho_p | n | slope |
-|---|---|---|---|---|---|---|---|
-| household | between states | 0.159 | 0.264 | 0.105 | 0.462 | 51 | 0.034 |
-| household | within states | 0.059 | 0.409 | 0.101 | 0.157 | 198 | 0.016 |
+## validation-women_share_childcare_parents
 
 ### 1.6 Discrepancy vs text volume
 
@@ -490,38 +230,30 @@ Outcome: text score (higher = less traditional); all variables standardized. Bet
 
 # Part II-C — text-survey discrepancy
 
-gap = z(text) − z(survey), main measures, higher = text less traditional than survey. All predictors jointly, standardized; predictors observed in < 80% of state-windows left out: abortion_restrictions, citizen_ideology, equal_pay_law, evangelical_lds_share, so_employment_law, universal_prek.
+gap = z(text) − z(survey composite: mean of the z-scored direct benchmarks), higher = text less traditional than survey. All predictors jointly, standardized; predictors observed in < 80% of state-windows left out: abortion_restrictions, citizen_ideology, equal_pay_law, evangelical_lds_share, so_employment_law, universal_prek.
 
 ### Model fit
 
 | domain | spec | n | r2 |
 |---|---|---|---|
-| household | between states | 50 | 0.78 |
-| household | pooled + window FE | 223 | 0.609 |
-| occupation | between states | 50 | 0.605 |
-| occupation | pooled + window FE | 227 | 0.399 |
+| household | between states | 50 | 0.381 |
+| household | pooled + window FE | 194 | 0.529 |
+| occupation | between states | 50 | 0.568 |
+| occupation | pooled + window FE | 227 | 0.441 |
 
 ### Terms with p < 0.05
 
 | domain | spec | term | coef | se | p |
 |---|---|---|---|---|---|
-| occupation | pooled + window FE | ba_share | -0.395 | 0.184 | 0.032 |
-| occupation | pooled + window FE | metro_share | -0.266 | 0.097 | 0.006 |
-| occupation | pooled + window FE | manufacturing_share | 0.571 | 0.194 | 0.003 |
-| occupation | pooled + window FE | service_share | 0.612 | 0.245 | 0.012 |
-| occupation | pooled + window FE | duncan | 0.489 | 0.238 | 0.04 |
-| occupation | pooled + window FE | female_share_professionals | -0.622 | 0.161 | 0.0 |
-| occupation | between states | metro_share | -0.421 | 0.188 | 0.025 |
-| occupation | between states | manufacturing_share | 0.873 | 0.333 | 0.009 |
-| occupation | between states | service_share | 0.882 | 0.417 | 0.035 |
-| occupation | between states | female_share_professionals | -0.941 | 0.285 | 0.001 |
-| household | pooled + window FE | log_real_gdp_pc | 0.339 | 0.093 | 0.0 |
-| household | pooled + window FE | log_real_income_pc | -0.393 | 0.161 | 0.015 |
-| household | pooled + window FE | gender_wage_gap | 0.272 | 0.101 | 0.007 |
-| household | pooled + window FE | female_share_professionals | -0.567 | 0.105 | 0.0 |
-| household | between states | log_real_gdp_pc | 0.438 | 0.196 | 0.025 |
-| household | between states | women_lfp | -0.492 | 0.21 | 0.019 |
-| household | between states | female_share_professionals | -0.833 | 0.209 | 0.0 |
+| occupation | pooled + window FE | manufacturing_share | 0.491 | 0.185 | 0.008 |
+| occupation | pooled + window FE | female_share_professionals | -0.393 | 0.168 | 0.019 |
+| occupation | pooled + window FE | log_tokens | -0.262 | 0.107 | 0.015 |
+| occupation | between states | manufacturing_share | 0.959 | 0.34 | 0.005 |
+| occupation | between states | female_share_professionals | -0.813 | 0.303 | 0.007 |
+| occupation | between states | log_tokens | -0.309 | 0.153 | 0.044 |
+| household | pooled + window FE | service_share | 0.393 | 0.196 | 0.045 |
+| household | pooled + window FE | pfl_share | 0.151 | 0.049 | 0.002 |
+| household | between states | women_lfp | -0.693 | 0.34 | 0.041 |
 
 # Part III — case selection
 
@@ -589,17 +321,17 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | occupation | state | little change | idaho | -0.0 | 2000–09 -> 2015–24 |
 | occupation | state | little change | kansas | -0.001 | 2000–09 -> 2015–24 |
 | occupation | state | little change | new_hampshire | 0.002 | 2000–09 -> 2015–24 |
-| occupation | state | largest text-survey discrepancy | district_of_columbia | -3.581 | mean z(text) - z(survey) |
-| occupation | state | largest text-survey discrepancy | utah | 2.145 | mean z(text) - z(survey) |
-| occupation | state | largest text-survey discrepancy | virginia | -1.867 | mean z(text) - z(survey) |
-| occupation | state | largest text-survey discrepancy | arizona | -1.644 | mean z(text) - z(survey) |
-| occupation | state | largest text-survey discrepancy | maryland | -1.547 | mean z(text) - z(survey) |
-| occupation | state | weakest alignment (I.7) | south_carolina | -0.141 | 95% [-0.49, 0.21] |
-| occupation | state | weakest alignment (I.7) | alaska | -0.057 | 95% [-0.50, 0.39] |
-| occupation | state | weakest alignment (I.7) | district_of_columbia | -0.046 | 95% [-0.41, 0.32] |
-| occupation | state | strongest alignment (I.7) | new_york | 0.476 | 95% [0.02, 0.93] |
-| occupation | state | strongest alignment (I.7) | florida | 0.49 | 95% [-0.03, 1.00] |
-| occupation | state | strongest alignment (I.7) | oklahoma | 0.551 | 95% [0.04, 1.06] |
+| occupation | state | largest text-survey discrepancy | district_of_columbia | -2.367 | mean z(text) - z(survey) |
+| occupation | state | largest text-survey discrepancy | utah | 1.813 | mean z(text) - z(survey) |
+| occupation | state | largest text-survey discrepancy | arizona | -1.533 | mean z(text) - z(survey) |
+| occupation | state | largest text-survey discrepancy | virginia | -1.36 | mean z(text) - z(survey) |
+| occupation | state | largest text-survey discrepancy | south_carolina | 1.3 | mean z(text) - z(survey) |
+| occupation | state | weakest alignment (I.7) | hawaii | 0.115 | mean state slope over 3 direct benchmarks |
+| occupation | state | weakest alignment (I.7) | south_carolina | 0.225 | mean state slope over 3 direct benchmarks |
+| occupation | state | weakest alignment (I.7) | north_dakota | 0.229 | mean state slope over 3 direct benchmarks |
+| occupation | state | strongest alignment (I.7) | montana | 0.441 | mean state slope over 3 direct benchmarks |
+| occupation | state | strongest alignment (I.7) | wyoming | 0.442 | mean state slope over 3 direct benchmarks |
+| occupation | state | strongest alignment (I.7) | california | 0.449 | mean state slope over 3 direct benchmarks |
 | household | state pair | similar baseline, divergent final | delaware / virginia | 0.033 | baseline gap 0.0019, final gap 0.0332 |
 | household | state pair | similar baseline, divergent final | indiana / louisiana | 0.028 | baseline gap 0.0037, final gap 0.0284 |
 | household | state pair | similar baseline, divergent final | district_of_columbia / georgia | 0.025 | baseline gap 0.0025, final gap 0.0252 |
@@ -620,62 +352,63 @@ Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
 | household | state | little change | washington | -0.001 | 2000–09 -> 2015–24 |
 | household | state | little change | new_york | -0.001 | 2000–09 -> 2015–24 |
 | household | state | little change | iowa | -0.001 | 2000–09 -> 2015–24 |
-| household | state | largest text-survey discrepancy | utah | 2.939 | mean z(text) - z(survey) |
-| household | state | largest text-survey discrepancy | washington | 1.894 | mean z(text) - z(survey) |
-| household | state | largest text-survey discrepancy | iowa | -1.847 | mean z(text) - z(survey) |
-| household | state | largest text-survey discrepancy | idaho | 1.488 | mean z(text) - z(survey) |
-| household | state | largest text-survey discrepancy | vermont | -1.457 | mean z(text) - z(survey) |
-| household | state | weakest alignment (I.7) | vermont | -0.161 | 95% [-0.36, 0.04] |
-| household | state | weakest alignment (I.7) | delaware | -0.151 | 95% [-0.34, 0.04] |
-| household | state | weakest alignment (I.7) | district_of_columbia | -0.151 | 95% [-0.31, 0.01] |
-| household | state | strongest alignment (I.7) | oklahoma | -0.052 | 95% [-0.25, 0.14] |
-| household | state | strongest alignment (I.7) | pennsylvania | -0.028 | 95% [-0.22, 0.16] |
-| household | state | strongest alignment (I.7) | utah | 0.031 | 95% [-0.17, 0.23] |
+| household | state | largest text-survey discrepancy | south_dakota | 2.166 | mean z(text) - z(survey) |
+| household | state | largest text-survey discrepancy | oregon | -1.887 | mean z(text) - z(survey) |
+| household | state | largest text-survey discrepancy | vermont | -1.41 | mean z(text) - z(survey) |
+| household | state | largest text-survey discrepancy | west_virginia | 1.288 | mean z(text) - z(survey) |
+| household | state | largest text-survey discrepancy | wyoming | -1.218 | mean z(text) - z(survey) |
+| household | state | weakest alignment (I.7) | vermont | -0.293 | mean state slope over 5 direct benchmarks |
+| household | state | weakest alignment (I.7) | kentucky | -0.247 | mean state slope over 5 direct benchmarks |
+| household | state | weakest alignment (I.7) | idaho | -0.246 | mean state slope over 5 direct benchmarks |
+| household | state | strongest alignment (I.7) | utah | 0.013 | mean state slope over 5 direct benchmarks |
+| household | state | strongest alignment (I.7) | nevada | 0.075 | mean state slope over 5 direct benchmarks |
+| household | state | strongest alignment (I.7) | north_dakota | 0.079 | mean state slope over 5 direct benchmarks |
 
 ### 3.3 State profiles (first vs last observed window; full table tables/3_3_state_profiles.csv)
 
 | state | first_window | last_window | text_occupation_first | text_occupation_last | survey_occupation_first | survey_occupation_last | tokens_first | tokens_last | log_real_gdp_pc_first | log_real_gdp_pc_last | women_lfp_first | women_lfp_last | pfl_share_last | gop_two_party_share_first | gop_two_party_share_last |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| alabama | 1995–04 | 2015–24 | -0.008 | -0.012 | 0.384 | 0.422 | 280598.0 | 4740228.0 | 10.547 | 10.723 | 0.663 | 0.672 | 0.0 | 0.581 | 0.642 |
-| alaska | 2000–09 | 2015–24 | 0.018 | 0.001 | 0.394 | 0.427 | 396311.0 | 2508084.0 | 11.125 | 11.174 | 0.74 | 0.731 | 0.0 | 0.641 | 0.568 |
-| arizona | 2010–19 | 2015–24 | -0.015 | -0.023 | 0.406 | 0.413 | 2747588.0 | 6741907.0 | 10.753 | 10.856 | 0.688 | 0.705 | 0.0 | 0.533 | 0.515 |
-| colorado | 1995–04 | 2015–24 | -0.006 | -0.006 | 0.384 | 0.433 | 1042502.0 | 9518972.0 | 10.874 | 11.112 | 0.732 | 0.767 | 0.1 | 0.525 | 0.449 |
-| connecticut | 1995–04 | 2015–24 | -0.004 | -0.005 | 0.369 | 0.42 | 381714.0 | 3423751.0 | 11.109 | 11.239 | 0.745 | 0.783 | 0.3 | 0.417 | 0.418 |
-| delaware | 2000–09 | 2015–24 | -0.017 | 0.0 | 0.401 | 0.423 | 208382.0 | 1253324.0 | 11.278 | 11.261 | 0.742 | 0.757 | 0.0 | 0.423 | 0.423 |
-| district_of_columbia | 1995–04 | 2015–24 | -0.039 | -0.005 | 0.427 | 0.448 | 387190.0 | 1900170.0 | 12.025 | 12.232 | 0.76 | 0.83 | 0.5 | 0.096 | 0.055 |
-| florida | 1995–04 | 2015–24 | -0.018 | -0.01 | 0.361 | 0.413 | 1457668.0 | 9769752.0 | 10.68 | 10.851 | 0.694 | 0.728 | 0.0 | 0.498 | 0.53 |
-| georgia | 2000–09 | 2015–24 | -0.015 | -0.009 | 0.395 | 0.426 | 828331.0 | 8151369.0 | 10.846 | 10.968 | 0.71 | 0.728 | 0.0 | 0.557 | 0.512 |
-| hawaii | 2000–09 | 2015–24 | -0.002 | -0.019 | 0.371 | 0.405 | 341418.0 | 2084277.0 | 10.897 | 11.001 | 0.74 | 0.767 | 0.0 | 0.376 | 0.352 |
-| idaho | 2000–09 | 2015–24 | -0.006 | -0.006 | 0.355 | 0.407 | 425350.0 | 3331167.0 | 10.583 | 10.718 | 0.696 | 0.704 | 0.0 | 0.677 | 0.676 |
-| indiana | 1995–04 | 2015–24 | -0.003 | 0.004 | 0.376 | 0.416 | 405505.0 | 8674112.0 | 10.716 | 10.919 | 0.722 | 0.736 | 0.0 | 0.572 | 0.593 |
-| iowa | 1995–04 | 2015–24 | 0.005 | -0.006 | 0.392 | 0.426 | 328869.0 | 7171058.0 | 10.7 | 11.013 | 0.779 | 0.794 | 0.0 | 0.481 | 0.553 |
-| kansas | 2000–09 | 2015–24 | -0.003 | -0.003 | 0.395 | 0.413 | 340415.0 | 2038576.0 | 10.766 | 10.963 | 0.762 | 0.761 | 0.0 | 0.605 | 0.589 |
-| kentucky | 2000–09 | 2015–24 | -0.02 | 0.004 | 0.377 | 0.408 | 689507.0 | 4895970.0 | 10.644 | 10.761 | 0.66 | 0.687 | 0.0 | 0.587 | 0.648 |
-| louisiana | 1995–04 | 2015–24 | -0.005 | -0.007 | 0.365 | 0.421 | 259941.0 | 3773407.0 | 10.775 | 10.863 | 0.667 | 0.696 | 0.0 | 0.516 | 0.603 |
-| maine | 2000–09 | 2015–24 | -0.001 | -0.01 | 0.386 | 0.423 | 345296.0 | 2175648.0 | 10.691 | 10.808 | 0.745 | 0.758 | 0.0 | 0.446 | 0.467 |
-| maryland | 1995–04 | 2015–24 | -0.018 | -0.006 | 0.406 | 0.434 | 350418.0 | 4104263.0 | 10.842 | 11.092 | 0.753 | 0.788 | 0.0 | 0.421 | 0.347 |
-| massachusetts | 1995–04 | 2015–24 | -0.019 | -0.006 | 0.397 | 0.431 | 1696494.0 | 9880210.0 | 10.975 | 11.305 | 0.748 | 0.792 | 0.4 | 0.346 | 0.351 |
-| missouri | 1995–04 | 2015–24 | -0.027 | -0.014 | 0.382 | 0.413 | 595126.0 | 6780899.0 | 10.746 | 10.876 | 0.725 | 0.744 | 0.0 | 0.506 | 0.59 |
-| nebraska | 1995–04 | 2015–24 | -0.002 | -0.003 | 0.404 | 0.42 | 262294.0 | 3389001.0 | 10.766 | 11.121 | 0.784 | 0.798 | 0.0 | 0.642 | 0.613 |
-| nevada | 1995–04 | 2015–24 | -0.017 | -0.009 | 0.352 | 0.406 | 397000.0 | 3126139.0 | 10.938 | 10.953 | 0.698 | 0.722 | 0.0 | 0.509 | 0.497 |
-| new_hampshire | 1995–04 | 2015–24 | -0.008 | 0.014 | 0.398 | 0.438 | 500960.0 | 411719.0 | 10.787 | 11.049 | 0.764 | 0.783 | 0.0 | 0.481 | 0.482 |
-| new_jersey | 1995–04 | 2015–24 | 0.002 | -0.01 | 0.377 | 0.399 | 1173650.0 | 5895765.0 | 10.985 | 11.11 | 0.715 | 0.768 | 1.0 | 0.428 | 0.439 |
-| new_york | 1995–04 | 2015–24 | -0.026 | -0.008 | 0.363 | 0.406 | 3049344.0 | 15529036.0 | 11.049 | 11.344 | 0.692 | 0.752 | 0.7 | 0.363 | 0.395 |
-| north_dakota | 2000–09 | 2015–24 | -0.038 | -0.007 | 0.397 | 0.436 | 313830.0 | 1954014.0 | 10.73 | 11.236 | 0.797 | 0.802 | 0.0 | 0.61 | 0.686 |
-| ohio | 1995–04 | 2015–24 | -0.006 | -0.005 | 0.376 | 0.415 | 922434.0 | 12059622.0 | 10.763 | 10.954 | 0.719 | 0.744 | 0.0 | 0.498 | 0.547 |
-| oklahoma | 1995–04 | 2015–24 | -0.016 | -0.0 | 0.357 | 0.413 | 494015.0 | 3894485.0 | 10.477 | 10.811 | 0.668 | 0.695 | 0.0 | 0.604 | 0.679 |
-| oregon | 1995–04 | 2015–24 | 0.005 | 0.004 | 0.371 | 0.425 | 550990.0 | 6242406.0 | 10.629 | 10.942 | 0.712 | 0.736 | 0.2 | 0.477 | 0.427 |
-| pennsylvania | 1995–04 | 2015–24 | 0.004 | -0.008 | 0.375 | 0.413 | 1167735.0 | 11758507.0 | 10.74 | 10.982 | 0.709 | 0.752 | 0.0 | 0.471 | 0.502 |
-| rhode_island | 2000–09 | 2015–24 | -0.005 | -0.013 | 0.382 | 0.418 | 335817.0 | 2348514.0 | 10.83 | 10.921 | 0.756 | 0.774 | 1.0 | 0.365 | 0.413 |
-| south_carolina | 1995–04 | 2015–24 | 0.032 | -0.003 | 0.375 | 0.427 | 221302.0 | 2295402.0 | 10.598 | 10.752 | 0.704 | 0.714 | 0.0 | 0.566 | 0.575 |
-| tennessee | 1995–04 | 2015–24 | -0.026 | -0.011 | 0.359 | 0.411 | 366226.0 | 6225419.0 | 10.697 | 10.915 | 0.687 | 0.71 | 0.0 | 0.526 | 0.635 |
-| texas | 2000–09 | 2015–24 | -0.025 | 0.0 | 0.377 | 0.412 | 1900226.0 | 11851541.0 | 10.823 | 11.06 | 0.683 | 0.712 | 0.0 | 0.595 | 0.548 |
-| utah | 1995–04 | 2015–24 | -0.004 | 0.001 | 0.349 | 0.388 | 415367.0 | 3107378.0 | 10.682 | 10.993 | 0.678 | 0.709 | 0.0 | 0.69 | 0.614 |
-| vermont | 2000–09 | 2015–24 | -0.015 | 0.005 | 0.391 | 0.418 | 817275.0 | 2810898.0 | 10.722 | 10.872 | 0.786 | 0.802 | 0.0 | 0.385 | 0.334 |
-| virginia | 1995–04 | 2015–24 | -0.027 | -0.013 | 0.396 | 0.428 | 418453.0 | 7390459.0 | 10.862 | 11.061 | 0.726 | 0.758 | 0.0 | 0.531 | 0.464 |
-| washington | 1995–04 | 2015–24 | -0.014 | -0.007 | 0.382 | 0.426 | 623157.0 | 8358966.0 | 10.883 | 11.245 | 0.709 | 0.731 | 0.5 | 0.454 | 0.406 |
-| west_virginia | 2000–09 | 2015–24 | -0.0 | -0.006 | 0.372 | 0.398 | 318519.0 | 3147851.0 | 10.513 | 10.663 | 0.616 | 0.65 | 0.0 | 0.555 | 0.711 |
-| wisconsin | 1995–04 | 2015–24 | -0.031 | 0.005 | 0.386 | 0.429 | 345026.0 | 6254087.0 | 10.742 | 10.946 | 0.772 | 0.788 | 0.0 | 0.479 | 0.502 |
+| alabama | 1995–04 | 2015–24 | -0.008 | -0.012 | -0.747 | 1.016 | 280598.0 | 4740228.0 | 10.547 | 10.723 | 0.663 | 0.672 | 0.0 | 0.581 | 0.642 |
+| arizona | 2010–19 | 2015–24 | -0.015 | -0.023 | -0.165 | 0.786 | 2747588.0 | 6741907.0 | 10.753 | 10.856 | 0.688 | 0.705 | 0.0 | 0.533 | 0.515 |
+| california | 1995–04 | 2015–24 | -0.014 | -0.004 | -1.583 | 1.073 | 3091784.0 | 27456112.0 | 10.832 | 11.223 | 0.675 | 0.721 | 1.0 | 0.438 | 0.362 |
+| colorado | 1995–04 | 2015–24 | -0.006 | -0.006 | -0.743 | 1.623 | 1042502.0 | 9518972.0 | 10.874 | 11.112 | 0.732 | 0.767 | 0.1 | 0.525 | 0.449 |
+| connecticut | 1995–04 | 2015–24 | -0.004 | -0.005 | -1.483 | 0.943 | 381714.0 | 3423751.0 | 11.109 | 11.239 | 0.745 | 0.783 | 0.3 | 0.417 | 0.418 |
+| delaware | 2000–09 | 2015–24 | -0.017 | 0.0 | -0.556 | 1.163 | 208382.0 | 1253324.0 | 11.278 | 11.261 | 0.742 | 0.757 | 0.0 | 0.423 | 0.423 |
+| district_of_columbia | 1995–04 | 2015–24 | -0.039 | -0.005 | 1.434 | 1.758 | 387190.0 | 1900170.0 | 12.025 | 12.232 | 0.76 | 0.83 | 0.5 | 0.096 | 0.055 |
+| florida | 1995–04 | 2015–24 | -0.018 | -0.01 | -1.888 | 0.95 | 1457668.0 | 9769752.0 | 10.68 | 10.851 | 0.694 | 0.728 | 0.0 | 0.498 | 0.53 |
+| georgia | 2000–09 | 2015–24 | -0.015 | -0.009 | -1.316 | 1.26 | 828331.0 | 8151369.0 | 10.846 | 10.968 | 0.71 | 0.728 | 0.0 | 0.557 | 0.512 |
+| hawaii | 2000–09 | 2015–24 | -0.002 | -0.019 | -0.798 | 1.392 | 341418.0 | 2084277.0 | 10.897 | 11.001 | 0.74 | 0.767 | 0.0 | 0.376 | 0.352 |
+| idaho | 2000–09 | 2015–24 | -0.006 | -0.006 | -1.212 | 0.683 | 425350.0 | 3331167.0 | 10.583 | 10.718 | 0.696 | 0.704 | 0.0 | 0.677 | 0.676 |
+| indiana | 1995–04 | 2015–24 | -0.003 | 0.004 | -1.153 | 0.935 | 405505.0 | 8674112.0 | 10.716 | 10.919 | 0.722 | 0.736 | 0.0 | 0.572 | 0.593 |
+| iowa | 1995–04 | 2015–24 | 0.005 | -0.006 | -0.364 | 1.079 | 328869.0 | 7171058.0 | 10.7 | 11.013 | 0.779 | 0.794 | 0.0 | 0.481 | 0.553 |
+| kansas | 2000–09 | 2015–24 | -0.003 | -0.003 | -0.589 | 0.816 | 340415.0 | 2038576.0 | 10.766 | 10.963 | 0.762 | 0.761 | 0.0 | 0.605 | 0.589 |
+| kentucky | 2000–09 | 2015–24 | -0.02 | 0.004 | -1.09 | 0.967 | 689507.0 | 4895970.0 | 10.644 | 10.761 | 0.66 | 0.687 | 0.0 | 0.587 | 0.648 |
+| louisiana | 1995–04 | 2015–24 | -0.005 | -0.007 | -1.72 | 1.026 | 259941.0 | 3773407.0 | 10.775 | 10.863 | 0.667 | 0.696 | 0.0 | 0.516 | 0.603 |
+| maine | 2000–09 | 2015–24 | -0.001 | -0.01 | -0.486 | 1.514 | 345296.0 | 2175648.0 | 10.691 | 10.808 | 0.745 | 0.758 | 0.0 | 0.446 | 0.467 |
+| massachusetts | 1995–04 | 2015–24 | -0.019 | -0.006 | -0.099 | 1.272 | 1696494.0 | 9880210.0 | 10.975 | 11.305 | 0.748 | 0.792 | 0.4 | 0.346 | 0.351 |
+| missouri | 1995–04 | 2015–24 | -0.027 | -0.014 | -0.847 | 1.053 | 595126.0 | 6780899.0 | 10.746 | 10.876 | 0.725 | 0.744 | 0.0 | 0.506 | 0.59 |
+| montana | 1995–04 | 2015–24 | -0.014 | -0.003 | -1.253 | 1.469 | 483062.0 | 3823932.0 | 10.502 | 10.774 | 0.733 | 0.749 | 0.0 | 0.586 | 0.599 |
+| nebraska | 1995–04 | 2015–24 | -0.002 | -0.003 | 0.235 | 1.157 | 262294.0 | 3389001.0 | 10.766 | 11.121 | 0.784 | 0.798 | 0.0 | 0.642 | 0.613 |
+| nevada | 1995–04 | 2015–24 | -0.017 | -0.009 | -2.375 | 1.079 | 397000.0 | 3126139.0 | 10.938 | 10.953 | 0.698 | 0.722 | 0.0 | 0.509 | 0.497 |
+| new_hampshire | 1995–04 | 2015–24 | -0.008 | 0.014 | -0.067 | 1.606 | 500960.0 | 411719.0 | 10.787 | 11.049 | 0.764 | 0.783 | 0.0 | 0.481 | 0.482 |
+| new_jersey | 1995–04 | 2015–24 | 0.002 | -0.01 | -1.085 | 0.851 | 1173650.0 | 5895765.0 | 10.985 | 11.11 | 0.715 | 0.768 | 1.0 | 0.428 | 0.439 |
+| new_york | 1995–04 | 2015–24 | -0.026 | -0.008 | -1.819 | 0.937 | 3049344.0 | 15529036.0 | 11.049 | 11.344 | 0.692 | 0.752 | 0.7 | 0.363 | 0.395 |
+| north_dakota | 2000–09 | 2015–24 | -0.038 | -0.007 | -0.251 | 1.308 | 313830.0 | 1954014.0 | 10.73 | 11.236 | 0.797 | 0.802 | 0.0 | 0.61 | 0.686 |
+| ohio | 1995–04 | 2015–24 | -0.006 | -0.005 | -1.164 | 1.158 | 922434.0 | 12059622.0 | 10.763 | 10.954 | 0.719 | 0.744 | 0.0 | 0.498 | 0.547 |
+| oklahoma | 1995–04 | 2015–24 | -0.016 | -0.0 | -2.122 | 1.184 | 494015.0 | 3894485.0 | 10.477 | 10.811 | 0.668 | 0.695 | 0.0 | 0.604 | 0.679 |
+| oregon | 1995–04 | 2015–24 | 0.005 | 0.004 | -1.409 | 1.397 | 550990.0 | 6242406.0 | 10.629 | 10.942 | 0.712 | 0.736 | 0.2 | 0.477 | 0.427 |
+| rhode_island | 2000–09 | 2015–24 | -0.005 | -0.013 | -0.973 | 1.314 | 335817.0 | 2348514.0 | 10.83 | 10.921 | 0.756 | 0.774 | 1.0 | 0.365 | 0.413 |
+| south_carolina | 1995–04 | 2015–24 | 0.032 | -0.003 | -1.208 | 1.281 | 221302.0 | 2295402.0 | 10.598 | 10.752 | 0.704 | 0.714 | 0.0 | 0.566 | 0.575 |
+| south_dakota | 2000–09 | 2015–24 | -0.026 | -0.007 | -0.235 | 0.882 | 416242.0 | 2280812.0 | 10.8 | 11.015 | 0.795 | 0.797 | 0.0 | 0.589 | 0.648 |
+| tennessee | 1995–04 | 2015–24 | -0.026 | -0.011 | -2.027 | 1.187 | 366226.0 | 6225419.0 | 10.697 | 10.915 | 0.687 | 0.71 | 0.0 | 0.526 | 0.635 |
+| texas | 2000–09 | 2015–24 | -0.025 | 0.0 | -1.146 | 0.957 | 1900226.0 | 11851541.0 | 10.823 | 11.06 | 0.683 | 0.712 | 0.0 | 0.595 | 0.548 |
+| utah | 1995–04 | 2015–24 | -0.004 | 0.001 | -2.52 | -0.008 | 415367.0 | 3107378.0 | 10.682 | 10.993 | 0.678 | 0.709 | 0.0 | 0.69 | 0.614 |
+| vermont | 2000–09 | 2015–24 | -0.015 | 0.005 | -0.563 | 1.454 | 817275.0 | 2810898.0 | 10.722 | 10.872 | 0.786 | 0.802 | 0.0 | 0.385 | 0.334 |
+| virginia | 1995–04 | 2015–24 | -0.027 | -0.013 | -0.164 | 1.207 | 418453.0 | 7390459.0 | 10.862 | 11.061 | 0.726 | 0.758 | 0.0 | 0.531 | 0.464 |
+| washington | 1995–04 | 2015–24 | -0.014 | -0.007 | -0.824 | 1.593 | 623157.0 | 8358966.0 | 10.883 | 11.245 | 0.709 | 0.731 | 0.5 | 0.454 | 0.406 |
+| west_virginia | 2000–09 | 2015–24 | -0.0 | -0.006 | -1.059 | 1.469 | 318519.0 | 3147851.0 | 10.513 | 10.663 | 0.616 | 0.65 | 0.0 | 0.555 | 0.711 |
+| wisconsin | 1995–04 | 2015–24 | -0.031 | 0.005 | -0.641 | 1.514 | 345026.0 | 6254087.0 | 10.742 | 10.946 | 0.772 | 0.788 | 0.0 | 0.479 | 0.502 |
+| wyoming | 2000–09 | 2015–24 | 0.007 | -0.002 | 0.401 | 1.302 | 213455.0 | 2404993.0 | 11.067 | 11.096 | 0.751 | 0.747 | 0.0 | 0.693 | 0.739 |
 
 # Part III (semantics) — nearest neighbours of selected cases
 

@@ -59,17 +59,17 @@ occupation,state,little change,missouri,0.0002171852764142005,2000–09 -> 2015�
 occupation,state,little change,idaho,-0.0004001726928700997,2000–09 -> 2015–24
 occupation,state,little change,kansas,-0.0006702024329868,2000–09 -> 2015–24
 occupation,state,little change,new_hampshire,0.0018465694396558006,2000–09 -> 2015–24
-occupation,state,largest text-survey discrepancy,district_of_columbia,-3.5808444009001383,mean z(text) - z(survey)
-occupation,state,largest text-survey discrepancy,utah,2.1450006815915827,mean z(text) - z(survey)
-occupation,state,largest text-survey discrepancy,virginia,-1.8671258507301984,mean z(text) - z(survey)
-occupation,state,largest text-survey discrepancy,arizona,-1.6435861496658961,mean z(text) - z(survey)
-occupation,state,largest text-survey discrepancy,maryland,-1.5471214211742097,mean z(text) - z(survey)
-occupation,state,weakest alignment (I.7),south_carolina,-0.1408729211844861,"95% [-0.49, 0.21]"
-occupation,state,weakest alignment (I.7),alaska,-0.0573657217680918,"95% [-0.50, 0.39]"
-occupation,state,weakest alignment (I.7),district_of_columbia,-0.0462360635267385,"95% [-0.41, 0.32]"
-occupation,state,strongest alignment (I.7),new_york,0.476117202292621,"95% [0.02, 0.93]"
-occupation,state,strongest alignment (I.7),florida,0.4896654463506172,"95% [-0.03, 1.00]"
-occupation,state,strongest alignment (I.7),oklahoma,0.5514405445057543,"95% [0.04, 1.06]"
+occupation,state,largest text-survey discrepancy,district_of_columbia,-2.3670179960110884,mean z(text) - z(survey)
+occupation,state,largest text-survey discrepancy,utah,1.813052704929381,mean z(text) - z(survey)
+occupation,state,largest text-survey discrepancy,arizona,-1.53287898303543,mean z(text) - z(survey)
+occupation,state,largest text-survey discrepancy,virginia,-1.360069191012887,mean z(text) - z(survey)
+occupation,state,largest text-survey discrepancy,south_carolina,1.2997516764328696,mean z(text) - z(survey)
+occupation,state,weakest alignment (I.7),hawaii,0.1151947516583474,mean state slope over 3 direct benchmarks
+occupation,state,weakest alignment (I.7),south_carolina,0.22513283452305352,mean state slope over 3 direct benchmarks
+occupation,state,weakest alignment (I.7),north_dakota,0.22854249134400828,mean state slope over 3 direct benchmarks
+occupation,state,strongest alignment (I.7),montana,0.44068343725209846,mean state slope over 3 direct benchmarks
+occupation,state,strongest alignment (I.7),wyoming,0.44163156890980226,mean state slope over 3 direct benchmarks
+occupation,state,strongest alignment (I.7),california,0.44897426929230705,mean state slope over 3 direct benchmarks
 household,state pair,"similar baseline, divergent final",delaware / virginia,0.0332285996869837,"baseline gap 0.0019, final gap 0.0332"
 household,state pair,"similar baseline, divergent final",indiana / louisiana,0.0284114309029244,"baseline gap 0.0037, final gap 0.0284"
 household,state pair,"similar baseline, divergent final",district_of_columbia / georgia,0.0251575736134789,"baseline gap 0.0025, final gap 0.0252"
@@ -90,14 +90,14 @@ household,state,little change,oregon,-0.0003168900150186012,2000–09 -> 2015–
 household,state,little change,washington,-0.0005118554208346998,2000–09 -> 2015–24
 household,state,little change,new_york,-0.0006152623027195995,2000–09 -> 2015–24
 household,state,little change,iowa,-0.0006167296678787001,2000–09 -> 2015–24
-household,state,largest text-survey discrepancy,utah,2.9390938152535613,mean z(text) - z(survey)
-household,state,largest text-survey discrepancy,washington,1.8942180377104918,mean z(text) - z(survey)
-household,state,largest text-survey discrepancy,iowa,-1.847110894491832,mean z(text) - z(survey)
-household,state,largest text-survey discrepancy,idaho,1.4881026572608407,mean z(text) - z(survey)
-household,state,largest text-survey discrepancy,vermont,-1.4571345541709448,mean z(text) - z(survey)
-household,state,weakest alignment (I.7),vermont,-0.1605653409754,"95% [-0.36, 0.04]"
-household,state,weakest alignment (I.7),delaware,-0.1513900567911983,"95% [-0.34, 0.04]"
-household,state,weakest alignment (I.7),district_of_columbia,-0.1512734487543154,"95% [-0.31, 0.01]"
-household,state,strongest alignment (I.7),oklahoma,-0.0515932619602052,"95% [-0.25, 0.14]"
-household,state,strongest alignment (I.7),pennsylvania,-0.0283306485352953,"95% [-0.22, 0.16]"
-household,state,strongest alignment (I.7),utah,0.0313171097003454,"95% [-0.17, 0.23]"
+household,state,largest text-survey discrepancy,south_dakota,2.1655635891374065,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,oregon,-1.8865021158099828,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,vermont,-1.4095059512952082,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,west_virginia,1.2878402665107567,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,wyoming,-1.2181785234199636,mean z(text) - z(survey)
+household,state,weakest alignment (I.7),vermont,-0.29271242791493285,mean state slope over 5 direct benchmarks
+household,state,weakest alignment (I.7),kentucky,-0.24712784032072682,mean state slope over 5 direct benchmarks
+household,state,weakest alignment (I.7),idaho,-0.24600506124009316,mean state slope over 5 direct benchmarks
+household,state,strongest alignment (I.7),utah,0.013178928707684768,mean state slope over 5 direct benchmarks
+household,state,strongest alignment (I.7),nevada,0.0749255500921849,mean state slope over 5 direct benchmarks
+household,state,strongest alignment (I.7),north_dakota,0.07942223973362207,mean state slope over 5 direct benchmarks

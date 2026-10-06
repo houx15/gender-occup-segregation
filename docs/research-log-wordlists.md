@@ -655,3 +655,40 @@ band for the common 95% interval instead of 51 identical bars
 Pooled: robustness-explicit (both domains), gender_emp_gap,
 motherhood_hours_gap, wife_earns_more. In those, the text–survey relation does
 not differ detectably across states.
+
+## 2026-10-06 — Part I restructured: validation vs correlates
+
+PI decision. **Validation** = direct benchmarks of the same concept, all
+reported, none singled out: occupation — ACS female share of our occupations,
+IAT, explicit; domestic and care work — ATUS women's share of housework,
+household activities, childcare, IAT, explicit. Each in three dimensions with
+standardized coefficients: pooled state-windows (SE clustered by state);
+between states (state means, HC1); within states (state + window FE, SE
+clustered by state), plus the national trend (window means, descriptive).
+**Correlates** = related concepts (ACS family index and its six measures,
+women's share of employment, Duncan): same three coefficients for both
+domains, one journal-style table with Benjamini–Hochberg q-values and a
+version without DC. II-C and Part III use the survey composite (mean of the
+z-scored direct benchmarks); Part III alignment uses the state slope averaged
+over the benchmarks.
+
+Validation results (standardized; > 0 = agreement; * p < 0.05, ** p < 0.01,
+*** p < 0.001):
+
+| | Pooled | Between | Within |
+|---|---:|---:|---:|
+| Occupation vs ACS female share | 0.09 | −0.15 | −0.02 |
+| Occupation vs IAT | 0.41*** | 0.49** | −0.01 |
+| Occupation vs explicit | 0.33*** | 0.11 | −0.01 |
+| Domestic/care vs ATUS housework | −0.03 | 0.12 | 0.01 |
+| Domestic/care vs ATUS household | −0.03 | 0.11 | −0.06 |
+| Domestic/care vs ATUS childcare | 0.10 | 0.16 | 0.16 |
+| Domestic/care vs IAT | −0.15 | −0.11 | 0.11 |
+| Domestic/care vs explicit | −0.20** | 0.14 | 0.00 |
+
+Occupation text agrees with the implicit career–family stereotype across
+states; the pooled agreement with explicit opinions comes from the shared
+national trend only. Domestic and care work text is not validated by any
+direct benchmark; its between-state associations are with the correlates
+(family index 0.38, wife's earnings share 0.42, wife earns more 0.40, gender
+employment gap 0.38; all p < 0.01).

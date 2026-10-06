@@ -1,0 +1,15 @@
+**Validation: text scores against direct survey benchmarks**
+
+| Survey measure | Occupation: Pooled | Occupation: Between states | Occupation: Within states | Domestic and care work: Pooled | Domestic and care work: Between states | Domestic and care work: Within states |
+|---|---|---|---|---|---|---|
+| ACS: female share of our occupations | 0.09 (0.10) | -0.15 (0.19) | -0.02 (0.03) |   |   |   |
+| IAT: implicit career-family stereotype | 0.41*** (0.08) | 0.49** (0.18) | -0.01 (0.06) | -0.15 (0.08) | -0.11 (0.14) | 0.11 (0.08) |
+| Project Implicit: explicit stereotype | 0.33*** (0.07) | 0.11 (0.11) | -0.01 (0.02) | -0.20** (0.06) | 0.14 (0.12) | 0.00 (0.02) |
+| ATUS: women's share of housework |   |   |   | -0.03 (0.10) | 0.12 (0.22) | 0.01 (0.10) |
+| ATUS: women's share of household activities |   |   |   | -0.03 (0.12) | 0.11 (0.16) | -0.06 (0.10) |
+| ATUS: women's share of childcare (parents) |   |   |   | 0.10 (0.10) | 0.16 (0.13) | 0.16 (0.12) |
+| Observations | 199–232 | 51 | 199–232 | 198 | 51 | 198 |
+| State FE | No | — | Yes | No | — | Yes |
+| Window FE | No | — | Yes | No | — | Yes |
+
+Standardized coefficients of the survey measure on the text score (both oriented higher = less traditional; > 0 = agreement). Pooled: state-windows, SE clustered by state. Between: state means over windows, HC1 SE. Within: state and window fixed effects, SE clustered by state. * p < 0.05, ** p < 0.01, *** p < 0.001.
