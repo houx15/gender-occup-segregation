@@ -82,7 +82,7 @@ def compare_words(t: pd.DataFrame, periods) -> dict:
     a, b = t["all states"][periods], t["balanced"][periods]
     ch_a, ch_b = a[periods[-1]] - a[periods[0]], b[periods[-1]] - b[periods[0]]
     ok = ch_a.notna() & ch_b.notna()
-    return {"words": int(ok.sum()), "r_change": float(np.corrcoef(ch_a[ok], ch_b[ok])[0, 1]),
+    return {"n_words": int(ok.sum()), "r_change": float(np.corrcoef(ch_a[ok], ch_b[ok])[0, 1]),
             "same_sign_change": float((np.sign(ch_a[ok]) == np.sign(ch_b[ok])).mean()),
             "median_abs_diff": float((a - b).abs().stack().median()),
             "median_states_balanced": float(t["balanced"]["states"].median())}
@@ -117,7 +117,7 @@ def run_balanced(panel: pd.DataFrame, cells: pd.DataFrame, terms: pd.DataFrame, 
                         for s, p in flat.columns]
         flat.reset_index().to_csv(out / "tables" / f"{fig_name.replace('.pdf', '.csv')}", index=False)
         c = compare_words(t, periods)
-        rows.append({"words": name, **c})
+        rows.append({"word_list": name, **c})
         sel = cases[cases["level"] == level].copy()
         lines = t["balanced"][periods].copy()
         if level.startswith("term"):
