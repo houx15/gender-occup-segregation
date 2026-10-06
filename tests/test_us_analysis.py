@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from scripts.us_analysis.common import MAIN, ROBUSTNESS, SURVEY_LABEL
+from scripts.us_analysis.common import CORRELATES, SURVEY_LABEL, VALIDATION
 from scripts.us_analysis import part1, part2
 
 
@@ -37,21 +37,38 @@ def _cells(seed=0):
     return pd.DataFrame(rows)
 
 
-def test_part1_main_and_robustness_outputs(tmp_path):
+def test_part1_validation_correlates_reliability(tmp_path):
     panel = _panel()
-    picked = [sp for sp in ROBUSTNESS if sp.name in ("robustness-duncan", "robustness-iat",
-                                                     "robustness-atus-household")]
-    text = part1.run_part1(panel, _cells(), [MAIN] + picked, tmp_path)
+    text = part1.run_part1(panel, _cells(), tmp_path)
     for f in ("1_1_occupation_validity.pdf", "1_2_temporal.pdf", "1_3_geography.pdf",
-              "1_4_state_window.pdf", "1_5_between_within.pdf", "1_6_volume_error.pdf",
-              "1_7_state_slopes.pdf"):
+              "1_4_validation_occupation.pdf", "1_4_validation_household.pdf"):
         assert (tmp_path / "main" / "figures" / f).exists(), f
-    assert (tmp_path / "robustness-iat" / "tables" / "1_4_models.csv").exists()
-    assert (tmp_path / "robustness-atus-household" / "figures" / "1_4_state_window.pdf").exists()
-    models = pd.read_csv(tmp_path / "main" / "tables" / "1_4_models.csv")
-    pooled = models[(models.model == "pooled") & (models.domain == "occupation")].iloc[0]
-    assert pooled["beta_std"] > 0.5            # planted positive alignment (oriented)
-    assert "1.1 Occupation-level validity" in text
+    v = pd.read_csv(tmp_path / "main" / "tables" / "1_4_validation.csv")
+    # every direct benchmark, three dimensions each
+    assert set(v[v.domain == "occupation"]["survey"]) == set(VALIDATION["occupation"])
+    assert set(v[v.domain == "household"]["survey"]) == set(VALIDATION["household"])
+    assert set(v["spec"]) == {"pooled", "between", "within"}
+    pooled = v[(v.spec == "pooled") & (v.survey == "matched_female_share")].iloc[0]
+    assert pooled["beta"] > 0.5                # planted agreement (oriented)
+    c = pd.read_csv(tmp_path / "main" / "tables" / "1_9_correlates.csv")
+    assert set(c["survey"]) == set(CORRELATES) and c["q_bh"].between(0, 1).all()
+    assert (tmp_path / "main" / "tables" / "1_9_correlates_table.tex").exists()
+    assert (tmp_path / "main" / "tables" / "1_9_correlates_no_dc.csv").exists()
+    for m in ("iat_sex_balanced", "women_share_housework"):
+        assert (tmp_path / f"validation-{m}" / "figures" / "1_7_state_slopes.pdf").exists()
+    hier = pd.read_csv(tmp_path / "validation-iat_sex_balanced" / "tables" / "1_7_hierarchical.csv")
+    assert set(hier["domain"]) == {"occupation", "household"}   # IAT validates both domains
+    assert "1.1 Occupation-level validity" in text and "Correlates" in text
+
+
+def test_journal_table_formats_coefficients():
+    from scripts.us_analysis.part1 import journal_table
+    res = pd.DataFrame([{"domain": "occupation", "survey": "iat_sex_balanced", "spec": sp,
+                         "beta": 0.41, "se": 0.08, "p": p, "n": n, "states": 51}
+                        for sp, p, n in (("pooled", 1e-6, 199), ("between", 0.02, 51), ("within", 0.9, 199))])
+    md, tex = journal_table(res, ["iat_sex_balanced"], "T", "note")
+    assert "0.41*** (0.08)" in md and "0.41* (0.08)" in md and "0.41 (0.08)" in md
+    assert "$^{***}$" in tex and "\\begin{tabular}" in tex
 
 
 def test_part2_heatmaps_and_change(tmp_path):
@@ -84,7 +101,7 @@ def test_part2b_2c_3(tmp_path):
     from scripts.us_analysis import part2b, part2c, part3
     panel = _panel_with_context()
     # Part I first so Part III can read the I.7 slopes
-    part1.run_part1(panel, _cells(), [MAIN], tmp_path)
+    part1.run_part1(panel, _cells(), tmp_path)
     t2b = part2b.run_part2b(panel, "", tmp_path)
     assert "Block fit" in t2b
     assert (tmp_path / "main" / "figures" / "2b_predictors_occupation.pdf").exists()
@@ -124,13 +141,14 @@ def test_policy_timing_counts_clean_before_after(tmp_path):
 def test_combined_figures(tmp_path):
     from scripts.us_analysis import part2b, figures
     panel = _panel_with_context()
-    part1.run_part1(panel, _cells(), [MAIN], tmp_path)
+    part1.run_part1(panel, _cells(), tmp_path)
     main = tmp_path / "main"
     part2.heatmaps(panel, main)
     part2.change_ranking(panel, main)
     part2b.run_part2b(panel, "", tmp_path)
     figures.run_figures(panel, tmp_path)
-    for f in ("figure1_validation.pdf", "figure2_survey.pdf", "figure3_reliability.pdf",
+    for f in ("figure1_validation.pdf", "figure2_validation_occupation.pdf",
+              "figure2_validation_household.pdf", "figure3_reliability.pdf",
               "figure5_dynamics_occupation.pdf", "figure6_explanatory.pdf"):
         assert (tmp_path / "figures_combined" / f).exists(), f
 

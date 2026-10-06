@@ -1,7 +1,8 @@
 """Part II-C — text-survey discrepancy as an outcome (plan II-C).
 
-gap_st = z(text score) - z(main survey measure), both oriented "higher = less
-traditional" and standardized over state-windows. gap > 0: the state's news
+gap_st = z(text score) - z(survey composite), both oriented "higher = less
+traditional" and standardized over state-windows; the survey composite is the
+mean of the domain's z-scored direct benchmarks (common.survey_composite). gap > 0: the state's news
 text is less traditional than its survey measure suggests. Also the residual
 from the survey-on-text calibration (survey_z ~ text_z) as an alternative.
 
@@ -18,14 +19,16 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 
-from scripts.us_analysis.common import DOMAIN_LABEL, MAIN, md_table, save, survey_egal, text_egal, zscore
+from scripts.us_analysis.common import (
+    DOMAIN_LABEL, TEXT_COL, md_table, save, survey_composite, text_egal, zscore,
+)
 from scripts.us_analysis.part2b import BLOCK_COLOR, available_blocks, prepare
 
 
 def add_gaps(panel: pd.DataFrame) -> pd.DataFrame:
     d = prepare(panel)
-    for dom, (tcol, scol) in MAIN.pairs.items():
-        t, s = text_egal(d, tcol), survey_egal(d, scol)
+    for dom, tcol in TEXT_COL.items():
+        t, s = text_egal(d, tcol), survey_composite(d, dom)
         ok = t.notna() & s.notna()
         tz, sz = zscore(t[ok]), zscore(s[ok])
         d.loc[ok, f"gap_{dom}"] = tz - sz
@@ -48,7 +51,7 @@ def models(d: pd.DataFrame) -> pd.DataFrame:
     blocks["text volume"] = ["log_tokens"]
     xs_all = [v for vs in blocks.values() for v in vs]
     rows = []
-    for dom in MAIN.pairs:
+    for dom in TEXT_COL:
         y = f"gap_{dom}"
         data = d[["state", "period", y] + xs_all].dropna()
         z = data.copy()
@@ -75,7 +78,7 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
 
     # state ranking of the mean gap
     fig, axes = plt.subplots(1, 2, figsize=(10, 9.5))
-    for ax, dom in zip(axes, MAIN.pairs):
+    for ax, dom in zip(axes, TEXT_COL):
         g = d.groupby("state")[f"gap_{dom}"].agg(["mean", "std", "count"]).dropna().sort_values("mean")
         y = np.arange(len(g))
         ax.errorbar(g["mean"], y, xerr=1.96 * g["std"] / np.sqrt(g["count"]), fmt="o", ms=3,
@@ -83,15 +86,15 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
         ax.axvline(0, color="grey", lw=0.6)
         ax.set_yticks(y, g.index.str.replace("_", " ").str.title(), fontsize=6)
         ax.set_xlabel("Mean gap: z(text) − z(survey)\n(> 0 = text less traditional than survey)", fontsize=8)
-        ax.set_title(dom, fontsize=9)
-    fig.suptitle("2C Text-survey discrepancy by state (main survey measures)", fontsize=10)
+        ax.set_title(DOMAIN_LABEL[dom], fontsize=9)
+    fig.suptitle("2C Text-survey discrepancy by state (survey composite of the direct benchmarks)", fontsize=10)
     save(fig, out / "figures" / "2c_gap_states.pdf")
 
     if not available_blocks(prepare(panel)):
         return "# Part II-C\n\nGaps computed; no context predictors yet.\n"
     res = models(d)
     res.to_csv(out / "tables" / "2c_models.csv", index=False)
-    for dom in MAIN.pairs:
+    for dom in TEXT_COL:
         fig, axes = plt.subplots(1, 2, figsize=(11, 5), sharey=True)
         for ax, spec in zip(axes, ["pooled + window FE", "between states"]):
             g = res[(res["domain"] == dom) & (res["spec"] == spec)].reset_index(drop=True)
@@ -111,7 +114,7 @@ def run_part2c(panel: pd.DataFrame, config: str, out_root: Path) -> str:
                      if v not in used)
     text = "\n".join([
         "# Part II-C — text-survey discrepancy\n",
-        "gap = z(text) − z(survey), main measures, higher = text less traditional than survey. "
+        "gap = z(text) − z(survey composite: mean of the z-scored direct benchmarks), higher = text less traditional than survey. "
         "All predictors jointly, standardized; predictors observed in < 80% of state-windows "
         f"left out: {', '.join(dropped) or 'none'}.\n",
         "### Model fit\n", md_table(fit) + "\n",

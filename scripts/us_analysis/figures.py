@@ -3,8 +3,9 @@
 Built from the saved per-step tables and the canonical panel, so they always
 match the step figures. Written to <out_dir>/figures_combined/:
   figure1_validation.pdf     1.1 occupations, 1.3 state means; 1.2 trends (occupation | domestic and care work)
-  figure2_survey.pdf         1.4 state-window, 1.5 between, 1.5 within (occupation | domestic and care work)
-  figure3_reliability.pdf    1.6 volume vs error, 1.7 state slopes
+  figure2_validation_DOMAIN.pdf  1.4 every direct benchmark: pooled, state and time
+                             dimensions, national trend (copied)
+  figure3_reliability.pdf    1.6 mismatch vs volume, 1.7 alignment slope, every benchmark
   figure4_maps_<domain>.pdf  2.1 (copied)
   figure5_dynamics_<domain>.pdf  2.2 heatmap + 2.3 change ranking
   figure6_explanatory.pdf    II-B coefficients: between states (state averages) and
@@ -20,25 +21,15 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import statsmodels.formula.api as smf
 from matplotlib.colors import TwoSlopeNorm
 
 from scripts.us_analysis.common import (
-    BETWEEN_NOTE, CMAP, DOMAIN_LABEL, LESS_TRAD_COLOR, MAIN, MISMATCH_LABEL, MORE_TRAD_COLOR,
-    SLOPE_LABEL, SURVEY_LABEL, TEXT_COL, TEXT_LABEL, VOLUME_LABEL, WITHIN_NOTE, change_legend,
-    plot_state_slopes, save, scatter_fit, survey_egal, text_egal, window_label, zscore,
+    CMAP, DOMAIN_LABEL, DOMAINS, LESS_TRAD_COLOR, MORE_TRAD_COLOR, SURVEY_LABEL, TEXT_COL, TEXT_LABEL,
+    change_legend, save, scatter_fit, window_label,
 )
 from scripts.us_analysis.part2b import BLOCK_COLOR
 
-DOMS = list(MAIN.pairs)
-
-
-def _frame(panel, dom):
-    tcol, scol = MAIN.pairs[dom]
-    d = pd.DataFrame({"state": panel["state"], "period": panel["period"], "tokens": panel["tokens"],
-                      "text": text_egal(panel, tcol), "survey": survey_egal(panel, scol)}).dropna(
-        subset=["text", "survey"])
-    return d, tcol, scol
+DOMS = list(DOMAINS)
 
 
 def figure1(panel, main, out):
@@ -69,56 +60,45 @@ def figure1(panel, main, out):
     save(fig, out / "figure1_validation.pdf")
 
 
-def figure2(panel, out):
-    fig, axes = plt.subplots(3, 2, figsize=(11, 14))
-    for j, (dom, letters) in enumerate(zip(DOMS, ("ACE", "BDF"))):
-        d, tcol, scol = _frame(panel, dom)
-        between = d.groupby("state")[["text", "survey"]].mean()
-        within = d[["text", "survey"]] - d.groupby("state")[["text", "survey"]].transform("mean")
-        tlab, slab = TEXT_LABEL[tcol], SURVEY_LABEL[scol]
-        scatter_fit(axes[0][j], d["survey"], d["text"], slab, tlab,
-                    f"{letters[0]}. {DOMAIN_LABEL[dom]}: one point = one state in one window")
-        scatter_fit(axes[1][j], between["survey"], between["text"], f"{slab}\n({BETWEEN_NOTE})",
-                    f"{tlab}\n({BETWEEN_NOTE})",
-                    f"{letters[1]}. {DOMAIN_LABEL[dom]}, between states: one point = one state")
-        scatter_fit(axes[2][j], within["survey"], within["text"], f"{slab}\n({WITHIN_NOTE})",
-                    f"{tlab}\n({WITHIN_NOTE})",
-                    f"{letters[2]}. {DOMAIN_LABEL[dom]}, within states: one point = one state-window")
-    fig.suptitle("Figure 2. Does the text score agree with the survey? (higher = less traditional)",
-                 fontsize=11)
-    fig.text(0.5, 0.004, "C, D: are states that are less traditional in the survey also less "
-             "traditional in text?\nE, F: when a state moves between windows in the survey, does its "
-             "text move the same way?  r > 0 = agreement.", ha="center", fontsize=8)
-    fig.tight_layout(rect=(0, 0.035, 1, 1))
-    fig.savefig(out / "figure2_survey.pdf")
-    plt.close(fig)
-
-
-def figure3(panel, main, out):
-    fig, axes = plt.subplots(2, 2, figsize=(11, 12.5), gridspec_kw={"height_ratios": [1, 2.2]})
-    for j, (dom, letters) in enumerate(zip(DOMS, ("AC", "BD"))):
-        d, _, _ = _frame(panel, dom)
-        d = d.dropna(subset=["tokens"]).copy()
-        d["sz"], d["tz"] = zscore(d["survey"]), zscore(d["text"])
-        fit = smf.ols("sz ~ tz", data=d).fit()
-        scatter_fit(axes[0][j], np.log10(d["tokens"]), (d["sz"] - fit.fittedvalues).abs(),
-                    VOLUME_LABEL, MISMATCH_LABEL,
-                    f"{letters[0]}. {DOMAIN_LABEL[dom]}: is the mismatch larger where there is less text?")
-        f = main / "tables" / f"1_7_state_slopes_{dom}.csv"
-        if f.exists():
-            h = pd.read_csv(f).sort_values("slope")
-            glob = pd.read_csv(main / "tables" / "1_7_hierarchical.csv").set_index("domain")
-            g = glob.loc[dom]
-            plot_state_slopes(axes[1][j], h, g["global_slope"], g["global_se"], g["slope_sd"], fontsize=4)
-            axes[1][j].set_title(f"{letters[1]}. {DOMAIN_LABEL[dom]}: how closely does text track the survey "
-                                 "in each state?", fontsize=9)
-    fig.suptitle("Figure 3. Measurement reliability", fontsize=11)
-    fig.text(0.5, 0.004, "C, D: one hierarchical model, slopes partially pooled toward the average; "
-             "bars = 95% intervals (blue > 0, red < 0, grey includes 0), or one band when the\n"
-             "state slopes are pooled to the average. Each state has at most 5 windows.", ha="center", fontsize=8)
-    fig.tight_layout(rect=(0, 0.035, 1, 1))
-    fig.savefig(out / "figure3_reliability.pdf")
-    plt.close(fig)
+def figure3(out_root, out):
+    """Reliability across every direct benchmark: A. does the text-survey
+    mismatch shrink with text volume (1.6)? B. average alignment slope and how
+    much it varies across states (1.7)."""
+    rows = []
+    for f in sorted(out_root.glob("validation-*/tables/1_6_volume_error.csv")):
+        survey = f.parts[-3].replace("validation-", "")
+        v = pd.read_csv(f)
+        h = pd.read_csv(f.parent / "1_7_hierarchical.csv")
+        for dm in v["domain"]:
+            r6, r7 = v[v["domain"] == dm].iloc[0], h[h["domain"] == dm].iloc[0]
+            rows.append({"domain": dm, "survey": survey, "r6": r6["r_abs_error_log_tokens"], "n": r6["n"],
+                         "slope": r7["global_slope"], "se": r7["global_se"], "sd": r7["slope_sd"]})
+    if not rows:
+        return
+    t = pd.DataFrame(rows)
+    t["label"] = [f"{DOMAIN_LABEL[d]}: {SURVEY_LABEL.get(s, s)}" for d, s in zip(t["domain"], t["survey"])]
+    t = t.sort_values(["domain", "survey"]).reset_index(drop=True)
+    y = np.arange(len(t))
+    fig, axes = plt.subplots(1, 2, figsize=(13, 0.45 * len(t) + 2.2), sharey=True)
+    z, zse = np.arctanh(t["r6"]), 1 / np.sqrt(t["n"] - 3)        # Fisher CI for r
+    axes[0].errorbar(t["r6"], y, xerr=[t["r6"] - np.tanh(z - 1.96 * zse), np.tanh(z + 1.96 * zse) - t["r6"]],
+                     fmt="o", color="#4c72b0")
+    axes[0].axvline(0, color="grey", lw=0.6)
+    axes[0].set_yticks(y, t["label"], fontsize=8)
+    axes[0].set_xlabel("r(|survey - survey predicted from text|, log10 tokens), 95% CI\n"
+                       "< 0: less mismatch where there is more text", fontsize=8)
+    axes[0].set_title("A. Mismatch vs text volume (1.6)", fontsize=9)
+    axes[1].errorbar(t["slope"], y, xerr=1.96 * t["se"], fmt="o", color="#4c72b0")
+    for yi, (sl, sd) in enumerate(zip(t["slope"], t["sd"])):
+        axes[1].annotate(f"SD across states {sd:.2f}", (sl, yi), xytext=(0, 6), textcoords="offset points",
+                         fontsize=6, ha="center")
+    axes[1].axvline(0, color="grey", lw=0.6)
+    axes[1].set_xlabel("Average slope of survey on text (z units), 95% CI; label = SD of the "
+                       "state-specific slopes", fontsize=8)
+    axes[1].set_title("B. Hierarchical alignment slope (1.7)", fontsize=9)
+    fig.suptitle("Figure 3. Measurement reliability, every direct benchmark "
+                 "(state-level slopes: validation-*/figures/1_7_state_slopes.pdf)", fontsize=10)
+    save(fig, out / "figure3_reliability.pdf")
 
 
 def figure5(panel, main, out):
@@ -184,8 +164,11 @@ def run_figures(panel: pd.DataFrame, out_root: Path) -> str:
     out = out_root / "figures_combined"
     out.mkdir(parents=True, exist_ok=True)
     figure1(panel, main, out)
-    figure2(panel, out)
-    figure3(panel, main, out)
+    for dom in DOMS:   # Figure 2: validation against every direct benchmark (step 1.4)
+        src = main / "figures" / f"1_4_validation_{dom}.pdf"
+        if src.exists():
+            shutil.copy(src, out / f"figure2_validation_{dom}.pdf")
+    figure3(out_root, out)
     for dom, col in TEXT_COL.items():
         src = main / "figures" / f"2_1_maps_{col.replace('ours_', '')}.pdf"
         if src.exists():

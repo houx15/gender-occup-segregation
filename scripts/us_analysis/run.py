@@ -37,9 +37,8 @@ def main(config: str, out_dir: str, parts: str = "panel,1,2,2b,2c,3,3s,bal,figs"
     terms = pd.read_csv(data / "household_terms.csv")
 
     if "1" in todo:
-        from scripts.us_analysis.common import MAIN, ROBUSTNESS
         from scripts.us_analysis.part1 import run_part1
-        print(run_part1(panel, cells, [MAIN] + ROBUSTNESS, out))
+        print(run_part1(panel, cells, out))
     if "2" in todo:
         from scripts.us_analysis.part2 import run_part2
         print(run_part2(panel, config, out))

@@ -13,8 +13,9 @@ Domestic- and care-work terms: largest |change|, most stable, reversal, largest 
 States (text score, higher = less traditional; baseline = second window,
   final = last): similar baseline / divergent final (pairs), similar
   socioeconomic structure / divergent change (pairs), largest move to less
-  traditional, least change, largest |text - survey gap|, weakest / strongest
-  partially pooled alignment slope (Part I.7).
+  traditional, least change, largest |text - survey gap| (survey composite of
+  the direct benchmarks), weakest / strongest partially pooled alignment slope
+  (Part I.7, averaged over the direct benchmarks).
 """
 
 from __future__ import annotations
@@ -27,7 +28,8 @@ import numpy as np
 import pandas as pd
 
 from scripts.us_analysis.common import (
-    DOMAIN_LABEL, MAIN, TEXT_COL, md_table, save, survey_egal, text_egal, window_label, zscore,
+    DOMAIN_LABEL, TEXT_COL, VALIDATION, md_table, save, survey_composite, text_egal, window_label,
+    zscore,
 )
 
 K = 5
@@ -97,8 +99,8 @@ def state_cases(panel: pd.DataFrame, out_root: Path) -> pd.DataFrame:
     periods = sorted(panel["period"].unique())
     base, final = periods[1], periods[-1]
     rows = []
-    for dom, (tcol, scol) in MAIN.pairs.items():
-        d = panel.assign(y=text_egal(panel, tcol), s=survey_egal(panel, scol))
+    for dom, tcol in TEXT_COL.items():
+        d = panel.assign(y=text_egal(panel, tcol), s=survey_composite(panel, dom))
         w = d.pivot_table(index="state", columns="period", values="y")
         sd = d["y"].std()
         both = w[[base, final]].dropna()
@@ -143,13 +145,17 @@ def state_cases(panel: pd.DataFrame, out_root: Path) -> pd.DataFrame:
             rows.append({"domain": dom, "level": "state", "criterion": "largest text-survey discrepancy",
                          "case": st, "value": v, "details": "mean z(text) - z(survey)"})
         # (6) weakest / strongest alignment (Part I.7)
-        sl = out_root / "main" / "tables" / f"1_7_state_slopes_{dom}.csv"
-        if sl.exists():
-            s7 = pd.read_csv(sl).sort_values("slope")
+        files = [out_root / f"validation-{m}" / "tables" / f"1_7_state_slopes_{dom}.csv"
+                 for m in VALIDATION[dom]]
+        files = [f for f in files if f.exists()]
+        if files:   # state slope averaged over every direct benchmark
+            s7 = (pd.concat([pd.read_csv(f) for f in files]).groupby("state")["slope"]
+                  .agg(["mean", "count"]).sort_values("mean"))
             for crit, sel in (("weakest alignment (I.7)", s7.head(3)), ("strongest alignment (I.7)", s7.tail(3))):
-                for r in sel.itertuples():
-                    rows.append({"domain": dom, "level": "state", "criterion": crit, "case": r.state,
-                                 "value": r.slope, "details": f"95% [{r.lo:.2f}, {r.hi:.2f}]"})
+                for st, r in sel.iterrows():
+                    rows.append({"domain": dom, "level": "state", "criterion": crit, "case": st,
+                                 "value": r["mean"],
+                                 "details": f"mean state slope over {int(r['count'])} direct benchmarks"})
     return pd.DataFrame(rows)
 
 
@@ -204,8 +210,8 @@ def _trajectories(panel: pd.DataFrame, cases: pd.DataFrame, out: Path, n_focus: 
     faint dashed grey line."""
     periods = sorted(panel["period"].unique())
     x = [window_label(p) for p in periods]
-    for dom, (tcol, scol) in MAIN.pairs.items():
-        d = panel.assign(y=zscore(text_egal(panel, tcol)), s=zscore(survey_egal(panel, scol)))
+    for dom, tcol in TEXT_COL.items():
+        d = panel.assign(y=zscore(text_egal(panel, tcol)), s=zscore(survey_composite(panel, dom)))
         text = d.pivot_table(index="state", columns="period", values="y").reindex(columns=periods)
         survey = d.pivot_table(index="state", columns="period", values="s").reindex(columns=periods)
         sel = cases[(cases["domain"] == dom) & (cases["level"] == "state")]
@@ -218,7 +224,7 @@ def _trajectories(panel: pd.DataFrame, cases: pd.DataFrame, out: Path, n_focus: 
             for st, c in zip(top, FOCUS_COLORS):
                 name = st.replace("_", " ").title()
                 ax.plot(x, text.loc[st].values, "-o", ms=4, lw=1.8, color=c, label=f"{name}: text")
-                ax.plot(x, survey.loc[st].values, ":s", ms=3, lw=1.2, color=c, label=f"{name}: survey")
+                ax.plot(x, survey.loc[st].values, ":s", ms=3, lw=1.2, color=c, label=f"{name}: survey composite")
             ax.plot([], [], **BACKGROUND, label="other states (text)")
             ax.axhline(0, color="black", lw=0.4)
             ax.set_title(crit, fontsize=9)
@@ -254,11 +260,11 @@ def state_profiles(panel: pd.DataFrame, cases: pd.DataFrame) -> pd.DataFrame:
         row = {"state": st, "first_window": window_label(int(a["period"])),
                "last_window": window_label(int(b["period"])),
                "criteria": "; ".join(sorted(set(cases[cases["case"].str.contains(st, regex=False)]["criterion"])))}
-        for dom, (tcol, scol) in MAIN.pairs.items():
+        for dom, tcol in TEXT_COL.items():
             row[f"text_{dom}_first"], row[f"text_{dom}_last"] = (text_egal(g, tcol).iloc[0],
                                                                  text_egal(g, tcol).iloc[-1])
-            row[f"survey_{dom}_first"], row[f"survey_{dom}_last"] = (survey_egal(g, scol).iloc[0],
-                                                                     survey_egal(g, scol).iloc[-1])
+            sv = survey_composite(panel, dom).loc[g.index]   # z over all state-windows
+            row[f"survey_{dom}_first"], row[f"survey_{dom}_last"] = sv.iloc[0], sv.iloc[-1]
         for vs in PROFILE.values():
             for v in vs:
                 if v in g.columns:

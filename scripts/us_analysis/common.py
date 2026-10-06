@@ -61,34 +61,38 @@ DOMAIN_LABEL = {"occupation": "occupation", "household": "domestic and care work
 
 # axis wording shared by the step figures (1.5-1.7) and the combined figures
 BETWEEN_NOTE = "state average over windows"
-WITHIN_NOTE = "window minus the state's own average"
 MISMATCH_LABEL = "Text-survey mismatch: |survey - survey predicted from text| (SD)"
 VOLUME_LABEL = "Text volume of the state-window model (log10 tokens)"
 SLOPE_LABEL = ("State-specific slope of survey on text (z units)\n"
                "> 0: where text is less traditional, the survey is too")
 
 
+# Direct benchmarks (same concept as the text measure): validation. Every one
+# is reported; none is singled out as "main".
+VALIDATION: Dict[str, List[str]] = {
+    "occupation": ["matched_female_share", "iat_sex_balanced", "explicit_sex_balanced"],
+    "household": ["women_share_housework", "women_share_household", "women_share_childcare_parents",
+                  "iat_sex_balanced", "explicit_sex_balanced"],
+}
+# Related but different concepts (family roles, labour-market structure):
+# correlates / mechanisms, reported as a coefficient table for both domains.
+CORRELATES: List[str] = ["family_index_acs", "motherhood_emp_gap", "motherhood_hours_gap",
+                         "married_women_nilf", "wife_earnings_share", "wife_earns_more",
+                         "gender_emp_gap", "female_emp_share", "duncan"]
+
+
 @dataclass
 class Spec:
-    """One validation run: folder name + (text column, survey column) per domain."""
+    """One reliability run (1.6-1.7): folder name + (text column, survey column) per domain."""
     name: str
     pairs: Dict[str, Tuple[str, str]] = field(default_factory=dict)
 
 
-MAIN = Spec("main", {"occupation": (TEXT_COL["occupation"], "matched_female_share"),
-                     "household": (TEXT_COL["household"], "family_index_acs")})
-ROBUSTNESS: List[Spec] = (
-    [Spec(f"robustness-{m}", {"occupation": ("ours_occupation", m)})
-     for m in ("duncan", "female_emp_share")]
-    + [Spec(f"robustness-{m}", {"household": (TEXT_COL["household"], m)})
-       for m in ("motherhood_emp_gap", "motherhood_hours_gap", "married_women_nilf",
-                 "wife_earnings_share", "wife_earns_more", "gender_emp_gap")]
-    + [Spec(f"robustness-{name}", {d: (TEXT_COL[d], m) for d in DOMAINS})
-       for name, m in (("iat", "iat_sex_balanced"), ("explicit", "explicit_sex_balanced"))]
-    + [Spec(f"robustness-atus-{name}", {"household": (TEXT_COL["household"], m)})
-       for name, m in (("housework", "women_share_housework"), ("household", "women_share_household"),
-                       ("childcare", "women_share_childcare_parents"))]
-)
+def validation_specs() -> List[Spec]:
+    """One Spec per direct benchmark, covering every domain it validates."""
+    surveys = list(dict.fromkeys(m for ms in VALIDATION.values() for m in ms))
+    return [Spec(f"validation-{m}", {d: (TEXT_COL[d], m) for d in DOMAINS if m in VALIDATION[d]})
+            for m in surveys]
 
 
 def text_egal(panel: pd.DataFrame, col: str) -> pd.Series:
@@ -99,6 +103,14 @@ def text_egal(panel: pd.DataFrame, col: str) -> pd.Series:
 def survey_egal(panel: pd.DataFrame, col: str) -> pd.Series:
     """Survey measure oriented higher = less traditional."""
     return -TRADITIONAL_SIGN.get(col, 1) * panel[col]
+
+
+def survey_composite(panel: pd.DataFrame, dom: str) -> pd.Series:
+    """Mean of the domain's direct benchmarks, each oriented (higher = less
+    traditional) and z-scored over state-windows; mean of those available.
+    Used where one survey value per state-window is needed (II-C, Part III)."""
+    cols = [c for c in VALIDATION[dom] if c in panel.columns]
+    return pd.concat([zscore(survey_egal(panel, c)) for c in cols], axis=1).mean(axis=1, skipna=True)
 
 
 def zscore(s: pd.Series) -> pd.Series:
