@@ -1,4 +1,4 @@
 category,candidates,used,median_coverage
-family_sphere,10,10,0.9655172413793103
+family_sphere,20,20,0.9482758620689654
 household,20,6,0.2995689655172413
 occupation,133,65,0.4870689655172414
