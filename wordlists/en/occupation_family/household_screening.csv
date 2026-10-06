@@ -1,0 +1,108 @@
+entry,coverage,decision,reason
+kitchen,0.970,kept,
+meals|meal,0.901,kept,
+cooking,0.879,kept,
+cleaning,0.836,kept,
+recipes|recipe,0.776,kept,
+gardening,0.724,kept,
+cleaned,0.720,kept,
+laundry,0.677,kept,
+baking,0.647,kept,
+oven,0.638,kept,
+washing,0.634,kept,
+sewing,0.578,kept,
+stove,0.526,kept,
+caregiver|caregivers,0.474,kept,
+refrigerator|refrigerators,0.453,kept,
+lunches,0.444,kept,
+parenting,0.440,kept,
+appliances|appliance,0.431,kept,
+chores|chore,0.392,kept,
+daycare|daycares,0.388,kept,
+childcare,0.306,kept,
+lunch,0.978,dropped,sense: events / restaurant meals
+dinner,0.974,dropped,"sense: events (banquet, luncheon, hors d'oeuvres)"
+nursing,0.948,dropped,"sense: medical sense (nurses, hospitals, nursing homes)"
+shopping,0.944,dropped,"sense: retail sense (malls, stores, retailers)"
+bills,0.927,dropped,sense: Buffalo Bills (NY) / payments
+groceries|grocery,0.892,dropped,"sense: retail sense (stores, supermarkets)"
+lawn|lawns,0.892,dropped,concept: male-typed task (would reverse the sign)
+bottles|bottle,0.853,dropped,"sense: drinks (wine, soda, cans)"
+caring,0.853,dropped,"concept: personality trait (compassionate, loving), not work"
+toys|toy,0.810,dropped,sense: merchandise / holiday donations
+repairs,0.776,dropped,concept: male-typed / infrastructure repairs
+feeding,0.759,dropped,"sense: animals (foraging, wildlife)"
+dishes,0.754,dropped,"sense: cuisine (menu, entrees)"
+sandwiches|sandwich,0.754,dropped,sense: restaurant food
+cookies|cookie,0.737,dropped,sense: food items (desserts)
+cleanup,0.728,dropped,"sense: environmental remediation (EPA, superfund)"
+cooked,0.728,dropped,sense: restaurant cuisine (dish descriptions)
+hugs|hug,0.681,dropped,"concept: affection, not work"
+baked,0.677,dropped,"sense: restaurant cuisine (breads, pastries)"
+washed,0.672,dropped,sense: floods ('washed ashore')
+formula,0.629,dropped,sense: calculation / formula funding
+sweeping,0.625,dropped,sense: 'sweeping reforms/changes'
+homework,0.616,dropped,concept: children's schoolwork
+packing,0.616,dropped,"sense: meatpacking, shipping"
+snacks|snack,0.616,dropped,sense: food items
+preschool|preschools,0.612,dropped,"concept: education institution (kindergarten, schools)"
+dinners,0.556,dropped,"sense: events (banquets, receptions)"
+pantry,0.556,dropped,sense: food pantries (charity)
+homemaker|homemakers,0.474,dropped,concept: neighbours are gender/kin words (obituaries); mirrors the gender anchors
+vacuuming|vacuum,0.422,dropped,"sense: technical / industrial (valves, solvents)"
+upbringing,0.388,dropped,"concept: biography (grew up, born)"
+kitchens,0.375,dropped,sense: restaurants
+spoon,0.358,dropped,sense: recipe / restaurant cuisine
+mowing,0.323,dropped,concept: male-typed task (would reverse the sign)
+quilting,0.297,dropped,coverage < 0.3
+naptime|nap,0.297,dropped,coverage < 0.3
+nurturing,0.297,dropped,coverage < 0.3
+dryer,0.297,dropped,coverage < 0.3
+diapers|diaper,0.293,dropped,coverage < 0.3
+knitting,0.289,dropped,coverage < 0.3
+bathing,0.254,dropped,coverage < 0.3
+budgeting,0.233,dropped,coverage < 0.3
+microwave,0.224,dropped,coverage < 0.3
+coupons|coupon,0.181,dropped,coverage < 0.3
+washer,0.164,dropped,coverage < 0.3
+apron|aprons,0.159,dropped,coverage < 0.3
+dishwasher,0.147,dropped,coverage < 0.3
+clutter,0.147,dropped,coverage < 0.3
+breakfasts,0.142,dropped,coverage < 0.3
+errands|errand,0.142,dropped,coverage < 0.3
+crib|cribs,0.142,dropped,coverage < 0.3
+schoolwork,0.112,dropped,coverage < 0.3
+breastfeeding,0.103,dropped,coverage < 0.3
+stroller|strollers,0.103,dropped,coverage < 0.3
+housekeeping,0.099,dropped,coverage < 0.3
+homeschooling|homeschool,0.099,dropped,coverage < 0.3
+bedtime,0.095,dropped,coverage < 0.3
+leftovers,0.091,dropped,coverage < 0.3
+babysitting,0.091,dropped,coverage < 0.3
+potty,0.047,dropped,coverage < 0.3
+detergent,0.039,dropped,coverage < 0.3
+dusting,0.034,dropped,coverage < 0.3
+carpool|carpooling,0.034,dropped,coverage < 0.3
+caregiving,0.026,dropped,coverage < 0.3
+tantrums|tantrum,0.026,dropped,coverage < 0.3
+casserole|casseroles,0.026,dropped,coverage < 0.3
+ironing,0.022,dropped,coverage < 0.3
+scrubbing,0.017,dropped,coverage < 0.3
+mopping,0.013,dropped,coverage < 0.3
+mending,0.013,dropped,coverage < 0.3
+lullaby|lullabies,0.013,dropped,coverage < 0.3
+housecleaning,0.004,dropped,coverage < 0.3
+housework,0.000,dropped,coverage < 0.3
+tidying,0.000,dropped,coverage < 0.3
+dishwashing,0.000,dropped,coverage < 0.3
+yardwork,0.000,dropped,coverage < 0.3
+homemaking,0.000,dropped,coverage < 0.3
+caretaking,0.000,dropped,coverage < 0.3
+childrearing,0.000,dropped,coverage < 0.3
+playdate|playdates,0.000,dropped,coverage < 0.3
+pacifier|pacifiers,0.000,dropped,coverage < 0.3
+eldercare,0.000,dropped,coverage < 0.3
+chauffeuring,0.000,dropped,coverage < 0.3
+housecleaner,0.000,dropped,coverage < 0.3
+cuddling,0.000,dropped,coverage < 0.3
+decluttering,0.000,dropped,coverage < 0.3

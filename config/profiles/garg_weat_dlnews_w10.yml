@@ -46,8 +46,10 @@ wordlists:
     # expanded from 61 brainstormed candidates (candidates_family.txt) to the 20
     # with coverage >= 0.5 and a family sense; every decision in family_screening.csv.
     family_sphere: "family_sphere.txt"
-    # Unpaid household work / care, from ATUS activity categories.
-    household: "candidates_household.txt"
+    # Unpaid household work and care (ATUS activity categories): 107 brainstormed
+    # candidates (candidates_household.txt) -> 21 with coverage >= 0.3 and a
+    # household-work sense; every decision in household_screening.csv.
+    household: "household.txt"
 
 corpus:
   tokenizer: "nltk_en"
@@ -87,6 +89,10 @@ analysis:
   # analyzed units and estimate each unit's level with word fixed effects.
   word_set: "fixed_effects"
   min_word_coverage: 0.5
+  # Household-work words are rarer in news; the care words (childcare 0.31,
+  # daycare 0.39, parenting 0.44, caregiver 0.47) need a lower bar.
+  min_word_coverage_by_category:
+    household: 0.3
   bootstrap:
     n_iter: 5000
     ci: 0.68
