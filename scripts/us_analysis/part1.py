@@ -215,11 +215,11 @@ def validation(panel: pd.DataFrame, out: Path) -> str:
                         "C. Time dimension: change beyond the national trend", s=8)
             g = d.groupby("period")[["text_z", "survey_z"]].mean()
             x = [window_label(int(p_)) for p_ in g.index]
-            ax[3].plot(x, g["text_z"], "-o", color="#4c72b0", label="text")
-            ax[3].plot(x, g["survey_z"], "--s", color="#dd8452", label="survey")
-            r = g["text_z"].corr(g["survey_z"]) if len(g) > 2 else np.nan
-            ax[3].set_title(f"D. National trend: mean over states per window\nr over {len(g)} windows = "
-                            f"{r:.2f} (descriptive)", fontsize=9)
+            dt, ds = (g[c].iloc[-1] - g[c].iloc[0] for c in ("text_z", "survey_z"))
+            ax[3].plot(x, g["text_z"], "-o", color="#4c72b0", label=f"{tlab} ({dt:+.2f} SD)")
+            ax[3].plot(x, g["survey_z"], "--s", color="#dd8452", label=f"{slab} ({ds:+.2f} SD)")
+            ax[3].set_title(f"D. National trend (mean over states), {x[0]} to {x[-1]}:\n"
+                            + ("same direction" if dt * ds > 0 else "opposite directions"), fontsize=9)
             ax[3].set_ylabel("mean z (higher = less traditional)", fontsize=8)
             ax[3].legend(fontsize=7)
             ax[3].tick_params(labelsize=7)
