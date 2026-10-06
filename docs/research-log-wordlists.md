@@ -613,3 +613,25 @@ ATUS housework-share benchmark. Not "domestic work" alone: in the literature
 that usually means paid domestic workers (ILO C189), who are in the occupation
 list. Labels only; the code key, config category and file names stay
 `household`.
+
+## 2026-10-06 — Robustness: national trends on a balanced panel
+
+Question: is the national trend (mean over states per window) driven by
+which states have a model in which window? Check
+(`scripts/us_analysis/balanced.py`, `analysis/robustness-balanced-2000/`):
+windows 2000–09 … 2015–24 only (1995–2004 has 33 states), and only states
+with a score in all four windows (occupation 48, domestic and care work 47;
+dropped: Arizona, Arkansas, New Mexico, + Wyoming for domestic and care work).
+Word trajectories (3.1, 3.2): per word, only states with the word in vocab in
+all four windows (median 35 states per occupation, 16 per domestic/care term).
+
+| National mean (higher = less traditional) | 2000–09 | 2015–24 | change |
+|---|---:|---:|---:|
+| Occupation, all states | −0.0122 | −0.0049 | +0.0073 |
+| Occupation, balanced | −0.0122 | −0.0046 | +0.0076 |
+| Domestic and care work, all states | −0.0010 | −0.0096 | −0.0085 |
+| Domestic and care work, balanced | −0.0010 | −0.0098 | −0.0088 |
+
+Word level: 2000–09 → 2015–24 change, balanced vs all states, r = 0.92
+(occupations, 91.9% same sign) and 0.87 (domestic and care terms, 90.5% same
+sign). The trends are not a composition effect of states entering later.

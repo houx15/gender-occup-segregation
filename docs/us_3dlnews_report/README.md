@@ -52,11 +52,14 @@ us_3dlnews_report/
 │   ├── part2c_summary.md        II-C text–survey gap as an outcome
 │   ├── part3_summary.md         III  case selection + state profiles (3.1–3.3)
 │   ├── part3s_summary.md        III  nearest-neighbour words of selected terms
+│   ├── part_balanced_summary.md robustness: national trends on a balanced panel
 │   ├── figures_combined/        Figures 1–6
 │   ├── main/figures, main/tables  every step, main measures; file names start
 │   │                              with the plan step (1_4_..., 2b_..., 3_3_...)
 │   ├── robustness-<measure>/    Part I steps 1.4–1.7 rerun with another survey
 │   │                            measure or text category (list below)
+│   ├── robustness-balanced-2000/ national trends (1.2, 3.1, 3.2) on states observed
+│   │                            in every window from 2000–09
 │   └── data/                    analysis inputs: state × window panel,
 │                                occupation cells, domestic- and care-work terms
 └── archive/                     deprecated tables and outputs (first report version;
@@ -73,7 +76,9 @@ us_3dlnews_report/
 
 `atus-*` use ATUS time-use shares (women's share of housework, household
 activities, childcare) as the survey measure; `iat` / `explicit` are Project
-Implicit (subjective) measures. The study has two text domains, occupation and
+Implicit (subjective) measures. `robustness-balanced-2000` is a different kind of check: the national
+average trends (1.2, 3.1, 3.2) on a balanced panel, 2000–09 to 2015–24, with
+only states (or, per word, states with the word) observed in every window. The study has two text domains, occupation and
 domestic and care work; the earlier family-sphere list (home, kids, marriage, ...) is
 no longer used.
 

@@ -1,0 +1,3 @@
+word_list,n_words,r_change,same_sign_change,median_abs_diff,median_states_balanced
+occupations,62,0.9205169968770764,0.9193548387096774,0.0007184192612248244,35.0
+domestic- and care-work terms,21,0.8646707664991375,0.9047619047619048,0.0016084418961252761,16.0
