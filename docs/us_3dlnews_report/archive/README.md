@@ -17,3 +17,8 @@ family-sphere maps, heatmaps and change tables, and the robustness runs
 `robustness-household-text*` (household words with the old 6-word list).
 Household-work words (21-entry list) are now the main family text measure;
 family sphere is `analysis/robustness-family-sphere-text/`.
+
+Since 2026-10-06 (later the same day) the family-sphere list is dropped from
+the analysis entirely: the study has two text domains, occupation and
+household work. The family-sphere word list and its screening table stay in
+`wordlists/en/occupation_family/` as a record.

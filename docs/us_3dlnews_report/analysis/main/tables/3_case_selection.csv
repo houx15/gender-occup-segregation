@@ -24,21 +24,21 @@ occupation,occupation,largest text vs female-share discrepancy,secretary,-0.0289
 occupation,occupation,largest text vs female-share discrepancy,physician,0.025802991876788813,RND 1995–04 +0.0195 -> 2015–24 +0.0135; female share 0.32
 occupation,occupation,largest text vs female-share discrepancy,nurse,0.02303134562812413,RND 1995–04 +0.0321 -> 2015–24 +0.0485; female share 0.91
 occupation,occupation,largest text vs female-share discrepancy,broker,-0.02298329369630461,RND 1995–04 -0.0202 -> 2015–24 -0.0203; female share 0.49
-family,term (household),largest temporal change,parenting,0.027076797044412126,RND 1995–04 +0.0028 -> 2015–24 +0.0299
-family,term (household),largest temporal change,sewing,0.022259920833122115,RND 1995–04 -0.0049 -> 2015–24 +0.0173
-family,term (household),largest temporal change,caregiver,-0.021846115632485667,RND 1995–04 +0.0628 -> 2015–24 +0.0409
-family,term (household),most stable,meals,0.0013217702465337326,RND 1995–04 +0.0105 -> 2015–24 +0.0098
-family,term (household),most stable,laundry,0.002220382302045137,RND 1995–04 +0.0084 -> 2015–24 +0.0088
-family,term (household),most stable,stove,0.002882127769017401,RND 1995–04 -0.0098 -> 2015–24 -0.0138
-family,term (household),reversal,chores,-0.016632661154249925,RND 1995–04 +0.0104 -> 2015–24 -0.0062
-family,term (household),reversal,cleaning,-0.004792310739440633,RND 1995–04 +0.0044 -> 2015–24 -0.0004
-family,term (household),reversal,lunches,0.013612562933550246,RND 1995–04 -0.0002 -> 2015–24 +0.0134
-family,term (household),reversal,oven,-0.00582499501693501,RND 1995–04 +0.0012 -> 2015–24 -0.0047
-family,term (household),reversal,refrigerator,-0.015468291101381686,RND 1995–04 +0.0131 -> 2015–24 -0.0023
-family,term (household),reversal,sewing,0.022259920833122115,RND 1995–04 -0.0049 -> 2015–24 +0.0173
-family,term (household),strongest state heterogeneity,caregiver,0.019602272184604575,RND 1995–04 +0.0628 -> 2015–24 +0.0409
-family,term (household),strongest state heterogeneity,sewing,0.01942275906318646,RND 1995–04 -0.0049 -> 2015–24 +0.0173
-family,term (household),strongest state heterogeneity,cooking,0.018997070105712457,RND 1995–04 +0.0001 -> 2015–24 +0.0089
+household,term (household),largest temporal change,parenting,0.027076797044412126,RND 1995–04 +0.0028 -> 2015–24 +0.0299
+household,term (household),largest temporal change,sewing,0.022259920833122115,RND 1995–04 -0.0049 -> 2015–24 +0.0173
+household,term (household),largest temporal change,caregiver,-0.021846115632485667,RND 1995–04 +0.0628 -> 2015–24 +0.0409
+household,term (household),most stable,meals,0.0013217702465337326,RND 1995–04 +0.0105 -> 2015–24 +0.0098
+household,term (household),most stable,laundry,0.002220382302045137,RND 1995–04 +0.0084 -> 2015–24 +0.0088
+household,term (household),most stable,stove,0.002882127769017401,RND 1995–04 -0.0098 -> 2015–24 -0.0138
+household,term (household),reversal,chores,-0.016632661154249925,RND 1995–04 +0.0104 -> 2015–24 -0.0062
+household,term (household),reversal,cleaning,-0.004792310739440633,RND 1995–04 +0.0044 -> 2015–24 -0.0004
+household,term (household),reversal,lunches,0.013612562933550246,RND 1995–04 -0.0002 -> 2015–24 +0.0134
+household,term (household),reversal,oven,-0.00582499501693501,RND 1995–04 +0.0012 -> 2015–24 -0.0047
+household,term (household),reversal,refrigerator,-0.015468291101381686,RND 1995–04 +0.0131 -> 2015–24 -0.0023
+household,term (household),reversal,sewing,0.022259920833122115,RND 1995–04 -0.0049 -> 2015–24 +0.0173
+household,term (household),strongest state heterogeneity,caregiver,0.019602272184604575,RND 1995–04 +0.0628 -> 2015–24 +0.0409
+household,term (household),strongest state heterogeneity,sewing,0.01942275906318646,RND 1995–04 -0.0049 -> 2015–24 +0.0173
+household,term (household),strongest state heterogeneity,cooking,0.018997070105712457,RND 1995–04 +0.0001 -> 2015–24 +0.0089
 occupation,state pair,"similar baseline, divergent final",hawaii / oregon,0.0236861943490207,"baseline gap 0.0012, final gap 0.0237"
 occupation,state pair,"similar baseline, divergent final",missouri / vermont,0.0186187661719422,"baseline gap 0.0012, final gap 0.0186"
 occupation,state pair,"similar baseline, divergent final",hawaii / kansas,0.0159686268658359,"baseline gap 0.0008, final gap 0.0160"
@@ -70,34 +70,34 @@ occupation,state,weakest alignment (I.7),district_of_columbia,-0.046236063526738
 occupation,state,strongest alignment (I.7),new_york,0.476117202292621,"95% [0.02, 0.93]"
 occupation,state,strongest alignment (I.7),florida,0.4896654463506172,"95% [-0.03, 1.00]"
 occupation,state,strongest alignment (I.7),oklahoma,0.5514405445057543,"95% [0.04, 1.06]"
-family,state pair,"similar baseline, divergent final",delaware / virginia,0.0332285996869837,"baseline gap 0.0019, final gap 0.0332"
-family,state pair,"similar baseline, divergent final",indiana / louisiana,0.0284114309029244,"baseline gap 0.0037, final gap 0.0284"
-family,state pair,"similar baseline, divergent final",district_of_columbia / georgia,0.0251575736134789,"baseline gap 0.0025, final gap 0.0252"
-family,state pair,"similar baseline, divergent final",louisiana / tennessee,0.0247307402510534,"baseline gap 0.0010, final gap 0.0247"
-family,state pair,"similar baseline, divergent final",indiana / washington,0.0229467218280056,"baseline gap 0.0025, final gap 0.0229"
-family,state pair,"similar socioeconomic structure, divergent change",north_dakota / utah,0.0632332636075595,"socioeconomic distance 1.68 (z units), change gap 0.0632"
-family,state pair,"similar socioeconomic structure, divergent change",kansas / vermont,0.0429463969425897,"socioeconomic distance 1.52 (z units), change gap 0.0429"
-family,state pair,"similar socioeconomic structure, divergent change",nebraska / north_dakota,0.0407198135231331,"socioeconomic distance 1.50 (z units), change gap 0.0407"
-family,state pair,"similar socioeconomic structure, divergent change",alabama / tennessee,0.0362481110328534,"socioeconomic distance 0.79 (z units), change gap 0.0362"
-family,state pair,"similar socioeconomic structure, divergent change",missouri / oklahoma,0.0355204793817649,"socioeconomic distance 1.53 (z units), change gap 0.0355"
-family,state,largest move toward less traditional,oklahoma,0.0283482552191579,2000–09 -> 2015–24
-family,state,largest move toward less traditional,west_virginia,0.020650161450872898,2000–09 -> 2015–24
-family,state,largest move toward less traditional,nevada,0.019659942169349798,2000–09 -> 2015–24
-family,state,largest move toward less traditional,alabama,0.014282407906456499,2000–09 -> 2015–24
-family,state,largest move toward less traditional,kansas,0.013802042275632299,2000–09 -> 2015–24
-family,state,little change,massachusetts,3.7543479785799756e-05,2000–09 -> 2015–24
-family,state,little change,oregon,-0.0003168900150186012,2000–09 -> 2015–24
-family,state,little change,washington,-0.0005118554208346998,2000–09 -> 2015–24
-family,state,little change,new_york,-0.0006152623027195995,2000–09 -> 2015–24
-family,state,little change,iowa,-0.0006167296678787001,2000–09 -> 2015–24
-family,state,largest text-survey discrepancy,utah,2.9390938152535613,mean z(text) - z(survey)
-family,state,largest text-survey discrepancy,washington,1.8942180377104918,mean z(text) - z(survey)
-family,state,largest text-survey discrepancy,iowa,-1.847110894491832,mean z(text) - z(survey)
-family,state,largest text-survey discrepancy,idaho,1.4881026572608407,mean z(text) - z(survey)
-family,state,largest text-survey discrepancy,vermont,-1.4571345541709448,mean z(text) - z(survey)
-family,state,weakest alignment (I.7),vermont,-0.1605653409754,"95% [-0.36, 0.04]"
-family,state,weakest alignment (I.7),delaware,-0.1513900567911983,"95% [-0.34, 0.04]"
-family,state,weakest alignment (I.7),district_of_columbia,-0.1512734487543154,"95% [-0.31, 0.01]"
-family,state,strongest alignment (I.7),oklahoma,-0.0515932619602052,"95% [-0.25, 0.14]"
-family,state,strongest alignment (I.7),pennsylvania,-0.0283306485352953,"95% [-0.22, 0.16]"
-family,state,strongest alignment (I.7),utah,0.0313171097003454,"95% [-0.17, 0.23]"
+household,state pair,"similar baseline, divergent final",delaware / virginia,0.0332285996869837,"baseline gap 0.0019, final gap 0.0332"
+household,state pair,"similar baseline, divergent final",indiana / louisiana,0.0284114309029244,"baseline gap 0.0037, final gap 0.0284"
+household,state pair,"similar baseline, divergent final",district_of_columbia / georgia,0.0251575736134789,"baseline gap 0.0025, final gap 0.0252"
+household,state pair,"similar baseline, divergent final",louisiana / tennessee,0.0247307402510534,"baseline gap 0.0010, final gap 0.0247"
+household,state pair,"similar baseline, divergent final",indiana / washington,0.0229467218280056,"baseline gap 0.0025, final gap 0.0229"
+household,state pair,"similar socioeconomic structure, divergent change",north_dakota / utah,0.0632332636075595,"socioeconomic distance 1.68 (z units), change gap 0.0632"
+household,state pair,"similar socioeconomic structure, divergent change",kansas / vermont,0.0429463969425897,"socioeconomic distance 1.52 (z units), change gap 0.0429"
+household,state pair,"similar socioeconomic structure, divergent change",nebraska / north_dakota,0.0407198135231331,"socioeconomic distance 1.50 (z units), change gap 0.0407"
+household,state pair,"similar socioeconomic structure, divergent change",alabama / tennessee,0.0362481110328534,"socioeconomic distance 0.79 (z units), change gap 0.0362"
+household,state pair,"similar socioeconomic structure, divergent change",missouri / oklahoma,0.0355204793817649,"socioeconomic distance 1.53 (z units), change gap 0.0355"
+household,state,largest move toward less traditional,oklahoma,0.0283482552191579,2000–09 -> 2015–24
+household,state,largest move toward less traditional,west_virginia,0.020650161450872898,2000–09 -> 2015–24
+household,state,largest move toward less traditional,nevada,0.019659942169349798,2000–09 -> 2015–24
+household,state,largest move toward less traditional,alabama,0.014282407906456499,2000–09 -> 2015–24
+household,state,largest move toward less traditional,kansas,0.013802042275632299,2000–09 -> 2015–24
+household,state,little change,massachusetts,3.7543479785799756e-05,2000–09 -> 2015–24
+household,state,little change,oregon,-0.0003168900150186012,2000–09 -> 2015–24
+household,state,little change,washington,-0.0005118554208346998,2000–09 -> 2015–24
+household,state,little change,new_york,-0.0006152623027195995,2000–09 -> 2015–24
+household,state,little change,iowa,-0.0006167296678787001,2000–09 -> 2015–24
+household,state,largest text-survey discrepancy,utah,2.9390938152535613,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,washington,1.8942180377104918,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,iowa,-1.847110894491832,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,idaho,1.4881026572608407,mean z(text) - z(survey)
+household,state,largest text-survey discrepancy,vermont,-1.4571345541709448,mean z(text) - z(survey)
+household,state,weakest alignment (I.7),vermont,-0.1605653409754,"95% [-0.36, 0.04]"
+household,state,weakest alignment (I.7),delaware,-0.1513900567911983,"95% [-0.34, 0.04]"
+household,state,weakest alignment (I.7),district_of_columbia,-0.1512734487543154,"95% [-0.31, 0.01]"
+household,state,strongest alignment (I.7),oklahoma,-0.0515932619602052,"95% [-0.25, 0.14]"
+household,state,strongest alignment (I.7),pennsylvania,-0.0283306485352953,"95% [-0.22, 0.16]"
+household,state,strongest alignment (I.7),utah,0.0313171097003454,"95% [-0.17, 0.23]"

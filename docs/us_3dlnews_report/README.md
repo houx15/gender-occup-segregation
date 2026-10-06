@@ -28,8 +28,8 @@ notes §3.3) show **raw RND**: > 0 = closer to female words.
 | `figure1_validation.pdf` | top: occupation RND vs ACS female share, state means; bottom: national trends (occupation, household work) | 1.1–1.3 |
 | `figure2_survey.pdf` | text vs survey: state-window, between states, within states | 1.4–1.5 |
 | `figure3_reliability.pdf` | text volume vs uncertainty; state-specific alignment slopes | 1.6–1.7 |
-| `figure4_maps_{occupation,family}.pdf` | state maps, one per window (family = household-work words) | 2.1 |
-| `figure5_dynamics_{occupation,family}.pdf` | state × window heatmap; change 2000–09 → 2015–24 by state (family = household-work words) | 2.2–2.3 |
+| `figure4_maps_{occupation,household}.pdf` | state maps, one per window | 2.1 |
+| `figure5_dynamics_{occupation,household}.pdf` | state × window heatmap; change 2000–09 → 2015–24 by state | 2.2–2.3 |
 | `figure6_explanatory.pdf` | state predictors of the text score: between states (state averages) and within states (state + window FE) | II-B |
 
 ## Folder structure
@@ -56,7 +56,7 @@ us_3dlnews_report/
 │   ├── robustness-<measure>/    Part I steps 1.4–1.7 rerun with another survey
 │   │                            measure or text category (list below)
 │   └── data/                    analysis inputs: state × window panel,
-│                                occupation cells, family terms
+│                                occupation cells, household-work terms
 └── archive/                     deprecated tables and outputs (first report version;
                                  family-sphere-as-main analysis); do not cite
                                  (see archive/README.md)
@@ -67,15 +67,16 @@ us_3dlnews_report/
 | Domain | Text (main) | Survey (main) | Robustness folders |
 |---|---|---|---|
 | Occupation | occupation words (65 used) | ACS female share of our occupations | `duncan`, `female_emp_share`; `iat`, `explicit` (both domains) |
-| Family | household-work words (21 used) | ACS family index (6 measures) | `motherhood_emp_gap`, `motherhood_hours_gap`, `married_women_nilf`, `wife_earnings_share`, `wife_earns_more`, `gender_emp_gap`, `atus-housework`, `atus-household`, `atus-childcare`, `family-sphere-text`; `iat`, `explicit` |
+| Household work | household-work words (21 used) | ACS family index (6 measures) | `motherhood_emp_gap`, `motherhood_hours_gap`, `married_women_nilf`, `wife_earnings_share`, `wife_earns_more`, `gender_emp_gap`, `atus-housework`, `atus-household`, `atus-childcare`; `iat`, `explicit` |
 
 `atus-*` use ATUS time-use shares (women's share of housework, household
-activities, childcare) as the survey measure; `family-sphere-text` uses the
-family-sphere word list (home, kids, marriage, …; 20 used) as the text
-measure; `iat` / `explicit` are Project Implicit (subjective) measures.
+activities, childcare) as the survey measure; `iat` / `explicit` are Project
+Implicit (subjective) measures. The study has two text domains, occupation and
+household work; the earlier family-sphere list (home, kids, marriage, ...) is
+no longer used.
 
 ## Related documents (outside this folder)
 
 - Word-list decisions and evidence: [`../research-log-wordlists.md`](../research-log-wordlists.md)
 - Word lists and screening tables: `wordlists/en/occupation_family/`
-  (`occupation_grounding.csv`, `household_screening.csv`, `family_screening.csv`)
+  (`occupation_grounding.csv`, `household_screening.csv`)

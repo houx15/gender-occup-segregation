@@ -584,3 +584,19 @@ sphere is `robustness-family-sphere-text`.
 - Caveat: before 2005 a state's household score rests on few words (median 3
   of 21 in 1995–04, 6.5 in 2000–09); adjacent-window stability is low
   (r = 0.00, 0.18, 0.47, −0.01).
+
+## 2026-10-06 — Family sphere dropped; two domains: occupation and household work
+
+PI decision: the family-sphere list is removed from the US analysis (config,
+benchmarks, report, `scripts/us_analysis/`). The family domain is renamed
+household work throughout (files `*_household*`, Figures 4–5
+`*_household.pdf`). Survey benchmark unchanged: ACS family index (main), ATUS
+housework / household / childcare shares and Project Implicit (robustness).
+
+Direction re-checked: RND > 0 = word closer to the female centre (Garg Eq. 3,
+`scripts/common/metrics.py`); the analysis score is −RND (`TEXT_SIGN`), so
+household words closer to female words = lower = more traditional. Word level
+agrees (caregiver +0.044, childcare +0.034, parenting +0.028, daycare +0.027
+raw RND, the most female-leaning entries). Survey side: women's housework
+share and the ACS family index are "higher = more traditional" and also
+flipped once. Tested in `tests/test_us_analysis.py::test_household_direction`.
