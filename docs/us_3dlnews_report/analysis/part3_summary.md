@@ -1,6 +1,6 @@
 # Part III — case selection
 
-Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv.
+Rules in scripts/us_analysis/part3.py; full table tables/3_case_selection.csv. Survey-based state rules use the survey composite (mean of the z-scored direct benchmarks) and the 1.7 state slopes averaged over the direct benchmarks.
 
 | domain | level | criterion | case | value | details |
 |---|---|---|---|---|---|

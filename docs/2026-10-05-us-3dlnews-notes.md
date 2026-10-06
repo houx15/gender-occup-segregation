@@ -126,8 +126,10 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
    mean RND; with gaps, a state is not shifted by which words it lacks.
 5. **Uncertainty.** Bootstrap over words (resample with replacement, refit;
    68% interval) and an 80% word-subsample band (100 rounds, 95% interval).
+   The 68% half-width is used as the standard error of a state-window score
+   (≈ 1 SE); 95% intervals in the analysis are 1.96 × that.
 
-| Category | Window | States | Words per state, median | Mean RND | SD across states | CI half-width, median |
+| Category | Window | States | Words per state, median | Mean RND | SD across states | 68% CI half-width (≈ 1 SE), median |
 |---|---|---:|---:|---:|---:|---:|
 | Occupation | 1995–2004 | 33 | 34 | −0.0093 | 0.0142 | 0.0041 |
 | | 2000–09 | 48 | 48.5 | −0.0122 | 0.0111 | 0.0036 |
@@ -321,3 +323,51 @@ models use complete cases.
 Paid family leave: policy timing (plan 2.6) in
 `analysis/main/tables/2_6_policy_timing.csv` — 2 of 10 states have a window
 fully before and one fully after benefits began, too few for DID.
+
+## 6. Analysis methods (`scripts/us_analysis/`)
+
+All scores oriented higher = less traditional (§4.2); models on z-scores, so
+coefficients are standardized.
+
+**Validation (1.4).** For each text score and each direct benchmark (§4.2,
+role "Validation"), the slope of the survey measure on the text score in
+three dimensions:
+
+| Dimension | Data | Model | SE |
+|---|---|---|---|
+| Pooled | state-windows | OLS | clustered by state |
+| Between states (state dimension) | state means over windows (n ≤ 51) | OLS | HC1 |
+| Within states (time dimension) | state-windows | OLS with state and window fixed effects (change beyond each state's mean and the national trend) | clustered by state |
+
+The national trend (mean over states per window, text and survey) is shown
+descriptively; with 4–5 windows it is not tested. Figures also give Pearson r
+and Spearman ρ (rank correlation, robust to outliers such as DC on Duncan).
+
+**Correlates (1.9).** The same three coefficients for the related survey
+measures (role "Correlate"), both domains, as one coefficient table
+(coefficient, SE, stars: * p < 0.05, ** < 0.01, *** < 0.001), with
+Benjamini–Hochberg q-values over the correlates within each column and a
+version without DC.
+
+**Reliability (1.6–1.7), per direct benchmark.** 1.6: correlation between the
+absolute residual of the pooled survey-on-text regression and log10 tokens
+of the state-window model. 1.7: linear mixed model with random intercepts and
+random text slopes by state (REML); state slope = common slope + state
+deviation, 95% interval from both variances. When the SD of the state slopes
+is below the SE of the common slope, the state slopes are pooled to the
+common slope and figures show one band for the common interval.
+
+**Survey composite (II-C, Part III).** Where one survey value per state-window
+is needed: the mean of the domain's z-scored direct benchmarks (those
+available in the window). Part III alignment uses each state's 1.7 slope
+averaged over the direct benchmarks.
+
+**Explanatory models (II-B).** Text score on blocks of state predictors
+(§5), one model per block: between states (state means, HC1) and within
+states (state + window FE, SE clustered by state). Associational.
+
+**National trends, balanced panel.** The national mean per window (1.2,
+3.1, 3.2) recomputed from 2000–09 on states observed in every window (per
+word: states with the word in every window), to rule out changes in which
+states are observed.
+

@@ -74,11 +74,15 @@ Standardized coefficients of the survey measure on the text score (both oriented
 
 ### 1.6 Discrepancy vs text volume
 
+r between |residual of the pooled survey-on-text regression| and log10 tokens (< 0: less mismatch where there is more text).
+
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | occupation | -0.134 | 0.041 | -0.175 | 232 | 0.98 | 0.812 |
 
 ### 1.7 Hierarchical state-specific slopes
+
+Mixed model, random intercepts and text slopes by state (REML). slopes_pooled: SD of the state slopes < SE of the common slope, so the states do not differ detectably.
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|
@@ -88,12 +92,16 @@ Standardized coefficients of the survey measure on the text score (both oriented
 
 ### 1.6 Discrepancy vs text volume
 
+r between |residual of the pooled survey-on-text regression| and log10 tokens (< 0: less mismatch where there is more text).
+
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | occupation | -0.054 | 0.448 | -0.068 | 199 | 0.868 | 0.813 |
 | household | 0.001 | 0.988 | 0.001 | 198 | 0.951 | 0.909 |
 
 ### 1.7 Hierarchical state-specific slopes
+
+Mixed model, random intercepts and text slopes by state (REML). slopes_pooled: SD of the state slopes < SE of the common slope, so the states do not differ detectably.
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|
@@ -104,12 +112,16 @@ Standardized coefficients of the survey measure on the text score (both oriented
 
 ### 1.6 Discrepancy vs text volume
 
+r between |residual of the pooled survey-on-text regression| and log10 tokens (< 0: less mismatch where there is more text).
+
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | occupation | 0.027 | 0.708 | 0.032 | 199 | 0.815 | 0.839 |
 | household | 0.102 | 0.152 | 0.128 | 198 | 0.762 | 0.893 |
 
 ### 1.7 Hierarchical state-specific slopes
+
+Mixed model, random intercepts and text slopes by state (REML). slopes_pooled: SD of the state slopes < SE of the common slope, so the states do not differ detectably.
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|
@@ -120,11 +132,15 @@ Standardized coefficients of the survey measure on the text score (both oriented
 
 ### 1.6 Discrepancy vs text volume
 
+r between |residual of the pooled survey-on-text regression| and log10 tokens (< 0: less mismatch where there is more text).
+
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | household | -0.382 | 0.0 | -0.58 | 198 | 1.204 | 0.487 |
 
 ### 1.7 Hierarchical state-specific slopes
+
+Mixed model, random intercepts and text slopes by state (REML). slopes_pooled: SD of the state slopes < SE of the common slope, so the states do not differ detectably.
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|
@@ -134,11 +150,15 @@ Standardized coefficients of the survey measure on the text score (both oriented
 
 ### 1.6 Discrepancy vs text volume
 
+r between |residual of the pooled survey-on-text regression| and log10 tokens (< 0: less mismatch where there is more text).
+
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | household | -0.304 | 0.0 | -0.44 | 198 | 1.101 | 0.586 |
 
 ### 1.7 Hierarchical state-specific slopes
+
+Mixed model, random intercepts and text slopes by state (REML). slopes_pooled: SD of the state slopes < SE of the common slope, so the states do not differ detectably.
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|
@@ -148,11 +168,15 @@ Standardized coefficients of the survey measure on the text score (both oriented
 
 ### 1.6 Discrepancy vs text volume
 
+r between |residual of the pooled survey-on-text regression| and log10 tokens (< 0: less mismatch where there is more text).
+
 | domain | r_abs_error_log_tokens | p | slope_per_log10_tokens | n | mean_abs_error_q1 | mean_abs_error_q5 |
 |---|---|---|---|---|---|---|
 | household | -0.304 | 0.0 | -0.482 | 198 | 1.02 | 0.503 |
 
 ### 1.7 Hierarchical state-specific slopes
+
+Mixed model, random intercepts and text slopes by state (REML). slopes_pooled: SD of the state slopes < SE of the common slope, so the states do not differ detectably.
 
 | domain | global_slope | global_se | slope_sd | slopes_pooled | states_ci_excl_0 |
 |---|---|---|---|---|---|

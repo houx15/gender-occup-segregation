@@ -14,7 +14,8 @@ notes §3.3) show **raw RND**: > 0 = closer to female words.
 
 1. **Methods and data** — [`../2026-10-05-us-3dlnews-notes.md`](../2026-10-05-us-3dlnews-notes.md):
    units and windows, corpus, word lists, how the score is computed, survey
-   measures, weights, missing data, sample sizes, context predictors.
+   measures, weights, missing data, sample sizes, context predictors, and
+   the analysis models (§6).
 2. **Headline figures** — `analysis/figures_combined/` (Figures 1–6, below).
 3. **Results text** — [`analysis/analysis_summary.md`](analysis/analysis_summary.md):
    all parts in one file, numbers and tables. The per-part files
@@ -57,7 +58,7 @@ us_3dlnews_report/
 │   ├── part3s_summary.md        III  nearest-neighbour words of selected terms
 │   ├── part_balanced_summary.md robustness: national trends on a balanced panel
 │   ├── figures_combined/        Figures 1–6
-│   ├── main/figures, main/tables  every step, main measures; file names start
+│   ├── main/figures, main/tables  every step; file names start
 │   │                              with the plan step (1_4_..., 2b_..., 3_3_...)
 │   ├── validation-MEASURE/      reliability (1.6 mismatch vs volume, 1.7 state
 │   │                            slopes) for each direct benchmark (list below)
