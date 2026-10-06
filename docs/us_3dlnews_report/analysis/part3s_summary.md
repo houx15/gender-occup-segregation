@@ -66,6 +66,14 @@
 - 2010–19: culinary (5), cuisine (5), pastry (4), restaurant (4), dishes (4), gourmet (4), kitchen (2), restaurants (2)
 - 2015–24: pastry (5), restaurant (5), culinary (4), cuisine (4), michelin (3), gourmet (3), sous (2), dishes (2)
 
+**chores**
+
+- 1995–04: cows (1), chickens (1), crocheting (1), relax (1), baked (1), cooked (1), allan (1), ethic (1)
+- 2000–09: tasks (4), errands (3), snacks (2), tending (2), indoors (1), parenting (1), relying (1), homework (1)
+- 2005–14: schoolwork (3), mowing (2), tasks (2), juggle (2), crocheting (2), workday (2), errands (2), tending (2)
+- 2010–19: homework (4), mowing (3), tasks (3), tiring (2), bedtime (2), errands (2), milking (2), mattresses (1)
+- 2015–24: errands (3), pleasures (2), veggies (2), tasks (2), journaling (2), homework (2), crochet (2), schoolwork (2)
+
 **cleaning**
 
 - 1995–04: washing (4), installing (2), sink (2), surfaces (2), equipped (2), drain (2), piles (2), maintenance (2)
@@ -89,14 +97,6 @@
 - 2005–14: designs (5), design (4), fashion (4), couture (3), fashions (3), chic (2), fashionable (2), apparel (2)
 - 2010–19: design (5), designs (5), fashion (4), handbags (3), sculptors (3), artists (3), architect (2), couture (2)
 - 2015–24: design (5), designs (5), fashion (4), architects (3), artists (2), architect (2), artist (2), graphic (2)
-
-**dishes**
-
-- 1995–04: mashed (2), baked (2), salads (2), spinach (2), pasta (2), desserts (2), sandwiches (1), onions (1)
-- 2000–09: salads (5), pasta (5), appetizers (3), salad (3), garlic (3), shrimp (2), entrees (2), sauce (2)
-- 2005–14: salads (5), sauces (4), soups (3), dish (3), macaroni (3), menu (3), veal (2), appetizer (2)
-- 2010–19: salads (5), entrees (5), soups (5), dish (3), menu (3), parmesan (3), flavorful (3), dumplings (2)
-- 2015–24: soups (5), entrees (5), dish (4), salads (3), menu (3), cuisine (2), meatballs (2), marinated (2)
 
 **doctor**
 
@@ -162,13 +162,21 @@
 - 2010–19: inspections (5), inspection (5), inspected (5), compliance (2), osha (2), oig (2), violations (2), oepa (1)
 - 2015–24: inspection (5), inspections (5), inspected (5), osha (4), department (4), oig (3), unannounced (2), investigators (2)
 
-**married**
+**lunches**
 
-- 1995–04: divorced (5), marriage (5), marry (4), baptized (2), wife (2), homemaker (2), wed (2), husband (2)
-- 2000–09: divorced (5), wife (5), marry (4), marrying (4), marriage (4), husband (3), sweetheart (3), survives (2)
-- 2005–14: divorced (5), wife (5), husband (5), marry (5), remarried (4), marrying (4), marriage (4), born (4)
-- 2010–19: wife (5), divorced (5), husband (5), remarried (5), marrying (5), marry (5), marriage (4), born (4)
-- 2015–24: wife (5), divorced (5), husband (5), marriage (5), marrying (5), graduated (4), born (4), marry (4)
+- 1995–04: meals (2), cakes (2), snacks (1), catering (1), sipping (1), buffet (1), gourmet (1), catered (1)
+- 2000–09: sandwiches (3), snacks (3), salads (2), dinners (2), pizzas (2), lunch (2), buffet (1), corned (1)
+- 2005–14: salads (4), lunch (3), dinners (3), breakfasts (3), meals (3), soups (3), meal (3), appetizers (2)
+- 2010–19: lunch (5), meals (5), meal (5), nutritious (3), cafeterias (3), breakfast (3), breakfasts (2), dinners (2)
+- 2015–24: meals (5), lunch (5), breakfasts (4), meal (4), breakfast (4), pantries (4), dinners (3), snacks (3)
+
+**meals**
+
+- 1995–04: cooked (3), baked (3), dinners (3), pasta (3), snacks (3), lunches (2), salads (2), sandwiches (2)
+- 2000–09: salads (4), dessert (4), cooked (4), desserts (3), delicious (3), roast (2), appetizers (2), sandwiches (2)
+- 2005–14: salads (5), lunch (4), delicious (4), lunches (3), cooked (3), appetizer (3), breakfast (3), soups (3)
+- 2010–19: nutritious (5), lunch (5), lunches (4), food (4), cooked (4), delicious (4), soups (4), entrees (3)
+- 2015–24: lunch (5), nutritious (5), lunches (5), food (5), cooked (4), breakfast (4), breakfasts (3), delicious (3)
 
 **nurse**
 
@@ -177,6 +185,22 @@
 - 2005–14: nursing (5), physicians (5), patients (5), hospital (5), practitioner (4), doctors (3), pediatric (3), therapists (3)
 - 2010–19: doctors (5), physicians (5), patients (5), practitioner (4), patient (4), nursing (4), icu (4), neonatal (4)
 - 2015–24: doctors (5), patients (5), patient (5), nursing (5), physicians (5), practitioner (4), icu (4), rn (3)
+
+**oven**
+
+- 1995–04: onions (3), roasted (3), slices (2), platter (2), spinach (2), chopped (1), dip (1), vinegar (1)
+- 2000–09: stove (3), frying (3), garlic (3), pans (2), chunks (2), onions (2), mashed (2), eggplant (2)
+- 2005–14: stove (4), ovens (3), microwave (2), flakes (2), baking (2), saut (2), roasted (2), teaspoon (2)
+- 2010–19: stove (4), ovens (3), toppings (2), mozzarella (2), skillet (2), tablespoons (2), teaspoon (2), microwave (1)
+- 2015–24: dough (4), skillet (3), stove (3), ovens (3), broth (3), parmesan (3), microwave (2), roasted (2)
+
+**parenting**
+
+- 1995–04: yoga (2), enroll (1), rigorous (1), workshops (1), parental (1), counseling (1), nurturing (1), handwriting (1)
+- 2000–09: literacy (2), strategies (2), stresses (2), mentoring (2), tutoring (2), autistic (2), coping (2), parental (2)
+- 2005–14: caregivers (2), adolescents (2), empowering (2), cognitive (2), autism (2), instill (1), tutoring (1), esteem (1)
+- 2010–19: adhd (3), motherhood (3), adolescents (3), fatherhood (2), interpersonal (2), counseling (2), parental (1), fourough (1)
+- 2015–24: coping (3), children (3), counseling (3), fatherhood (2), mindfulness (2), adhd (2), motherhood (2), socialization (2)
 
 **parents**
 
@@ -218,6 +242,14 @@
 - 2010–19: attorney (5), prosecution (5), prosecuting (4), attorneys (4), trial (4), prosecuted (3), jury (3), prosecutorial (2)
 - 2015–24: attorney (5), prosecution (5), attorneys (5), prosecuting (5), judge (3), prosecuted (3), prosecute (3), trial (3)
 
+**refrigerator**
+
+- 1995–04: stove (3), sink (2), chunks (2), container (2), piles (1), peanut (1), dough (1), washing (1)
+- 2000–09: freezer (4), oven (3), appliances (3), stove (2), tub (2), fridge (2), pots (2), cardboard (2)
+- 2005–14: appliances (4), freezer (4), fridge (3), microwave (3), trays (3), stove (2), dryer (2), heaters (2)
+- 2010–19: microwave (4), utensils (3), closets (3), fridge (3), freezers (2), ovens (2), washers (2), trays (2)
+- 2015–24: freezer (4), microwave (4), fridge (4), freezers (3), heaters (3), ovens (3), coolers (3), mattresses (2)
+
 **relatives**
 
 - 1995–04: slain (2), friends (2), uncles (2), acquaintances (2), estranged (2), cousins (2), family (2), solace (2)
@@ -233,6 +265,14 @@
 - 2005–14: treasurer (5), president (4), vice (3), treasury (3), adviser (3), aide (3), appointee (2), aides (2)
 - 2010–19: treasurer (5), president (5), aides (4), vice (4), kissinger (2), aide (2), adviser (2), pompeo (2)
 - 2015–24: treasurer (5), aides (4), president (3), parliamentarian (2), pompeo (2), karine (2), sens (2), vice (2)
+
+**sewing**
+
+- 1995–04: gardening (3), knitting (2), baking (2), cooking (2), crafts (2), stove (2), landscaping (2), crocheting (1)
+- 2000–09: knitting (4), baking (4), quilting (3), hobbies (3), gardening (3), crafts (3), quilts (2), pottery (2)
+- 2005–14: knitting (4), quilting (4), woodworking (4), crocheting (3), gardening (3), quilts (3), sew (2), seamstress (2)
+- 2010–19: quilting (5), sew (5), woodworking (5), knitting (4), seamstress (4), crocheting (3), gardening (3), crochet (2)
+- 2015–24: quilting (5), knitting (5), woodworking (5), crochet (4), sew (4), embroidery (4), seamstress (4), fabrics (4)
 
 **siblings**
 

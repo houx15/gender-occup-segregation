@@ -57,8 +57,9 @@ us_3dlnews_report/
 │   │                            measure or text category (list below)
 │   └── data/                    analysis inputs: state × window panel,
 │                                occupation cells, family terms
-└── archive/                     deprecated tables from the first report version;
-                                 do not cite (see archive/README.md)
+└── archive/                     deprecated tables and outputs (first report version;
+                                 family-sphere-as-main analysis); do not cite
+                                 (see archive/README.md)
 ```
 
 ## Main and robustness measures
@@ -66,14 +67,15 @@ us_3dlnews_report/
 | Domain | Text (main) | Survey (main) | Robustness folders |
 |---|---|---|---|
 | Occupation | occupation words (65 used) | ACS female share of our occupations | `duncan`, `female_emp_share`; `iat`, `explicit` (both domains) |
-| Family | family-sphere words (20 used) | ACS family index (6 measures) | `motherhood_emp_gap`, `motherhood_hours_gap`, `married_women_nilf`, `wife_earnings_share`, `wife_earns_more`, `gender_emp_gap`, `atus-household`, `atus-childcare`, `household-text`, `household-text-atus`; `iat`, `explicit` |
+| Family | household-work words (21 used) | ACS family index (6 measures) | `motherhood_emp_gap`, `motherhood_hours_gap`, `married_women_nilf`, `wife_earnings_share`, `wife_earns_more`, `gender_emp_gap`, `atus-housework`, `atus-household`, `atus-childcare`, `family-sphere-text`; `iat`, `explicit` |
 
-`household-text` uses the household-work word list as the text measure;
-`atus-*` use ATUS time-use shares as the survey measure; `iat` / `explicit`
-are Project Implicit (subjective) measures.
+`atus-*` use ATUS time-use shares (women's share of housework, household
+activities, childcare) as the survey measure; `family-sphere-text` uses the
+family-sphere word list (home, kids, marriage, …; 20 used) as the text
+measure; `iat` / `explicit` are Project Implicit (subjective) measures.
 
 ## Related documents (outside this folder)
 
 - Word-list decisions and evidence: [`../research-log-wordlists.md`](../research-log-wordlists.md)
 - Word lists and screening tables: `wordlists/en/occupation_family/`
-  (`occupation_grounding.csv`, `family_screening.csv`)
+  (`occupation_grounding.csv`, `household_screening.csv`, `family_screening.csv`)

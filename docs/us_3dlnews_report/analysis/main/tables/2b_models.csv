@@ -79,83 +79,83 @@ occupation,within states (state + window FE),all blocks,policy,abortion_restrict
 occupation,within states (state + window FE),all blocks,political & cultural,gop_two_party_share,1.485212944226759,3.030533101873881,0.624075122798498,79,0.09464727505586101
 occupation,within states (state + window FE),all blocks,political & cultural,citizen_ideology,1.281232868695122,4.414199004440936,0.7716229756642669,79,0.09464727505586101
 occupation,within states (state + window FE),all blocks,political & cultural,evangelical_lds_share,2.937463437425797,8.077870698990989,0.7161243996659364,79,0.09464727505586101
-family,between states,socioeconomic,socioeconomic,log_real_gdp_pc,0.1555701014987349,0.2832403242592979,0.5828330392883017,50,0.11157049700204635
-family,between states,socioeconomic,socioeconomic,log_real_income_pc,-0.44205770175408343,0.528542351723176,0.40294600215284837,50,0.11157049700204635
-family,between states,socioeconomic,socioeconomic,ba_share,0.18374994597868488,0.3476124338334099,0.5970789413641981,50,0.11157049700204635
-family,between states,socioeconomic,socioeconomic,metro_share,0.27164265112420743,0.14190276951969602,0.05558347282909275,50,0.11157049700204635
-family,between states,socioeconomic,socioeconomic,unemployment_rate,-0.2364707517991309,0.2232786537693834,0.28956172578302597,50,0.11157049700204635
-family,between states,socioeconomic,socioeconomic,manufacturing_share,-0.09180224312067045,0.27791507573016644,0.7411545523858245,50,0.11157049700204635
-family,between states,socioeconomic,socioeconomic,service_share,0.06071221820300467,0.31474158300604105,0.8470408511891541,50,0.11157049700204635
-family,between states,gendered labour market,gendered labour market,women_lfp,-0.006654908714388985,0.17704544500757663,0.9700156149672546,51,0.0800061598145827
-family,between states,gendered labour market,gendered labour market,duncan,-0.14293335366110962,0.2353167291545714,0.5435799273634248,51,0.0800061598145827
-family,between states,gendered labour market,gendered labour market,gender_wage_gap,-0.2757448182162902,0.21671698645749393,0.20324066187635237,51,0.0800061598145827
-family,between states,gendered labour market,gendered labour market,female_share_managers,-0.1277756609933259,0.187605646896337,0.49581680065589073,51,0.0800061598145827
-family,between states,gendered labour market,gendered labour market,female_share_professionals,0.09246037441019352,0.20857324257829943,0.6575492551936519,51,0.0800061598145827
-family,between states,policy,policy,pfl_share,-0.051403806776251094,0.053250195802900885,0.33438147536260543,47,0.062468603848362725
-family,between states,policy,policy,universal_prek,-0.09573986460988121,0.13391113470791585,0.4746394834493596,47,0.062468603848362725
-family,between states,policy,policy,equal_pay_law,0.14585195902703457,0.15455132573171504,0.34531677957368834,47,0.062468603848362725
-family,between states,policy,policy,so_employment_law,0.1636593357366183,0.14560244994535157,0.26100666848762544,47,0.062468603848362725
-family,between states,policy,policy,abortion_restrictions,0.09461268019901851,0.12573989514140105,0.45178194062325283,47,0.062468603848362725
-family,between states,political & cultural,political & cultural,gop_two_party_share,-0.15823695004662397,0.21949785631944746,0.47096839262034373,50,0.03588217490308743
-family,between states,political & cultural,political & cultural,citizen_ideology,0.1096759788450375,0.26799613581430665,0.6823601466707699,50,0.03588217490308743
-family,between states,political & cultural,political & cultural,evangelical_lds_share,0.10580004800507285,0.2890378038809656,0.7143335492708278,50,0.03588217490308743
-family,between states,all blocks,socioeconomic,log_real_gdp_pc,0.34074947886561874,0.3465814601537365,0.3255223790640952,47,0.4157500164702247
-family,between states,all blocks,socioeconomic,log_real_income_pc,-0.4093710688497669,0.7510848760955718,0.5857262196490081,47,0.4157500164702247
-family,between states,all blocks,socioeconomic,ba_share,0.03082497491210153,0.4478244738133446,0.9451227760773949,47,0.4157500164702247
-family,between states,all blocks,socioeconomic,metro_share,-0.0027376267038699276,0.26477868578670183,0.9917505778199358,47,0.4157500164702247
-family,between states,all blocks,socioeconomic,unemployment_rate,-0.24858790195040886,0.2187662111674747,0.25582365617931824,47,0.4157500164702247
-family,between states,all blocks,socioeconomic,manufacturing_share,-0.7687039012372054,0.5781339060431845,0.18364037076454176,47,0.4157500164702247
-family,between states,all blocks,socioeconomic,service_share,-0.844156867820604,0.584151276977724,0.14842986752541557,47,0.4157500164702247
-family,between states,all blocks,gendered labour market,women_lfp,-0.08221054874142336,0.30440386007874376,0.7871059003091396,47,0.4157500164702247
-family,between states,all blocks,gendered labour market,duncan,-0.11823459908840081,0.5208302459174089,0.8204145853281132,47,0.4157500164702247
-family,between states,all blocks,gendered labour market,gender_wage_gap,-0.05697264887745601,0.30462319618174094,0.8516397559861351,47,0.4157500164702247
-family,between states,all blocks,gendered labour market,female_share_managers,0.06285867454254036,0.24688132912939248,0.7990236485579824,47,0.4157500164702247
-family,between states,all blocks,gendered labour market,female_share_professionals,-0.15651676030141198,0.32647264332060644,0.6316415116266969,47,0.4157500164702247
-family,between states,all blocks,policy,pfl_share,-0.049691065665733974,0.12247320556476997,0.6849409250519877,47,0.4157500164702247
-family,between states,all blocks,policy,universal_prek,-0.06482713973588408,0.15819792010379846,0.6819636472087789,47,0.4157500164702247
-family,between states,all blocks,policy,equal_pay_law,0.07757751033634157,0.16423403290096378,0.6366701868869606,47,0.4157500164702247
-family,between states,all blocks,policy,so_employment_law,-0.27584893156968365,0.2255256849237793,0.2212777516721789,47,0.4157500164702247
-family,between states,all blocks,policy,abortion_restrictions,0.23944740192636801,0.14952258767713458,0.10928549568434422,47,0.4157500164702247
-family,between states,all blocks,political & cultural,gop_two_party_share,-1.2315786191929765,0.5515319709118767,0.025548020354445016,47,0.4157500164702247
-family,between states,all blocks,political & cultural,citizen_ideology,-0.2891502594139705,0.26100870704863144,0.26794023344408213,47,0.4157500164702247
-family,between states,all blocks,political & cultural,evangelical_lds_share,-0.006398656136472454,0.3949677458100619,0.9870744746072462,47,0.4157500164702247
-family,within states (state + window FE),socioeconomic,socioeconomic,log_real_gdp_pc,0.2617237273348758,0.519846057976619,0.6146381502303568,227,0.027083193717802545
-family,within states (state + window FE),socioeconomic,socioeconomic,log_real_income_pc,-0.24502124174851825,0.6703233980032115,0.7147181216188047,227,0.027083193717802545
-family,within states (state + window FE),socioeconomic,socioeconomic,ba_share,0.08049241746672847,0.9802929871205512,0.934558786625835,227,0.027083193717802545
-family,within states (state + window FE),socioeconomic,socioeconomic,metro_share,0.3772796933318216,0.18226597550711593,0.038457932694185196,227,0.027083193717802545
-family,within states (state + window FE),socioeconomic,socioeconomic,unemployment_rate,0.5122470553711511,0.24209068781926504,0.0343507241443237,227,0.027083193717802545
-family,within states (state + window FE),socioeconomic,socioeconomic,manufacturing_share,-0.0862421543982572,1.1937762572150223,0.9424084080076051,227,0.027083193717802545
-family,within states (state + window FE),socioeconomic,socioeconomic,service_share,-0.34088931739459505,0.8750929536998989,0.6968719871054131,227,0.027083193717802545
-family,within states (state + window FE),gendered labour market,gendered labour market,women_lfp,-0.35043275367615667,0.6866541642138443,0.6098075025044656,232,0.023024167433457476
-family,within states (state + window FE),gendered labour market,gendered labour market,duncan,-0.500712057948812,0.7695276923338809,0.5152566177745463,232,0.023024167433457476
-family,within states (state + window FE),gendered labour market,gendered labour market,gender_wage_gap,0.7987062118484867,0.35699572095725224,0.025266796792478112,232,0.023024167433457476
-family,within states (state + window FE),gendered labour market,gendered labour market,female_share_managers,-0.16418758293158264,0.4250059060607006,0.699260907581138,232,0.023024167433457476
-family,within states (state + window FE),gendered labour market,gendered labour market,female_share_professionals,-0.018639916006122303,0.5039449969622192,0.9704945762460013,232,0.023024167433457476
-family,within states (state + window FE),policy,policy,pfl_share,0.004189989485837217,0.08837874438205463,0.9621868810404535,79,0.0810097797463698
-family,within states (state + window FE),policy,policy,universal_prek,-0.2310572753978713,0.5243807223791304,0.6594817123016754,79,0.0810097797463698
-family,within states (state + window FE),policy,policy,equal_pay_law,0.07824684074310684,0.25673794562691243,0.7605389077160915,79,0.0810097797463698
-family,within states (state + window FE),policy,policy,so_employment_law,-1.4071671621884896,0.5815884149208675,0.015540832656613534,79,0.0810097797463698
-family,within states (state + window FE),policy,policy,abortion_restrictions,0.0463194163868616,1.134056893305136,0.9674202640434726,79,0.0810097797463698
-family,within states (state + window FE),political & cultural,political & cultural,gop_two_party_share,0.07523665293089146,0.3773190137524496,0.8419514326631874,177,0.015613930200211068
-family,within states (state + window FE),political & cultural,political & cultural,citizen_ideology,-0.7700232588655331,0.7613960969382347,0.3118581701568235,177,0.015613930200211068
-family,within states (state + window FE),political & cultural,political & cultural,evangelical_lds_share,0.03333081303756447,0.46053149632137125,0.942303745844529,177,0.015613930200211068
-family,within states (state + window FE),all blocks,socioeconomic,log_real_gdp_pc,-8.51571419224369,4.2668567666803305,0.045957701296180875,79,0.22203765868378744
-family,within states (state + window FE),all blocks,socioeconomic,log_real_income_pc,14.957088160005418,8.624211679260938,0.08286244428396766,79,0.22203765868378744
-family,within states (state + window FE),all blocks,socioeconomic,ba_share,0.029800871314886512,10.246145873016594,0.9976793594497444,79,0.22203765868378744
-family,within states (state + window FE),all blocks,socioeconomic,metro_share,-21.137705242453436,15.112387888726301,0.16190279942359576,79,0.22203765868378744
-family,within states (state + window FE),all blocks,socioeconomic,unemployment_rate,0.10854201862509011,2.1605771367000073,0.9599331194721318,79,0.22203765868378744
-family,within states (state + window FE),all blocks,socioeconomic,manufacturing_share,-7.265098715476141,10.246773398561098,0.47831621774149524,79,0.22203765868378744
-family,within states (state + window FE),all blocks,socioeconomic,service_share,2.4021459057797294,6.8582500296722175,0.7261462895902981,79,0.22203765868378744
-family,within states (state + window FE),all blocks,gendered labour market,women_lfp,-12.702721331258248,10.349981099337498,0.2197029756328326,79,0.22203765868378744
-family,within states (state + window FE),all blocks,gendered labour market,duncan,-0.6132254094130181,3.931950808339285,0.8760648792107623,79,0.22203765868378744
-family,within states (state + window FE),all blocks,gendered labour market,gender_wage_gap,-0.46495775148036034,2.700839521416787,0.8633172102208467,79,0.22203765868378744
-family,within states (state + window FE),all blocks,gendered labour market,female_share_managers,-1.087849725805161,4.349708120263677,0.8025121983135648,79,0.22203765868378744
-family,within states (state + window FE),all blocks,gendered labour market,female_share_professionals,-2.188381109282009,5.414798667799112,0.6861037460362256,79,0.22203765868378744
-family,within states (state + window FE),all blocks,policy,pfl_share,0.19840542083088855,0.23709322511095218,0.40269122077915265,79,0.22203765868378744
-family,within states (state + window FE),all blocks,policy,universal_prek,1.279776184523365,1.0348089400693916,0.21618844114260816,79,0.22203765868378744
-family,within states (state + window FE),all blocks,policy,equal_pay_law,-1.1279490125079643,3.216676995522006,0.725845990086352,79,0.22203765868378744
-family,within states (state + window FE),all blocks,policy,so_employment_law,-1.4306693750543402,1.1838263352682943,0.22685004414998533,79,0.22203765868378744
-family,within states (state + window FE),all blocks,policy,abortion_restrictions,0.18090103748978847,1.503559983731508,0.9042335072703861,79,0.22203765868378744
-family,within states (state + window FE),all blocks,political & cultural,gop_two_party_share,-0.8375224147046153,3.295291906380367,0.7993740557997605,79,0.22203765868378744
-family,within states (state + window FE),all blocks,political & cultural,citizen_ideology,-2.2688219075213225,3.33384569440868,0.49616135814917584,79,0.22203765868378744
-family,within states (state + window FE),all blocks,political & cultural,evangelical_lds_share,-4.622632825769043,5.65604743212426,0.41376253630595283,79,0.22203765868378744
+family,between states,socioeconomic,socioeconomic,log_real_gdp_pc,0.4111000026491307,0.2473283145011503,0.09648007264990095,50,0.14212780950048975
+family,between states,socioeconomic,socioeconomic,log_real_income_pc,-0.6069986959398418,0.3844101455614727,0.11432706165385308,50,0.14212780950048975
+family,between states,socioeconomic,socioeconomic,ba_share,0.21785299567982583,0.32533412082699864,0.5030946485051273,50,0.14212780950048975
+family,between states,socioeconomic,socioeconomic,metro_share,0.11554887904639873,0.14626820131152152,0.42953974653471816,50,0.14212780950048975
+family,between states,socioeconomic,socioeconomic,unemployment_rate,-0.18844692516452602,0.21709371169149222,0.38537016685857295,50,0.14212780950048975
+family,between states,socioeconomic,socioeconomic,manufacturing_share,-0.22444529272800406,0.30883976081277004,0.4673870601261365,50,0.14212780950048975
+family,between states,socioeconomic,socioeconomic,service_share,-0.1007291743489986,0.3393682926641926,0.7666087100696044,50,0.14212780950048975
+family,between states,gendered labour market,gendered labour market,women_lfp,0.11207262432966263,0.1215154424208728,0.3563766981479507,51,0.1250029451471315
+family,between states,gendered labour market,gendered labour market,duncan,-0.34560348941936886,0.36325594534053274,0.34139886959188315,51,0.1250029451471315
+family,between states,gendered labour market,gendered labour market,gender_wage_gap,-0.08534520352229165,0.2850847231279243,0.7646593821919156,51,0.1250029451471315
+family,between states,gendered labour market,gendered labour market,female_share_managers,-0.054040081878816634,0.306823003862191,0.8601934867372878,51,0.1250029451471315
+family,between states,gendered labour market,gendered labour market,female_share_professionals,0.3260591784102269,0.24923849999433426,0.1907981725554686,51,0.1250029451471315
+family,between states,policy,policy,pfl_share,-0.07066360208477859,0.04630981592496421,0.12703770762449293,46,0.04245446184128798
+family,between states,policy,policy,universal_prek,-0.2022631318135625,0.13490840021862505,0.13380549587568363,46,0.04245446184128798
+family,between states,policy,policy,equal_pay_law,-0.011826909602308956,0.1712840774194363,0.9449510096075526,46,0.04245446184128798
+family,between states,policy,policy,so_employment_law,0.03845159392615051,0.15727925151299876,0.8068592743388909,46,0.04245446184128798
+family,between states,policy,policy,abortion_restrictions,-0.044845961880779266,0.17104065066335716,0.7931712951542185,46,0.04245446184128798
+family,between states,political & cultural,political & cultural,gop_two_party_share,0.695656294365166,0.3650538883097877,0.05669870603407185,50,0.11423306656552479
+family,between states,political & cultural,political & cultural,citizen_ideology,0.5670480369499481,0.268638451661719,0.034787587803481415,50,0.11423306656552479
+family,between states,political & cultural,political & cultural,evangelical_lds_share,-0.22732115346447462,0.2611227787376934,0.3839984043994995,50,0.11423306656552479
+family,between states,all blocks,socioeconomic,log_real_gdp_pc,0.7357532694839695,0.27253414430418754,0.006940750711142883,46,0.5117631816075578
+family,between states,all blocks,socioeconomic,log_real_income_pc,-0.29946445808074307,0.7298866686353989,0.6815939736785918,46,0.5117631816075578
+family,between states,all blocks,socioeconomic,ba_share,0.15810419578912138,0.5174409072014075,0.7599471086283826,46,0.5117631816075578
+family,between states,all blocks,socioeconomic,metro_share,-0.004609404231595712,0.2365601836384348,0.9844541050642555,46,0.5117631816075578
+family,between states,all blocks,socioeconomic,unemployment_rate,-0.009809567838538438,0.2129741234410058,0.9632625034493619,46,0.5117631816075578
+family,between states,all blocks,socioeconomic,manufacturing_share,-1.8899320736622442,0.645835679799314,0.003429805019449372,46,0.5117631816075578
+family,between states,all blocks,socioeconomic,service_share,-1.8594989232499215,0.7198228176362252,0.009786781793595961,46,0.5117631816075578
+family,between states,all blocks,gendered labour market,women_lfp,-0.05992636062018389,0.3924453283455929,0.8786349431927948,46,0.5117631816075578
+family,between states,all blocks,gendered labour market,duncan,-0.2709891358212303,0.6915594742287327,0.6951673862656643,46,0.5117631816075578
+family,between states,all blocks,gendered labour market,gender_wage_gap,0.38696034071671176,0.3304735443877846,0.24162818835395472,46,0.5117631816075578
+family,between states,all blocks,gendered labour market,female_share_managers,-0.040472469803127194,0.32718004370379,0.9015520895153047,46,0.5117631816075578
+family,between states,all blocks,gendered labour market,female_share_professionals,0.10565335660942363,0.3484849258900165,0.7617533529232582,46,0.5117631816075578
+family,between states,all blocks,policy,pfl_share,0.00618317154320798,0.145469260194884,0.9660961224311235,46,0.5117631816075578
+family,between states,all blocks,policy,universal_prek,-0.0031247080216594177,0.15713426486914753,0.9841346380751003,46,0.5117631816075578
+family,between states,all blocks,policy,equal_pay_law,0.027020965606280062,0.21582968424929816,0.9003685582543786,46,0.5117631816075578
+family,between states,all blocks,policy,so_employment_law,-0.05358120832956932,0.27688700585553516,0.8465573018399082,46,0.5117631816075578
+family,between states,all blocks,policy,abortion_restrictions,0.13190547759697652,0.18482048704900794,0.47541573162874384,46,0.5117631816075578
+family,between states,all blocks,political & cultural,gop_two_party_share,-0.6861311201476106,0.678442193084848,0.3118569768014414,46,0.5117631816075578
+family,between states,all blocks,political & cultural,citizen_ideology,0.2769136921452109,0.318353045821,0.384392177106478,46,0.5117631816075578
+family,between states,all blocks,political & cultural,evangelical_lds_share,0.30547830422604855,0.41401490086168363,0.460609408070321,46,0.5117631816075578
+family,within states (state + window FE),socioeconomic,socioeconomic,log_real_gdp_pc,0.7389623863191963,0.6380333038320197,0.24678740728025939,223,0.04302126227710079
+family,within states (state + window FE),socioeconomic,socioeconomic,log_real_income_pc,-0.8743233480885857,0.6999703520016911,0.21163352605689278,223,0.04302126227710079
+family,within states (state + window FE),socioeconomic,socioeconomic,ba_share,1.498123143441791,1.2309271494589804,0.22357800483253443,223,0.04302126227710079
+family,within states (state + window FE),socioeconomic,socioeconomic,metro_share,0.061865750125156244,0.2568432871561476,0.8096561531782285,223,0.04302126227710079
+family,within states (state + window FE),socioeconomic,socioeconomic,unemployment_rate,0.22034760747153045,0.28378270556886304,0.43747391916674394,223,0.04302126227710079
+family,within states (state + window FE),socioeconomic,socioeconomic,manufacturing_share,1.0681125079196159,1.3609433443364107,0.43255180783072344,223,0.04302126227710079
+family,within states (state + window FE),socioeconomic,socioeconomic,service_share,1.106073149482682,0.6844770535686833,0.10610750751727588,223,0.04302126227710079
+family,within states (state + window FE),gendered labour market,gendered labour market,women_lfp,0.3191141466556578,0.5149271217862664,0.5354376564727873,228,0.04116977797166432
+family,within states (state + window FE),gendered labour market,gendered labour market,duncan,0.233196848164977,1.0041105531756094,0.816349899482921,228,0.04116977797166432
+family,within states (state + window FE),gendered labour market,gendered labour market,gender_wage_gap,0.43302143117134295,0.35588172559428943,0.22369684486271102,228,0.04116977797166432
+family,within states (state + window FE),gendered labour market,gendered labour market,female_share_managers,1.1519197564069912,0.5674790973930058,0.04236779141442188,228,0.04116977797166432
+family,within states (state + window FE),gendered labour market,gendered labour market,female_share_professionals,0.025126153222708423,0.5612663248212252,0.9642931089070219,228,0.04116977797166432
+family,within states (state + window FE),policy,policy,pfl_share,-0.05720821235716852,0.10043845039628281,0.5689593559383384,75,0.015353575206070946
+family,within states (state + window FE),policy,policy,universal_prek,0.13574977640427074,0.5316401718064507,0.7984593823267093,75,0.015353575206070946
+family,within states (state + window FE),policy,policy,equal_pay_law,-0.061041032356066324,0.4018738022729994,0.8792728702775741,75,0.015353575206070946
+family,within states (state + window FE),policy,policy,so_employment_law,-0.6230993130520193,0.9296019919038966,0.5026754130170963,75,0.015353575206070946
+family,within states (state + window FE),policy,policy,abortion_restrictions,-0.5023337001608271,1.3509278929551214,0.7100094046314707,75,0.015353575206070946
+family,within states (state + window FE),political & cultural,political & cultural,gop_two_party_share,0.07404430326872463,0.5573132246249087,0.8943045725480764,173,0.0031748474614992084
+family,within states (state + window FE),political & cultural,political & cultural,citizen_ideology,-0.3288438830588564,0.6129550110820753,0.5916203407708271,173,0.0031748474614992084
+family,within states (state + window FE),political & cultural,political & cultural,evangelical_lds_share,-0.10839516257592424,0.4595334179150591,0.8135250789208425,173,0.0031748474614992084
+family,within states (state + window FE),all blocks,socioeconomic,log_real_gdp_pc,1.1505328572461992,8.690746953463734,0.8946790211675656,75,0.2003942648278364
+family,within states (state + window FE),all blocks,socioeconomic,log_real_income_pc,7.874628518958066,17.248995029748013,0.6480112029383668,75,0.2003942648278364
+family,within states (state + window FE),all blocks,socioeconomic,ba_share,2.19019879308747,11.388957022381764,0.8475001788267204,75,0.2003942648278364
+family,within states (state + window FE),all blocks,socioeconomic,metro_share,-3.8837719791090333,43.23671380611748,0.9284256534919868,75,0.2003942648278364
+family,within states (state + window FE),all blocks,socioeconomic,unemployment_rate,1.1924273695219991,2.4700455256266216,0.6292695502220751,75,0.2003942648278364
+family,within states (state + window FE),all blocks,socioeconomic,manufacturing_share,2.8860747237228987,14.628349437334423,0.8435980547798909,75,0.2003942648278364
+family,within states (state + window FE),all blocks,socioeconomic,service_share,7.201522376723706,8.436833131379487,0.39333706385697265,75,0.2003942648278364
+family,within states (state + window FE),all blocks,gendered labour market,women_lfp,-2.8447540197925534,18.662757170835373,0.8788482219052113,75,0.2003942648278364
+family,within states (state + window FE),all blocks,gendered labour market,duncan,-1.2350368269913592,3.3429387598150315,0.7117949876374061,75,0.2003942648278364
+family,within states (state + window FE),all blocks,gendered labour market,gender_wage_gap,1.5793042105904438,4.052004582959746,0.6967149545218386,75,0.2003942648278364
+family,within states (state + window FE),all blocks,gendered labour market,female_share_managers,-0.990352006259954,4.865575950897285,0.838710948213752,75,0.2003942648278364
+family,within states (state + window FE),all blocks,gendered labour market,female_share_professionals,3.1849895601451945,7.341094382929056,0.66439185402779,75,0.2003942648278364
+family,within states (state + window FE),all blocks,policy,pfl_share,-0.02502480964053285,0.4630113277325657,0.9568969674052118,75,0.2003942648278364
+family,within states (state + window FE),all blocks,policy,universal_prek,0.8339778486919817,1.5451506508076205,0.5893771376124266,75,0.2003942648278364
+family,within states (state + window FE),all blocks,policy,equal_pay_law,-1.1649908564233857,5.799510193887067,0.8407943955506685,75,0.2003942648278364
+family,within states (state + window FE),all blocks,policy,so_employment_law,-1.0976736573182186,1.085183548913711,0.3117725535420395,75,0.2003942648278364
+family,within states (state + window FE),all blocks,policy,abortion_restrictions,-0.5900687892009462,1.7388518934054764,0.7343506723969981,75,0.2003942648278364
+family,within states (state + window FE),all blocks,political & cultural,gop_two_party_share,-3.823223987655017,3.0595027985770415,0.21143742596854476,75,0.2003942648278364
+family,within states (state + window FE),all blocks,political & cultural,citizen_ideology,-0.2531156558987467,4.2383255132077835,0.9523781057226601,75,0.2003942648278364
+family,within states (state + window FE),all blocks,political & cultural,evangelical_lds_share,6.065269725166128,8.807611383583914,0.49105011260665643,75,0.2003942648278364

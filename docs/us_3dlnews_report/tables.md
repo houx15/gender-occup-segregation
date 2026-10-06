@@ -21,13 +21,13 @@
 | vector_size / window / min_count | 300 / 5 / 20 |
 | negative / epochs / seed | 10 / 10 / 42 |
 
-### Word lists: candidates, words used (in vocabulary of >= 0.5 of state models), median coverage
+### Word lists: candidates, words used (in vocabulary of >= coverage_bar of state models), median coverage
 
-| category | candidates | used | median_coverage |
-|---|---|---|---|
-| family_sphere | 20 | 20 | 0.9483 |
-| household | 20 | 6 | 0.2996 |
-| occupation | 133 | 65 | 0.4871 |
+| category | candidates | coverage_bar | used | median_coverage |
+|---|---|---|---|---|
+| family_sphere | 20 | 0.5 | 20 | 0.9483 |
+| household | 21 | 0.3 | 21 | 0.6336 |
+| occupation | 133 | 0.5 | 65 | 0.4871 |
 
 ### Survey measures per window (across states)
 
@@ -136,11 +136,11 @@
 | family_sphere | 2005–14 | 49 | 20 | 19.0 | 0.0118 | 0.0075 | 0.0051 |
 | family_sphere | 2010–19 | 51 | 20 | 20.0 | 0.0132 | 0.0067 | 0.005 |
 | family_sphere | 2015–24 | 51 | 20 | 20.0 | 0.012 | 0.0076 | 0.0049 |
-| household | 1995–04 | 33 | 6 | 2.0 | -0.0052 | 0.0253 | 0.0067 |
-| household | 2000–09 | 48 | 6 | 5.0 | -0.003 | 0.0169 | 0.0067 |
-| household | 2005–14 | 49 | 6 | 6.0 | -0.0019 | 0.0129 | 0.0058 |
-| household | 2010–19 | 51 | 6 | 6.0 | 0.0024 | 0.0089 | 0.006 |
-| household | 2015–24 | 51 | 6 | 6.0 | 0.0052 | 0.009 | 0.0056 |
+| household | 1995–04 | 33 | 21 | 3.0 | 0.0022 | 0.0285 | 0.0058 |
+| household | 2000–09 | 48 | 21 | 6.5 | 0.001 | 0.0164 | 0.0058 |
+| household | 2005–14 | 49 | 21 | 13.0 | 0.0038 | 0.0118 | 0.0052 |
+| household | 2010–19 | 51 | 21 | 18.0 | 0.0081 | 0.0083 | 0.0047 |
+| household | 2015–24 | 51 | 21 | 20.0 | 0.0096 | 0.0084 | 0.0045 |
 | occupation | 1995–04 | 33 | 65 | 34.0 | -0.0093 | 0.0142 | 0.0041 |
 | occupation | 2000–09 | 48 | 65 | 48.5 | -0.0122 | 0.0111 | 0.0036 |
 | occupation | 2005–14 | 49 | 65 | 60.0 | -0.0101 | 0.0072 | 0.0033 |

@@ -21,16 +21,16 @@ Outcome: text score (higher = less traditional); all variables standardized. Bet
 
 | domain | spec | model | n | r2_or_added_r2 | significant_terms | terms |
 |---|---|---|---|---|---|---|
-| family | between states | all blocks | 47 | 0.416 | 1 | 20 |
-| family | between states | gendered labour market | 51 | 0.08 | 0 | 5 |
-| family | between states | policy | 47 | 0.062 | 0 | 5 |
-| family | between states | political & cultural | 50 | 0.036 | 0 | 3 |
-| family | between states | socioeconomic | 50 | 0.112 | 0 | 7 |
-| family | within states (state + window FE) | all blocks | 79 | 0.222 | 1 | 20 |
-| family | within states (state + window FE) | gendered labour market | 232 | 0.023 | 1 | 5 |
-| family | within states (state + window FE) | policy | 79 | 0.081 | 1 | 5 |
-| family | within states (state + window FE) | political & cultural | 177 | 0.016 | 0 | 3 |
-| family | within states (state + window FE) | socioeconomic | 227 | 0.027 | 2 | 7 |
+| family | between states | all blocks | 46 | 0.512 | 3 | 20 |
+| family | between states | gendered labour market | 51 | 0.125 | 0 | 5 |
+| family | between states | policy | 46 | 0.042 | 0 | 5 |
+| family | between states | political & cultural | 50 | 0.114 | 1 | 3 |
+| family | between states | socioeconomic | 50 | 0.142 | 0 | 7 |
+| family | within states (state + window FE) | all blocks | 75 | 0.2 | 0 | 20 |
+| family | within states (state + window FE) | gendered labour market | 228 | 0.041 | 1 | 5 |
+| family | within states (state + window FE) | policy | 75 | 0.015 | 0 | 5 |
+| family | within states (state + window FE) | political & cultural | 173 | 0.003 | 0 | 3 |
+| family | within states (state + window FE) | socioeconomic | 223 | 0.043 | 0 | 7 |
 | occupation | between states | all blocks | 47 | 0.49 | 0 | 20 |
 | occupation | between states | gendered labour market | 51 | 0.265 | 2 | 5 |
 | occupation | between states | policy | 47 | 0.102 | 1 | 5 |
@@ -51,7 +51,5 @@ Outcome: text score (higher = less traditional); all variables standardized. Bet
 | occupation | between states | female_share_professionals | -0.446 | 0.181 | 0.014 |
 | occupation | between states | abortion_restrictions | -0.332 | 0.163 | 0.042 |
 | occupation | within states (state + window FE) | pfl_share | 0.149 | 0.076 | 0.049 |
-| family | within states (state + window FE) | metro_share | 0.377 | 0.182 | 0.038 |
-| family | within states (state + window FE) | unemployment_rate | 0.512 | 0.242 | 0.034 |
-| family | within states (state + window FE) | gender_wage_gap | 0.799 | 0.357 | 0.025 |
-| family | within states (state + window FE) | so_employment_law | -1.407 | 0.582 | 0.016 |
+| family | between states | citizen_ideology | 0.567 | 0.269 | 0.035 |
+| family | within states (state + window FE) | female_share_managers | 1.152 | 0.567 | 0.042 |

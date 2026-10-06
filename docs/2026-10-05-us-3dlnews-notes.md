@@ -76,7 +76,23 @@ adapted to modern local news; every candidate and decision is in
   several codes, 4 with no code (entrepreneur, operator, proprietor,
   supervisor).
 
-**Family sphere.** 20 gender-neutral entries (singular/plural pooled): home,
+**Household work (main family-domain text measure).** 21 entries (singular/plural
+pooled) for unpaid domestic work and care, from American Time Use Survey
+activity categories: cleaning, cleaned, laundry, washing, chores (cleaning and
+laundry); cooking, baking, recipes, meals, lunches (food preparation);
+kitchen, stove, oven, appliances, refrigerator (kitchen and appliances);
+gardening, sewing; caregiver, childcare, daycare, parenting (care). Built
+from 107 brainstormed candidates (`candidates_household.txt`), kept if in ≥ 30%
+of state models and if their nearest neighbours show a household-work sense
+(`household_screening.csv` gives every decision). Dropped for another sense,
+e.g. *nursing* (medical), *shopping*, *groceries* (retail), *cleanup*
+(environmental), *dishes*, *cooked*, *dinner* (restaurant cuisine and events),
+*vacuum* (technical); dropped by concept: male-typed tasks (*lawn*, *mowing*,
+*repairs*, which would reverse the sign) and *homemaker* (obituary sense,
+neighbours are gender and kin words). Paid occupations (nanny, housekeeper,
+babysitter) are in the occupation list instead.
+
+**Family sphere (robustness).** 20 gender-neutral entries (singular/plural pooled): home,
 kids, parents, married, family, children, baby, grandchildren, marriage,
 relatives, wedding, cousins, childhood, grandparents, siblings, infant,
 divorce, household, toddler, nursery. Built from Caliskan et al. (2017) WEAT
@@ -86,21 +102,19 @@ state models and if their nearest neighbours show a family sense
 (`family_screening.csv` gives every decision; e.g. *house* = Congress,
 *couple* = "a couple of", *kitchen* = restaurants were dropped).
 
-**Household work.** 20 words from American Time Use Survey activity
-categories (housework, chores, cleaning, laundry, cooking, groceries, dishes,
-vacuuming, ironing, errands, gardening, yardwork, childcare, daycare,
-babysitting, diapers, caregiving, parenting, homemaking, housekeeping).
 
 ### 3.2 Coverage
 
 A word enters a category score if it is in the vocabulary (≥ 20 occurrences)
-of at least 50% of the state models across all windows.
+of at least 50% of the state models across all windows (household work: 30%,
+because care words are rare in news: childcare 0.31, daycare 0.39, parenting
+0.44, caregiver 0.47).
 
-| Category | Candidates | Used | Median coverage |
-|---|---:|---:|---:|
-| Occupation | 133 | 65 | 0.49 |
-| Family sphere | 61 | 20 | 0.95 |
-| Household work | 20 | 6 | 0.30 |
+| Category | Candidates | Coverage bar | Used | Median coverage |
+|---|---:|---:|---:|---:|
+| Occupation | 133 | 0.5 | 65 | 0.49 |
+| Household work | 107 | 0.3 | 21 | 0.63 |
+| Family sphere | 61 | 0.5 | 20 | 0.95 |
 
 Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 
@@ -136,11 +150,14 @@ Per-word coverage, overall and per window: `tables/word_coverage.csv`.
 | | 2005–14 | 49 | 19 | 0.0118 | 0.0075 | 0.0051 |
 | | 2010–19 | 51 | 20 | 0.0132 | 0.0067 | 0.0050 |
 | | 2015–24 | 51 | 20 | 0.0120 | 0.0076 | 0.0049 |
-| Household work | 1995–2004 | 33 | 2 | −0.0052 | 0.0253 | 0.0066 |
-| | 2000–09 | 48 | 5 | −0.0030 | 0.0169 | 0.0067 |
-| | 2005–14 | 49 | 6 | −0.0019 | 0.0129 | 0.0057 |
-| | 2010–19 | 51 | 6 | 0.0024 | 0.0089 | 0.0059 |
-| | 2015–24 | 51 | 6 | 0.0052 | 0.0090 | 0.0056 |
+| Household work | 1995–2004 | 33 | 3 | 0.0022 | 0.0285 | 0.0058 |
+| | 2000–09 | 48 | 6.5 | 0.0010 | 0.0164 | 0.0058 |
+| | 2005–14 | 49 | 13 | 0.0038 | 0.0118 | 0.0052 |
+| | 2010–19 | 51 | 18 | 0.0081 | 0.0083 | 0.0047 |
+| | 2015–24 | 51 | 20 | 0.0096 | 0.0084 | 0.0045 |
+
+Household-work scores before 2005 rest on few words per state (median 3 and
+6.5 of 21), because the smaller early models miss the rarer words.
 
 ## 4. Survey measures
 

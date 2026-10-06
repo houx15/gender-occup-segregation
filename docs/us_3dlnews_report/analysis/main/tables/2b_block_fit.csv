@@ -1,14 +1,14 @@
 domain,spec,model,n,r2_or_added_r2,significant_terms,terms
-family,between states,all blocks,47,0.4157500164702247,1,20
-family,between states,gendered labour market,51,0.0800061598145827,0,5
-family,between states,policy,47,0.062468603848362725,0,5
-family,between states,political & cultural,50,0.03588217490308743,0,3
-family,between states,socioeconomic,50,0.11157049700204635,0,7
-family,within states (state + window FE),all blocks,79,0.22203765868378744,1,20
-family,within states (state + window FE),gendered labour market,232,0.023024167433457476,1,5
-family,within states (state + window FE),policy,79,0.0810097797463698,1,5
-family,within states (state + window FE),political & cultural,177,0.015613930200211068,0,3
-family,within states (state + window FE),socioeconomic,227,0.027083193717802545,2,7
+family,between states,all blocks,46,0.5117631816075578,3,20
+family,between states,gendered labour market,51,0.1250029451471315,0,5
+family,between states,policy,46,0.04245446184128798,0,5
+family,between states,political & cultural,50,0.11423306656552479,1,3
+family,between states,socioeconomic,50,0.14212780950048975,0,7
+family,within states (state + window FE),all blocks,75,0.2003942648278364,0,20
+family,within states (state + window FE),gendered labour market,228,0.04116977797166432,1,5
+family,within states (state + window FE),policy,75,0.015353575206070946,0,5
+family,within states (state + window FE),political & cultural,173,0.0031748474614992084,0,3
+family,within states (state + window FE),socioeconomic,223,0.04302126227710079,0,7
 occupation,between states,all blocks,47,0.49037764311357024,0,20
 occupation,between states,gendered labour market,51,0.2646599602231494,2,5
 occupation,between states,policy,47,0.10201058603174162,1,5

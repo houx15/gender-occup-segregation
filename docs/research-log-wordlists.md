@@ -521,3 +521,66 @@ traditional** (family text = −RND); earlier entries used the opposite sign.
 - Agreement with the ACS family index is still absent: pooled β = 0.03
   (p = 0.65); within states (state + window FE) β = −0.045 (p = 0.04), i.e. a
   small *negative* association, so the wider list does not create alignment.
+
+## 2026-10-06 — Household-work list expansion (6 -> 21 entries); main family text measure
+
+**Why.** PI decision: unpaid household work and care is the better-defined
+family-domain concept (a direct counterpart of ATUS time use); the family
+sphere list (home, kids, marriage, ...) is a loose domain. The old household
+list had 20 candidates but only 6 reached the coverage bar.
+
+**Method** (jobs 3394839, 3394842; `slurm/household_wordlist_dlnews.slurm`).
+107 brainstormed candidates in two rounds (`candidates_household.txt`):
+cleaning and laundry, food preparation, kitchen and appliances, domestic
+tasks, childcare and care. Paid occupations (nanny, housekeeper, babysitter)
+excluded (occupation list). Two screens:
+
+1. Coverage over 232 state-window models: 37 reach 0.5, 50 reach 0.3.
+   The core care words sit between the two (caregiver 0.47, parenting 0.44,
+   daycare 0.39, chores 0.39, childcare 0.31); many classic housework words
+   are rare in news (housework, homemaking, ironing, housekeeping < 0.1).
+   The bar for this category is therefore 0.3
+   (`analysis.min_word_coverage_by_category`, new; other lists stay at 0.5).
+2. Sense: nearest neighbours in the 4 largest models. Dropped when another
+   sense dominates: nursing (medical), shopping, groceries (retail), bills
+   (Buffalo Bills / payments), cleanup (environmental remediation), sweeping
+   ("sweeping reforms"), formula, packing, feeding (animals), bottles
+   (drinks), toys (merchandise), dishes, cooked, baked, sandwiches, cookies,
+   snacks (restaurant cuisine), dinner(s), lunch (events), pantry (food
+   pantries), kitchens (restaurants), spoon, washed (floods), vacuum
+   (technical). Dropped by concept: caring, hugs (trait / affection),
+   upbringing, preschool, homework; lawn, mowing, repairs (male-typed tasks:
+   a male association there is the traditional pattern, so they would
+   reverse the sign); homemaker (obituary sense; neighbours are gender and
+   kin words, mirroring the anchors).
+
+**Kept (21).** cleaning, cleaned, laundry, washing, chores; cooking, baking,
+recipes, meals, lunches; kitchen, stove, oven, appliances, refrigerator;
+gardening, sewing; caregiver, childcare, daycare, parenting. Full table:
+`wordlists/en/occupation_family/household_screening.csv`.
+
+**Result** (jobs 3394845–3394851; family text = −RND, higher = less
+traditional). Household work is now the main family text measure; family
+sphere is `robustness-family-sphere-text`.
+
+| | family sphere (20) | household, old (6) | household (21) |
+|---|---:|---:|---:|
+| state-windows | 232 | 217 | 228 |
+| words per state, median 1995–04 / 2015–24 | 15 / 20 | 2 / 6 | 3 / 20 |
+| SD of state means | 0.0051 | — | 0.0082 |
+| vs ACS family index, between states r | 0.18 (p = 0.20) | 0.13 (p = 0.36) | **0.38 (p = 0.006)** |
+| vs ACS family index, state + window FE β | −0.045 (p = 0.04) | 0.02 (p = 0.40) | 0.02 (p = 0.60) |
+| vs ATUS women's housework share, between r | — | 0.06 | 0.12 (p = 0.39) |
+
+- Between states the household text now agrees with the ACS family index
+  (r = 0.38), and with married women not in the labour force (r = 0.28,
+  p = 0.045); the family-sphere list never did.
+- Within states the raw correlation is negative (r = −0.23): the national
+  household trend runs opposite to the surveys. Household words move toward
+  female words over time (national oriented score −0.001 in 2000–09 to
+  −0.010 in 2015–24; 13 states significantly more traditional, 2 less),
+  while survey measures become less traditional. With window fixed effects
+  removing the common trend, β ≈ 0.
+- Caveat: before 2005 a state's household score rests on few words (median 3
+  of 21 in 1995–04, 6.5 in 2000–09); adjacent-window stability is low
+  (r = 0.00, 0.18, 0.47, −0.01).
